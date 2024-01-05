@@ -1,0 +1,23 @@
+{
+  "name": "my-dapp",
+  "version": "0.1.0",
+  "description": "JS DApp",
+  "dependencies": {
+    "ethers": "^6.7.1",
+    "planck-js": "^0.3.31"
+  },
+  "devDependencies": {
+    "esbuild": "^0.19.2",
+    "nodemon": "^3.0.2"
+  },
+  "scripts": {
+    "build": "esbuild ./src/server/index.ts --bundle --outfile=dist/index.js --platform=node --target=node20",
+    "start": "npm run build && ROLLUP_HTTP_SERVER_URL=\"http://127.0.0.1:5004\" node dist/index.js",
+    "host": "npm run build && ROLLUP_HTTP_SERVER_URL=\"http://127.0.0.1:8080/host-runner\" node dist/index.js",
+    "dev": "nodemon --watch ./src --ext js,ts,json,html --delay 0.5 --exec npm run host"
+  },
+  "keywords": [
+    "cartesi"
+  ],
+  "license": "MIT"
+}

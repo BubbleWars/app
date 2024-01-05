@@ -1,0 +1,10 @@
+body, html {
+  padding: 0;
+  margin: 0;
+}
+
+.game-bar {
+  position: fixed;
+  bottom: 0;
+  height: 50px;
+}
