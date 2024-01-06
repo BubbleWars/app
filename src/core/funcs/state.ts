@@ -10,6 +10,7 @@ import { User } from "../types/user";
 import { portals, bubbles, deferredUpdates } from "../world";
 import { portalAbsorbBubble } from "./portal";
 import { absorbBubble } from "./bubble";
+import { snapshotBubbles, snapshotDeferredUpdates, snapshotPortals } from "../snapshots";
 
 export const updateState = (
     state: Snapshot, 
@@ -84,10 +85,10 @@ export const handleContact = (contact: Contact) => {
 
     //Portal-Bubble collision
     if(p1 && b2) {
-        deferredUpdates.push(() => { portalAbsorbBubble(p1, b2, STEP_DELTA) });
+        deferredUpdates.push(() => { portalAbsorbBubble(bubbles, p1, b2, STEP_DELTA) });
     }else
     if(p2 && b1) {
-        deferredUpdates.push(() => { portalAbsorbBubble(p2, b1, STEP_DELTA) });
+        deferredUpdates.push(() => { portalAbsorbBubble(bubbles, p2, b1, STEP_DELTA) });
     }else
 
     //Bubble-Bubble collision
@@ -95,11 +96,46 @@ export const handleContact = (contact: Contact) => {
         const m1 = b1?.body.getMass();
         const m2 = b2?.body.getMass();
         if(m1 > m2) {
-            deferredUpdates.push(() => { absorbBubble(b1, b2, STEP_DELTA) });
+            deferredUpdates.push(() => { absorbBubble(bubbles,b1, b2, STEP_DELTA) });
         }else if(m2 > m1) {
-            deferredUpdates.push(() => { absorbBubble(b2, b1, STEP_DELTA) });
+            deferredUpdates.push(() => { absorbBubble(bubbles,b2, b1, STEP_DELTA) });
         }
     }else
+
+    //Bubble-Obstacle collision
+    if(b1 && !b2) {
+        contact.setRestitution(1);
+    }else
+    if(b2 && !b1) {
+        contact.setRestitution(1);
+    }
+}
+
+export const handleSnapshotContact = (contact: Contact) => {
+    const p1 = snapshotPortals.get(contact.getFixtureA().getBody().getUserData() as string);
+    const p2 = snapshotPortals.get(contact.getFixtureB().getBody().getUserData() as string);
+    const b1 = snapshotBubbles.get(contact.getFixtureA().getBody().getUserData() as string);
+    const b2 = snapshotBubbles.get(contact.getFixtureB().getBody().getUserData() as string);
+    
+    //Portal-Bubble collision
+    if(p1 && b2) {
+        snapshotDeferredUpdates.push(() => { portalAbsorbBubble(snapshotBubbles, p1, b2, STEP_DELTA) });
+    }else
+    if(p2 && b1) {
+        snapshotDeferredUpdates.push(() => { portalAbsorbBubble(snapshotBubbles, p2, b1, STEP_DELTA) });
+    }else 
+
+
+    //Bubble-Bubble collision
+    if(b1 && b2) {
+        const m1 = b1?.body.getMass();
+        const m2 = b2?.body.getMass();
+        if(m1 > m2) {
+            snapshotDeferredUpdates.push(() => { absorbBubble(snapshotBubbles,b1, b2, STEP_DELTA) });
+        }else if(m2 > m1) {
+            snapshotDeferredUpdates.push(() => { absorbBubble(snapshotBubbles,b2, b1, STEP_DELTA) });
+        }
+    }
 
     //Bubble-Obstacle collision
     if(b1 && !b2) {

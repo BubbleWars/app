@@ -63,14 +63,14 @@ export const applyPortalGravity = (portal: Portal, bubble: Bubble): void => {
     ////console.log(force);
 }
 
-export const portalAbsorbBubble = (portal: Portal, absorbedBubble: Bubble, timeElapsed: number): void => {
+export const portalAbsorbBubble = (bubbles: Map<string, Bubble>, portal: Portal, absorbedBubble: Bubble, timeElapsed: number): void => {
     if(!portal || !absorbedBubble) return;
     const amountAbsorbed = Math.min(absorbedBubble.body.getMass(), MASS_PER_SECOND * timeElapsed);
     const newPortalMass = portal.mass + amountAbsorbed;
     const newBubbleMass = absorbedBubble.body.getMass() - amountAbsorbed;
     //console.log("portalAbsorbBubble", amountAbsorbed, newPortalMass, newBubbleMass);
     updatePortal(portal, newPortalMass);
-    updateBubble(absorbedBubble, newBubbleMass);
+    updateBubble(bubbles, absorbedBubble, newBubbleMass);
 }
 
 export const portalEmitBubble = (bubbles: Map<string, Bubble>, portal: Portal, mass: number, direction: Vec2): Bubble => {

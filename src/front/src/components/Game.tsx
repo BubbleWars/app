@@ -6,11 +6,11 @@ import { CustomCameraControls } from './CameraControls'
 import { Portals } from './Portals'
 import { Bubbles } from './Bubbles'
 import { useEffect, useState } from 'react'
-import { currentState, init, lastTimestamp, rollback, rollbackToState, run, world } from '../../../core/world'
+import { currentState, init, lastTimestamp, rollbackToState, run, world } from '../../../core/world'
 import { handleInput } from '../../../core/funcs/inputs'
 import { Input } from '../../../core/types/inputs'
 import { useBlockTimestamp, useLocalTimestamp, useMachineTimestamp } from '../hooks/state'
-import { snapshotRollback, snapshotRun } from '../../../core/snapshots'
+import { snapshotCurrentState, snapshotInit, snapshotRollback, snapshotRun } from '../../../core/snapshots'
 
 
 
@@ -32,6 +32,7 @@ export const Game = ({snapshot, inputs, notices} : {snapshot: Snapshot, inputs: 
     useEffect(() => {
         if(!snapshot) return
         init(snapshot)
+        snapshotInit(snapshot)
         console.log("init snapshot:", snapshot)
         setBubbleIds(snapshot.bubbles.map(bubble => bubble.id))
         setPortalIds(snapshot.portals.map(portal => portal.id))
@@ -50,6 +51,8 @@ export const Game = ({snapshot, inputs, notices} : {snapshot: Snapshot, inputs: 
                     handleInput(input, true)
                     if(isBehind) snapshotRun(blockTimestamp, ()=>{}, true)
                     setLastTimestampHandled(input.timestamp)
+                    setBubbleIds(snapshotCurrentState.bubbles.map(bubble => bubble.id))
+                    setPortalIds(snapshotCurrentState.portals.map(portal => portal.id))
                 })
         }
                 
@@ -65,13 +68,15 @@ export const Game = ({snapshot, inputs, notices} : {snapshot: Snapshot, inputs: 
         snapshotRun(blockTimestamp, ()=>{}, true)
 
         //Rollback and update client state
-        const end = Math.max(Date.now() / 1000, blockTimestamp)
-        rollbackToState(snapshot)
-        run(end)
+        // const end = Math.max(Date.now() / 1000, blockTimestamp)
+        console.log("setting snapshotCurrentState:", snapshotCurrentState)
+        console.log("setting currentState:", currentState)
+        rollbackToState(snapshotCurrentState)
+        // run(end)
 
         //Add new objects if they exist
-        setBubbleIds(currentState.bubbles.map(bubble => bubble.id))
-        setPortalIds(currentState.portals.map(portal => portal.id))
+        setBubbleIds(snapshotCurrentState.bubbles.map(bubble => bubble.id))
+        setPortalIds(snapshotCurrentState.portals.map(portal => portal.id))
 
         //console.log(end)
     }, [blockTimestamp])

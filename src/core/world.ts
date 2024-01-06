@@ -19,9 +19,6 @@ export const portals = new Map<string, Portal>()
 export const obstacles = new Map<string, Obstacle>()
 export const pendingInputs = new Array<InputWithExecutionTime>()
 
-//only client
-export const snapshots = new Map<number, Snapshot>()
-
 export let world = new World({
     gravity: Vec2(0, 0),
 })
@@ -55,6 +52,14 @@ export const applyDeferredUpdates = () => {
 
 export const init = (initialState?: Snapshot) => {
     if(initialState){
+        //reset all state
+        users.clear();
+        bubbles.clear();
+        portals.clear();
+        obstacles.clear();
+        pendingInputs.length = 0;
+        deferredUpdates.length = 0;
+
         currentState = Object.assign({}, initialState);
         lastTimestamp = initialState.timestamp;
 
@@ -167,7 +172,5 @@ export const run = (end: number, callback?: () => void, client:boolean= false) =
     )
 
     
-    console.log("snapshot", snapshots)   
-    console.log(snapshots); 
     console.log("world state", currentState)
 }

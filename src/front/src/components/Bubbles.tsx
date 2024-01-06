@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
 import { currentState } from '../../../core/world'
+import { snapshotCurrentState } from '../../../core/snapshots'
 
 export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
     const meshRef = useRef<any>()
@@ -13,6 +14,7 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
         const temp = new THREE.Object3D()
         const radius = massToRadius(bubble.mass)
         meshRef.current.scale.set(radius, radius, radius)
+        console.log("bubble position:", bubble.position)
         meshRef.current.position.set(bubble.position.x, bubble.position.y, 0)
         meshRef.current.updateMatrix()
     })    

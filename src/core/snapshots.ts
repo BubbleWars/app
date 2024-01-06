@@ -8,7 +8,7 @@ import { Input, InputWithExecutionTime } from "./types/inputs"
 import { Snapshot } from "./types/state"
 import { MAX_ADVANCE_STATE_TIME, STEP_DELTA } from "./consts"
 import { handleInput, handlePendingInputs } from "./funcs/inputs"
-import { updateState, handleContact } from "./funcs/state"
+import { updateState, handleSnapshotContact } from "./funcs/state"
 import { applyPortalGravity, createPortal } from "./funcs/portal"
 import { createBubble } from "./funcs/bubble"
 
@@ -54,6 +54,15 @@ export const applyDeferredUpdates = () => {
 
 export const snapshotInit = (initialState?: Snapshot) => {
     if(initialState){
+        //reset all state
+        snapshotUsers.clear();
+        snapshotBubbles.clear();
+        snapshotPortals.clear();
+        snapshotObstacles.clear();
+        snapshotPendingInputs.length = 0;
+        snapshotDeferredUpdates.length = 0;
+
+        //Set snapshot state
         snapshotCurrentState = Object.assign({}, initialState);
         snapshotLastTimestamp = initialState.timestamp;
 
@@ -83,7 +92,7 @@ export const snapshotInit = (initialState?: Snapshot) => {
 
     // console.log("snapshotWorld init", snapshotWorld)
 
-    snapshotWorld.on("begin-contact", handleContact)
+    snapshotWorld.on("begin-contact", handleSnapshotContact)
 }
 
 export const snapshotRollback = (timestamp: number) => {
