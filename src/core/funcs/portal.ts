@@ -2,14 +2,66 @@ import { World, Circle, Vec2 } from "planck-js";
 import { Portal } from "../types/portal";
 import { Address } from "../types/address";
 import { massToRadius } from "./utils";
-import { GRAVITATIONAL_CONSTANT, MASS_PER_SECOND } from "../consts";
+import { GRAVITATIONAL_CONSTANT, MASS_PER_SECOND, WORLD_HEIGHT, WORLD_WIDTH } from "../consts";
 import { Bubble } from "../types/bubble";
 import { createBubble, updateBubble } from "./bubble";
 import { Obstacle } from "../types/obstacle";
 
-export const generateSpawnPoint = (world: World, portals: Map<string, Portal>, bubbles: Map<string, Bubble>, obstacles: Map<string, Obstacle>, mass: number): Vec2 => {
-    return Vec2(0, 0);
+function deterministicHash(x: number, y: number): number {
+    let seed = 0x2F6E2B1;
+    let hash = Math.floor(x) * 0x1f1f1f1f ^ Math.floor(y);
+    hash = Math.sin(hash) * 10000;
+    return hash - Math.floor(hash);
 }
+
+export const generateSpawnPoint = (
+    world: World, 
+    portals: Map<string, Portal>, 
+    bubbles: Map<string, Bubble>, 
+    obstacles: Map<string, Obstacle>, 
+    mass: number
+): Vec2 => {
+    const minimumDistance = massToRadius(mass) * 2;
+    let spawnPoint = new Vec2(0, 0);
+    let isSafeLocation = false;
+    let attempt = 0;
+
+    while (!isSafeLocation) {
+        isSafeLocation = true;
+
+        
+        // Check distance from existing portals
+        portals.forEach((portal) => {
+            if (Vec2.distance(spawnPoint, portal.body.getPosition()) < minimumDistance) {
+                isSafeLocation = false;
+            }
+        });
+
+        // Check distance from existing bubbles
+        bubbles.forEach((bubble) => {
+            if (Vec2.distance(spawnPoint, bubble.body.getPosition()) < minimumDistance) {
+                isSafeLocation = false;
+            }
+        });
+
+        // Check distance from existing obstacles
+        obstacles.forEach((obstacle) => {
+            if (Vec2.distance(spawnPoint, obstacle.body.getPosition()) < minimumDistance) {
+                isSafeLocation = false;
+            }
+        });
+
+        // Generate a spawn point using deterministic hash
+        const hashValueX = deterministicHash(attempt, 0);
+        const hashValueY = deterministicHash(0, attempt);
+        spawnPoint = new Vec2(hashValueX * WORLD_WIDTH, hashValueY * WORLD_HEIGHT); // Scale to world dimensions
+
+
+        attempt++;
+    }
+
+    return spawnPoint;
+};
 
 export const createPortal = (portals: Map<string, Portal>, world: World, owner: Address, x: number, y: number, mass: number): Portal => {
     const radius = massToRadius(mass);
