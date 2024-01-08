@@ -1,13 +1,15 @@
 import { BubbleState } from '../../../core/types/state'
 import { massToRadius } from '../../../core/funcs/utils'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
 import { currentState } from '../../../core/world'
 import { snapshotCurrentState } from '../../../core/snapshots'
+import { BubblesInfo } from './BubblesInfo'
 
 export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
     const meshRef = useRef<any>()
+    const [ isHovered, setIsHovered ] = useState<boolean>(false)
     useFrame(() => {
         const bubble = currentState.bubbles.find(bubble => bubble.id === bubbleId)
         if(!bubble) return
@@ -21,6 +23,8 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
     return (
         <mesh
             ref={meshRef}
+            onPointerEnter={() => setIsHovered(true)}
+            onPointerLeave={() => setIsHovered(false)}
         >
             <sphereGeometry />
             <meshBasicMaterial
@@ -28,6 +32,7 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
                 color='blue'
                 transparent
             />
+            {isHovered && <BubblesInfo bubbleId={bubbleId} />}
         </mesh>
     )
 }
