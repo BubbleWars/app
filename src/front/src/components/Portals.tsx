@@ -6,11 +6,13 @@ import { useFrame } from '@react-three/fiber'
 import { PortalState } from '../../../core/types/state'
 import { snapshotCurrentState } from '../../../core/snapshots'
 import { PortalsInfo } from './PortalsInfo'
+import { PortalsControlsEmit } from './PortalsControlsEmit'
 
 
 export const Portal = ({ portalId } : { portalId: string }) => {
     const meshRef = useRef<any>()
     const [ isHovered, setIsHovered ] = useState<boolean>(false)
+    const [ isSelected, setIsSelected ] = useState<boolean>(false)
     useFrame(() => {
         const portal = currentState.portals.find(portal => portal.id === portalId)
         if(!portal) return
@@ -25,6 +27,9 @@ export const Portal = ({ portalId } : { portalId: string }) => {
             ref={meshRef}
             onPointerEnter={() => setIsHovered(true)}
             onPointerLeave={() => setIsHovered(false)}
+            onClick={() => setIsSelected(!isSelected)}
+            onContextMenu={() => setIsSelected(false)}
+
         >
             <sphereGeometry />
             <meshBasicMaterial
@@ -33,6 +38,7 @@ export const Portal = ({ portalId } : { portalId: string }) => {
                 transparent
             />
             {isHovered && <PortalsInfo  portalId={portalId} />}
+            {isSelected && <PortalsControlsEmit portalId={portalId} />}
         </mesh>
     )
 }

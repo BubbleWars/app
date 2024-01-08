@@ -39,6 +39,7 @@ export interface Emit extends BaseInput {
     executionTime?: number,
     from: string, //bubble or portal id
     mass: number, //mass of bubble to emit
+    direction: { x: number, y: number } //direction to emit bubble
 }
 
 export type Input = SpawnPortal | Emit | Deposit | Withdraw;

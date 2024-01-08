@@ -370,12 +370,12 @@ export const handlePendingEmit = (input: Emit): void => {
     if(isPortal){
         const portal = portals.get(input.from.toLowerCase());
         if(!portal) return;
-        portalEmitBubble(bubbles, portal, input.mass, Vec2(1, 1));
+        portalEmitBubble(bubbles, portal, input.mass, Vec2(input.direction.x, input.direction.y));
 
     }else if(isBubble){
         const bubble = bubbles.get(input.from.toLowerCase());
         if(!bubble) return;
-        emitBubble(bubbles, bubble, input.mass, Vec2(1, 1));
+        emitBubble(bubbles, bubble, input.mass, Vec2(input.direction.x, input.direction.y));
     }
 
 
@@ -390,12 +390,12 @@ export const handlePendingClientEmit = (input: Emit): void => {
     if(isPortal){
         const portal = snapshotPortals.get(input.from.toLowerCase());
         if(!portal) return;
-        portalEmitBubble(snapshotBubbles, portal, input.mass, Vec2(1, 1));
+        portalEmitBubble(snapshotBubbles, portal, input.mass, Vec2(input.direction.x, input.direction.y));
 
     }else if(isBubble){
         const bubble = snapshotBubbles.get(input.from.toLowerCase());
         if(!bubble) return;
-        emitBubble(snapshotBubbles, bubble, input.mass, Vec2(1, 1));
+        emitBubble(snapshotBubbles, bubble, input.mass, Vec2(input.direction.x, input.direction.y));
     }
 
 }

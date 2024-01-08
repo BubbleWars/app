@@ -6,10 +6,12 @@ import { useFrame } from '@react-three/fiber'
 import { currentState } from '../../../core/world'
 import { snapshotCurrentState } from '../../../core/snapshots'
 import { BubblesInfo } from './BubblesInfo'
+import { BubblesControlsEmit } from './BubblesControlsEmit'
 
 export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
     const meshRef = useRef<any>()
     const [ isHovered, setIsHovered ] = useState<boolean>(false)
+    const [ isSelected, setIsSelected ] = useState<boolean>(false)
     useFrame(() => {
         const bubble = currentState.bubbles.find(bubble => bubble.id === bubbleId)
         if(!bubble) return
@@ -25,6 +27,8 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
             ref={meshRef}
             onPointerEnter={() => setIsHovered(true)}
             onPointerLeave={() => setIsHovered(false)}
+            onClick={() => setIsSelected(!isSelected)}
+            onContextMenu={() => setIsSelected(false)}
         >
             <sphereGeometry />
             <meshBasicMaterial
@@ -33,6 +37,7 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
                 transparent
             />
             {isHovered && <BubblesInfo bubbleId={bubbleId} />}
+            {isSelected && <BubblesControlsEmit bubbleId={bubbleId} />}
         </mesh>
     )
 }
