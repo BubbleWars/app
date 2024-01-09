@@ -1,6 +1,6 @@
 import THREE from "three"
 import { massToRadius } from "../../../core/funcs/utils"
-import { currentState } from "../../../core/world"
+import { currentState, rollbackToState, run } from "../../../core/world"
 import { useEffect, useRef, useState } from "react"
 import { Line, Text } from "@react-three/drei"
 import { useFrame } from "@react-three/fiber"
@@ -10,6 +10,7 @@ import { useWaitForTransaction } from "wagmi"
 import { currentChain } from "../contracts"
 import { getPublicClient } from "wagmi/actions"
 import { handleInput } from "../../../core/funcs/inputs"
+import { snapshots } from "../../../core/snapshots"
 
 export const BubblesControlsEmit = ({ bubbleId } : { bubbleId: string }) => {
     const bubble = currentState.bubbles.find(bubble => bubble.id === bubbleId)
@@ -69,6 +70,12 @@ export const BubblesControlsEmit = ({ bubbleId } : { bubbleId: string }) => {
                     mass,
                     from: bubbleId,
                     direction,
+                }
+                const isBehind = input.timestamp < currentState.timestamp
+                if(isBehind) {
+                    const state = snapshots.get(input.timestamp)
+                    if(!state) return
+                    rollbackToState(state)
                 }
                 handleInput(input)
             })
