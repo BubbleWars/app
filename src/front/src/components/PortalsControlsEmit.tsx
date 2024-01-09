@@ -1,11 +1,15 @@
 import THREE from "three"
 import { massToRadius } from "../../../core/funcs/utils"
 import { currentState } from "../../../core/world"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Line, Text } from "@react-three/drei"
 import { useFrame } from "@react-three/fiber"
 import { useCreateInput, useOnClick, useOnWheel } from "../hooks/inputs"
-import { InputType } from "../../../core/types/inputs"
+import { Emit, InputType } from "../../../core/types/inputs"
+import { useWaitForTransaction } from "wagmi"
+import { currentChain } from "../contracts"
+import { getPublicClient } from "wagmi/actions"
+import { handleInput } from "../../../core/funcs/inputs"
 
 export const PortalsControlsEmit = ({ portalId } : { portalId: string }) => {
     const portal = currentState.portals.find(portal => portal.id === portalId)
@@ -23,6 +27,7 @@ export const PortalsControlsEmit = ({ portalId } : { portalId: string }) => {
         isError,
         isLoading,
         isSuccess,
+        data,
     } = useCreateInput({
         type: InputType.Emit,
         mass,
@@ -45,6 +50,30 @@ export const PortalsControlsEmit = ({ portalId } : { portalId: string }) => {
         if(isError || isLoading || isSuccess) return
         write()
     })
+
+    //Tx prediction
+    const tx = useWaitForTransaction({
+        chainId: currentChain.id, 
+        hash: data?.hash
+    })
+    useEffect(() => {
+        if(!tx) return
+        if(!tx.data?.blockNumber) return
+        getPublicClient({chainId: currentChain.id})
+            .getBlock({blockNumber: tx.data.blockNumber})
+            .then(block => {
+                const timestamp = Number(block.timestamp)
+                const input: Emit = {
+                    type: InputType.Emit,
+                    timestamp,
+                    mass,
+                    from: portalId,
+                    direction,
+                }
+                handleInput(input)
+            })
+        console.log("tx:", tx)
+    }, [tx])
 
     //Scroll action
     useOnWheel((event) => {
