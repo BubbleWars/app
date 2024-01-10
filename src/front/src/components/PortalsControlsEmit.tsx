@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import { massToRadius } from "../../../core/funcs/utils"
 import { currentState, rollbackToState } from "../../../core/world"
 import { useEffect, useRef, useState } from "react"
-import { Line, Text } from "@react-three/drei"
+import { Line, Text, Text3D } from "@react-three/drei"
 import { useFrame } from "@react-three/fiber"
 import { useCreateInput, useOnClick, useOnWheel } from "../hooks/inputs"
 import { Emit, InputType } from "../../../core/types/inputs"
@@ -117,6 +117,10 @@ export const PortalsControlsEmit = ({ portalId } : { portalId: string }) => {
                 dashed={true}
                 points={[position, position.clone().add(direction.clone().multiplyScalar(length))]}
             />
+            <Text3D
+            
+            position={position.clone().add(direction.clone().multiplyScalar(length))}
+            >Hello</Text3D>
             {/* <Text 
                 anchorX={'left'}
                 anchorY={'bottom'}
