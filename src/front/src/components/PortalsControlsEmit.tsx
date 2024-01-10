@@ -1,4 +1,4 @@
-import THREE from "three"
+import * as THREE from 'three'
 import { massToRadius } from "../../../core/funcs/utils"
 import { currentState, rollbackToState } from "../../../core/world"
 import { useEffect, useRef, useState } from "react"
@@ -6,21 +6,25 @@ import { Line, Text } from "@react-three/drei"
 import { useFrame } from "@react-three/fiber"
 import { useCreateInput, useOnClick, useOnWheel } from "../hooks/inputs"
 import { Emit, InputType } from "../../../core/types/inputs"
-import { useWaitForTransaction } from "wagmi"
+import { useAccount, useWaitForTransaction } from "wagmi"
 import { currentChain } from "../contracts"
 import { getPublicClient } from "wagmi/actions"
 import { handleInput } from "../../../core/funcs/inputs"
-import { snapshots } from "../../../core/snapshots"
+import { snapshotRollback, snapshotRun, snapshots } from "../../../core/snapshots"
+import { useDispatch } from 'react-redux'
+import { addInput } from '../store/inputs'
 
 export const PortalsControlsEmit = ({ portalId } : { portalId: string }) => {
+    const dispatch = useDispatch()
     const portal = currentState.portals.find(portal => portal.id === portalId)
     if(!portal) return null
     const radius = massToRadius(portal.mass)
     const position = new THREE.Vector3(portal.position.x, portal.position.y, 0)
     const length = 10
     const [ direction, setDirection ] = useState<THREE.Vector3>(new THREE.Vector3(1, 0, 0))
-    const [ mass, setMass ] = useState<number>(portal.mass/2)
+    const [ mass, setMass ] = useState<number>(portal.mass/10)
     const lineRef = useRef<any>()
+    const {address} = useAccount()
 
     //Input action
     const {
@@ -33,10 +37,9 @@ export const PortalsControlsEmit = ({ portalId } : { portalId: string }) => {
         type: InputType.Emit,
         mass,
         from: portalId,
-        direction, 
+        direction: { x: direction.x, y: direction.y } 
     })
 
-    if(isSuccess || isError) return null
 
     //Now get mouse position
     useFrame(({ pointer }) => {
@@ -44,6 +47,9 @@ export const PortalsControlsEmit = ({ portalId } : { portalId: string }) => {
         const mouse = new THREE.Vector3(pointer.x, pointer.y, 0)
         const direction = mouse.sub(position).normalize()
         setDirection(direction)
+        console.log("bb mouse:", mouse)
+        console.log("bb position:", position)
+        console.log("bb direction:", direction)
     })
 
     //Click action
@@ -69,15 +75,26 @@ export const PortalsControlsEmit = ({ portalId } : { portalId: string }) => {
                     timestamp,
                     mass,
                     from: portalId,
-                    direction,
+                    direction: { x: direction.x, y: direction.y },
+                    sender: address,
+                    executionTime: timestamp,
+                    prediction: true,
                 }
-                const isBehind = input.timestamp < currentState.timestamp
-                if(isBehind) {
-                    const state = snapshots.get(input.timestamp)
-                    if(!state) return
-                    rollbackToState(state)
-                }
-                handleInput(input)
+                dispatch(addInput(input))
+                // //Client add input
+                // const isBehind = input.timestamp < currentState.timestamp
+                // if(isBehind) {
+                //     const state = snapshots.get(input.timestamp)
+                //     if(!state) return
+                //     rollbackToState(state)
+                // }
+                // handleInput(input)
+
+                // //Snapshot add input
+                // snapshotRollback(input.timestamp)
+                // handleInput(input, true)
+                // console.log("is predicting", input)
+                // console.log("is predicting", timestamp)
             })
         console.log("tx:", tx)
     }, [tx])
@@ -89,21 +106,24 @@ export const PortalsControlsEmit = ({ portalId } : { portalId: string }) => {
         setMass(newMass)
     })
 
+    if(isSuccess || isError) return null
+
     return (
         <>
             <Line
                 ref={lineRef}
                 color={'blue'}
+                lineWidth={1}
                 dashed={true}
-                points={[position, position.add(direction.multiplyScalar(length))]}
+                points={[position, position.clone().add(direction.clone().multiplyScalar(length))]}
             />
-            <Text 
+            {/* <Text 
                 anchorX={'left'}
                 anchorY={'bottom'}
                 position={position.add(direction.multiplyScalar(length))}
             >
                 {mass.toFixed(6)} ETH
-            </Text>
+            </Text> */}
         </>
         
     )

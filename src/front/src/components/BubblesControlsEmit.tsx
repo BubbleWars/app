@@ -1,6 +1,6 @@
-import THREE from "three"
+import * as THREE from 'three'
 import { massToRadius } from "../../../core/funcs/utils"
-import { currentState, rollbackToState, run } from "../../../core/world"
+import { currentState, rollbackToState } from "../../../core/world"
 import { useEffect, useRef, useState } from "react"
 import { Line, Text } from "@react-three/drei"
 import { useFrame } from "@react-three/fiber"
@@ -10,33 +10,32 @@ import { useWaitForTransaction } from "wagmi"
 import { currentChain } from "../contracts"
 import { getPublicClient } from "wagmi/actions"
 import { handleInput } from "../../../core/funcs/inputs"
-import { snapshots } from "../../../core/snapshots"
+import { snapshotRollback, snapshotRun, snapshots } from "../../../core/snapshots"
 
 export const BubblesControlsEmit = ({ bubbleId } : { bubbleId: string }) => {
     const bubble = currentState.bubbles.find(bubble => bubble.id === bubbleId)
     if(!bubble) return null
     const radius = massToRadius(bubble.mass)
     const position = new THREE.Vector3(bubble.position.x, bubble.position.y, 0)
-    const length = 10 + radius
+    const length = 10
     const [ direction, setDirection ] = useState<THREE.Vector3>(new THREE.Vector3(1, 0, 0))
     const [ mass, setMass ] = useState<number>(bubble.mass/2)
     const lineRef = useRef<any>()
 
     //Input action
     const {
-        data,
         write,
         isError,
         isLoading,
         isSuccess,
+        data,
     } = useCreateInput({
         type: InputType.Emit,
         mass,
         from: bubbleId,
-        direction, 
+        direction: { x: direction.x, y: direction.y } 
     })
 
-    if(isSuccess || isError) return null
 
     //Now get mouse position
     useFrame(({ pointer }) => {
@@ -44,6 +43,9 @@ export const BubblesControlsEmit = ({ bubbleId } : { bubbleId: string }) => {
         const mouse = new THREE.Vector3(pointer.x, pointer.y, 0)
         const direction = mouse.sub(position).normalize()
         setDirection(direction)
+        console.log("vv mouse:", mouse)
+        console.log("vv position:", position)
+        console.log("vv direction:", direction)
     })
 
     //Click action
@@ -60,26 +62,26 @@ export const BubblesControlsEmit = ({ bubbleId } : { bubbleId: string }) => {
     useEffect(() => {
         if(!tx) return
         if(!tx.data?.blockNumber) return
-        getPublicClient({chainId: currentChain.id})
-            .getBlock({blockNumber: tx.data.blockNumber})
-            .then(block => {
-                const timestamp = Number(block.timestamp)
-                const input: Emit = {
-                    type: InputType.Emit,
-                    timestamp,
-                    mass,
-                    from: bubbleId,
-                    direction,
-                }
-                const isBehind = input.timestamp < currentState.timestamp
-                if(isBehind) {
-                    const state = snapshots.get(input.timestamp)
-                    if(!state) return
-                    rollbackToState(state)
-                }
-                handleInput(input)
-            })
-        console.log("tx:", tx)
+        // getPublicClient({chainId: currentChain.id})
+        //     .getBlock({blockNumber: tx.data.blockNumber})
+        //     .then(block => {
+        //         const timestamp = Number(block.timestamp)
+        //         const input: Emit = {
+        //             type: InputType.Emit,
+        //             timestamp,
+        //             mass,
+        //             from: bubbleId,
+        //             direction,
+        //         }
+        //         const isBehind = input.timestamp < currentState.timestamp
+        //         if(isBehind) {
+        //             const state = snapshots.get(input.timestamp)
+        //             if(!state) return
+        //             rollbackToState(state)
+        //         }
+        //         handleInput(input)
+        //     })
+        // console.log("tx:", tx)
     }, [tx])
 
     //Scroll action
@@ -89,21 +91,25 @@ export const BubblesControlsEmit = ({ bubbleId } : { bubbleId: string }) => {
         setMass(newMass)
     })
 
+    if(isSuccess || isError) return null
+
+
     return (
         <>
             <Line
                 ref={lineRef}
                 color={'blue'}
                 dashed={true}
-                points={[position, position.add(direction.multiplyScalar(length))]}
+                lineWidth={1}
+                points={[position, position.clone().add(direction.clone().multiplyScalar(length))]}
             />
-            <Text 
+            {/* <Text 
                 anchorX={'left'}
                 anchorY={'bottom'}
                 position={position.add(direction.multiplyScalar(length))}
             >
                 {mass.toFixed(6)} ETH
-            </Text>
+            </Text> */}
         </>
         
     )

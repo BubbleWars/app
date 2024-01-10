@@ -1,7 +1,7 @@
 import { Text } from "@react-three/drei"
 import { currentState } from "../../../core/world"
 import { massToRadius, truncateAddress } from "../../../core/funcs/utils"
-import THREE from "three"
+import * as THREE from 'three'
 
 
 

@@ -8,6 +8,8 @@ import { publicProvider } from 'wagmi/providers/public'
 import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
 import { URL_QUERY_GRAPHQL } from './consts/index.ts';
 import { currentChain } from './contracts.ts';
+import { Provider } from 'react-redux';
+import store from './store/index.ts';
 
 //Configure Apollo
 const client = new ApolloClient({
@@ -27,11 +29,13 @@ const config = createConfig({
 })
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <ApolloProvider client={client}>
-    <WagmiConfig config={config}>
-      <React.StrictMode>
-        <App />
-      </React.StrictMode>
-    </WagmiConfig>
-  </ApolloProvider>,
+  <Provider store={store}>
+    <ApolloProvider client={client}>
+      <WagmiConfig config={config}>
+        <React.StrictMode>
+          <App />
+        </React.StrictMode>
+      </WagmiConfig>
+    </ApolloProvider>
+  </Provider>,
 )

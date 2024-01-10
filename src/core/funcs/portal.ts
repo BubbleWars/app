@@ -102,16 +102,16 @@ export const applyPortalGrowth = (portal: Portal, timeElapsed: number): void => 
 
 export const applyPortalGravity = (portal: Portal, bubble: Bubble): void => {
     if(!portal || !bubble) return;
-    const mi = portal.mass;
-    const pi = portal.body.getPosition();
-    const mk = bubble.body.getMass();
-    const pk = bubble.body.getPosition();
-    const delta = pk.sub(pi);
-    const r = delta.length();
-    const force = GRAVITATIONAL_CONSTANT * mi * mk / (r * r);
-    delta.normalize();
-    bubble.body.applyForceToCenter(
-        delta.mul(force).neg());
+    // const mi = portal.mass;
+    // const pi = portal.body.getPosition();
+    // const mk = bubble.body.getMass();
+    // const pk = bubble.body.getPosition();
+    // const delta = pk.sub(pi);
+    // const r = delta.length();
+    // const force = GRAVITATIONAL_CONSTANT * mi * mk / (r * r);
+    // delta.normalize();
+    // bubble.body.applyForceToCenter(
+    //     delta.mul(force).neg());
     ////console.log(force);
 }
 
@@ -125,7 +125,7 @@ export const portalAbsorbBubble = (bubbles: Map<string, Bubble>, portal: Portal,
     updateBubble(bubbles, absorbedBubble, newBubbleMass);
 }
 
-export const portalEmitBubble = (bubbles: Map<string, Bubble>, portal: Portal, mass: number, direction: Vec2): Bubble => {
+export const portalEmitBubble = (bubbles: Map<string, Bubble>, portal: Portal, mass: number, direction: Vec2 = new Vec2(1, 1)): Bubble => {
     if(mass > portal.mass) throw new Error("Cannot emit more than the portal's mass");
     const portalRadius = portal.fixture.getShape().getRadius();
     const emittedBubbleRadius = massToRadius(mass);

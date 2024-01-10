@@ -8,6 +8,8 @@ import { hexToString } from "viem";
 import { useBlockNumber } from "wagmi";
 import { currentChain } from "../contracts";
 import { getPublicClient } from "wagmi/actions";
+import { useDispatch, useSelector } from "react-redux";
+import { setInputs } from "../store/inputs";
 
 //Get latest timestamp from blockchain
 export const useBlockTimestamp = () : number => {
@@ -114,6 +116,8 @@ export const useNotices = () : {
     //Add new notices
     const newNotices = data?.notices?.edges?.map((edge) => edge.node) as Notice[];
     if (newNotices?.length > 0) setNotices([...notices, ...newNotices]);
+
+    console.log("notices main2", notices);
     
     return { 
         loading, 
@@ -131,8 +135,19 @@ export const useInputs = () : {
     cursor: any 
 } => {
     const { loading, error, notices, cursor } = useNotices();
+    const dispatch = useDispatch();
     const inputs = notices.map((notice) => {
         return {...JSON.parse(hexToString(notice.payload as '0x{string}')) } as Input;
     })
-    return { loading, error, inputs, cursor };
+
+
+    useEffect(() => {
+        dispatch(setInputs(inputs));
+        console.log("inputs effect", inputs);
+    }, [inputs]);
+
+    let storeInputs = useSelector((state) => state.inputs.inputs);
+
+    console.log("inputs main2", storeInputs);
+    return { loading, error, inputs:storeInputs, cursor };
 }

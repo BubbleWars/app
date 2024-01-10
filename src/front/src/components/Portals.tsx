@@ -23,23 +23,24 @@ export const Portal = ({ portalId } : { portalId: string }) => {
         meshRef.current.updateMatrix()
     })    
     return (
-        <mesh
-            ref={meshRef}
+        <>
+            <mesh
             onPointerEnter={() => setIsHovered(true)}
             onPointerLeave={() => setIsHovered(false)}
             onClick={() => setIsSelected(!isSelected)}
             onContextMenu={() => setIsSelected(false)}
-
-        >
-            <sphereGeometry />
-            <meshBasicMaterial
-                opacity={0.8}
-                color={ethereumAddressToColor(portalId)}
-                transparent
-            />
-            {isHovered && <PortalsInfo  portalId={portalId} />}
+                ref={meshRef}
+                >
+                <sphereGeometry />
+                <meshBasicMaterial
+                    opacity={0.8}
+                    color={ethereumAddressToColor(portalId)}
+                    transparent
+                />
+            </mesh>
             {isSelected && <PortalsControlsEmit portalId={portalId} />}
-        </mesh>
+        </>
+        
     )
 }
 

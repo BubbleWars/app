@@ -68,6 +68,7 @@ export const parseInput = (data: AdvanceData): Input | false => {
                 executionTime: payloadJSON.executionTime ?? timestamp,
                 from: payloadJSON.from,
                 mass: payloadJSON.mass,
+                direction: payloadJSON.direction,
             };
         case InputType.Withdraw:
             return {
@@ -192,7 +193,7 @@ const handleSpawnPortal = (input: SpawnPortal, client:boolean): boolean => {
 }
 
 const handleEmit = (input: Emit, client:boolean): boolean => {
-    //console.log("Handling emit with input:", JSON.stringify(input));
+    console.log("Handling emit with input:", JSON.stringify(input));
     //console.log("Portals:", JSON.stringify(portals));
     //console.log(portals)
     //console.log("Bubbles:", JSON.stringify(bubbles));

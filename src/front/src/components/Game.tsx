@@ -10,12 +10,13 @@ import { currentState, init, lastTimestamp, rollbackToState, run, world } from '
 import { handleInput } from '../../../core/funcs/inputs'
 import { Input } from '../../../core/types/inputs'
 import { useBlockTimestamp, useLocalTimestamp, useMachineTimestamp } from '../hooks/state'
-import { snapshotCurrentState, snapshotInit, snapshotRollback, snapshotRun } from '../../../core/snapshots'
+import { snapshotCurrentState, snapshotInit, snapshotRollback, snapshotRun, snapshots } from '../../../core/snapshots'
 
 
 
 export const Game = ({snapshot, inputs, notices} : {snapshot: Snapshot, inputs: Input[], notices:Notice[]}) => {
-    console.log("main snapshot:", snapshot)
+    console.log("22 inputs:", inputs)
+    console.log("22 notices:", notices)
     // Get current timestamps
     const machineTimestamp = useMachineTimestamp(snapshot, notices)
     const blockTimestamp = useBlockTimestamp();
@@ -42,17 +43,27 @@ export const Game = ({snapshot, inputs, notices} : {snapshot: Snapshot, inputs: 
     //Check for new inputs, make sure to only run on new inputs
     useEffect(() => {
         if(inputs.length > 0){ 
-            inputs
+            [...inputs]
                 .sort((a, b) => a.timestamp - b.timestamp)
                 .filter((input) => input.timestamp > lastTimestampHandled)
                 .forEach((input) => {
                     const isBehind = input.timestamp < blockTimestamp
                     if(isBehind) snapshotRollback(input.timestamp)
                     handleInput(input, true)
+                    
                     if(isBehind) snapshotRun(blockTimestamp, ()=>{}, true)
                     setLastTimestampHandled(input.timestamp)
                     setBubbleIds(snapshotCurrentState.bubbles.map(bubble => bubble.id))
                     setPortalIds(snapshotCurrentState.portals.map(portal => portal.id))
+
+                    if(input?.prediction) {
+                        const stateOfInput = snapshots.get(input.timestamp)
+                        rollbackToState(stateOfInput)
+                        handleInput(input)
+                        setBubbleIds(currentState.bubbles.map(bubble => bubble.id))
+                        setPortalIds(currentState.portals.map(portal => portal.id))
+                    }
+                    console.log("abc input:", input)
                 })
         }
                 
@@ -85,6 +96,8 @@ export const Game = ({snapshot, inputs, notices} : {snapshot: Snapshot, inputs: 
     useFrame(() => {
         const now = Date.now() / 1000
         run(now)
+        setBubbleIds(currentState.bubbles.map(bubble => bubble.id))
+        setPortalIds(currentState.portals.map(portal => portal.id))
     })
 
     console.log(inputs)

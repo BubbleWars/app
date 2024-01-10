@@ -9,7 +9,7 @@ export const ActionSpawnPortal = () => {
         isSuccess
     } = useCreateInput({
         type: InputType.SpawnPortal, 
-        mass: 10,
+        mass: 100,
     })
 
     return (

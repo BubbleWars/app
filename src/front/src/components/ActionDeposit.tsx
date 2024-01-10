@@ -11,7 +11,7 @@ export const ActionDeposit = () => {
         isSuccess
     } = useCreateInput({
         type: InputType.Deposit, 
-        amount: 100,
+        amount: 1000,
     })
 
     return (

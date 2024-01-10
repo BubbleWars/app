@@ -23,22 +23,24 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
         meshRef.current.updateMatrix()
     })    
     return (
-        <mesh
-            ref={meshRef}
-            onPointerEnter={() => setIsHovered(true)}
-            onPointerLeave={() => setIsHovered(false)}
-            onClick={() => setIsSelected(!isSelected)}
-            onContextMenu={() => setIsSelected(false)}
-        >
-            <sphereGeometry />
-            <meshBasicMaterial
-                opacity={0.8}
-                color='blue'
-                transparent
-            />
-            {isHovered && <BubblesInfo bubbleId={bubbleId} />}
+        <>
+            <mesh
+                ref={meshRef}
+                onPointerEnter={() => setIsHovered(true)}
+                onPointerLeave={() => setIsHovered(false)}
+                onClick={() => setIsSelected(!isSelected)}
+                onContextMenu={() => setIsSelected(false)}
+            >
+                <sphereGeometry />
+                <meshBasicMaterial
+                    opacity={0.8}
+                    color='blue'
+                    transparent
+                />
+            </mesh>
             {isSelected && <BubblesControlsEmit bubbleId={bubbleId} />}
-        </mesh>
+        </>
+        
     )
 }
 

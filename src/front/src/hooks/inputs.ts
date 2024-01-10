@@ -6,6 +6,7 @@ import { useEffect } from "react";
 
 
 export const useCreateInput = (input: Input) => {
+    console.log("useCreateInput", input)
     //Check if deposit input
     const isDeposit = input.type == InputType.Deposit;
     const functionName = isDeposit ? 'depositEther' : 'addInput';
@@ -43,6 +44,7 @@ export const useOnWheel = (onWheel: (event: WheelEvent) => void) => {
         };
 
         // Add wheel event listener
+        window.onwheel = () => { return false; }
         window.addEventListener('wheel', handleWheel);
 
         // Clean up the event listener on component unmount
