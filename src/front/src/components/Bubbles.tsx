@@ -15,7 +15,6 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
     useFrame(() => {
         const bubble = currentState.bubbles.find(bubble => bubble.id === bubbleId)
         if(!bubble) return
-        const temp = new THREE.Object3D()
         const radius = massToRadius(bubble.mass)
         meshRef.current.scale.set(radius, radius, radius)
         console.log("bubble position:", bubble.position)

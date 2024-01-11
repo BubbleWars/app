@@ -2,7 +2,9 @@ import { useContractWrite } from "wagmi";
 import { CartesiDAppAddress, EtherPortal, InputBox } from "../contracts";
 import { Input, InputType } from "../../../core/types/inputs";
 import { parseEther, toHex, zeroAddress } from "viem";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import * as THREE from 'three';
+import { useThree } from '@react-three/fiber';
 
 
 export const useCreateInput = (input: Input) => {
@@ -53,3 +55,16 @@ export const useOnWheel = (onWheel: (event: WheelEvent) => void) => {
         };
     }, [onWheel]); // Re-run the effect only if the onWheel function changes
 }
+
+
+export const useMousePosition = (handler: (event: MouseEvent) => void) => {
+    useEffect(() => {
+        // Add mousemove event listener
+        document.addEventListener('mousemove', handler);
+
+        // Clean up the event listener on component unmount
+        return () => {
+            document.removeEventListener('mousemove', handler);
+        };
+    }, [handler]); // Re-run the effect only if the handler changes
+};

@@ -5,7 +5,7 @@ import { useBlockTimestamp, useInputs, useInspect, useLocalTimestamp, useMachine
 import { InspectType } from '../../core/types/inputs'
 import { Game } from './components/Game'
 import { GameBar } from './components/GameBar'
-import { Canvas } from '@react-three/fiber'
+import { Canvas, extend } from '@react-three/fiber'
 import { CustomCameraControls } from './components/CameraControls'
 import * as THREE from 'three'
 

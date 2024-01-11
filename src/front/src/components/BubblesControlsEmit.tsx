@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import { massToRadius } from "../../../core/funcs/utils"
 import { currentState, rollbackToState } from "../../../core/world"
 import { useEffect, useRef, useState } from "react"
-import { Line, Text } from "@react-three/drei"
+import { Line } from "@react-three/drei"
 import { useFrame } from "@react-three/fiber"
 import { useCreateInput, useOnClick, useOnWheel } from "../hooks/inputs"
 import { Emit, InputType } from "../../../core/types/inputs"
@@ -42,15 +42,27 @@ export const BubblesControlsEmit = ({ bubbleId } : { bubbleId: string }) => {
 
 
     //Now get mouse position
-    useFrame(({ pointer }) => {
-        if(isError || isLoading || isSuccess) return
-        const mouse = new THREE.Vector3(pointer.x, pointer.y, 0)
-        const direction = mouse.sub(position).normalize()
-        setDirection(direction)
-        console.log("bb mouse:", mouse)
-        console.log("bb position:", position)
-        console.log("bb direction:", direction)
-    })
+    useFrame(({ pointer, camera }) => {
+        if (isError || isLoading || isSuccess) return;
+
+        // Raycaster for converting pointer coordinates
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(new THREE.Vector2(pointer.x, pointer.y) , camera);
+
+        // Assuming your 2D plane is at z = 0
+        const planeZ = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+        const worldMouse = new THREE.Vector3();
+        raycaster.ray.intersectPlane(planeZ, worldMouse);
+
+        // Calculate the direction vector
+        const directionVector = worldMouse.sub(position).normalize();
+
+        setDirection(directionVector);
+
+        console.log("bb mouse:", worldMouse);
+        console.log("bb position:", position);
+        console.log("bb direction:", directionVector);
+    });
 
     //Click action
     useOnClick(() => {
@@ -112,7 +124,7 @@ export const BubblesControlsEmit = ({ bubbleId } : { bubbleId: string }) => {
         <>
             <Line
                 ref={lineRef}
-                color={'blue'}
+                color={'black'}
                 lineWidth={1}
                 dashed={true}
                 points={[position, position.clone().add(direction.clone().multiplyScalar(length))]}

@@ -18,7 +18,7 @@ export const Portal = ({ portalId } : { portalId: string }) => {
         if(!portal) return
         const radius = massToRadius(portal.mass)
         meshRef.current.scale.set(radius, radius, radius)
-        console.log("bubble position:", portal.position)
+        console.log("portal position:", portal.position)
         meshRef.current.position.set(portal.position.x, portal.position.y, 0)
         meshRef.current.updateMatrix()
     })    

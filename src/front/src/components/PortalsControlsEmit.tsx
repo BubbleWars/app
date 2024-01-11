@@ -2,8 +2,8 @@ import * as THREE from 'three'
 import { massToRadius } from "../../../core/funcs/utils"
 import { currentState, rollbackToState } from "../../../core/world"
 import { useEffect, useRef, useState } from "react"
-import { Line, Text, Text3D } from "@react-three/drei"
-import { useFrame } from "@react-three/fiber"
+import { Line, Text } from "@react-three/drei"
+import { extend, useFrame } from "@react-three/fiber"
 import { useCreateInput, useOnClick, useOnWheel } from "../hooks/inputs"
 import { Emit, InputType } from "../../../core/types/inputs"
 import { useAccount, useWaitForTransaction } from "wagmi"
@@ -13,6 +13,8 @@ import { handleInput } from "../../../core/funcs/inputs"
 import { snapshotRollback, snapshotRun, snapshots } from "../../../core/snapshots"
 import { useDispatch } from 'react-redux'
 import { addInput } from '../store/inputs'
+import { Vec2 } from 'planck-js'
+
 
 export const PortalsControlsEmit = ({ portalId } : { portalId: string }) => {
     const dispatch = useDispatch()
@@ -42,15 +44,27 @@ export const PortalsControlsEmit = ({ portalId } : { portalId: string }) => {
 
 
     //Now get mouse position
-    useFrame(({ pointer }) => {
-        if(isError || isLoading || isSuccess) return
-        const mouse = new THREE.Vector3(pointer.x, pointer.y, 0)
-        const direction = mouse.sub(position).normalize()
-        setDirection(direction)
-        console.log("bb mouse:", mouse)
-        console.log("bb position:", position)
-        console.log("bb direction:", direction)
-    })
+    useFrame(({ pointer, camera }) => {
+        if (isError || isLoading || isSuccess) return;
+
+        // Raycaster for converting pointer coordinates
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(new THREE.Vector2(pointer.x, pointer.y) , camera);
+
+        // Assuming your 2D plane is at z = 0
+        const planeZ = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+        const worldMouse = new THREE.Vector3();
+        raycaster.ray.intersectPlane(planeZ, worldMouse);
+
+        // Calculate the direction vector
+        const directionVector = worldMouse.sub(position).normalize();
+
+        setDirection(directionVector);
+
+        console.log("bb mouse:", worldMouse);
+        console.log("bb position:", position);
+        console.log("bb direction:", directionVector);
+    });
 
     //Click action
     useOnClick(() => {
@@ -117,14 +131,16 @@ export const PortalsControlsEmit = ({ portalId } : { portalId: string }) => {
                 dashed={true}
                 points={[position, position.clone().add(direction.clone().multiplyScalar(length))]}
             />
-            <Text3D
-            
-            position={position.clone().add(direction.clone().multiplyScalar(length))}
-            >Hello</Text3D>
+            {/* <text
+                position={position.clone().add(direction.clone().multiplyScalar(length))}
+            >
+                {mass.toFixed(6)} ETH
+            </text> */}
+
             {/* <Text 
                 anchorX={'left'}
                 anchorY={'bottom'}
-                position={position.add(direction.multiplyScalar(length))}
+                position={position.clone().add(direction.clone().multiplyScalar(length))}
             >
                 {mass.toFixed(6)} ETH
             </Text> */}
