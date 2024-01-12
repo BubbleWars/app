@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import { massToRadius } from "../../../core/funcs/utils"
 import { currentState, rollbackToState } from "../../../core/world"
 import { useEffect, useRef, useState } from "react"
-import { Line, Text } from "@react-three/drei"
+import { Line, Text, Text3D } from "@react-three/drei"
 import { extend, useFrame } from "@react-three/fiber"
 import { useCreateInput, useOnClick, useOnWheel } from "../hooks/inputs"
 import { Emit, InputType } from "../../../core/types/inputs"
@@ -126,8 +126,8 @@ export const PortalsControlsEmit = ({ portalId } : { portalId: string }) => {
         <>
             <Line
                 ref={lineRef}
-                color={'blue'}
-                lineWidth={1}
+                color={'black'}
+                lineWidth={2}
                 dashed={true}
                 points={[position, position.clone().add(direction.clone().multiplyScalar(length))]}
             />
@@ -136,14 +136,19 @@ export const PortalsControlsEmit = ({ portalId } : { portalId: string }) => {
             >
                 {mass.toFixed(6)} ETH
             </text> */}
-
-            {/* <Text 
-                anchorX={'left'}
-                anchorY={'bottom'}
-                position={position.clone().add(direction.clone().multiplyScalar(length))}
+            <group 
+            position={position.clone().add(direction.clone().multiplyScalar(length))}>
+            <Text3D 
+                font="./fonts/helvetiker.json"
+                size={0.8}
+                
             >
-                {mass.toFixed(6)} ETH
-            </Text> */}
+                <meshBasicMaterial attach="material" color="black" />
+                {`Emit \n`} 
+                {mass.toFixed(3)} ETH
+            </Text3D>
+            </group>
+            
         </>
         
     )

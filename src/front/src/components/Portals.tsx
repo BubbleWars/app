@@ -25,20 +25,19 @@ export const Portal = ({ portalId } : { portalId: string }) => {
     return (
         <>
             <mesh
-            onPointerEnter={() => setIsHovered(true)}
+            onPointerEnter={() => {if(!isSelected)setIsHovered(true)}}
             onPointerLeave={() => setIsHovered(false)}
-            onClick={() => setIsSelected(!isSelected)}
+            onClick={() => {setIsSelected(!isSelected); setIsHovered(false)}}
             onContextMenu={() => setIsSelected(false)}
                 ref={meshRef}
                 >
                 <sphereGeometry />
                 <meshBasicMaterial
-                    opacity={0.8}
                     color={ethereumAddressToColor(portalId)}
-                    transparent
                 />
             </mesh>
             {isSelected && <PortalsControlsEmit portalId={portalId} />}
+            {isHovered && <PortalsInfo portalId={portalId} /> }
         </>
         
     )

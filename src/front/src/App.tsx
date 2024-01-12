@@ -8,6 +8,7 @@ import { GameBar } from './components/GameBar'
 import { Canvas, extend } from '@react-three/fiber'
 import { CustomCameraControls } from './components/CameraControls'
 import * as THREE from 'three'
+import { Text3D } from '@react-three/drei'
 
 function App() {
   const { snapshot } = useInspect({type:InspectType.State, value: 0})
@@ -30,6 +31,7 @@ function App() {
         />
         <ambientLight />
         <pointLight position={[1, 1, 3]} intensity={5}  color={new THREE.Color(0xffffff)} />
+        
       </Canvas>
       <GameBar />
     </>

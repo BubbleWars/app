@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import { massToRadius } from "../../../core/funcs/utils"
 import { currentState, rollbackToState } from "../../../core/world"
 import { useEffect, useRef, useState } from "react"
-import { Line } from "@react-three/drei"
+import { Line, Text3D } from "@react-three/drei"
 import { useFrame } from "@react-three/fiber"
 import { useCreateInput, useOnClick, useOnWheel } from "../hooks/inputs"
 import { Emit, InputType } from "../../../core/types/inputs"
@@ -136,6 +136,18 @@ export const BubblesControlsEmit = ({ bubbleId } : { bubbleId: string }) => {
             >
                 {mass.toFixed(6)} ETH
             </Text> */}
+            <group 
+            position={position.clone().add(direction.clone().multiplyScalar(length))}>
+            <Text3D 
+                font="./fonts/helvetiker.json"
+                size={0.8}
+                
+            >
+                <meshBasicMaterial attach="material" color="black" />
+                {`Emit \n`} 
+                {mass.toFixed(3)} ETH
+            </Text3D>
+            </group>
         </>
         
     )

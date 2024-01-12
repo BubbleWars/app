@@ -1,5 +1,5 @@
 import { BubbleState } from '../../../core/types/state'
-import { massToRadius } from '../../../core/funcs/utils'
+import { ethereumAddressToColor, massToRadius } from '../../../core/funcs/utils'
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
@@ -25,19 +25,18 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
         <>
             <mesh
                 ref={meshRef}
-                onPointerEnter={() => setIsHovered(true)}
-                onPointerLeave={() => setIsHovered(false)}
-                onClick={() => setIsSelected(!isSelected)}
-                onContextMenu={() => setIsSelected(false)}
+                onPointerEnter={() => {if(!isSelected)setIsHovered(true)}}
+            onPointerLeave={() => setIsHovered(false)}
+            onClick={() => {setIsSelected(!isSelected); setIsHovered(false)}}
+            onContextMenu={() => setIsSelected(false)}
             >
                 <sphereGeometry />
                 <meshBasicMaterial
-                    opacity={0.8}
-                    color='blue'
-                    transparent
+                    color={ethereumAddressToColor(bubbleId.substring(0, bubbleId.length-2))}
                 />
             </mesh>
             {isSelected && <BubblesControlsEmit bubbleId={bubbleId} />}
+            {isHovered && <BubblesInfo bubbleId={bubbleId} /> }
         </>
         
     )
