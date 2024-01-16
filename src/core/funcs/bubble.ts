@@ -10,7 +10,7 @@ export const generateBubbleId = (bubbles: Map<string, Bubble>, owner: Address): 
 
 export const createBubble = (bubbles: Map<string, Bubble>, world: World, owner: Address, x: number, y: number, mass: number, controllable: boolean): Bubble => {
     const radius = massToRadius(mass);
-    const body = world.createBody({position: Vec2(x, y), type: "dynamic"});
+    const body = world.createBody({position: Vec2(x, y), type: "dynamic", linearDamping: 0.1});
     body.setMassData({mass, center: Vec2(0, 0), I: 0});
     const fixture = body.createFixture({ shape: Circle(radius), density: 1, restitution: 0, friction: 0});
     const bubble = { owner, balance: 0, body, fixture, controllable };

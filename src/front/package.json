@@ -23,6 +23,7 @@
     "react-query": "^3.39.3",
     "react-redux": "^9.0.4",
     "three": "^0.160.0",
+    "three-line-raycast": "1.0.2",
     "troika-three-text": "^0.49.0",
     "viem": "^1.21.0",
     "wagmi": "^1.4.12"

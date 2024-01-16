@@ -32,8 +32,8 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
             >
                 <sphereGeometry />
                 <meshBasicMaterial
-                    color={ethereumAddressToColor(bubbleId.substring(0, bubbleId.length-2))}
-                />
+                    color="#30D5C8"
+                    />
             </mesh>
             {isSelected && <BubblesControlsEmit bubbleId={bubbleId} />}
             {isHovered && <BubblesInfo bubbleId={bubbleId} /> }

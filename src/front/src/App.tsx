@@ -19,18 +19,20 @@ function App() {
     <>
       <Canvas 
         orthographic={true} 
-        camera={{ position: [0, 0, 5], zoom: 40 }}
+        camera={{ position: [0, 0, 10], zoom: 10, near: 0.01, far: 1000 }}
         style={{ height: '100vh', width: '100vw' }}
       >
+            <ambientLight intensity={5.5} color={'white'} />
+            <pointLight position={[10, 10, 10]} />
+
+        <color attach="background" args={['#272730']} />
         <CustomCameraControls/>
         <Game snapshot={snapshot} inputs={inputs} notices ={notices} />
-        <gridHelper 
+        {/* <gridHelper 
           position={[0, 0, -10]}
           rotation={[Math.PI / 2, 0, 0]}
           args={[1000, 2000, 0xebebeb, 0xebebeb]}
-        />
-        <ambientLight />
-        <pointLight position={[1, 1, 3]} intensity={5}  color={new THREE.Color(0xffffff)} />
+        /> */}
         
       </Canvas>
       <GameBar />

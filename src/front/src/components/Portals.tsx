@@ -33,7 +33,7 @@ export const Portal = ({ portalId } : { portalId: string }) => {
                 >
                 <sphereGeometry />
                 <meshBasicMaterial
-                    color={ethereumAddressToColor(portalId)}
+                    color="lightgreen"
                 />
             </mesh>
             {isSelected && <PortalsControlsEmit portalId={portalId} />}

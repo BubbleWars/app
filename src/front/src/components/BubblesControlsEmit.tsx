@@ -22,6 +22,7 @@ export const BubblesControlsEmit = ({ bubbleId } : { bubbleId: string }) => {
     const position = new THREE.Vector3(portal.position.x, portal.position.y, 0)
     const length = 10
     const [ direction, setDirection ] = useState<THREE.Vector3>(new THREE.Vector3(1, 0, 0))
+    const [hasProcessedTx, setHasProcessedTx] = useState(false);
     const [ mass, setMass ] = useState<number>(portal.mass/10)
     const lineRef = useRef<any>()
     const {address} = useAccount()
@@ -76,8 +77,7 @@ export const BubblesControlsEmit = ({ bubbleId } : { bubbleId: string }) => {
         hash: data?.hash
     })
     useEffect(() => {
-        if(!tx) return
-        if(!tx.data?.blockNumber) return
+        if (!tx || !tx.data?.blockNumber || hasProcessedTx) return;
         getPublicClient({chainId: currentChain.id})
             .getBlock({blockNumber: tx.data.blockNumber})
             .then(block => {
@@ -93,6 +93,8 @@ export const BubblesControlsEmit = ({ bubbleId } : { bubbleId: string }) => {
                     prediction: true,
                 }
                 dispatch(addInput(input))
+                console.log("is predicting22", input)
+                setHasProcessedTx(true)
                 // //Client add input
                 // const isBehind = input.timestamp < currentState.timestamp
                 // if(isBehind) {
@@ -109,7 +111,7 @@ export const BubblesControlsEmit = ({ bubbleId } : { bubbleId: string }) => {
                 // console.log("is predicting", timestamp)
             })
         console.log("tx:", tx)
-    }, [tx])
+    }, [tx, dispatch])
 
     //Scroll action
     useOnWheel((event) => {
