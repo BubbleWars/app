@@ -24,24 +24,13 @@ export const BubblesInfo = ({ bubbleId } : { bubbleId: string }) => {
             >
             <CustomText 
                 size={0.7}
-                color="white"
                 position={pos3}
             >
-                {truncateAddress(bubble.owner)}
-            </CustomText>
-            <CustomText
-                size={0.7}
-                position={pos2}
-
-            >
-                {bubble.mass.toFixed(3)} ETH
-            </CustomText>
-            <CustomText
-                size={0.7}
-                position={pos1}
-            >
+                {truncateAddress(bubble.owner)} {'\n'}
+                {bubble.mass.toFixed(3)} ETH {'\n'}
                 0 EP
             </CustomText>
+            
             </group>
             
         </>

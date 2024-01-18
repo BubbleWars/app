@@ -14,6 +14,7 @@ import { snapshotRollback, snapshotRun, snapshots } from "../../../core/snapshot
 import { useDispatch } from 'react-redux'
 import { addInput } from '../store/inputs'
 import { Vec2 } from 'planck-js'
+import { CustomText } from './CustomText'
 
 
 export const PortalsControlsEmit = ({ portalId } : { portalId: string }) => {
@@ -142,18 +143,14 @@ export const PortalsControlsEmit = ({ portalId } : { portalId: string }) => {
             >
                 {mass.toFixed(6)} ETH
             </text> */}
-            <group 
-            position={position.clone().add(direction.clone().multiplyScalar(length))}>
-            <Text3D 
-                font="./fonts/helvetiker.json"
+            <CustomText 
                 size={0.8}
-                
-            >
-                <meshBasicMaterial attach="material" color="black" />
+                color="white"
+                position={position.clone().add(direction.clone().multiplyScalar(length))}>
+            
                 {`Emit \n`} 
                 {mass.toFixed(3)} ETH
-            </Text3D>
-            </group>
+            </CustomText>
             
         </>
         

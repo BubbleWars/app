@@ -7,7 +7,7 @@ import { currentState } from '../../../core/world'
 import { snapshotCurrentState } from '../../../core/snapshots'
 import { BubblesInfo } from './BubblesInfo'
 import { BubblesControlsEmit } from './BubblesControlsEmit'
-import { OutlineEffect } from './Outline'
+import { Outlines } from '@react-three/drei'
 
 export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
     const meshRef = useRef<any>()
@@ -32,6 +32,7 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
             onContextMenu={() => setIsSelected(false)}
             >
                 <sphereGeometry />
+                <Outlines thickness={0.3} color={'black'} />
                 <meshBasicMaterial
                     color={ethereumAddressToColor(bubbleId.substring(0, bubbleId.length-2))}
                     />

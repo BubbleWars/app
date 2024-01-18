@@ -7,6 +7,7 @@ import { PortalState } from '../../../core/types/state'
 import { snapshotCurrentState } from '../../../core/snapshots'
 import { PortalsInfo } from './PortalsInfo'
 import { PortalsControlsEmit } from './PortalsControlsEmit'
+import { Outlines } from '@react-three/drei'
 
 
 export const Portal = ({ portalId } : { portalId: string }) => {
@@ -32,12 +33,13 @@ export const Portal = ({ portalId } : { portalId: string }) => {
                 ref={meshRef}
                 >
                 <sphereGeometry />
+                <Outlines thickness={0.3} color={'black'} />
                 <meshBasicMaterial
                     color={ethereumAddressToColor(portalId)}
                 />
             </mesh>
             {isSelected && <PortalsControlsEmit portalId={portalId} />}
-            {isHovered && <PortalsInfo portalId={portalId} /> }
+            <PortalsInfo portalId={portalId} />
         </>
         
     )

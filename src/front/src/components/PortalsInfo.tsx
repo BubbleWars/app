@@ -2,6 +2,7 @@ import { Text3D } from "@react-three/drei"
 import { currentState } from "../../../core/world"
 import { massToRadius, truncateAddress } from "../../../core/funcs/utils"
 import * as THREE from 'three'
+import { CustomText } from "./CustomText"
 
 
 
@@ -17,25 +18,16 @@ export const PortalsInfo = ({ portalId } : { portalId: string }) => {
 
     return (
         <>
-            <Text3D 
-                font="./fonts/helvetiker.json"
+            <CustomText 
+                size={0.7}
+                color="white"
                 position={pos3}
             >
-                <meshBasicMaterial color='black' />
-                {truncateAddress(portal.owner)}</Text3D>
-            <Text3D
-                font="./fonts/helvetiker.json"
-                position={pos2}
-
-            >
-                <meshBasicMaterial color='black' />
-                {portal.mass.toFixed(3)} ETH</Text3D>
-            <Text3D
-                font="./fonts/helvetiker.json"
-                position={pos1}
-            >
-                <meshBasicMaterial color='black' />
-                0 ENERGY</Text3D>
+                {truncateAddress(portal.owner)} {'\n'}
+                {portal.mass.toFixed(3)} ETH {'\n'}
+                0 EP
+            </CustomText>
+            
         </>
     )
 }

@@ -25,14 +25,14 @@ function App() {
             <ambientLight intensity={5.5} color={'white'} />
             <pointLight position={[10, 10, 10]} />
 
-        <color attach="background" args={['#272730']} />
+        {/* <color attach="background" args={['#272730']} /> */}
         <CustomCameraControls/>
         <Game snapshot={snapshot} inputs={inputs} notices ={notices} />
-        {/* <gridHelper 
+        <gridHelper 
           position={[0, 0, -10]}
           rotation={[Math.PI / 2, 0, 0]}
-          args={[1000, 2000, 0xebebeb, 0xebebeb]}
-        /> */}
+          args={[5000, 100, 0xebebeb, 0xebebeb]}
+        />
         
       </Canvas>
       <GameBar />

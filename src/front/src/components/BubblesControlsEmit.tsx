@@ -13,6 +13,7 @@ import { handleInput } from "../../../core/funcs/inputs"
 import { snapshotRollback, snapshotRun, snapshots } from "../../../core/snapshots"
 import { useDispatch } from 'react-redux'
 import { addInput } from '../store/inputs'
+import { CustomText } from './CustomText'
 
 export const BubblesControlsEmit = ({ bubbleId } : { bubbleId: string }) => {
     const dispatch = useDispatch()
@@ -141,18 +142,13 @@ export const BubblesControlsEmit = ({ bubbleId } : { bubbleId: string }) => {
             >
                 {mass.toFixed(6)} ETH
             </Text> */}
-            <group 
-            position={position.clone().add(direction.clone().multiplyScalar(length))}>
-            <Text3D 
-                font="./fonts/helvetiker.json"
+            <CustomText 
                 size={0.8}
-                
+                position={position.clone().add(direction.clone().multiplyScalar(length))}
             >
-                <meshBasicMaterial attach="material" color="black" />
                 {`Emit \n`} 
                 {mass.toFixed(3)} ETH
-            </Text3D>
-            </group>
+            </CustomText>
         </>
         
     )
