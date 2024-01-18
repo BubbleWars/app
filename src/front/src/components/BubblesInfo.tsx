@@ -2,6 +2,7 @@ import { Text, Text3D } from "@react-three/drei"
 import { currentState } from "../../../core/world"
 import { massToRadius, truncateAddress } from "../../../core/funcs/utils"
 import * as THREE from 'three'
+import { CustomText } from "./CustomText"
 
 
 
@@ -10,32 +11,39 @@ export const BubblesInfo = ({ bubbleId } : { bubbleId: string }) => {
     if(!bubble) return null
     const radius = massToRadius(bubble.mass)
     const textPosition = new THREE.Vector3(bubble.position.x+radius, bubble.position.y+radius, 0)
-    const lineHeightVector = new THREE.Vector3(0, 2, 0)
-    const pos1 = textPosition.clone().add(lineHeightVector.clone().multiplyScalar(0)).clone()
-    const pos2 = textPosition.clone().add(lineHeightVector.clone().multiplyScalar(1)).clone()
-    const pos3 = textPosition.clone().add(lineHeightVector.clone().multiplyScalar(2)).clone()
+    const zeroPosition = new THREE.Vector3(0, 0, 0)
+    const lineHeightVector = new THREE.Vector3(0, 1, 0)
+    const pos1 = zeroPosition.clone().add(lineHeightVector.clone().multiplyScalar(0)).clone()
+    const pos2 = zeroPosition.clone().add(lineHeightVector.clone().multiplyScalar(1)).clone()
+    const pos3 = zeroPosition.clone().add(lineHeightVector.clone().multiplyScalar(2)).clone()
 
     return (
         <>
-            <Text3D 
-                font="./fonts/helvetiker.json"
+            <group 
+                position={textPosition}
+            >
+            <CustomText 
+                size={0.7}
+                color="white"
                 position={pos3}
             >
-                <meshBasicMaterial color='black' />
-                {truncateAddress(bubble.owner)}</Text3D>
-            <Text3D
-                font="./fonts/helvetiker.json"
+                {truncateAddress(bubble.owner)}
+            </CustomText>
+            <CustomText
+                size={0.7}
                 position={pos2}
 
             >
-                <meshBasicMaterial color='black' />
-                {bubble.mass.toFixed(3)} ETH</Text3D>
-            <Text3D
-                font="./fonts/helvetiker.json"
+                {bubble.mass.toFixed(3)} ETH
+            </CustomText>
+            <CustomText
+                size={0.7}
                 position={pos1}
             >
-                <meshBasicMaterial color='black' />
-                0 ENERGY</Text3D>
+                0 EP
+            </CustomText>
+            </group>
+            
         </>
     )
 }

@@ -134,6 +134,8 @@ export const portalEmitBubble = (bubbles: Map<string, Bubble>, portal: Portal, m
     console.log("emittedBubblePosition", emittedBubblePosition);
     const emittedBubble = createBubble(bubbles, portal.body.getWorld(), portal.owner, emittedBubblePosition.x, emittedBubblePosition.y, mass, false);
     console.log("emittedBubblePosition after create", JSON.stringify(emittedBubble.body.getPosition()));
+    console.log("123at", emittedBubble.body.getUserData());
+    console.log("123at", bubbles)
     //Apply mass conservation
     const newPortalMass = portal.mass - mass;
     updatePortal(portal, newPortalMass);

@@ -77,7 +77,10 @@ export const BubblesControlsEmit = ({ bubbleId } : { bubbleId: string }) => {
         hash: data?.hash
     })
     useEffect(() => {
-        if (!tx || !tx.data?.blockNumber || hasProcessedTx) return;
+        if(!tx) return
+        if(!tx.data?.blockNumber) return
+        if(hasProcessedTx) return  
+        setHasProcessedTx(true)
         getPublicClient({chainId: currentChain.id})
             .getBlock({blockNumber: tx.data.blockNumber})
             .then(block => {
@@ -93,8 +96,8 @@ export const BubblesControlsEmit = ({ bubbleId } : { bubbleId: string }) => {
                     prediction: true,
                 }
                 dispatch(addInput(input))
-                console.log("is predicting22", input)
                 setHasProcessedTx(true)
+                console.log("is predicting portal", input)
                 // //Client add input
                 // const isBehind = input.timestamp < currentState.timestamp
                 // if(isBehind) {

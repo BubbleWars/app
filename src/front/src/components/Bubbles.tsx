@@ -7,6 +7,7 @@ import { currentState } from '../../../core/world'
 import { snapshotCurrentState } from '../../../core/snapshots'
 import { BubblesInfo } from './BubblesInfo'
 import { BubblesControlsEmit } from './BubblesControlsEmit'
+import { OutlineEffect } from './Outline'
 
 export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
     const meshRef = useRef<any>()
@@ -23,7 +24,7 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
     })    
     return (
         <>
-            <mesh
+        <mesh
                 ref={meshRef}
                 onPointerEnter={() => {if(!isSelected)setIsHovered(true)}}
             onPointerLeave={() => setIsHovered(false)}
@@ -32,11 +33,12 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
             >
                 <sphereGeometry />
                 <meshBasicMaterial
-                    color="#30D5C8"
+                    color={ethereumAddressToColor(bubbleId.substring(0, bubbleId.length-2))}
                     />
             </mesh>
+            
             {isSelected && <BubblesControlsEmit bubbleId={bubbleId} />}
-            {isHovered && <BubblesInfo bubbleId={bubbleId} /> }
+            <BubblesInfo bubbleId={bubbleId} />
         </>
         
     )

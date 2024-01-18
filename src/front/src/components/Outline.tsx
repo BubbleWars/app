@@ -1,37 +1,42 @@
-import ReactDOM from "react-dom"
-import React, { useRef, useEffect, useMemo, useState, useContext, useCallback } from "react"
-import { Vector2 } from "three"
-import { Canvas, extend, useFrame, useThree } from "@react-three/fiber"
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
-import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer"
-import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass"
-import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass"
-import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass"
-import { FXAAShader } from "three/examples/jsm/shaders/FXAAShader"
-const context = React.createContext([])
-extend({ OrbitControls, EffectComposer, RenderPass, OutlinePass, ShaderPass })
-export const Outline = ({ children }) => {
-    const { gl, scene, camera, size } = useThree()
-    const composer = useRef()
-    const [hovered, set] = useState([])
-    const aspect = useMemo(() => new Vector2(size.width, size.height), [size])
-    useEffect(() => composer.current.setSize(size.width, size.height), [size])
-    useFrame(() => composer.current.render(), 1)
-    return (
-      <context.Provider value={set}>
-        {children}
-        <effectComposer ref={composer} args={[gl]}>
-          <renderPass attachArray="passes" args={[scene, camera]} />
-          <oulinePass
-            attachArray="passes"
-            args={[aspect, scene, camera]}
-            selectedObjects={hovered}
-            visibleEdgeColor="black"
-            edgeStrength={50}
-            edgeThickness={1}
-          />
-          <shaderPass attachArray="passes" args={[FXAAShader]} uniforms-resolution-value={[1 / size.width, 1 / size.height]} />
-        </effectComposer>
-      </context.Provider>
-    )
-  }
+import * as THREE from 'three'; 
+import { useEffect, useRef, useMemo } from 'react';
+import { useThree, useFrame, extend } from '@react-three/fiber';
+import { OutlinePass, RenderPass, EffectComposer } from 'three/examples/jsm/Addons.js';
+
+extend({ EffectComposer, RenderPass, OutlinePass });
+
+const Outline = ({ children, edgeColor = '#ffffff', edgeStrength = 3, edgeThickness = 1 }) => {
+  const { gl, scene, camera, size } = useThree();
+  const composer = useRef();
+  const aspect = useMemo(() => new Vector2(size.width, size.height), [size]);
+
+  useEffect(() => {
+    if (!composer.current) {
+      composer.current = new EffectComposer(gl);
+      composer.current.addPass(new RenderPass(scene, camera));
+
+      const outlinePass = new OutlinePass(aspect, scene, camera);
+      outlinePass.visibleEdgeColor.set(edgeColor);
+      outlinePass.edgeStrength = edgeStrength;
+      outlinePass.edgeThickness = edgeThickness;
+      composer.current.addPass(outlinePass);
+    }
+
+    composer.current.setSize(size.width, size.height);
+  }, [edgeColor, edgeStrength, edgeThickness, gl, scene, camera, size, aspect]);
+
+  useFrame(() => composer.current?.render(), 1);
+
+  return (
+    <>
+      {children}
+      <effectComposer ref={composer} args={[gl]}>
+        <renderPass attachArray="passes" args={[scene, camera]} />
+        <outlinePass attachArray="passes" args={[aspect, scene, camera, []]} />
+        {/* You can add other passes like ShaderPass here if needed */}
+      </effectComposer>
+    </>
+  );
+};
+
+export default Outline;

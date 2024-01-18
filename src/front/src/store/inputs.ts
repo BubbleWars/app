@@ -26,6 +26,7 @@ export const inputsSlice = createSlice({
             stateInput.timestamp === action.payload.timestamp && stateInput.sender === action.payload.sender // Example combination
         );
         if (!isInputExists) {
+          console.log("is predicting portal", action.payload.timestamp);
             state.inputs.push(action.payload);
         }
     }

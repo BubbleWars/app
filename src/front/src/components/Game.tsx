@@ -11,6 +11,8 @@ import { handleInput } from '../../../core/funcs/inputs'
 import { Input } from '../../../core/types/inputs'
 import { useBlockTimestamp, useLocalTimestamp, useMachineTimestamp } from '../hooks/state'
 import { snapshotCurrentState, snapshotInit, snapshotRollback, snapshotRun, snapshots } from '../../../core/snapshots'
+import { interpolate, setInterpolation } from '../store/interpolation'
+import { useDispatch, useSelector } from 'react-redux'
 
 
 
@@ -21,6 +23,8 @@ export const Game = ({snapshot, inputs, notices} : {snapshot: Snapshot, inputs: 
     const machineTimestamp = useMachineTimestamp(snapshot, notices)
     const blockTimestamp = useBlockTimestamp();
     const localTimestamp = useLocalTimestamp();
+    const interpolation = useSelector((state: any) => state.interpolation)
+    const dispatch = useDispatch()
 
     //Initialize client state
     const [lastTimestampHandled, setLastTimestampHandled] = useState<number>(snapshot.timestamp)
@@ -47,22 +51,29 @@ export const Game = ({snapshot, inputs, notices} : {snapshot: Snapshot, inputs: 
                 .sort((a, b) => a.timestamp - b.timestamp)
                 .filter((input) => input.timestamp > lastTimestampHandled)
                 .forEach((input) => {
+                    
                     const isBehind = input.timestamp < blockTimestamp
-                    if(isBehind) snapshotRollback(input.timestamp)
+                    if(isBehind) {
+                        snapshotRollback(input.timestamp)
+                        const stateOfInput = snapshots.get(input.timestamp)
+                        rollbackToState(stateOfInput)
+                    }
+                    if(input?.prediction) {
+                        //clear pending inputs
+                            handleInput(input)
+                            setBubbleIds(currentState.bubbles.map(bubble => bubble.id))
+                            setPortalIds(currentState.portals.map(portal => portal.id))
+
+                    }
                     handleInput(input, true)
                     
                     if(isBehind) snapshotRun(blockTimestamp, ()=>{}, true)
                     setLastTimestampHandled(input.timestamp)
                     setBubbleIds(snapshotCurrentState.bubbles.map(bubble => bubble.id))
                     setPortalIds(snapshotCurrentState.portals.map(portal => portal.id))
-
-                    if(input?.prediction) {
-                        const stateOfInput = snapshots.get(input.timestamp)
-                        rollbackToState(stateOfInput)
-                        handleInput(input)
-                        setBubbleIds(currentState.bubbles.map(bubble => bubble.id))
-                        setPortalIds(currentState.portals.map(portal => portal.id))
-                    }
+                    
+                    dispatch(setInterpolation(input.timestamp))
+                    
                     console.log("abc input:", input)
                 })
         }
@@ -76,27 +87,39 @@ export const Game = ({snapshot, inputs, notices} : {snapshot: Snapshot, inputs: 
         //Run the world
         if(!snapshot) return
         if(blockTimestamp <= lastTimestampHandled) return
+        //const maxTimeToRun = interpolation.from ? interpolation.from : blockTimestamp
         snapshotRun(blockTimestamp, ()=>{}, true)
 
         //Rollback and update client state
         // const end = Math.max(Date.now() / 1000, blockTimestamp)
         console.log("setting snapshotCurrentState:", snapshotCurrentState)
         console.log("setting currentState:", currentState)
-        rollbackToState(snapshotCurrentState)
+        if(!interpolation.from)
+            rollbackToState(snapshotCurrentState)
         // run(end)
 
         //Add new objects if they exist
-        setBubbleIds(snapshotCurrentState.bubbles.map(bubble => bubble.id))
-        setPortalIds(snapshotCurrentState.portals.map(portal => portal.id))
+        // setBubbleIds(snapshotCurrentState.bubbles.map(bubble => bubble.id))
+        // setPortalIds(snapshotCurrentState.portals.map(portal => portal.id))
 
         //console.log(end)
     }, [blockTimestamp])
 
     //Predict client state
-    useFrame(() => {
+    useFrame((state) => {
+        console.log("new delta", state.clock.getDelta())
         const now = Date.now() / 1000
-        run(now)
+        // if(interpolation.from){
+        //     const maxTimeToRun = Math.min(now, interpolation.from)
+        //     console.log("interpolating: ", maxTimeToRun, now)
+        //     run(maxTimeToRun)
+        //     dispatch(interpolate({step: 0.09, end: now}))
+        // }else{
+            run(now)
+        // }
         setBubbleIds(currentState.bubbles.map(bubble => bubble.id))
+        console.log("123at", currentState.bubbles);
+        console.log("123at", currentState.bubbles.map(bubble => bubble.id))
         setPortalIds(currentState.portals.map(portal => portal.id))
     })
 

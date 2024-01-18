@@ -61,15 +61,8 @@ export const ethereumAddressToColor =(ethAddress: string) => {
         throw new Error('Invalid Ethereum address');
     }
 
-    // Remove the '0x' prefix and convert the address to an array of characters
-    const addressChars = ethAddress.substring(2).split('');
+    // Use the first six characters after '0x' as the color code
+    const colorCode = ethAddress.substring(2, 8);
 
-    // Convert each hex character to a decimal and sum them
-    const sum = addressChars.reduce((acc, char) => acc + parseInt(char, 16), 0);
-
-    // Modulate the sum to fit within 0xFFFFFF (the largest hex color code)
-    const colorCode = sum % 0xFFFFFF;
-
-    // Convert the result back to a hex string and pad with zeroes if necessary
-    return `#${colorCode.toString(16).padStart(6, '0')}`;
+    return `#${colorCode}`;
 }

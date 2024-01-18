@@ -82,22 +82,25 @@ export const PortalsControlsEmit = ({ portalId } : { portalId: string }) => {
         if(!tx) return
         if(!tx.data?.blockNumber) return
         if(hasProcessedTx) return
+        setHasProcessedTx(true)
         getPublicClient({chainId: currentChain.id})
             .getBlock({blockNumber: tx.data.blockNumber})
             .then(block => {
-                const timestamp = Number(block.timestamp)
-                const input: Emit = {
-                    type: InputType.Emit,
-                    timestamp,
-                    mass,
-                    from: portalId,
-                    direction: { x: direction.x, y: direction.y },
-                    sender: address,
-                    executionTime: timestamp,
-                    prediction: true,
-                }
-                dispatch(addInput(input))
-                setHasProcessedTx(true)
+                    const timestamp = Number(block.timestamp)
+                    const input: Emit = {
+                        type: InputType.Emit,
+                        timestamp,
+                        mass,
+                        from: portalId,
+                        direction: { x: direction.x, y: direction.y },
+                        sender: address,
+                        executionTime: timestamp,
+                        prediction: true,
+                    }
+                    dispatch(addInput(input))
+                    setHasProcessedTx(true)
+                    console.log("is predicting portal", input)
+                
                 // //Client add input
                 // const isBehind = input.timestamp < currentState.timestamp
                 // if(isBehind) {

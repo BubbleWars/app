@@ -15,6 +15,7 @@
     "@cartesi/rollups": "^1.0.0",
     "@react-three/drei": "^9.92.7",
     "@react-three/fiber": "^8.15.12",
+    "@react-three/postprocessing": "^2.15.12",
     "@reduxjs/toolkit": "^2.0.1",
     "@types/three": "^0.160.0",
     "graphql": "^16.8.1",
