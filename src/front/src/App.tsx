@@ -22,17 +22,15 @@ function App() {
         camera={{ position: [0, 0, 10], zoom: 10, near: 0.01, far: 1000 }}
         style={{ height: '100vh', width: '100vw' }}
       >
-            <ambientLight intensity={5.5} color={'white'} />
-            <pointLight position={[10, 10, 10]} />
 
         {/* <color attach="background" args={['#272730']} /> */}
         <CustomCameraControls/>
         <Game snapshot={snapshot} inputs={inputs} notices ={notices} />
-        <gridHelper 
+        {/* <gridHelper 
           position={[0, 0, -10]}
           rotation={[Math.PI / 2, 0, 0]}
           args={[5000, 100, 0xebebeb, 0xebebeb]}
-        />
+        /> */}
         
       </Canvas>
       <GameBar />

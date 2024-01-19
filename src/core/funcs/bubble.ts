@@ -54,7 +54,7 @@ export const emitBubble = (bubbles: Map<string, Bubble>, bubble: Bubble, mass: n
     //Apply momentum conservation
     const originalBubbleMomentum = totalMomentum.clone();
     const emittedBubbleVelocityDirection = direction.clone();
-    const emittedBubbleVelocityMagnitude = (bubble.body.getMass() / emittedBubble.body.getMass())*1;
+    const emittedBubbleVelocityMagnitude = (bubble.body.getMass() / emittedBubble.body.getMass())*0.1;
     const emittedBubbleRelativeVelocity = emittedBubbleVelocityDirection.mul(emittedBubbleVelocityMagnitude);
     const emittedBubbleVelocity = bubble.body.getLinearVelocity().clone().add(emittedBubbleRelativeVelocity);
     const emittedBubbleMomentum = emittedBubbleVelocity.clone().mul(emittedBubble.body.getMass());

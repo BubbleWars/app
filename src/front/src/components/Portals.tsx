@@ -8,6 +8,7 @@ import { snapshotCurrentState } from '../../../core/snapshots'
 import { PortalsInfo } from './PortalsInfo'
 import { PortalsControlsEmit } from './PortalsControlsEmit'
 import { Outlines } from '@react-three/drei'
+import { darkenColor } from '../utils'
 
 
 export const Portal = ({ portalId } : { portalId: string }) => {
@@ -22,7 +23,12 @@ export const Portal = ({ portalId } : { portalId: string }) => {
         console.log("portal position:", portal.position)
         meshRef.current.position.set(portal.position.x, portal.position.y, 0)
         meshRef.current.updateMatrix()
-    })    
+    })  
+    
+    // Calculate the outline color based on the Ethereum address
+    const baseColor = ethereumAddressToColor(portalId);
+    const outlineColor = darkenColor(baseColor, 0.2); // Darken by 20%
+
     return (
         <>
             <mesh
@@ -33,9 +39,9 @@ export const Portal = ({ portalId } : { portalId: string }) => {
                 ref={meshRef}
                 >
                 <sphereGeometry />
-                <Outlines thickness={0.3} color={'black'} />
+                <Outlines thickness={0.1} color={outlineColor} />
                 <meshBasicMaterial
-                    color={ethereumAddressToColor(portalId)}
+                    color={baseColor}
                 />
             </mesh>
             {isSelected && <PortalsControlsEmit portalId={portalId} />}

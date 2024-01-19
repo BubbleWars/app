@@ -1,16 +1,16 @@
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
 
-export const CustomText = ({ children, position, color='white', size } : { children: string, position: THREE.Vector3, color: string, size: number }) => {
+export const CustomText = ({ children, position, color='white', size=8, anchorX='center', anchorY='middle' } : { children: string, position: THREE.Vector3, color: string, size: number, anchorX: string, anchorY: string }) => {
     return (
         <Text 
-            color={'#ffffff'}
-            fontSize={5}
+            color={color}
+            fontSize={size}
             outlineColor={'black'}
-            outlineWidth={0.4}
-            anchorX={'left'}
-            anchorY={'bottom'}
-            position={position.clone().add(new THREE.Vector3(0, 0, 5))}
+            outlineWidth={size/10}
+            anchorX={anchorX}
+            anchorY={anchorY}
+            position={position.clone().add(new THREE.Vector3(0, 0, 6))}
         >
             {children}
         </Text>

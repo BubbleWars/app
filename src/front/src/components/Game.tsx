@@ -94,8 +94,7 @@ export const Game = ({snapshot, inputs, notices} : {snapshot: Snapshot, inputs: 
         // const end = Math.max(Date.now() / 1000, blockTimestamp)
         console.log("setting snapshotCurrentState:", snapshotCurrentState)
         console.log("setting currentState:", currentState)
-        if(!interpolation.from)
-            rollbackToState(snapshotCurrentState)
+        rollbackToState(snapshotCurrentState)
         // run(end)
 
         //Add new objects if they exist

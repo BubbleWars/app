@@ -142,7 +142,7 @@ export const portalEmitBubble = (bubbles: Map<string, Bubble>, portal: Portal, m
 
     //Apply momentum conservation
     const emittedBubbleVelocityDirection = direction.clone();
-    const emittedBubbleVelocityMagnitude = (portal.mass / emittedBubble.body.getMass())*1;
+    const emittedBubbleVelocityMagnitude = (portal.mass / emittedBubble.body.getMass())*0.1;
     const emittedBubbleRelativeVelocity = emittedBubbleVelocityDirection.mul(emittedBubbleVelocityMagnitude);
     const emittedBubbleVelocity = portal.body.getLinearVelocity().clone().add(emittedBubbleRelativeVelocity);
     emittedBubble.body.setLinearVelocity(emittedBubbleVelocity);

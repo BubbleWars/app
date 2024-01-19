@@ -58,7 +58,7 @@ export const truncateAddress = (address: string, length: number = 4): string => 
 
 export const ethereumAddressToColor =(ethAddress: string) => {
     if (!ethAddress || ethAddress.length !== 42 || !ethAddress.startsWith('0x')) {
-        throw new Error('Invalid Ethereum address');
+        return '#000000';
     }
 
     // Use the first six characters after '0x' as the color code

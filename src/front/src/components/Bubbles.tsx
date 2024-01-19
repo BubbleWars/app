@@ -8,6 +8,7 @@ import { snapshotCurrentState } from '../../../core/snapshots'
 import { BubblesInfo } from './BubblesInfo'
 import { BubblesControlsEmit } from './BubblesControlsEmit'
 import { Outlines } from '@react-three/drei'
+import { darkenColor } from '../utils'
 
 export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
     const meshRef = useRef<any>()
@@ -21,7 +22,11 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
         console.log("bubble position:", bubble.position)
         meshRef.current.position.set(bubble.position.x, bubble.position.y, 0)
         meshRef.current.updateMatrix()
-    })    
+    })  
+    
+    const baseColor = ethereumAddressToColor(bubbleId.substring(0, bubbleId.length-2));
+    const outlineColor = darkenColor(baseColor, 0.2); // Darken by 20%
+    
     return (
         <>
         <mesh
@@ -32,7 +37,7 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
             onContextMenu={() => setIsSelected(false)}
             >
                 <sphereGeometry />
-                <Outlines thickness={0.3} color={'black'} />
+                <Outlines thickness={0.1} color={outlineColor} />
                 <meshBasicMaterial
                     color={ethereumAddressToColor(bubbleId.substring(0, bubbleId.length-2))}
                     />

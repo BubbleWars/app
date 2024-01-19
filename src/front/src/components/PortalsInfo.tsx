@@ -10,8 +10,8 @@ export const PortalsInfo = ({ portalId } : { portalId: string }) => {
     const portal = currentState.portals.find(portal => portal.id === portalId)
     if(!portal) return null
     const radius = massToRadius(portal.mass)
-    const textPosition = new THREE.Vector3(portal.position.x+radius, portal.position.y+radius, 0)
-    const lineHeightVector = new THREE.Vector3(0, 2, 0)
+    const textPosition = new THREE.Vector3(portal.position.x, portal.position.y, 0)
+    const lineHeightVector = new THREE.Vector3(0, -1.5, 0)
     const pos1 = textPosition.clone().add(lineHeightVector.clone().multiplyScalar(0)).clone()
     const pos2 = textPosition.clone().add(lineHeightVector.clone().multiplyScalar(1)).clone()
     const pos3 = textPosition.clone().add(lineHeightVector.clone().multiplyScalar(2)).clone()
@@ -19,14 +19,34 @@ export const PortalsInfo = ({ portalId } : { portalId: string }) => {
     return (
         <>
             <CustomText 
-                size={0.7}
+                size={radius/3}
                 color="white"
-                position={pos3}
+                position={textPosition}
             >
-                {truncateAddress(portal.owner)} {'\n'}
-                {portal.mass.toFixed(3)} ETH {'\n'}
-                0 EP
+                {truncateAddress(portal.owner)}
             </CustomText>
+            <group position={pos2}
+            
+            >
+            <CustomText
+                size={radius/7}
+                color="green"
+                position={new THREE.Vector3(-0, 0, 0)}
+                anchorX="right"
+            >
+                {portal.mass.toFixed(2)} ETH
+
+            </CustomText>
+            <CustomText
+                size={radius/7}
+                color="blue"
+                position={new THREE.Vector3(1, 0, 0)}
+                anchorX="left"
+                >
+                    0.00 EP
+                </CustomText>
+            </group>
+            
             
         </>
     )
