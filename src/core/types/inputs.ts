@@ -1,3 +1,5 @@
+import { ResourceType } from "./resource";
+
 export enum InputType {
     SpawnPortal = "spawnPortal",
     Emit = "emit",
@@ -39,6 +41,7 @@ export interface Emit extends BaseInput {
     executionTime?: number,
     from: string, //bubble or portal id
     mass: number, //mass of bubble to emit
+    emissionType?: ResourceType | `bubble`,
     direction: { x: number, y: number } //direction to emit bubble
 }
 

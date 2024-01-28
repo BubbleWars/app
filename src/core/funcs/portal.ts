@@ -6,6 +6,8 @@ import { GRAVITATIONAL_CONSTANT, MASS_PER_SECOND, WORLD_HEIGHT, WORLD_WIDTH } fr
 import { Bubble } from "../types/bubble";
 import { createBubble, updateBubble } from "./bubble";
 import { Obstacle } from "../types/obstacle";
+import { Resource, ResourceType } from "../types/resource";
+import { createResource, updateResource } from "./resource";
 
 function deterministicHash(x: number, y: number): number {
     let seed = 0x2F6E2B1;
@@ -29,7 +31,6 @@ export const generateSpawnPoint = (
     while (!isSafeLocation) {
         isSafeLocation = true;
 
-        
         // Check distance from existing portals
         portals.forEach((portal) => {
             if (Vec2.distance(spawnPoint, portal.body.getPosition()) < minimumDistance) {
@@ -55,7 +56,6 @@ export const generateSpawnPoint = (
         const hashValueX = deterministicHash(attempt, 0);
         const hashValueY = deterministicHash(0, attempt);
         spawnPoint = new Vec2(hashValueX * WORLD_WIDTH, hashValueY * WORLD_HEIGHT); // Scale to world dimensions
-
 
         attempt++;
     }
@@ -115,18 +115,38 @@ export const applyPortalGravity = (portal: Portal, bubble: Bubble): void => {
     ////console.log(force);
 }
 
+export const getPortalMass = (portal: Portal): number => {
+    const totalMass = portal.mass;
+    let resourceMass = 0;
+    portal.resources?.forEach((resource) => {
+        resourceMass += resource.mass;
+    });
+    return totalMass - resourceMass;
+}
+
+export const getPortalResourceMass = (portal: Portal, resource: ResourceType): number => {
+    const portalResource = portal.resources?.get(resource);
+    return portalResource?.mass || 0;
+}
+
 export const portalAbsorbBubble = (bubbles: Map<string, Bubble>, portal: Portal, absorbedBubble: Bubble, timeElapsed: number): void => {
     if(!portal || !absorbedBubble) return;
     const amountAbsorbed = Math.min(absorbedBubble.body.getMass(), MASS_PER_SECOND * timeElapsed);
+    const percentageAbsorbed = amountAbsorbed / absorbedBubble.body.getMass();
+    const amountResourceAbsorbed = absorbedBubble.resources?.get(ResourceType.Energy)?.mass * percentageAbsorbed;
     const newPortalMass = portal.mass + amountAbsorbed;
+    const newPortalResourceMass = portal.resources?.get(ResourceType.Energy)?.mass + amountResourceAbsorbed;
     const newBubbleMass = absorbedBubble.body.getMass() - amountAbsorbed;
+    const newBubbleResourceMass = absorbedBubble.resources?.get(ResourceType.Energy)?.mass - amountResourceAbsorbed;
     //console.log("portalAbsorbBubble", amountAbsorbed, newPortalMass, newBubbleMass);
     updatePortal(portal, newPortalMass);
+    portal.resources?.get(ResourceType.Energy)?.mass = newPortalResourceMass;
     updateBubble(bubbles, absorbedBubble, newBubbleMass);
+    absorbedBubble.resources?.get(ResourceType.Energy)?.mass = newBubbleResourceMass;
 }
 
 export const portalEmitBubble = (bubbles: Map<string, Bubble>, portal: Portal, mass: number, direction: Vec2 = new Vec2(1, 1)): Bubble => {
-    if(mass > portal.mass) throw new Error("Cannot emit more than the portal's mass");
+    if(mass > getPortalMass(portal)) throw new Error("Cannot emit more than the portal's mass");
     const portalRadius = portal.fixture.getShape().getRadius();
     const emittedBubbleRadius = massToRadius(mass);
     const centerDelta = direction.clone().mul(portalRadius + emittedBubbleRadius);
@@ -150,3 +170,61 @@ export const portalEmitBubble = (bubbles: Map<string, Bubble>, portal: Portal, m
 
     return emittedBubble;
 }
+
+export const portalAbsorbResource = (portals: Map<string, Portal>, resources: Map<string, Resource>, portal: Portal, absorbedResource: Resource, timeElapsed: number): void => {
+    if(!portal || !absorbedResource) return;
+    const amountAbsorbed = Math.min(absorbedResource.body.getMass(), MASS_PER_SECOND * timeElapsed);
+    const newPortalMass = portal.mass + amountAbsorbed;
+    const newResourceMass = absorbedResource.body.getMass() - amountAbsorbed;
+    //console.log("portalAbsorbBubble", amountAbsorbed, newPortalMass, newBubbleMass);
+    updatePortal(portal, newPortalMass);
+
+    //Add resource to portal
+    if(!portal.resources?.has(absorbedResource.resource)) {
+        portal.resources?.set(absorbedResource.resource, {
+            resource: absorbedResource.resource,
+            mass: 0,
+        });
+    }
+    const portalResource = portal.resources?.get(absorbedResource.resource);
+    portalResource.mass += amountAbsorbed;
+
+    updateResource(resources, absorbedResource, newResourceMass);
+}
+
+export const portalEmitResource = (
+    portals: Map<string, Portal>, 
+    world: World,
+    resources: Map<string, Resource>, 
+    portal: Portal, 
+    resource: ResourceType, 
+    mass: number, 
+    direction: Vec2 = new Vec2(1, 1)
+): Resource => {
+    if(mass > getPortalResourceMass(portal, resource)) throw new Error("Cannot emit more than the portal's resource mass");
+    const portalRadius = portal.fixture.getShape().getRadius();
+    const emittedResourceRadius = massToRadius(mass);
+    const centerDelta = direction.clone().mul(portalRadius + emittedResourceRadius);
+    const emittedResourcePosition = portal.body.getPosition().clone().add(centerDelta);
+    console.log("emittedResourcePosition", emittedResourcePosition);
+    const emittedResource = createResource(world, resources, resource, emittedResourcePosition.x, emittedResourcePosition.y, mass);
+    console.log("emittedResourcePosition after create", JSON.stringify(emittedResource.body.getPosition()));
+    console.log("123at", emittedResource.body.getUserData());
+    console.log("123at", resources)
+    //Apply mass conservation
+    const newPortalMass = portal.mass - mass;
+    updatePortal(portal, newPortalMass);
+    portal.resources?.get(resource)?.mass -= mass;
+
+    //Apply momentum conservation
+    const emittedResourceVelocityDirection = direction.clone();
+    const emittedResourceVelocityMagnitude = (portal.mass / emittedResource.body.getMass())*0.1;
+    const emittedResourceRelativeVelocity = emittedResourceVelocityDirection.mul(emittedResourceVelocityMagnitude);
+    const emittedResourceVelocity = portal.body.getLinearVelocity().clone().add(emittedResourceRelativeVelocity);
+    emittedResource.body.setLinearVelocity(emittedResourceVelocity);
+    console.log("emittedResourcePosition after velocity", JSON.stringify(emittedResource.body.getPosition()));
+
+    return emittedResource;
+}
+
+

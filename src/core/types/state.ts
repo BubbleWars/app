@@ -1,5 +1,6 @@
 import { Event } from "./events";
 import { InputWithExecutionTime } from "./inputs";
+import { ResourceType } from "./resource";
 import { User } from "./user";
 
 export interface BubbleState {
@@ -24,6 +25,22 @@ export interface ObstacleState {
     vertices: { x: number, y: number }[],
 }
 
+export interface ResourceNodeState {
+    id: string,
+    type: ResourceType,
+    position: { x: number, y: number },
+    mass: number,
+}
+
+export interface ResourceState {
+    id: string,
+    owner: string,
+    type: ResourceType,
+    position: { x: number, y: number },
+    velocity: { x: number, y: number },
+    mass: number,
+}
+
 export interface Snapshot {
     timestamp: number,
     pendingInputs: InputWithExecutionTime[],
@@ -31,6 +48,8 @@ export interface Snapshot {
     bubbles: BubbleState[],
     portals: PortalState[],
     obstacles: ObstacleState[],
+    nodes: ResourceNodeState[],
+    resources: ResourceState[],
 }
 
 export type History = Snapshot[]

@@ -1,13 +1,14 @@
 import { AdvanceData, Emit, Input, InputType, SpawnPortal, Deposit, Withdraw, InspectData, Inspect, InspectType } from "../types/inputs";
 import { ethers } from "ethers";
-import { bubbles, currentState, obstacles, pendingInputs, portals, run, users, world } from "../world";
+import { bubbles, currentState, obstacles, pendingInputs, portals, resources, run, users, world } from "../world";
 import { Address } from "../types/address";
 import { User } from "../types/user";
-import { createPortal, generateSpawnPoint, portalAbsorbBubble, portalEmitBubble } from "./portal";
+import { createPortal, generateSpawnPoint, portalAbsorbBubble, portalEmitBubble, portalEmitResource } from "./portal";
 import { decodePacked } from "./utils";
-import { emitBubble } from "./bubble";
+import { emitBubble, emitResource } from "./bubble";
 import { Vec2 } from "planck-js";
 import { snapshotBubbles, snapshotPendingInputs, snapshotPortals, snapshotRun, snapshotUsers, snapshotWorld } from "../snapshots";
+import { ResourceType } from "../types/resource";
 
 const isNode = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
 const rollup_server = isNode ? process.env.ROLLUP_HTTP_SERVER_URL ?? "http://localhost:3000" : "http://localhost:3000";
@@ -68,6 +69,7 @@ export const parseInput = (data: AdvanceData): Input | false => {
                 executionTime: payloadJSON.executionTime ?? timestamp,
                 from: payloadJSON.from,
                 mass: payloadJSON.mass,
+                emissionType: payloadJSON.emissionType ?? 'bubble',
                 direction: payloadJSON.direction,
             };
         case InputType.Withdraw:
@@ -367,16 +369,22 @@ export const handlePendingEmit = (input: Emit): void => {
     const isPortal = portals.has(input.from.toLowerCase());
     const isBubble = bubbles.has(input.from.toLowerCase());
     if (!isPortal && !isBubble) return;
-
+    const emissionType = input?.emissionType;
     if(isPortal){
         const portal = portals.get(input.from.toLowerCase());
         if(!portal) return;
-        portalEmitBubble(bubbles, portal, input.mass, Vec2(input.direction.x, input.direction.y));
+        if(emissionType == 'bubble')
+            portalEmitBubble(bubbles, portal, input.mass, Vec2(input.direction.x, input.direction.y));
+        else if(emissionType == ResourceType.Energy)
+            portalEmitResource(portals, world, resources, portal, input.mass, emissionType, Vec2(input.direction.x, input.direction.y));
 
     }else if(isBubble){
         const bubble = bubbles.get(input.from.toLowerCase());
         if(!bubble) return;
-        emitBubble(bubbles, bubble, input.mass, Vec2(input.direction.x, input.direction.y));
+        if(emissionType == 'bubble')
+            emitBubble(bubbles, bubble, input.mass, Vec2(input.direction.x, input.direction.y));
+        else if(emissionType == ResourceType.Energy)
+            emitResource(world, bubbles, resources, bubble, input.mass, emissionType, Vec2(input.direction.x, input.direction.y));
     }
 
 

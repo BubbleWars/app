@@ -18,19 +18,21 @@ function App() {
   return (
     <>
       <Canvas 
+      gl={{ gammaFactor: 2.2, outputEncoding: THREE.sRGBEncoding }}
         orthographic={true} 
         camera={{ position: [0, 0, 10], zoom: 10, near: 0.01, far: 1000 }}
         style={{ height: '100vh', width: '100vw' }}
       >
+        <ambientLight intensity={1} color={"white"} />
 
         {/* <color attach="background" args={['#272730']} /> */}
         <CustomCameraControls/>
         <Game snapshot={snapshot} inputs={inputs} notices ={notices} />
-        {/* <gridHelper 
+        <gridHelper 
           position={[0, 0, -10]}
           rotation={[Math.PI / 2, 0, 0]}
           args={[5000, 100, 0xebebeb, 0xebebeb]}
-        /> */}
+        />
         
       </Canvas>
       <GameBar />

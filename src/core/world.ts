@@ -1,6 +1,7 @@
 import { Vec2, World } from "planck-js"
 import { Bubble } from "./types/bubble"
 import { Portal } from "./types/portal"
+import { Resource, ResourceNode } from "./types/resource"
 import { Obstacle } from "./types/obstacle"
 import { Address } from "./types/address"
 import { User } from "./types/user"
@@ -10,13 +11,16 @@ import { MAX_ADVANCE_STATE_TIME, STEP_DELTA } from "./consts"
 import { handleInput, handlePendingInputs } from "./funcs/inputs"
 import { updateState, handleContact } from "./funcs/state"
 import { applyPortalGravity, createPortal } from "./funcs/portal"
-import { createBubble } from "./funcs/bubble"
+import { createBubble, handleBubbleUpdates } from "./funcs/bubble"
+import { createNode, createResource, generateNodes, handleNodeUpdates } from "./funcs/resource"
 
 
 export const users = new Map<Address, User>()
 export const bubbles = new Map<string, Bubble>()
 export const portals = new Map<string, Portal>()
 export const obstacles = new Map<string, Obstacle>()
+export const nodes = new Map<string, ResourceNode>()
+export const resources = new Map<string, Resource>()
 export const pendingInputs = new Array<InputWithExecutionTime>()
 
 export let world = new World({
@@ -29,6 +33,8 @@ export let currentState: Snapshot = {
     users: [],
     bubbles: [],
     portals: [],
+    nodes: [],
+    resources: [],
     obstacles: [],
 }
 
@@ -57,6 +63,8 @@ export const init = (initialState?: Snapshot) => {
         bubbles.clear();
         portals.clear();
         obstacles.clear();
+        nodes.clear();
+        resources.clear();
         pendingInputs.length = 0;
         deferredUpdates.length = 0;
 
@@ -74,9 +82,19 @@ export const init = (initialState?: Snapshot) => {
         currentState.users.forEach(user => {
             users.set(user.address, { address: user.address, balance: user.balance });
         })
+        currentState.resources.forEach(resource =>{
+            const newResource = createResource(world, resources, resource.type, resource.position.x, resource.position.y, resource.mass)
+            newResource.body.setLinearVelocity(Vec2(resource.velocity.x, resource.velocity.y))
+        })
+        currentState.nodes.forEach(node => {
+            createNode(world, nodes, node.type, node.position.x, node.position.y, node.mass)
+        })
         currentState.pendingInputs.forEach(input => {
             pendingInputs.push(input);
         })
+    }else {
+        //Generate initial nodes
+        generateNodes(world, nodes, 100)
     }
     //Create initial portal
     //const portal = createPortal(portals, world, "0x0", 0, 0, 10);
@@ -88,7 +106,6 @@ export const init = (initialState?: Snapshot) => {
     // bubble2.body.setLinearVelocity(Vec2(-1.33, 1.33));
 
     // console.log("world init", world)
-
     world.on("begin-contact", handleContact)
 }
 
@@ -137,6 +154,10 @@ export const run = (end: number, callback?: () => void, client:boolean= false) =
         const next = Math.min(nextInput?.executionTime ?? current + STEP_DELTA, current + STEP_DELTA, end)
         const stepDelta =  next - current;
 
+        // Handle entity updates
+        handleBubbleUpdates(bubbles, stepDelta);
+        handleNodeUpdates(world, nodes, bubbles, resources, stepDelta);
+
         // Step the world
         world.step(stepDelta)
         current += stepDelta
@@ -168,6 +189,8 @@ export const run = (end: number, callback?: () => void, client:boolean= false) =
         bubbles, 
         portals, 
         obstacles, 
+        nodes,
+        resources,
         lastTimestamp,
     )
 
