@@ -7,10 +7,12 @@ export enum ResourceType {
 }
 
 export interface Resource extends Entity  {
+    id: string,
     resource: ResourceType,
 }
 
 export interface ResourceNode extends Entity {
+    id: string,
     resource: ResourceType,
     mass: number, // ETH mass injected into the node
     emitted: number, // amount of resource emitted

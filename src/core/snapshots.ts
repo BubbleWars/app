@@ -9,14 +9,19 @@ import { Snapshot } from "./types/state"
 import { MAX_ADVANCE_STATE_TIME, STEP_DELTA } from "./consts"
 import { handleInput, handlePendingInputs } from "./funcs/inputs"
 import { updateState, handleSnapshotContact } from "./funcs/state"
-import { applyPortalGravity, createPortal } from "./funcs/portal"
-import { createBubble } from "./funcs/bubble"
+import { applyPortalGravity, createPortal, setPortalResourceMass } from "./funcs/portal"
+import { createBubble, handleBubbleUpdates, setBubbleResourceMass } from "./funcs/bubble"
+import { Resource, ResourceNode } from "./types/resource"
+import { createNode, createResource, generateNodes, handleNodeUpdates } from "./funcs/resource"
+import { tempTimestamp } from "./world"
 
 
 export const snapshotUsers = new Map<Address, User>()
 export const snapshotBubbles = new Map<string, Bubble>()
 export const snapshotPortals = new Map<string, Portal>()
 export const snapshotObstacles = new Map<string, Obstacle>()
+export const snapshotNodes = new Map<string, ResourceNode>()
+export const snapshotResources = new Map<string, Resource>()
 export const snapshotPendingInputs = new Array<InputWithExecutionTime>()
 
 //only client
@@ -32,10 +37,14 @@ export let snapshotCurrentState: Snapshot = {
     users: [],
     bubbles: [],
     portals: [],
+    nodes: [],
+    resources: [],
     obstacles: [],
 }
 
 export let snapshotLastTimestamp = 0;
+
+export let snapshotTempTimestamp = 0;
 
 //Deferred updates called after the physics step
 export let snapshotDeferredUpdates: Array<()=>void> = [];
@@ -68,18 +77,35 @@ export const snapshotInit = (initialState?: Snapshot) => {
 
         //Set world state based on snapshot
         snapshotCurrentState.bubbles.forEach(bubble => {
-            const newBubble = createBubble(snapshotBubbles, snapshotWorld, bubble.owner, bubble.position.x, bubble.position.y, bubble.mass, false);
+            const newBubble = createBubble(snapshotLastTimestamp, snapshotBubbles, snapshotWorld, bubble.owner, bubble.position.x, bubble.position.y, bubble.mass, false);
             newBubble.body.setLinearVelocity(Vec2(bubble.velocity.x, bubble.velocity.y));
+            bubble.resources.forEach(resource => {
+                setBubbleResourceMass(newBubble, resource.resource, resource.mass);
+            })
         })
         snapshotCurrentState.portals.forEach(portal => {
-            createPortal(snapshotPortals, snapshotWorld, portal.owner, portal.position.x, portal.position.y, portal.mass);
+            const newPortal = createPortal(snapshotPortals, snapshotWorld, portal.owner, portal.position.x, portal.position.y, portal.mass);
+            portal.resources.forEach(resource => {
+                setPortalResourceMass(newPortal, resource.resource, resource.mass);
+            })
         })
         snapshotCurrentState.users.forEach(user => {
             snapshotUsers.set(user.address, { address: user.address, balance: user.balance });
         })
+        snapshotCurrentState.resources.forEach(resource =>{
+            const newResource = createResource(snapshotWorld, snapshotResources, resource.type, resource.position.x, resource.position.y, resource.mass)
+            newResource.body.setLinearVelocity(Vec2(resource.velocity.x, resource.velocity.y))
+        })
+        snapshotCurrentState.nodes.forEach(node => {
+            createNode(snapshotWorld, snapshotNodes, node.type, node.position.x, node.position.y, node.mass)
+        })
         snapshotCurrentState.pendingInputs.forEach(input => {
             snapshotPendingInputs.push(input);
         })
+    }else {
+        //Generate initial nodes
+        generateNodes(snapshotWorld, snapshotNodes, 1)
+
     }
     //Create initial portal
     //const portal = createPortal(portals, snapshotWorld, "0x0", 0, 0, 10);
@@ -110,6 +136,7 @@ export const snapshotRollback = (timestamp: number) => {
 export const snapshotRun = (end: number, callback?: () => void, client:boolean= false) => {
     // Set the current time to the last timestamp
     if (snapshotLastTimestamp == 0) snapshotLastTimestamp = end
+    snapshotTempTimestamp = snapshotLastTimestamp
     let current = snapshotLastTimestamp
     // Sort the pending inputs by execution time and remove any scheduled before the current time
     snapshotPendingInputs.sort((a, b) => a.executionTime - b.executionTime)
@@ -142,9 +169,14 @@ export const snapshotRun = (end: number, callback?: () => void, client:boolean= 
         const next = Math.min(nextInput?.executionTime ?? current + STEP_DELTA, current + STEP_DELTA, end)
         const stepDelta =  next - current;
 
+        // Handle entity updates
+        handleBubbleUpdates(current, snapshotBubbles, stepDelta);
+        handleNodeUpdates(snapshotWorld, snapshotNodes, snapshotBubbles, snapshotResources, stepDelta);
+
         // Step the snapshotWorld
         snapshotWorld.step(stepDelta)
         current += stepDelta
+        snapshotTempTimestamp = current
 
         // Run inputs again
         nextInput = snapshotPendingInputs[0]
@@ -173,6 +205,8 @@ export const snapshotRun = (end: number, callback?: () => void, client:boolean= 
         snapshotBubbles, 
         snapshotPortals, 
         snapshotObstacles, 
+        snapshotNodes,
+        snapshotResources,
         snapshotLastTimestamp,
     )
 

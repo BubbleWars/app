@@ -4,7 +4,7 @@ import { Address } from "../types/address";
 import { massToRadius } from "./utils";
 import { GRAVITATIONAL_CONSTANT, MASS_PER_SECOND, WORLD_HEIGHT, WORLD_WIDTH } from "../consts";
 import { Bubble } from "../types/bubble";
-import { createBubble, updateBubble } from "./bubble";
+import { createBubble, setBubbleResourceMass, updateBubble } from "./bubble";
 import { Obstacle } from "../types/obstacle";
 import { Resource, ResourceType } from "../types/resource";
 import { createResource, updateResource } from "./resource";
@@ -129,30 +129,36 @@ export const getPortalResourceMass = (portal: Portal, resource: ResourceType): n
     return portalResource?.mass || 0;
 }
 
-export const portalAbsorbBubble = (bubbles: Map<string, Bubble>, portal: Portal, absorbedBubble: Bubble, timeElapsed: number): void => {
+export const setPortalResourceMass = (portal: Portal, resource: ResourceType, mass: number): void => {
+    const portalResource = portal.resources?.get(resource);
+    if(!portalResource) portal.resources?.set(resource, {resource, mass});
+    else portalResource.mass = mass;
+}
+
+export const portalAbsorbBubble = (timestamp:number, bubbles: Map<string, Bubble>, portal: Portal, absorbedBubble: Bubble, timeElapsed: number): void => {
     if(!portal || !absorbedBubble) return;
     const amountAbsorbed = Math.min(absorbedBubble.body.getMass(), MASS_PER_SECOND * timeElapsed);
     const percentageAbsorbed = amountAbsorbed / absorbedBubble.body.getMass();
-    const amountResourceAbsorbed = absorbedBubble.resources?.get(ResourceType.Energy)?.mass * percentageAbsorbed;
+    const amountResourceAbsorbed = (absorbedBubble.resources?.get(ResourceType.Energy)?.mass ?? 0) * percentageAbsorbed;
     const newPortalMass = portal.mass + amountAbsorbed;
-    const newPortalResourceMass = portal.resources?.get(ResourceType.Energy)?.mass + amountResourceAbsorbed;
+    const newPortalResourceMass = (portal.resources?.get(ResourceType.Energy)?.mass ?? 0) + amountResourceAbsorbed;
     const newBubbleMass = absorbedBubble.body.getMass() - amountAbsorbed;
-    const newBubbleResourceMass = absorbedBubble.resources?.get(ResourceType.Energy)?.mass - amountResourceAbsorbed;
+    const newBubbleResourceMass = (absorbedBubble.resources?.get(ResourceType.Energy)?.mass ?? 0) - amountResourceAbsorbed;
     //console.log("portalAbsorbBubble", amountAbsorbed, newPortalMass, newBubbleMass);
     updatePortal(portal, newPortalMass);
-    portal.resources?.get(ResourceType.Energy)?.mass = newPortalResourceMass;
-    updateBubble(bubbles, absorbedBubble, newBubbleMass);
-    absorbedBubble.resources?.get(ResourceType.Energy)?.mass = newBubbleResourceMass;
+    setPortalResourceMass(portal, ResourceType.Energy, newPortalResourceMass);
+    updateBubble(bubbles, absorbedBubble, newBubbleMass, timestamp=timestamp);
+    setBubbleResourceMass(absorbedBubble, ResourceType.Energy, newBubbleResourceMass);
 }
 
-export const portalEmitBubble = (bubbles: Map<string, Bubble>, portal: Portal, mass: number, direction: Vec2 = new Vec2(1, 1)): Bubble => {
+export const portalEmitBubble = (timestamp: number, bubbles: Map<string, Bubble>, portal: Portal, mass: number, direction: Vec2 = new Vec2(1, 1)): Bubble => {
     if(mass > getPortalMass(portal)) throw new Error("Cannot emit more than the portal's mass");
     const portalRadius = portal.fixture.getShape().getRadius();
     const emittedBubbleRadius = massToRadius(mass);
     const centerDelta = direction.clone().mul(portalRadius + emittedBubbleRadius);
     const emittedBubblePosition = portal.body.getPosition().clone().add(centerDelta);
     console.log("emittedBubblePosition", emittedBubblePosition);
-    const emittedBubble = createBubble(bubbles, portal.body.getWorld(), portal.owner, emittedBubblePosition.x, emittedBubblePosition.y, mass, false);
+    const emittedBubble = createBubble(timestamp, bubbles, portal.body.getWorld(), portal.owner, emittedBubblePosition.x, emittedBubblePosition.y, mass, false);
     console.log("emittedBubblePosition after create", JSON.stringify(emittedBubble.body.getPosition()));
     console.log("123at", emittedBubble.body.getUserData());
     console.log("123at", bubbles)
@@ -187,7 +193,8 @@ export const portalAbsorbResource = (portals: Map<string, Portal>, resources: Ma
         });
     }
     const portalResource = portal.resources?.get(absorbedResource.resource);
-    portalResource.mass += amountAbsorbed;
+    if(!portalResource) portal.resources?.set(absorbedResource.resource, {resource: absorbedResource.resource, mass: amountAbsorbed});
+    else portalResource.mass += amountAbsorbed;
 
     updateResource(resources, absorbedResource, newResourceMass);
 }
@@ -214,7 +221,7 @@ export const portalEmitResource = (
     //Apply mass conservation
     const newPortalMass = portal.mass - mass;
     updatePortal(portal, newPortalMass);
-    portal.resources?.get(resource)?.mass -= mass;
+    setPortalResourceMass(portal, resource, getPortalResourceMass(portal, resource) - mass);
 
     //Apply momentum conservation
     const emittedResourceVelocityDirection = direction.clone();

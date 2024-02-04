@@ -9,6 +9,7 @@ export interface BubbleState {
     position: { x: number, y: number },
     velocity: { x: number, y: number },
     mass: number,
+    resources: { resource: ResourceType, mass: number }[],
 }
 
 export interface PortalState {
@@ -16,6 +17,7 @@ export interface PortalState {
     owner: string,
     position: { x: number, y: number },
     mass: number,
+    resources: { resource: ResourceType, mass: number }[],
 }
 
 export interface ObstacleState {

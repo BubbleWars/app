@@ -9,6 +9,8 @@ import { BubblesInfo } from './BubblesInfo'
 import { BubblesControlsEmit } from './BubblesControlsEmit'
 import { Outlines } from '@react-three/drei'
 import { darkenColor } from '../utils'
+import { MathUtils } from 'three'
+import { bubbleStartPositions } from './Game'
 
 export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
     const meshRef = useRef<any>()
@@ -16,11 +18,32 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
     const [ isSelected, setIsSelected ] = useState<boolean>(false)
     useFrame(() => {
         const bubble = currentState.bubbles.find(bubble => bubble.id === bubbleId)
-        if(!bubble) return
+        if(!bubble) {
+            console.log("bubble not found")
+            return
+        }
+
+        if(!meshRef.current) {
+            console.log("bubble not found")
+            return
+        }
+
+        if(!meshRef.current.position.x || !meshRef.current.position.y) {
+            const startPosition = bubbleStartPositions[bubbleId]
+            if(startPosition) {
+                meshRef.current.position.set(startPosition.x, startPosition.y, 0)
+            }
+            else {
+                console.log("bubble start position not found")
+            }
+            console.log("bubble not found")
+        }
         const radius = massToRadius(bubble.mass)
         meshRef.current.scale.set(radius, radius, radius)
         console.log("bubble position:", bubble.position)
-        meshRef.current.position.set(bubble.position.x, bubble.position.y, 0)
+        const newX = MathUtils.lerp(meshRef.current.position.x, bubble.position.x, 0.1)
+        const newY = MathUtils.lerp(meshRef.current.position.y, bubble.position.y, 0.1)
+        meshRef.current.position.set(newX, newY, 0)
         meshRef.current.updateMatrix()
     })  
     

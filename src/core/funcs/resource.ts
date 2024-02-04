@@ -16,12 +16,13 @@ export const generateNodes = (
 
     for (let i = 0; i < amount; i++) {
         let x, y, tooClose;
+        let inc = 0.01;
 
         do {
             tooClose = false;
             // Generate random positions for the node
-            x = Math.random() * WORLD_WIDTH; // Assuming worldWidth is the width of your world
-            y = Math.random() * WORLD_HEIGHT; // Assuming worldHeight is the height of your world
+            x =  inc * WORLD_WIDTH; // Assuming worldWidth is the width of your world
+            y = inc * WORLD_HEIGHT; // Assuming worldHeight is the height of your world
 
             // Check if the new node is too close to existing nodes
             nodes.forEach((existingNode) => {
@@ -32,6 +33,8 @@ export const generateNodes = (
                     tooClose = true;
                 }
             });
+
+            inc += 0.01;
         } while (tooClose);
 
         // Create the node at the generated position
@@ -52,6 +55,7 @@ export const createNode = (
     const body = world.createBody({position: Vec2(x,y), type: "static"});
     const fixture = body.createFixture({shape: Circle(radius), density: 1, restitution: 0, friction: 0});
     const node: ResourceNode = { 
+        id: `${nodes.size}`,
         resource: type, 
         mass,
         body, 
@@ -63,7 +67,7 @@ export const createNode = (
         pendingResourceMass: 0,
         emissionDirection: {x: 1, y: 1}
     };
-    node.body.setUserData(`${nodes.size}`);
+    node.body.setUserData(`node-${nodes.size}`);
     nodes.set(node.body.getUserData() as string, node);
 
     return node;
@@ -82,15 +86,23 @@ export const createResource = (
     body.setMassData({mass, center: Vec2(0, 0), I: 0});
     const fixture = body.createFixture({shape: Circle(radius), density: 1, restitution: 0, friction: 0});
     const resource: Resource = {
+        id: `${resources.size}`,
         resource: type,
         body,
         fixture,
         owner: ZeroAddress,
         balance: 0,
     };
-    resource.body.setUserData(`${resources.size}`);
+    resource.body.setUserData(`resource-${resources.size}`);
     resources.set(resource.body.getUserData() as string, resource);
-
+    console.log("creating resource", {
+        id: `${resources.size}`,
+        resource: type,
+        position: {x, y},
+        owner: ZeroAddress,
+        balance: 0,
+    });
+    
     return resource;
 }
 
@@ -101,7 +113,7 @@ export const updateNode = (
 ): void => {
     node.mass = newMass;
     if(newEmitted )node.emitted = newEmitted;
-    const radius = Math.min(massToRadius(node.mass), 1)
+    const radius = massToRadius(Math.max(node.mass, 1))
     node.body.destroyFixture(node.fixture);
     node.fixture = node.body.createFixture({shape: Circle(radius), density: 1, restitution: 0, friction: 0});
 }
@@ -112,7 +124,7 @@ export const updateResource = (
     newMass: number,
 ): void => {
     if(newMass <= 0) {
-        console.log("destroying resource", resource);
+        //console.log("destroying resource", resource);
         resources.delete(resource.body.getUserData() as string);
         resource.body.getWorld().destroyBody(resource.body);
         resource = null;
@@ -132,11 +144,11 @@ export const nodeEmitResource = (
     emittedMass: number,
     direction: Vec2,
 ): Resource => {
-    const radius = node.fixture.getShape().getRadius();
+    const radius = massToRadius(newNodeMass)
     const emittedResourceRadius = massToRadius(emittedMass);
     const centerDelta = direction.clone().mul(radius+emittedResourceRadius);
     const emittedResourcePosition = node.body.getPosition().clone().add(centerDelta);
-    const emittedResource = createResource(world, resources, node.resource, emittedResourcePosition.x, emittedResourcePosition.y, mass);
+    const emittedResource = createResource(world, resources, node.resource, emittedResourcePosition.x, emittedResourcePosition.y, emittedMass);
 
     //Apply mass conservation
     const newResourceMass = newNodeMass;
@@ -206,6 +218,7 @@ export const nodeAbsorbBubble = (
     const amountAbsorbed = Math.min(absorbedBubble.body.getMass(), (MASS_PER_SECOND * timeElapsed));
     const newBubbleMass = absorbedBubble.body.getMass() - amountAbsorbed;
     node.pendingEthMass += amountAbsorbed;
+    console.log("node absorbing bubble", absorbedBubble, amountAbsorbed, newBubbleMass);
 
     updateBubble(bubbles, absorbedBubble, newBubbleMass);
 }
@@ -258,7 +271,10 @@ export const handleEmission = (
     mass: number,
     direction: Vec2,
 ): Resource | Bubble | undefined => {
+    console.log("handling emission", mass);
+    //console.log("node", node);
     const { newMass, emission } = getEmission(node, mass);
+    console.log("emission", newMass, emission);
     if(mass > 0) 
      return nodeEmitResource(world, node, resources, newMass, emission, direction);
     if(mass < 0)

@@ -10,8 +10,8 @@ import { Snapshot } from "./types/state"
 import { MAX_ADVANCE_STATE_TIME, STEP_DELTA } from "./consts"
 import { handleInput, handlePendingInputs } from "./funcs/inputs"
 import { updateState, handleContact } from "./funcs/state"
-import { applyPortalGravity, createPortal } from "./funcs/portal"
-import { createBubble, handleBubbleUpdates } from "./funcs/bubble"
+import { applyPortalGravity, createPortal, setPortalResourceMass } from "./funcs/portal"
+import { createBubble, handleBubbleUpdates, setBubbleResourceMass } from "./funcs/bubble"
 import { createNode, createResource, generateNodes, handleNodeUpdates } from "./funcs/resource"
 
 
@@ -40,6 +40,7 @@ export let currentState: Snapshot = {
 
 export let lastTimestamp = 0;
 
+export let tempTimestamp = 0; // for accessing the current state of the world
 
 //Deferred updates called after the physics step
 export let deferredUpdates: Array<()=>void> = [];
@@ -73,11 +74,17 @@ export const init = (initialState?: Snapshot) => {
 
         //Set world state based on snapshot
         currentState.bubbles.forEach(bubble => {
-            const newBubble = createBubble(bubbles, world, bubble.owner, bubble.position.x, bubble.position.y, bubble.mass, false);
+            const newBubble = createBubble(lastTimestamp,bubbles, world, bubble.owner, bubble.position.x, bubble.position.y, bubble.mass, false);
             newBubble.body.setLinearVelocity(Vec2(bubble.velocity.x, bubble.velocity.y));
+            bubble.resources.forEach(resource => {
+                setBubbleResourceMass(newBubble, resource.resource, resource.mass);
+            })
         })
         currentState.portals.forEach(portal => {
-            createPortal(portals, world, portal.owner, portal.position.x, portal.position.y, portal.mass);
+            const newPortal = createPortal(portals, world, portal.owner, portal.position.x, portal.position.y, portal.mass);
+            portal.resources.forEach(resource => {
+                setPortalResourceMass(newPortal, resource.resource, resource.mass);
+            })
         })
         currentState.users.forEach(user => {
             users.set(user.address, { address: user.address, balance: user.balance });
@@ -94,7 +101,7 @@ export const init = (initialState?: Snapshot) => {
         })
     }else {
         //Generate initial nodes
-        generateNodes(world, nodes, 100)
+        generateNodes(world, nodes, 1)
     }
     //Create initial portal
     //const portal = createPortal(portals, world, "0x0", 0, 0, 10);
@@ -122,12 +129,13 @@ export const rollbackToState = (snapshot: Snapshot) => {
 export const run = (end: number, callback?: () => void, client:boolean= false) => {
     // Set the current time to the last timestamp
     if (lastTimestamp == 0) lastTimestamp = end
+    tempTimestamp = lastTimestamp
     let current = lastTimestamp
     // Sort the pending inputs by execution time and remove any scheduled before the current time
     pendingInputs.sort((a, b) => a.executionTime - b.executionTime)
         .filter(input => input.executionTime < current)
 
-    console.log("Pending inputs in run", pendingInputs)
+    //console.log("Pending inputs in run", pendingInputs)
 
     // Run the simulation
     while (current < end) {
@@ -155,12 +163,13 @@ export const run = (end: number, callback?: () => void, client:boolean= false) =
         const stepDelta =  next - current;
 
         // Handle entity updates
-        handleBubbleUpdates(bubbles, stepDelta);
+        handleBubbleUpdates(current, bubbles, stepDelta);
         handleNodeUpdates(world, nodes, bubbles, resources, stepDelta);
 
         // Step the world
         world.step(stepDelta)
         current += stepDelta
+        tempTimestamp = current
 
         // Run inputs again
         nextInput = pendingInputs[0]

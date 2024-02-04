@@ -1,13 +1,13 @@
 import { AdvanceData, Emit, Input, InputType, SpawnPortal, Deposit, Withdraw, InspectData, Inspect, InspectType } from "../types/inputs";
 import { ethers } from "ethers";
-import { bubbles, currentState, obstacles, pendingInputs, portals, resources, run, users, world } from "../world";
+import { bubbles, currentState, obstacles, pendingInputs, portals, resources, run, tempTimestamp, users, world } from "../world";
 import { Address } from "../types/address";
 import { User } from "../types/user";
 import { createPortal, generateSpawnPoint, portalAbsorbBubble, portalEmitBubble, portalEmitResource } from "./portal";
 import { decodePacked } from "./utils";
 import { emitBubble, emitResource } from "./bubble";
 import { Vec2 } from "planck-js";
-import { snapshotBubbles, snapshotPendingInputs, snapshotPortals, snapshotRun, snapshotUsers, snapshotWorld } from "../snapshots";
+import { snapshotBubbles, snapshotPendingInputs, snapshotPortals, snapshotRun, snapshotTempTimestamp, snapshotUsers, snapshotWorld } from "../snapshots";
 import { ResourceType } from "../types/resource";
 
 const isNode = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
@@ -210,15 +210,15 @@ const handleEmit = (input: Emit, client:boolean): boolean => {
         bubbles.has(input.from.toLowerCase());
 
     if (!isPortal && !isBubble){ 
-        //console.log("Input from is not a portal or bubble");
+        console.log("Input from is not a portal or bubble");
         return false
     }
     if(!input?.timestamp) {
-        //console.log("Input timestamp is undefined");
+        console.log("Input timestamp is undefined");
         return false;
     }
     if(!input?.sender) {
-        //console.log("Input sender is undefined");
+        console.log("Input sender is undefined");
         return false;
     }
     if(!input?.executionTime) input.executionTime = input.timestamp;
@@ -230,16 +230,16 @@ const handleEmit = (input: Emit, client:boolean): boolean => {
             snapshotPortals.get(input.from.toLowerCase()) :
             portals.get(input.from.toLowerCase());
         if(!portal) {
-            //console.log("Portal not found");
+            console.log("Portal not found");
             return false
         }
 
         if(portal.owner.toLowerCase() !== user.address.toLowerCase()){
-            //console.log("Portal owner is not user");
+            console.log("Portal owner is not user");
             return false;
         }
         if(portal.mass <= input.mass){
-            //console.log("Portal mass is less than input mass");
+            console.log("Portal mass is less than input mass");
             return false;
         } 
     } else if(isBubble){
@@ -247,15 +247,15 @@ const handleEmit = (input: Emit, client:boolean): boolean => {
             snapshotBubbles.get(input.from.toLowerCase()) :
             bubbles.get(input.from.toLowerCase());
         if(!bubble){
-            //console.log("Bubble not found");
+            console.log("Bubble not found");
             return false;
         } 
         if(bubble.owner.toLowerCase() !== user.address.toLowerCase()) {
-            //console.log("Bubble owner is not user");
+            console.log("Bubble owner is not user");
             return false;
         }
         if(bubble.body.getMass() <= input.mass){
-            //console.log("Bubble mass is less than input mass");
+            console.log("Bubble mass is less than input mass");
             return false;
         } 
     }
@@ -370,11 +370,12 @@ export const handlePendingEmit = (input: Emit): void => {
     const isBubble = bubbles.has(input.from.toLowerCase());
     if (!isPortal && !isBubble) return;
     const emissionType = input?.emissionType;
+    const timestamp = tempTimestamp;
     if(isPortal){
         const portal = portals.get(input.from.toLowerCase());
         if(!portal) return;
         if(emissionType == 'bubble')
-            portalEmitBubble(bubbles, portal, input.mass, Vec2(input.direction.x, input.direction.y));
+            portalEmitBubble(timestamp, bubbles, portal, input.mass, Vec2(input.direction.x, input.direction.y));
         else if(emissionType == ResourceType.Energy)
             portalEmitResource(portals, world, resources, portal, input.mass, emissionType, Vec2(input.direction.x, input.direction.y));
 
@@ -382,7 +383,7 @@ export const handlePendingEmit = (input: Emit): void => {
         const bubble = bubbles.get(input.from.toLowerCase());
         if(!bubble) return;
         if(emissionType == 'bubble')
-            emitBubble(bubbles, bubble, input.mass, Vec2(input.direction.x, input.direction.y));
+            emitBubble(timestamp, bubbles, bubble, input.mass, Vec2(input.direction.x, input.direction.y));
         else if(emissionType == ResourceType.Energy)
             emitResource(world, bubbles, resources, bubble, input.mass, emissionType, Vec2(input.direction.x, input.direction.y));
     }
@@ -395,16 +396,16 @@ export const handlePendingClientEmit = (input: Emit): void => {
     const isPortal = snapshotPortals.has(input.from.toLowerCase());
     const isBubble = snapshotBubbles.has(input.from.toLowerCase());
     if (!isPortal && !isBubble) return;
-
+    const timestamp = snapshotTempTimestamp;
     if(isPortal){
         const portal = snapshotPortals.get(input.from.toLowerCase());
         if(!portal) return;
-        portalEmitBubble(snapshotBubbles, portal, input.mass, Vec2(input.direction.x, input.direction.y));
+        portalEmitBubble(timestamp, snapshotBubbles, portal, input.mass, Vec2(input.direction.x, input.direction.y));
 
     }else if(isBubble){
         const bubble = snapshotBubbles.get(input.from.toLowerCase());
         if(!bubble) return;
-        emitBubble(snapshotBubbles, bubble, input.mass, Vec2(input.direction.x, input.direction.y));
+        emitBubble(timestamp, snapshotBubbles, bubble, input.mass, Vec2(input.direction.x, input.direction.y));
     }
 
 }

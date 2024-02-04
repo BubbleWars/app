@@ -3,6 +3,7 @@ import { currentState } from "../../../core/world"
 import { massToRadius, truncateAddress } from "../../../core/funcs/utils"
 import * as THREE from 'three'
 import { CustomText } from "./CustomText"
+import { ResourceType } from "../../../core/types/resource"
 
 
 
@@ -16,7 +17,10 @@ export const BubblesInfo = ({ bubbleId } : { bubbleId: string }) => {
     const pos1 = textPosition.clone().add(lineHeightVector.clone().multiplyScalar(0)).clone()
     const pos2 = textPosition.clone().add(lineHeightVector.clone().multiplyScalar(1)).clone()
     const pos3 = textPosition.clone().add(lineHeightVector.clone().multiplyScalar(2)).clone()
-
+    const energy = bubble.resources
+        .find(resource => resource.resource == ResourceType.Energy)
+    const energyAmount = energy ? energy.mass : 0
+    console.log("resources main", bubble.resources)
     return (
         <>
 
@@ -35,7 +39,7 @@ export const BubblesInfo = ({ bubbleId } : { bubbleId: string }) => {
                 position={new THREE.Vector3(-0, 0, 0)}
                 anchorX="right"
             >
-                {bubble.mass.toFixed(2)} ETH
+                {(bubble.mass - energyAmount).toFixed(2)} ETH
 
             </CustomText>
             <CustomText
@@ -44,7 +48,7 @@ export const BubblesInfo = ({ bubbleId } : { bubbleId: string }) => {
                 position={new THREE.Vector3(radius/7, 0, 0)}
                 anchorX="left"
                 >
-                    0.00 EP
+                {energyAmount.toFixed(2)} EP
                 </CustomText>
             </group>
             
