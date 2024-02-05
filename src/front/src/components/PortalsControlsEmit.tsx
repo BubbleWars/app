@@ -16,6 +16,7 @@ import { addInput } from '../store/inputs'
 import { Vec2 } from 'planck-js'
 import { CustomText } from './CustomText'
 import { ResourceType } from '../../../core/types/resource'
+import { setIsBubbleSelected } from '../store/interpolation'
 
 
 export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string, isHovered: boolean }) => {
@@ -30,6 +31,7 @@ export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string
     const [ mass, setMass ] = useState<number>(portal.mass/10)
     const [ emitEth, setEmitEth ] = useState<boolean>(true)
     const [ emitEp, setEmitEp ] = useState<boolean>(false)
+    const [ isReady, setIsReady ] = useState<boolean>(false)
     const lineRef = useRef<any>()
     const {address} = useAccount()
 
@@ -74,8 +76,14 @@ export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string
 
     //Click action
     useOnClick(() => {
-        if(isError || isLoading || isSuccess) return
-        write()
+        if(isError || isLoading || isSuccess) {
+            dispatch(setIsBubbleSelected(false))
+            return
+        }
+        if(isReady) {
+            dispatch(setIsBubbleSelected(false))
+            write()
+        }
     })
 
     //Tx prediction
@@ -135,6 +143,7 @@ export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string
 
     return (
         <>
+        {isReady && <>
             <Line
                 ref={lineRef}
                 color={'black'}
@@ -155,14 +164,22 @@ export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string
                 {`Emit \n`} 
                 {mass.toFixed(3)} {emitEth ? "ETH" : "EP"}
             </CustomText>
+        </>}
+            
 
-            {isHovered && <>
+            {!isReady && <>
         <group
             onPointerEnter={() => {setEmitEth(true); setEmitEp(false)}}
+            onPointerDown={() =>{
+                setTimeout(() => {
+                setIsReady(true)
+                }
+                , 250)
+            }}
          >
         <CustomText
-            size={emitEth ? 0.2 : 0.1}
-            position={new THREE.Vector3(0, 0, 0)}
+            size={emitEth ? 1.2 : 1.1}
+            position={new THREE.Vector3(radius, radius, 0)}
             anchorX="center"
             anchorY="center"
             color='black'
@@ -171,11 +188,18 @@ export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string
         </CustomText>
         </group>
         <group
-            onPointerEnter={() => {setEmitEp(true); setEmitEth(false)}}
+            onPointerEnter={() => {
+                setEmitEp(true); setEmitEth(false)}}
+            onPointerDown={() =>{
+                setTimeout(() => {
+                    setIsReady(true)
+                    }
+                    , 250)
+            }}
          >
             <CustomText
-                size={emitEp ? 0.2 : 0.1}
-                position={new THREE.Vector3(0, -0.2, 0)}
+                size={emitEp ? 1.2 : 1.1}
+                position={new THREE.Vector3(radius, radius-2, 0)}
                 anchorX="center"
                 anchorY="center"
                 color='black'

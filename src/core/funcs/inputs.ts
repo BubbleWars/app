@@ -7,7 +7,7 @@ import { createPortal, generateSpawnPoint, portalAbsorbBubble, portalEmitBubble,
 import { decodePacked } from "./utils";
 import { emitBubble, emitResource } from "./bubble";
 import { Vec2 } from "planck-js";
-import { snapshotBubbles, snapshotPendingInputs, snapshotPortals, snapshotRun, snapshotTempTimestamp, snapshotUsers, snapshotWorld } from "../snapshots";
+import { snapshotBubbles, snapshotPendingInputs, snapshotPortals, snapshotResources, snapshotRun, snapshotTempTimestamp, snapshotUsers, snapshotWorld } from "../snapshots";
 import { ResourceType } from "../types/resource";
 
 const isNode = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;

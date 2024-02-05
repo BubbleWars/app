@@ -9,7 +9,7 @@ import { PortalsInfo } from './PortalsInfo'
 import { PortalsControlsEmit } from './PortalsControlsEmit'
 import { Outlines } from '@react-three/drei'
 import { darkenColor } from '../utils'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { setIsBubbleSelected } from '../store/interpolation'
 import { MathUtils } from 'three'
 
@@ -17,9 +17,10 @@ import { MathUtils } from 'three'
 export const Portal = ({ portalId } : { portalId: string }) => {
     const meshRef = useRef<any>()
     const [ isHovered, setIsHovered ] = useState<boolean>(false)
-    const [ isSelected, setIsSelected ] = useState<boolean>(false)
+    //const [ isSelected, setIsSelected ] = useState<boolean>(false)
     const dispatch = useDispatch()
-    
+    const isSelected = useSelector((state: any) => state.interpolation.isBubbleSelected)
+    const setIsSelected = (isSelected1: boolean) => dispatch(setIsBubbleSelected(isSelected1))
     useFrame(() => {
         const portal = currentState.portals.find(portal => portal.id === portalId)
         if(!portal) return
