@@ -11,11 +11,16 @@ import { Outlines } from '@react-three/drei'
 import { darkenColor } from '../utils'
 import { MathUtils } from 'three'
 import { bubbleStartPositions } from './Game'
+import { useDispatch } from 'react-redux'
+import { setIsBubbleSelected } from '../store/interpolation'
+import { is } from '@react-three/fiber/dist/declarations/src/core/utils'
 
 export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
     const meshRef = useRef<any>()
     const [ isHovered, setIsHovered ] = useState<boolean>(false)
     const [ isSelected, setIsSelected ] = useState<boolean>(false)
+    const dispatch = useDispatch()
+
     useFrame(() => {
         const bubble = currentState.bubbles.find(bubble => bubble.id === bubbleId)
         if(!bubble) {
@@ -49,6 +54,11 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
     
     const baseColor = ethereumAddressToColor(bubbleId.substring(0, bubbleId.length-2));
     const outlineColor = darkenColor(baseColor, 0.2); // Darken by 20%
+
+    useEffect(() => {
+        console.log("setIsBubbleSelected: ui", isSelected)
+        dispatch(setIsBubbleSelected(isSelected))
+    }, [isSelected])
     
     return (
         <>

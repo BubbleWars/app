@@ -9,12 +9,16 @@ import { PortalsInfo } from './PortalsInfo'
 import { PortalsControlsEmit } from './PortalsControlsEmit'
 import { Outlines } from '@react-three/drei'
 import { darkenColor } from '../utils'
+import { useDispatch } from 'react-redux'
+import { setIsBubbleSelected } from '../store/interpolation'
 
 
 export const Portal = ({ portalId } : { portalId: string }) => {
     const meshRef = useRef<any>()
     const [ isHovered, setIsHovered ] = useState<boolean>(false)
     const [ isSelected, setIsSelected ] = useState<boolean>(false)
+    const dispatch = useDispatch()
+    
     useFrame(() => {
         const portal = currentState.portals.find(portal => portal.id === portalId)
         if(!portal) return
@@ -28,6 +32,11 @@ export const Portal = ({ portalId } : { portalId: string }) => {
     // Calculate the outline color based on the Ethereum address
     const baseColor = ethereumAddressToColor(portalId);
     const outlineColor = darkenColor(baseColor, 0.2); // Darken by 20%
+
+    useEffect(() => {
+        console.log("setIsBubbleSelected: ui", isSelected)
+        dispatch(setIsBubbleSelected(isSelected))
+    }, [isSelected])
 
     return (
         <>

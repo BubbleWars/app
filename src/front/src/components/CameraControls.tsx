@@ -2,6 +2,9 @@ import * as THREE from 'three';
 import { extend, useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { useRef } from 'react'
+import { useSelector } from 'react-redux';
+import { CameraControls } from '@react-three/drei';
+import { is } from '@react-three/fiber/dist/declarations/src/core/utils';
 
 export class CustomControls extends OrbitControls {
     constructor(camera:any, domElement:any) {
@@ -19,9 +22,19 @@ extend({ CustomControls });
   
 export const CustomCameraControls = () => {
     const { camera, gl } = useThree();
-    const controls = useRef();
+    const controls = useRef<CameraControls>();
+    const isBubbleSelected = useSelector((state: any) => state.interpolation.isBubbleSelected)
 
-    useFrame(() => controls.current?.update());
+    useFrame(() => {
+      if(isBubbleSelected) {
+        console.log("isBubbleSelected")
+        //controls.current?.enabled = false
+        return
+      }
+      controls.current?.update()
+    });
+
+    if(isBubbleSelected) return null
 
     return <customControls ref={controls} args={[camera, gl.domElement]} />;
 }
