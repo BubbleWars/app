@@ -14,6 +14,9 @@ import { bubbleStartPositions } from './Game'
 import { useDispatch } from 'react-redux'
 import { setIsBubbleSelected } from '../store/interpolation'
 import { is } from '@react-three/fiber/dist/declarations/src/core/utils'
+import { CustomText } from './CustomText'
+
+
 
 export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
     const meshRef = useRef<any>()
@@ -76,8 +79,9 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
                     />
             </mesh>
             
-            {isSelected && <BubblesControlsEmit bubbleId={bubbleId} />}
+            {isSelected && <BubblesControlsEmit isHovered={isHovered} bubbleId={bubbleId} />}
             <BubblesInfo bubbleId={bubbleId} />
+            
         </>
         
     )

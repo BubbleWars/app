@@ -93,7 +93,7 @@ export const snapshotInit = (initialState?: Snapshot) => {
             snapshotUsers.set(user.address, { address: user.address, balance: user.balance });
         })
         snapshotCurrentState.resources.forEach(resource =>{
-            const newResource = createResource(snapshotWorld, snapshotResources, resource.type, resource.position.x, resource.position.y, resource.mass)
+            const newResource = createResource(snapshotLastTimestamp, snapshotWorld, snapshotResources, resource.type, resource.position.x, resource.position.y, resource.mass)
             newResource.body.setLinearVelocity(Vec2(resource.velocity.x, resource.velocity.y))
         })
         snapshotCurrentState.nodes.forEach(node => {

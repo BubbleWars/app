@@ -200,6 +200,7 @@ export const portalAbsorbResource = (portals: Map<string, Portal>, resources: Ma
 }
 
 export const portalEmitResource = (
+    timestamp: number,
     portals: Map<string, Portal>, 
     world: World,
     resources: Map<string, Resource>, 
@@ -214,7 +215,7 @@ export const portalEmitResource = (
     const centerDelta = direction.clone().mul(portalRadius + emittedResourceRadius);
     const emittedResourcePosition = portal.body.getPosition().clone().add(centerDelta);
     console.log("emittedResourcePosition", emittedResourcePosition);
-    const emittedResource = createResource(world, resources, resource, emittedResourcePosition.x, emittedResourcePosition.y, mass);
+    const emittedResource = createResource(timestamp, world, resources, resource, emittedResourcePosition.x, emittedResourcePosition.y, mass);
     console.log("emittedResourcePosition after create", JSON.stringify(emittedResource.body.getPosition()));
     console.log("123at", emittedResource.body.getUserData());
     console.log("123at", resources)

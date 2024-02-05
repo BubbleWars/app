@@ -20,6 +20,8 @@ import { CreateBubble, EventsType } from '../../../core/types/events'
 
 export const bubbleStartPositions : {[key: string]: {x: number, y: number}} = {}
 export const bubbleDestroyPositions : {[key: string]: {x: number, y: number}} = {}
+export const resourceStartPositions : {[key: string]: {x: number, y: number}} = {}
+export const resourceDestroyPositions : {[key: string]: {x: number, y: number}} = {}
 
 export const Game = ({snapshot, inputs, notices} : {snapshot: Snapshot, inputs: Input[], notices:Notice[]}) => {
     console.log("22 inputs:", inputs)
@@ -100,6 +102,12 @@ export const Game = ({snapshot, inputs, notices} : {snapshot: Snapshot, inputs: 
                             if(bubbleIds.includes(event.id)){
                                 console.log("new event 22", event)
                                 bubbleDestroyPositions[event.id] = event.position
+                                setOnEvent(()=>{})
+                            }
+                        }else if(event.type == EventsType.CreateResource){
+                            if(!resourceIds.includes(event.id)){
+                                console.log("new event 33", event)
+                                resourceStartPositions[event.id] = event.position
                                 setOnEvent(()=>{})
                             }
                         }

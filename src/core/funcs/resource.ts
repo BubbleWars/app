@@ -5,6 +5,8 @@ import { ZeroAddress } from "ethers";
 import { MASS_PER_SECOND, WORLD_HEIGHT, WORLD_WIDTH } from "../consts";
 import { createBubble, updateBubble } from "./bubble";
 import { Bubble } from "../types/bubble";
+import { addEvent } from "./events";
+import { EventsType } from "../types/events";
 
 //Generates random initial starting point for resource nodes
 export const generateNodes = (
@@ -74,6 +76,7 @@ export const createNode = (
 }
 
 export const createResource = (
+    timestamp: number,
     world: World,
     resources: Map<string, Resource>,
     type: ResourceType = ResourceType.Energy,
@@ -101,6 +104,13 @@ export const createResource = (
         position: {x, y},
         owner: ZeroAddress,
         balance: 0,
+    });
+
+    addEvent({
+        timestamp,
+        type: EventsType.CreateResource,
+        id: resource.id,
+        position: {x, y},
     });
     
     return resource;
@@ -137,6 +147,7 @@ export const updateResource = (
 }
 
 export const nodeEmitResource = (
+    timestamp: number,
     world: World,
     node: ResourceNode,
     resources: Map<string, Resource>,
@@ -148,7 +159,7 @@ export const nodeEmitResource = (
     const emittedResourceRadius = massToRadius(emittedMass);
     const centerDelta = direction.clone().mul(radius+emittedResourceRadius);
     const emittedResourcePosition = node.body.getPosition().clone().add(centerDelta);
-    const emittedResource = createResource(world, resources, node.resource, emittedResourcePosition.x, emittedResourcePosition.y, emittedMass);
+    const emittedResource = createResource(timestamp, world, resources, node.resource, emittedResourcePosition.x, emittedResourcePosition.y, emittedMass);
 
     //Apply mass conservation
     const newResourceMass = newNodeMass;

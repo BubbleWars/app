@@ -8,7 +8,7 @@ import { createResource, updateResource } from "./resource";
 import { bubbles } from "../world";
 import { addEvent } from "./events";
 import { EventsType } from "../types/events";
-import { time } from "console";
+import { time, timeStamp } from "console";
 
 const PUNCTURE_EMIT_PER_SECOND = 100;
 
@@ -127,6 +127,7 @@ export const emitBubble = (timestamp: number, bubbles: Map<string, Bubble>, bubb
 }
 
 export const emitResource = (
+    timestamp: number,
     world: World,
     bubbles: Map<string, Bubble>,
     resources: Map<string, Resource>,
@@ -140,7 +141,7 @@ export const emitResource = (
     const emittedResourceRadius = massToRadius(mass);
     const centerDelta = direction.clone().mul(radius+emittedResourceRadius);
     const emittedResourcePosition = bubble.body.getPosition().clone().add(centerDelta);
-    const emittedResource = createResource(world, resources, resourceType, emittedResourcePosition.x, emittedResourcePosition.y, mass);
+    const emittedResource = createResource(timestamp, world, resources, resourceType, emittedResourcePosition.x, emittedResourcePosition.y, mass);
     const totalMomentum = bubble.body.getLinearVelocity().clone().mul(bubble.body.getMass());
 
     const newBubbleMass = bubble.body.getMass() - mass;

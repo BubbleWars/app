@@ -53,7 +53,7 @@ export const Portal = ({ portalId } : { portalId: string }) => {
                     color={baseColor}
                 />
             </mesh>
-            {isSelected && <PortalsControlsEmit portalId={portalId} />}
+            {isSelected && <PortalsControlsEmit isHovered={isHovered} portalId={portalId} />}
             <PortalsInfo portalId={portalId} />
         </>
         

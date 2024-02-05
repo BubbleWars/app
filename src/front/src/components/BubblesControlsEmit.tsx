@@ -14,8 +14,9 @@ import { snapshotRollback, snapshotRun, snapshots } from "../../../core/snapshot
 import { useDispatch } from 'react-redux'
 import { addInput } from '../store/inputs'
 import { CustomText } from './CustomText'
+import { ResourceType } from '../../../core/types/resource'
 
-export const BubblesControlsEmit = ({ bubbleId } : { bubbleId: string }) => {
+export const BubblesControlsEmit = ({ bubbleId, isHovered } : { bubbleId: string, isHovered: boolean }) => {
     const dispatch = useDispatch()
     const portal = currentState.bubbles.find(bubble => bubble.id === bubbleId)
     if(!portal) return null
@@ -25,6 +26,8 @@ export const BubblesControlsEmit = ({ bubbleId } : { bubbleId: string }) => {
     const [ direction, setDirection ] = useState<THREE.Vector3>(new THREE.Vector3(1, 0, 0))
     const [hasProcessedTx, setHasProcessedTx] = useState(false);
     const [ mass, setMass ] = useState<number>(portal.mass/10)
+    const [ emitEth, setEmitEth ] = useState<boolean>(true)
+    const [ emitEp, setEmitEp ] = useState<boolean>(false)
     const lineRef = useRef<any>()
     const {address} = useAccount()
 
@@ -39,7 +42,8 @@ export const BubblesControlsEmit = ({ bubbleId } : { bubbleId: string }) => {
         type: InputType.Emit,
         mass,
         from: bubbleId,
-        direction: { x: direction.x, y: direction.y } 
+        direction: { x: direction.x, y: direction.y },
+        emissionType: emitEth ? 'bubble' : ResourceType.Energy,
     })
 
 
@@ -147,8 +151,38 @@ export const BubblesControlsEmit = ({ bubbleId } : { bubbleId: string }) => {
                 position={position.clone().add(direction.clone().multiplyScalar(length))}
             >
                 {`Emit \n`} 
-                {mass.toFixed(3)} ETH
+                {mass.toFixed(3)} {emitEth ? "ETH" : "EP"}
             </CustomText>
+
+            {isHovered && <>
+        <group
+            onPointerEnter={() => {setEmitEth(true); setEmitEp(false)}}
+         >
+        <CustomText
+            size={emitEth ? 0.2 : 0.1}
+            position={new THREE.Vector3(0, 0, 0)}
+            anchorX="center"
+            anchorY="center"
+            color='black'
+        >
+            Emit ETH
+        </CustomText>
+        </group>
+        <group
+            onPointerEnter={() => {setEmitEp(true); setEmitEth(false)}}
+         >
+            <CustomText
+                size={emitEp ? 0.2 : 0.1}
+                position={new THREE.Vector3(0, -0.2, 0)}
+                anchorX="center"
+                anchorY="center"
+                color='black'
+            >
+            Emit EP
+            </CustomText>
+        </group>
+        
+    </>}
         </>
         
     )
