@@ -8,6 +8,7 @@ import { snapshotCurrentState } from '../../../core/snapshots'
 import { Outlines } from '@react-three/drei'
 import { darkenColor } from '../utils'
 import { resourceStartPositions } from './Game'
+import { MathUtils } from 'three'
 
 export const Resource = ({ resourceId } : { resourceId: string }) => {
     const meshRef = useRef<any>()
@@ -36,10 +37,11 @@ export const Resource = ({ resourceId } : { resourceId: string }) => {
             console.log("resource not found")
         }
         const radius = massToRadius(resource.mass)
-        meshRef.current.scale.set(radius, radius, radius)
+        const newRadius = MathUtils.lerp(meshRef.current.scale.x, radius, 0.1)
+        meshRef.current.scale.set(newRadius, newRadius, newRadius)
         console.log("resource position:", resource.position)
-        const newX = THREE.MathUtils.lerp(meshRef.current.position.x, resource.position.x, 0.1)
-        const newY = THREE.MathUtils.lerp(meshRef.current.position.y, resource.position.y, 0.1)
+        const newX = MathUtils.lerp(meshRef.current.position.x, resource.position.x, 0.1)
+        const newY = MathUtils.lerp(meshRef.current.position.y, resource.position.y, 0.1)
         meshRef.current.position.set(newX, newY, 0)
         meshRef.current.updateMatrix()
     })  

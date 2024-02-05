@@ -11,6 +11,7 @@ import { Outlines } from '@react-three/drei'
 import { darkenColor } from '../utils'
 import { useDispatch } from 'react-redux'
 import { setIsBubbleSelected } from '../store/interpolation'
+import { MathUtils } from 'three'
 
 
 export const Portal = ({ portalId } : { portalId: string }) => {
@@ -23,7 +24,8 @@ export const Portal = ({ portalId } : { portalId: string }) => {
         const portal = currentState.portals.find(portal => portal.id === portalId)
         if(!portal) return
         const radius = massToRadius(portal.mass)
-        meshRef.current.scale.set(radius, radius, radius)
+        const newRadius = MathUtils.lerp(meshRef.current.scale.x, radius, 0.1)
+        meshRef.current.scale.set(newRadius, newRadius, newRadius)
         console.log("portal position:", portal.position)
         meshRef.current.position.set(portal.position.x, portal.position.y, 0)
         meshRef.current.updateMatrix()

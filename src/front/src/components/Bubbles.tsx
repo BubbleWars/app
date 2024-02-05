@@ -47,7 +47,8 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
             console.log("bubble not found")
         }
         const radius = massToRadius(bubble.mass)
-        meshRef.current.scale.set(radius, radius, radius)
+        const newRadius = MathUtils.lerp(meshRef.current.scale.x, radius, 0.1)
+        meshRef.current.scale.set(newRadius, newRadius, newRadius)
         console.log("bubble position:", bubble.position)
         const newX = MathUtils.lerp(meshRef.current.position.x, bubble.position.x, 0.1)
         const newY = MathUtils.lerp(meshRef.current.position.y, bubble.position.y, 0.1)
