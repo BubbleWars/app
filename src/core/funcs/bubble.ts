@@ -13,7 +13,17 @@ import { time, timeStamp } from "console";
 const PUNCTURE_EMIT_PER_SECOND = 100;
 
 export const generateBubbleId = (bubbles: Map<string, Bubble>, owner: Address): string => {
-    return `${owner.toLowerCase()}-${bubbles.size}`;
+    //loop through all the bubbles owned by the owner and return the next available id by getting the highest number "bubble-<number>"
+    let max = 0;
+    bubbles.forEach((value: Bubble, key: string) => {
+        if(value.owner == owner){
+            const split = key.split('-');
+            const number = parseInt(split[split.length-1]);
+            if(number > max) max = number;
+        }
+    })
+
+    return `${owner.toLowerCase()}-${max+1}`;
 }
 
 export const getBubbleMass = (bubble: Bubble): number => {

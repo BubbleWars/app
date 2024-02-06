@@ -6,12 +6,17 @@ import { Snapshot } from '../../../core/types/state';
 interface InterpolationState {
   from: number | null;
   isBubbleSelected: boolean;
+  selectedEntityId: string | null;
 }
 
 export const interpolationSlice = createSlice({
   name: 'inputs',
   initialState: { from: null } as InterpolationState,
   reducers: {
+    setSelectedEntityId: (state, action: PayloadAction<string | null>) => {
+      console.log("setSelectedEntityId", action.payload)
+        state.selectedEntityId = action.payload;
+    },
     setIsBubbleSelected: (state, action: PayloadAction<boolean>) => {
       console.log("setIsBubbleSelected", action.payload)
         state.isBubbleSelected = action.payload;
@@ -33,6 +38,6 @@ export const interpolationSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { setInterpolation, endInterpolation, interpolate, setIsBubbleSelected } = interpolationSlice.actions;
+export const { setInterpolation, endInterpolation, interpolate, setIsBubbleSelected, setSelectedEntityId } = interpolationSlice.actions;
 
 export default interpolationSlice.reducer;

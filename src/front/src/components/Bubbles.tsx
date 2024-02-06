@@ -11,8 +11,8 @@ import { Outlines } from '@react-three/drei'
 import { darkenColor } from '../utils'
 import { MathUtils } from 'three'
 import { bubbleStartPositions } from './Game'
-import { useDispatch } from 'react-redux'
-import { setIsBubbleSelected } from '../store/interpolation'
+import { useDispatch, useSelector } from 'react-redux'
+import { setIsBubbleSelected, setSelectedEntityId } from '../store/interpolation'
 import { is } from '@react-three/fiber/dist/declarations/src/core/utils'
 import { CustomText } from './CustomText'
 
@@ -21,8 +21,15 @@ import { CustomText } from './CustomText'
 export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
     const meshRef = useRef<any>()
     const [ isHovered, setIsHovered ] = useState<boolean>(false)
-    const [ isSelected, setIsSelected ] = useState<boolean>(false)
     const dispatch = useDispatch()
+    const setIsSelected = (isSelected1: boolean) => {
+        dispatch(setIsBubbleSelected(isSelected1))
+        dispatch(setSelectedEntityId(isSelected1 ? bubbleId : null))
+    }
+    const selectedBubbleId = useSelector((state: any) => state.interpolation.selectedEntityId)
+    const isBubbleSelected = useSelector((state: any) => state.interpolation.isBubbleSelected)
+    const isSelected = isBubbleSelected && selectedBubbleId == bubbleId
+
 
     useFrame(() => {
         const bubble = currentState.bubbles.find(bubble => bubble.id === bubbleId)

@@ -29,9 +29,13 @@ export const CustomCameraControls = () => {
       if(isBubbleSelected) {
         console.log("isBubbleSelected")
         //controls.current?.enabled = false
-        return
+      }else{
+        controls.current?.update()
+        //set rotation to 0
+        camera.rotation.x = 0
+        camera.rotation.y = 0
+        camera.rotation.z = 0
       }
-      controls.current?.update()
     });
 
     if(isBubbleSelected) return null

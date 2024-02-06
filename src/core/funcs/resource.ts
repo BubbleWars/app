@@ -44,6 +44,15 @@ export const generateNodes = (
     }
 }
 
+export const generateNodeId = (nodes: Map<string, ResourceNode>): string => {
+    let max = 0;
+    nodes.forEach(node => {
+        const id = parseInt(node.id);
+        if(id > max) max = id;
+    });
+    return `${max+1}`;
+}
+
 export const createNode = (
     world: World,
     nodes: Map<string, ResourceNode>, 
@@ -57,7 +66,7 @@ export const createNode = (
     const body = world.createBody({position: Vec2(x,y), type: "static"});
     const fixture = body.createFixture({shape: Circle(radius), density: 1, restitution: 0, friction: 0});
     const node: ResourceNode = { 
-        id: `${nodes.size}`,
+        id: generateNodeId(nodes),
         resource: type, 
         mass,
         body, 

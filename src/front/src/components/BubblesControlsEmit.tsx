@@ -15,19 +15,21 @@ import { useDispatch } from 'react-redux'
 import { addInput } from '../store/inputs'
 import { CustomText } from './CustomText'
 import { ResourceType } from '../../../core/types/resource'
+import { setIsBubbleSelected } from '../store/interpolation'
 
 export const BubblesControlsEmit = ({ bubbleId, isHovered } : { bubbleId: string, isHovered: boolean }) => {
     const dispatch = useDispatch()
-    const portal = currentState.bubbles.find(bubble => bubble.id === bubbleId)
-    if(!portal) return null
-    const radius = massToRadius(portal.mass)
-    const position = new THREE.Vector3(portal.position.x, portal.position.y, 0)
+    const bubble = currentState.bubbles.find(bubble => bubble.id === bubbleId)
+    if(!bubble) return null
+    const radius = massToRadius(bubble.mass)
+    const position = new THREE.Vector3(bubble.position.x, bubble.position.y, 0)
     const length = 10
     const [ direction, setDirection ] = useState<THREE.Vector3>(new THREE.Vector3(1, 0, 0))
     const [hasProcessedTx, setHasProcessedTx] = useState(false);
-    const [ mass, setMass ] = useState<number>(portal.mass/10)
+    const [ mass, setMass ] = useState<number>(bubble.mass/10)
     const [ emitEth, setEmitEth ] = useState<boolean>(true)
     const [ emitEp, setEmitEp ] = useState<boolean>(false)
+    const [ isReady, setIsReady ] = useState<boolean>(false)
     const lineRef = useRef<any>()
     const {address} = useAccount()
 
@@ -42,7 +44,7 @@ export const BubblesControlsEmit = ({ bubbleId, isHovered } : { bubbleId: string
         type: InputType.Emit,
         mass,
         from: bubbleId,
-        direction: { x: direction.x, y: direction.y },
+        direction: { x: direction.x, y: direction.y }, 
         emissionType: emitEth ? 'bubble' : ResourceType.Energy,
     })
 
@@ -72,8 +74,14 @@ export const BubblesControlsEmit = ({ bubbleId, isHovered } : { bubbleId: string
 
     //Click action
     useOnClick(() => {
-        if(isError || isLoading || isSuccess) return
-        write()
+        if(isError || isLoading || isSuccess) {
+            dispatch(setIsBubbleSelected(false))
+            return
+        }
+        if(isReady) {
+            dispatch(setIsBubbleSelected(false))
+            write()
+        }
     })
 
     //Tx prediction
@@ -84,25 +92,26 @@ export const BubblesControlsEmit = ({ bubbleId, isHovered } : { bubbleId: string
     useEffect(() => {
         if(!tx) return
         if(!tx.data?.blockNumber) return
-        if(hasProcessedTx) return  
+        if(hasProcessedTx) return
         setHasProcessedTx(true)
         getPublicClient({chainId: currentChain.id})
             .getBlock({blockNumber: tx.data.blockNumber})
             .then(block => {
-                const timestamp = Number(block.timestamp)
-                const input: Emit = {
-                    type: InputType.Emit,
-                    timestamp,
-                    mass,
-                    from: bubbleId,
-                    direction: { x: direction.x, y: direction.y },
-                    sender: address,
-                    executionTime: timestamp,
-                    prediction: true,
-                }
-                dispatch(addInput(input))
-                setHasProcessedTx(true)
-                console.log("is predicting portal", input)
+                    const timestamp = Number(block.timestamp)
+                    const input: Emit = {
+                        type: InputType.Emit,
+                        timestamp,
+                        mass,
+                        from: bubbleId,
+                        direction: { x: direction.x, y: direction.y },
+                        sender: address,
+                        executionTime: timestamp,
+                        prediction: true,
+                    }
+                    dispatch(addInput(input))
+                    setHasProcessedTx(true)
+                    console.log("is predicting bubble", input)
+                
                 // //Client add input
                 // const isBehind = input.timestamp < currentState.timestamp
                 // if(isBehind) {
@@ -119,12 +128,12 @@ export const BubblesControlsEmit = ({ bubbleId, isHovered } : { bubbleId: string
                 // console.log("is predicting", timestamp)
             })
         console.log("tx:", tx)
-    }, [tx, dispatch])
+    }, [tx])
 
     //Scroll action
     useOnWheel((event) => {
         if(isError || isLoading || isSuccess) return
-        const newMass = Math.max(Math.min(mass + event.deltaY/100, portal.mass), 0)
+        const newMass = Math.max(Math.min(mass + event.deltaY/100, bubble.mass), 0)
         setMass(newMass)
     })
 
@@ -132,35 +141,43 @@ export const BubblesControlsEmit = ({ bubbleId, isHovered } : { bubbleId: string
 
     return (
         <>
+        {isReady && <>
             <Line
                 ref={lineRef}
                 color={'black'}
-                lineWidth={1}
+                lineWidth={2}
                 dashed={true}
                 points={[position, position.clone().add(direction.clone().multiplyScalar(length))]}
             />
-            {/* <Text 
-                anchorX={'left'}
-                anchorY={'bottom'}
-                position={position.add(direction.multiplyScalar(length))}
-            >
-                {mass.toFixed(6)} ETH
-            </Text> */}
-            <CustomText 
-                size={0.8}
+            {/* <text
                 position={position.clone().add(direction.clone().multiplyScalar(length))}
             >
+                {mass.toFixed(6)} ETH
+            </text> */}
+            <CustomText 
+                size={0.8}
+                color="white"
+                position={position.clone().add(direction.clone().multiplyScalar(length))}>
+            
                 {`Emit \n`} 
                 {mass.toFixed(3)} {emitEth ? "ETH" : "EP"}
             </CustomText>
+        </>}
+            
 
-            {isHovered && <>
+            {!isReady && <>
         <group
             onPointerEnter={() => {setEmitEth(true); setEmitEp(false)}}
+            onPointerDown={() =>{
+                setTimeout(() => {
+                setIsReady(true)
+                }
+                , 250)
+            }}
          >
         <CustomText
-            size={emitEth ? 0.2 : 0.1}
-            position={new THREE.Vector3(0, 0, 0)}
+            size={emitEth ? 1.2 : 1.1}
+            position={new THREE.Vector3(radius, radius, 0).add(position)}
             anchorX="center"
             anchorY="center"
             color='black'
@@ -169,11 +186,18 @@ export const BubblesControlsEmit = ({ bubbleId, isHovered } : { bubbleId: string
         </CustomText>
         </group>
         <group
-            onPointerEnter={() => {setEmitEp(true); setEmitEth(false)}}
+            onPointerEnter={() => {
+                setEmitEp(true); setEmitEth(false)}}
+            onPointerDown={() =>{
+                setTimeout(() => {
+                    setIsReady(true)
+                    }
+                    , 250)
+            }}
          >
             <CustomText
-                size={emitEp ? 0.2 : 0.1}
-                position={new THREE.Vector3(0, -0.2, 0)}
+                size={emitEp ? 1.2 : 1.1}
+                position={new THREE.Vector3(radius, radius-2, 0).add(position)}
                 anchorX="center"
                 anchorY="center"
                 color='black'
@@ -183,6 +207,7 @@ export const BubblesControlsEmit = ({ bubbleId, isHovered } : { bubbleId: string
         </group>
         
     </>}
+            
         </>
         
     )
