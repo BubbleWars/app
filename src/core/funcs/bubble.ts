@@ -110,7 +110,7 @@ export const updateBubble = (
 //This emits a bubble from a bubble
 export const emitBubble = (timestamp: number, bubbles: Map<string, Bubble>, bubble: Bubble, mass: number, direction: Vec2): Bubble => {
     //if(!bubble.controllable) throw new Error("Cannot emit from a non-controllable bubble");
-    if(mass > bubble.body.getMass()/2) throw new Error("Cannot emit more than half of the bubble's mass");
+    if(mass > bubble.body.getMass()) throw new Error("Cannot emit more than of the bubble's mass");
     const radius = bubble.fixture.getShape().getRadius();
     const emittedBubbleRadius = massToRadius(mass);
     const centerDelta = direction.clone().mul(radius+emittedBubbleRadius);

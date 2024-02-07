@@ -64,7 +64,7 @@ export const Game = ({snapshot, inputs, notices} : {snapshot: Snapshot, inputs: 
                 .filter((input) => input.timestamp > lastTimestampHandled)
                 .forEach((input) => {
                     const isBehind = input.timestamp < blockTimestamp
-                    console.log("new input11")
+                    console.log("new input11", input)
                     clearEvents()
                     if(isBehind) {
                         snapshotRollback(input.timestamp)

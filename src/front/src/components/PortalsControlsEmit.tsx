@@ -28,6 +28,7 @@ export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string
     const length = 10
     const [ direction, setDirection ] = useState<THREE.Vector3>(new THREE.Vector3(1, 0, 0))
     const [hasProcessedTx, setHasProcessedTx] = useState(false);
+    const [ isEmitting, setIsEmitting ] = useState<boolean>(false)
     const [ mass, setMass ] = useState<number>(portal.mass/10)
     const [ emitEth, setEmitEth ] = useState<boolean>(true)
     const [ emitEp, setEmitEp ] = useState<boolean>(false)
@@ -77,11 +78,12 @@ export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string
     //Click action
     useOnClick(() => {
         if(isError || isLoading || isSuccess) {
-            dispatch(setIsBubbleSelected(false))
+            //dispatch(setIsBubbleSelected(false))
             return
         }
         if(isReady) {
-            dispatch(setIsBubbleSelected(false))
+            //dispatch(setIsBubbleSelected(false))
+            setIsEmitting(true)
             write()
         }
     })
@@ -109,9 +111,12 @@ export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string
                         sender: address,
                         executionTime: timestamp,
                         prediction: true,
+                        emissionType: emitEth ? 'bubble' : ResourceType.Energy,
                     }
                     dispatch(addInput(input))
+                    dispatch(setIsBubbleSelected(false))
                     setHasProcessedTx(true)
+                    setIsEmitting(false)
                     console.log("is predicting portal", input)
                 
                 // //Client add input
@@ -139,11 +144,11 @@ export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string
         setMass(newMass)
     })
 
-    if(isSuccess || isError) return null
+    //if(isSuccess || isError) return null
 
     return (
         <>
-        {isReady && <>
+        {(isReady && !isEmitting) && <>
             <Line
                 ref={lineRef}
                 color={'black'}
@@ -165,6 +170,27 @@ export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string
                 {mass.toFixed(3)} {emitEth ? "ETH" : "EP"}
             </CustomText>
         </>}
+        {isEmitting  && <>
+            <Line
+                ref={lineRef}
+                color={'black'}
+                lineWidth={2}
+                dashed={true}
+                points={[position, position.clone().add(direction.clone().multiplyScalar(length))]}
+            />
+            {/* <text
+                position={position.clone().add(direction.clone().multiplyScalar(length))}
+            >
+                {mass.toFixed(6)} ETH
+            </text> */}
+            <CustomText 
+                size={0.8}
+                color="white"
+                position={position.clone().add(direction.clone().multiplyScalar(length))}>
+                
+                    {`Emmiting... \n`}
+            </CustomText>
+        </>}
             
 
             {!isReady && <>
@@ -179,7 +205,7 @@ export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string
          >
         <CustomText
             size={emitEth ? 1.2 : 1.1}
-            position={new THREE.Vector3(radius, radius, 0)}
+            position={new THREE.Vector3(radius, radius, 0).add(position)}
             anchorX="center"
             anchorY="center"
             color='black'
@@ -199,7 +225,7 @@ export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string
          >
             <CustomText
                 size={emitEp ? 1.2 : 1.1}
-                position={new THREE.Vector3(radius, radius-2, 0)}
+                position={new THREE.Vector3(radius, radius-2, 0).add(position)}
                 anchorX="center"
                 anchorY="center"
                 color='black'
