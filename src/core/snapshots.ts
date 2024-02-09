@@ -171,7 +171,7 @@ export const snapshotRun = (end: number, callback?: () => void, client:boolean= 
 
         // Handle entity updates
         handleBubbleUpdates(current, snapshotBubbles, stepDelta);
-        handleNodeUpdates(snapshotWorld, snapshotNodes, snapshotBubbles, snapshotResources, stepDelta);
+        handleNodeUpdates(current, snapshotWorld, snapshotNodes, snapshotBubbles, snapshotResources, stepDelta);
 
         // Step the snapshotWorld
         snapshotWorld.step(stepDelta)

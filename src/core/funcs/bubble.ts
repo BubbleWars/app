@@ -2,7 +2,7 @@ import { Circle, Vec2, World } from "planck-js";
 import { Bubble, PuncturePoint } from "../types/bubble";
 import { massToRadius, radiusToMass } from "./utils";
 import { Address } from "../types/address";
-import { MASS_PER_SECOND } from "../consts";
+import { DAMPENING, EMISSION_SPEED, MASS_PER_SECOND } from "../consts";
 import { Resource, ResourceType } from "../types/resource";
 import { createResource, updateResource } from "./resource";
 import { bubbles } from "../world";
@@ -52,7 +52,7 @@ export const setBubbleResourceMass = (bubble: Bubble, resource: ResourceType, ma
 
 export const createBubble = (timestamp:number, bubbles: Map<string, Bubble>, world: World, owner: Address, x: number, y: number, mass: number, controllable: boolean): Bubble => {
     const radius = massToRadius(mass);
-    const body = world.createBody({position: Vec2(x, y), type: "dynamic", linearDamping: 0.01});
+    const body = world.createBody({position: Vec2(x, y), type: "dynamic", linearDamping: DAMPENING });
     body.setMassData({mass, center: Vec2(0, 0), I: 0});
     const fixture = body.createFixture({ shape: Circle(radius), density: 1, restitution: 0, friction: 0});
     const bubble = { owner, balance: 0, body, fixture, controllable };
@@ -111,6 +111,7 @@ export const updateBubble = (
 export const emitBubble = (timestamp: number, bubbles: Map<string, Bubble>, bubble: Bubble, mass: number, direction: Vec2): Bubble => {
     //if(!bubble.controllable) throw new Error("Cannot emit from a non-controllable bubble");
     if(mass > bubble.body.getMass()) throw new Error("Cannot emit more than of the bubble's mass");
+    console.log("emitting bubble", mass, bubble.body.getMass() );
     const radius = bubble.fixture.getShape().getRadius();
     const emittedBubbleRadius = massToRadius(mass);
     const centerDelta = direction.clone().mul(radius+emittedBubbleRadius);
@@ -126,7 +127,7 @@ export const emitBubble = (timestamp: number, bubbles: Map<string, Bubble>, bubb
     //Apply momentum conservation
     const originalBubbleMomentum = totalMomentum.clone();
     const emittedBubbleVelocityDirection = direction.clone();
-    const emittedBubbleVelocityMagnitude = (bubble.body.getMass() / emittedBubble.body.getMass())*0.1;
+    const emittedBubbleVelocityMagnitude = (bubble.body.getMass() / emittedBubble.body.getMass())*EMISSION_SPEED;
     const emittedBubbleRelativeVelocity = emittedBubbleVelocityDirection.mul(emittedBubbleVelocityMagnitude);
     const emittedBubbleVelocity = bubble.body.getLinearVelocity().clone().add(emittedBubbleRelativeVelocity);
     const emittedBubbleMomentum = emittedBubbleVelocity.clone().mul(emittedBubble.body.getMass());
@@ -147,6 +148,7 @@ export const emitResource = (
     direction: Vec2,
 ): Resource => {
     if(mass > getBubbleResourceMass(bubble, resourceType)) throw new Error("Cannot emit more than the bubble's resource mass");
+    console.log("emitting resource", resourceType, mass, getBubbleResourceMass(bubble, resourceType));
     const radius = bubble.fixture.getShape().getRadius();
     const emittedResourceRadius = massToRadius(mass);
     const centerDelta = direction.clone().mul(radius+emittedResourceRadius);
@@ -161,7 +163,7 @@ export const emitResource = (
     //Apply momentum conservation
     const originalBubbleMomentum = totalMomentum.clone();
     const emittedResourceVelocityDirection = direction.clone();
-    const emittedResourceVelocityMagnitude = (bubble.body.getMass() / emittedResource.body.getMass())*0.1;
+    const emittedResourceVelocityMagnitude = (bubble.body.getMass() / emittedResource.body.getMass())*EMISSION_SPEED;
     const emittedResourceRelativeVelocity = emittedResourceVelocityDirection.mul(emittedResourceVelocityMagnitude);
     const emittedResourceVelocity = bubble.body.getLinearVelocity().clone().add(emittedResourceRelativeVelocity);
     const emittedResourceMomentum = emittedResourceVelocity.clone().mul(emittedResource.body.getMass());

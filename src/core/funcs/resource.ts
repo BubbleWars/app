@@ -2,7 +2,7 @@ import { Circle, Vec2, World } from "planck-js";
 import { Resource, ResourceNode, ResourceType } from "../types/resource";
 import { massToRadius, radiusToMass } from "./utils";
 import { ZeroAddress } from "ethers";
-import { MASS_PER_SECOND, WORLD_HEIGHT, WORLD_WIDTH } from "../consts";
+import { DAMPENING, EMISSION_SPEED, MASS_PER_SECOND, WORLD_HEIGHT, WORLD_WIDTH } from "../consts";
 import { createBubble, updateBubble } from "./bubble";
 import { Bubble } from "../types/bubble";
 import { addEvent } from "./events";
@@ -94,7 +94,7 @@ export const createResource = (
     mass: number,
 ): Resource => {
     const radius = massToRadius(mass);
-    const body = world.createBody({position: Vec2(x, y), type: "dynamic", linearDamping: 0.01});
+    const body = world.createBody({position: Vec2(x, y), type: "dynamic", linearDamping: DAMPENING});
     body.setMassData({mass, center: Vec2(0, 0), I: 0});
     const fixture = body.createFixture({shape: Circle(radius), density: 1, restitution: 0, friction: 0});
     const resource: Resource = {
@@ -177,7 +177,7 @@ export const nodeEmitResource = (
 
     //Apply momentum
     const emittedResourceVelocityDirection = direction.clone();
-    const emittedResourceVelocityMagnitude = (node.mass / emittedResource.body.getMass())*0.1;
+    const emittedResourceVelocityMagnitude = (node.mass / emittedResource.body.getMass())*EMISSION_SPEED;
     const emittedResourceRelativeVelocity = emittedResourceVelocityDirection.mul(emittedResourceVelocityMagnitude);
     const emittedResourceVelocity = node.body.getLinearVelocity().clone().add(emittedResourceRelativeVelocity);
     emittedResource.body.setLinearVelocity(emittedResourceVelocity);
@@ -186,6 +186,7 @@ export const nodeEmitResource = (
 }
 
 export const nodeEmitBubble = (
+    timestamp: number,
     world: World,
     bubbles: Map<string, Bubble>,
     node: ResourceNode,
@@ -197,7 +198,7 @@ export const nodeEmitBubble = (
     const emittedBubbleRadius = massToRadius(emittedMass);
     const centerDelta = direction.clone().mul(radius+emittedBubbleRadius);
     const emittedBubblePosition = node.body.getPosition().clone().add(centerDelta);
-    const emittedBubble = createBubble(bubbles, world, node.owner, emittedBubblePosition.x, emittedBubblePosition.y, emittedMass, false);
+    const emittedBubble = createBubble(timestamp,bubbles, world, node.owner, emittedBubblePosition.x, emittedBubblePosition.y, emittedMass, false);
 
     //Apply mass conservation
     const newResourceMass = newNodeMass;
@@ -205,7 +206,7 @@ export const nodeEmitBubble = (
 
     //Apply momentum
     const emittedBubbleVelocityDirection = direction.clone();
-    const emittedBubbleVelocityMagnitude = (node.mass / emittedBubble.body.getMass())*0.1;
+    const emittedBubbleVelocityMagnitude = (node.mass / emittedBubble.body.getMass())*EMISSION_SPEED;
     const emittedBubbleRelativeVelocity = emittedBubbleVelocityDirection.mul(emittedBubbleVelocityMagnitude);
     const emittedBubbleVelocity = node.body.getLinearVelocity().clone().add(emittedBubbleRelativeVelocity);
     emittedBubble.body.setLinearVelocity(emittedBubbleVelocity);
@@ -284,6 +285,7 @@ export const getBubbleEmission = (
 //Emit Resource or Bubble,
 //Positive mass for resource, negative for bubble
 export const handleEmission = (
+    timestamp: number,
     world: World,
     node: ResourceNode,
     bubbles: Map<string, Bubble>,
@@ -296,22 +298,22 @@ export const handleEmission = (
     const { newMass, emission } = getEmission(node, mass);
     console.log("emission", newMass, emission);
     if(mass > 0) 
-     return nodeEmitResource(world, node, resources, newMass, emission, direction);
+     return nodeEmitResource(timestamp, world, node, resources, newMass, emission, direction);
     if(mass < 0)
-     return nodeEmitBubble(world, bubbles, node, newMass, emission, direction);
+     return nodeEmitBubble(timestamp,world, bubbles, node, newMass, emission, direction);
 }
 
-export const handleInflation = (
-    world: World,
-    node: ResourceNode,
-    resources: Map<string, Resource>,
-    mass: number,
-    direction: Vec2,
-): Resource => {
-    const emittedResource = nodeEmitResource(world, node, resources, node.mass, mass, direction);
+// export const handleInflation = (
+//     world: World,
+//     node: ResourceNode,
+//     resources: Map<string, Resource>,
+//     mass: number,
+//     direction: Vec2,
+// ): Resource => {
+//     const emittedResource = nodeEmitResource(timestamp, world, node, resources, node.mass, mass, direction);
 
-    return emittedResource;
-}
+//     return emittedResource;
+// }
 // function getPrice(uint256 supply, uint256 amount) public pure returns (uint256) {
 //     uint256 sum1 = supply == 0 ? 0 : (supply - 1 )* (supply) * (2 * (supply - 1) + 1) / 6;
 //     uint256 sum2 = supply == 0 && amount == 1 ? 0 : (supply - 1 + amount) * (supply + amount) * (2 * (supply - 1 + amount) + 1) / 6;
@@ -329,6 +331,7 @@ export const handleInflation = (
 
 
 export const handleNodeUpdates = (
+    timestamp: number,
     world: World,
     nodes: Map<string, ResourceNode>,
     bubbles: Map<string, Bubble>,
@@ -339,8 +342,10 @@ export const handleNodeUpdates = (
         //Check if resources have been injected
         //If so emit bubbles
         if(node.pendingResourceMass){
+            console.log("pending resource mass", node.pendingResourceMass);
             const resourceMassToConvert = Math.min(node.pendingResourceMass, (MASS_PER_SECOND * timeElapsed));
             handleEmission(
+                timestamp,
                 world,
                 node,
                 bubbles,
@@ -363,8 +368,10 @@ export const handleNodeUpdates = (
         //Check if bubbles have been injected
         //If so emit resources
         if(node.pendingEthMass){
+            console.log("pending eth mass", node.pendingEthMass);
             const ethMassToConvert = Math.min(node.pendingEthMass, (MASS_PER_SECOND * timeElapsed));
             handleEmission(
+                timestamp,
                 world,
                 node,
                 bubbles,

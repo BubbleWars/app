@@ -2,7 +2,7 @@ import { World, Circle, Vec2 } from "planck-js";
 import { Portal } from "../types/portal";
 import { Address } from "../types/address";
 import { massToRadius } from "./utils";
-import { GRAVITATIONAL_CONSTANT, MASS_PER_SECOND, WORLD_HEIGHT, WORLD_WIDTH } from "../consts";
+import { EMISSION_SPEED, GRAVITATIONAL_CONSTANT, MASS_PER_SECOND, WORLD_HEIGHT, WORLD_WIDTH } from "../consts";
 import { Bubble } from "../types/bubble";
 import { createBubble, setBubbleResourceMass, updateBubble } from "./bubble";
 import { Obstacle } from "../types/obstacle";
@@ -168,7 +168,7 @@ export const portalEmitBubble = (timestamp: number, bubbles: Map<string, Bubble>
 
     //Apply momentum conservation
     const emittedBubbleVelocityDirection = direction.clone();
-    const emittedBubbleVelocityMagnitude = (portal.mass / emittedBubble.body.getMass())*0.1;
+    const emittedBubbleVelocityMagnitude = (portal.mass / emittedBubble.body.getMass())*EMISSION_SPEED;
     const emittedBubbleRelativeVelocity = emittedBubbleVelocityDirection.mul(emittedBubbleVelocityMagnitude);
     const emittedBubbleVelocity = portal.body.getLinearVelocity().clone().add(emittedBubbleRelativeVelocity);
     emittedBubble.body.setLinearVelocity(emittedBubbleVelocity);
@@ -226,7 +226,7 @@ export const portalEmitResource = (
 
     //Apply momentum conservation
     const emittedResourceVelocityDirection = direction.clone();
-    const emittedResourceVelocityMagnitude = (portal.mass / emittedResource.body.getMass())*0.1;
+    const emittedResourceVelocityMagnitude = (portal.mass / emittedResource.body.getMass())*EMISSION_SPEED;
     const emittedResourceRelativeVelocity = emittedResourceVelocityDirection.mul(emittedResourceVelocityMagnitude);
     const emittedResourceVelocity = portal.body.getLinearVelocity().clone().add(emittedResourceRelativeVelocity);
     emittedResource.body.setLinearVelocity(emittedResourceVelocity);

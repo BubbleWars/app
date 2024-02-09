@@ -164,7 +164,7 @@ export const run = (end: number, callback?: () => void, client:boolean= false) =
 
         // Handle entity updates
         handleBubbleUpdates(current, bubbles, stepDelta);
-        handleNodeUpdates(world, nodes, bubbles, resources, stepDelta);
+        handleNodeUpdates(current, world, nodes, bubbles, resources, stepDelta);
 
         // Step the world
         world.step(stepDelta)

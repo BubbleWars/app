@@ -5,3 +5,5 @@ export const MASS_PER_SECOND = 100000000000; // 0.001 ETH per second
 export const STEP_DELTA = 1 / 60;
 export const MAX_ADVANCE_STATE_TIME = 500;
 export const MIN_MASS = 0.000001;
+export const EMISSION_SPEED= 6;
+export const DAMPENING= 0.5;
