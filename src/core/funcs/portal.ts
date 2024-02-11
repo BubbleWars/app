@@ -87,6 +87,7 @@ export const updatePortal = (portal: Portal, newMass: number): void => {
     const radius = massToRadius(portal.mass);
     portal.body.destroyFixture(portal.fixture);
     portal.fixture = portal.body.createFixture({ shape: Circle(radius), density: 1, restitution: 0, friction: 0});
+    if(!portal.resources) portal.resources = new Map();
 }
 
 export const applyPortalGrowth = (portal: Portal, timeElapsed: number): void => {
@@ -130,6 +131,7 @@ export const getPortalResourceMass = (portal: Portal, resource: ResourceType): n
 }
 
 export const setPortalResourceMass = (portal: Portal, resource: ResourceType, mass: number): void => {
+    if(!portal.resources) portal.resources = new Map();
     const portalResource = portal.resources?.get(resource);
     if(!portalResource) portal.resources?.set(resource, {resource, mass});
     else portalResource.mass = mass;
@@ -182,19 +184,11 @@ export const portalAbsorbResource = (portals: Map<string, Portal>, resources: Ma
     const amountAbsorbed = Math.min(absorbedResource.body.getMass(), MASS_PER_SECOND * timeElapsed);
     const newPortalMass = portal.mass + amountAbsorbed;
     const newResourceMass = absorbedResource.body.getMass() - amountAbsorbed;
-    //console.log("portalAbsorbBubble", amountAbsorbed, newPortalMass, newBubbleMass);
+    console.log("portalAbsorbBubble", amountAbsorbed, newPortalMass);
     updatePortal(portal, newPortalMass);
 
     //Add resource to portal
-    if(!portal.resources?.has(absorbedResource.resource)) {
-        portal.resources?.set(absorbedResource.resource, {
-            resource: absorbedResource.resource,
-            mass: 0,
-        });
-    }
-    const portalResource = portal.resources?.get(absorbedResource.resource);
-    if(!portalResource) portal.resources?.set(absorbedResource.resource, {resource: absorbedResource.resource, mass: amountAbsorbed});
-    else portalResource.mass += amountAbsorbed;
+    setPortalResourceMass(portal, absorbedResource.resource, getPortalResourceMass(portal, absorbedResource.resource) + amountAbsorbed);
 
     updateResource(resources, absorbedResource, newResourceMass);
 }

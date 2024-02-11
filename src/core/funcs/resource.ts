@@ -71,7 +71,7 @@ export const createNode = (
         mass,
         body, 
         fixture ,
-        owner: ZeroAddress,
+        owner: "0x0000000000000000000000000000000000000001",
         balance: 0,
         emitted: 0,
         pendingEthMass: 0,

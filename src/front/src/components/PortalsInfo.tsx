@@ -3,6 +3,7 @@ import { currentState } from "../../../core/world"
 import { massToRadius, truncateAddress } from "../../../core/funcs/utils"
 import * as THREE from 'three'
 import { CustomText } from "./CustomText"
+import { ResourceType } from "../../../core/types/resource"
 
 
 
@@ -15,7 +16,10 @@ export const PortalsInfo = ({ portalId } : { portalId: string }) => {
     const pos1 = textPosition.clone().add(lineHeightVector.clone().multiplyScalar(0)).clone()
     const pos2 = textPosition.clone().add(lineHeightVector.clone().multiplyScalar(1)).clone()
     const pos3 = textPosition.clone().add(lineHeightVector.clone().multiplyScalar(2)).clone()
-
+    const energy = portal.resources
+    .find(resource => resource.resource == ResourceType.Energy)
+const energyAmount = energy ? energy.mass : 0
+console.log("404::resources main", portal.resources)
     return (
         <>
             <CustomText 
@@ -43,7 +47,7 @@ export const PortalsInfo = ({ portalId } : { portalId: string }) => {
                 position={new THREE.Vector3(1, 0, 0)}
                 anchorX="left"
                 >
-                    0.00 EP
+                {energyAmount.toFixed(2)} EP
                 </CustomText>
             </group>
             
