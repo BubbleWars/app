@@ -9,6 +9,7 @@ import { bubbles } from "../world";
 import { addEvent } from "./events";
 import { EventsType } from "../types/events";
 import { time, timeStamp } from "console";
+import { ZeroAddress } from "ethers";
 
 const PUNCTURE_EMIT_PER_SECOND = 100;
 
@@ -44,6 +45,7 @@ export const getBubbleResourceMass = (bubble: Bubble, resource: ResourceType): n
 }
 
 export const setBubbleResourceMass = (bubble: Bubble, resource: ResourceType, mass: number): void => {
+    console.log("404::setBubbleResourceMass", bubble.resources, resource, mass)
     if(!bubble.resources) bubble.resources = new Map();
     const bubbleResource = bubble.resources?.get(resource);
     if(!bubbleResource) bubble.resources.set(resource, { resource, mass });
@@ -52,6 +54,7 @@ export const setBubbleResourceMass = (bubble: Bubble, resource: ResourceType, ma
 
 export const createBubble = (timestamp:number, bubbles: Map<string, Bubble>, world: World, owner: Address, x: number, y: number, mass: number, controllable: boolean): Bubble => {
     const radius = massToRadius(mass);
+    if(owner == ZeroAddress) throw new Error("Cannot create bubble with zero address");
     const body = world.createBody({position: Vec2(x, y), type: "dynamic", linearDamping: DAMPENING });
     body.setMassData({mass, center: Vec2(0, 0), I: 0});
     const fixture = body.createFixture({ shape: Circle(radius), density: 1, restitution: 0, friction: 0});

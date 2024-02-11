@@ -107,7 +107,7 @@ export const createResource = (
     };
     resource.body.setUserData(`resource-${resources.size}`);
     resources.set(resource.body.getUserData() as string, resource);
-    console.log("creating resource", {
+    console.log("404::creating resource", {
         id: `${resources.size}`,
         resource: type,
         position: {x, y},
@@ -345,16 +345,16 @@ export const handleNodeUpdates = (
             console.log("pending resource mass", node.pendingResourceMass);
             const resourceMassToConvert = Math.min(node.pendingResourceMass, (MASS_PER_SECOND * timeElapsed));
             handleEmission(
-                timestamp,
-                world,
-                node,
-                bubbles,
-                resources,
-                -resourceMassToConvert,
-                Vec2(
-                    node.emissionDirection.x, 
-                    node.emissionDirection.y
-                )
+            timestamp,
+            world,
+            node,
+            bubbles,
+            resources,
+            -resourceMassToConvert,
+            Vec2(
+            node.emissionDirection.x, 
+            node.emissionDirection.y
+            )
             );
             node.pendingResourceMass -= resourceMassToConvert;
 

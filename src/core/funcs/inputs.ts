@@ -377,7 +377,7 @@ export const handlePendingEmit = (input: Emit): void => {
         if(emissionType == 'bubble')
             portalEmitBubble(timestamp, bubbles, portal, input.mass, Vec2(input.direction.x, input.direction.y));
         else if(emissionType == ResourceType.Energy)
-            portalEmitResource(timestamp, portals, world, resources, portal, input.mass, emissionType, Vec2(input.direction.x, input.direction.y));
+            portalEmitResource(timestamp, portals, world, resources, portal, emissionType, input.mass, Vec2(input.direction.x, input.direction.y));
 
     }else if(isBubble){
         const bubble = bubbles.get(input.from.toLowerCase());
@@ -385,7 +385,7 @@ export const handlePendingEmit = (input: Emit): void => {
         if(emissionType == 'bubble')
             emitBubble(timestamp, bubbles, bubble, input.mass, Vec2(input.direction.x, input.direction.y));
         else if(emissionType == ResourceType.Energy)
-            emitResource(timestamp, world, bubbles, resources, bubble, input.mass, emissionType, Vec2(input.direction.x, input.direction.y));
+            emitResource(timestamp, world, bubbles, resources, bubble, emissionType, input.mass, Vec2(input.direction.x, input.direction.y));
     }
 
 
@@ -404,7 +404,7 @@ export const handlePendingClientEmit = (input: Emit): void => {
         if(emissionType == 'bubble')
             portalEmitBubble(timestamp, snapshotBubbles, portal, input.mass, Vec2(input.direction.x, input.direction.y));
         else if(emissionType == ResourceType.Energy)
-            portalEmitResource(timestamp, snapshotPortals, snapshotWorld, snapshotResources, portal, input.mass, emissionType, Vec2(input.direction.x, input.direction.y));
+            portalEmitResource(timestamp, snapshotPortals, snapshotWorld, snapshotResources, portal, emissionType, input.mass, Vec2(input.direction.x, input.direction.y));
 
     }else if(isBubble){
         const bubble = snapshotBubbles.get(input.from.toLowerCase());
@@ -412,7 +412,7 @@ export const handlePendingClientEmit = (input: Emit): void => {
         if(emissionType == 'bubble')
             emitBubble(timestamp, snapshotBubbles, bubble, input.mass, Vec2(input.direction.x, input.direction.y));
         else if(emissionType == ResourceType.Energy)
-            emitResource(timestamp, snapshotWorld, snapshotBubbles, snapshotResources, bubble, input.mass, emissionType, Vec2(input.direction.x, input.direction.y));
+            emitResource(timestamp, snapshotWorld, snapshotBubbles, snapshotResources, bubble, emissionType, input.mass, Vec2(input.direction.x, input.direction.y));
     }
 
 }
