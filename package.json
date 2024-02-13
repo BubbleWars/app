@@ -3,8 +3,10 @@
   "version": "0.1.0",
   "description": "JS DApp",
   "dependencies": {
+    "alea": "^1.0.1",
     "ethers": "^6.7.1",
-    "planck-js": "^0.3.31"
+    "planck-js": "^0.3.31",
+    "simplex-noise": "^4.0.1"
   },
   "devDependencies": {
     "esbuild": "^0.19.2",

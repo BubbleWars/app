@@ -7,6 +7,8 @@ import { createBubble, updateBubble } from "./bubble";
 import { Bubble } from "../types/bubble";
 import { addEvent } from "./events";
 import { EventsType } from "../types/events";
+import { createNoise2D } from "simplex-noise";
+import Alea from "alea";
 
 //Generates random initial starting point for resource nodes
 export const generateNodes = (
@@ -14,34 +16,18 @@ export const generateNodes = (
     nodes: Map<string, ResourceNode>,
     amount: number,
 ): void => {
-    const minDistance = 10; // minimum distance between nodes
+    const prng = Alea(6969);
+    const noise = createNoise2D(prng);
 
-    for (let i = 0; i < amount; i++) {
-        let x, y, tooClose;
-        let inc = 0.01;
-
-        do {
-            tooClose = false;
-            // Generate random positions for the node
-            x =  inc * WORLD_WIDTH; // Assuming worldWidth is the width of your world
-            y = inc * WORLD_HEIGHT; // Assuming worldHeight is the height of your world
-
-            // Check if the new node is too close to existing nodes
-            nodes.forEach((existingNode) => {
-                const existingX = existingNode.body.getPosition().x;
-                const existingY = existingNode.body.getPosition().y;
-                const distance = Math.sqrt(Math.pow(x - existingX, 2) + Math.pow(y - existingY, 2));
-                if (distance < minDistance) {
-                    tooClose = true;
-                }
-            });
-
-            inc += 0.01;
-        } while (tooClose);
-
-        // Create the node at the generated position
-        createNode(world, nodes, ResourceType.Energy, x, y, 0);
+    for(let x=-WORLD_WIDTH/2; x<WORLD_WIDTH/2; x+=100){
+        for(let y=-WORLD_HEIGHT/2; y<WORLD_HEIGHT/2; y+=100){
+            
+            const value = noise(x/100, y/100);
+            console.log("noise value", value);
+            if(value > 0.9) createNode(world, nodes, ResourceType.Energy, x, y, 0);
+        }
     }
+
 }
 
 export const generateNodeId = (nodes: Map<string, ResourceNode>): string => {

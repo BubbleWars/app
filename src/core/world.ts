@@ -58,6 +58,9 @@ export const applyDeferredUpdates = () => {
 //console.log("world init", world)
 
 export const init = (initialState?: Snapshot) => {
+    if(!initialState?.nodes || initialState.nodes.length == 0){
+        generateNodes(world, nodes, 1)
+    }
     if(initialState){
         //reset all state
         users.clear();
@@ -99,9 +102,6 @@ export const init = (initialState?: Snapshot) => {
         currentState.pendingInputs.forEach(input => {
             pendingInputs.push(input);
         })
-    }else {
-        //Generate initial nodes
-        generateNodes(world, nodes, 1)
     }
     //Create initial portal
     //const portal = createPortal(portals, world, "0x0", 0, 0, 10);

@@ -36,8 +36,8 @@ export const Resource = ({ resourceId } : { resourceId: string }) => {
             }
             console.log("resource not found")
         }
-        const radius = massToRadius(resource.mass)
-        const newRadius = MathUtils.lerp(meshRef.current.scale.x, radius, 0.1)
+        const radius = massToRadius(resource.mass) + 50;
+        const newRadius = MathUtils.lerp(meshRef.current.scale.x, radius, 0.1) + 100;
         meshRef.current.scale.set(newRadius, newRadius, newRadius)
         console.log("resource position:", resource.position)
         const newX = MathUtils.lerp(meshRef.current.position.x, resource.position.x, 0.1)
