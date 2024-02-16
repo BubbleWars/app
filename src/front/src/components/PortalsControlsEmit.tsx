@@ -70,9 +70,9 @@ export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string
 
         setDirection(directionVector);
 
-        console.log("bb mouse:", worldMouse);
-        console.log("bb position:", position);
-        console.log("bb direction:", directionVector);
+       //console.log("bb mouse:", worldMouse);
+       //console.log("bb position:", position);
+       //console.log("bb direction:", directionVector);
     });
 
     //Click action
@@ -117,7 +117,7 @@ export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string
                     dispatch(setIsBubbleSelected(false))
                     setHasProcessedTx(true)
                     setIsEmitting(false)
-                    console.log("is predicting portal", input)
+                   //console.log("is predicting portal", input)
                 
                 // //Client add input
                 // const isBehind = input.timestamp < currentState.timestamp
@@ -131,10 +131,10 @@ export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string
                 // //Snapshot add input
                 // snapshotRollback(input.timestamp)
                 // handleInput(input, true)
-                // console.log("is predicting", input)
-                // console.log("is predicting", timestamp)
+                ////console.log("is predicting", input)
+                ////console.log("is predicting", timestamp)
             })
-        console.log("tx:", tx)
+       //console.log("tx:", tx)
     }, [tx])
 
     //Scroll action

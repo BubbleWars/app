@@ -163,21 +163,21 @@ export const handleContact = (contact: Contact) => {
 
     //Node-RresoureCollideResourceesource collision
     if(n1 && r2) {
-        console.log("node absorb resource")
+       //console.log("node absorb resource")
         deferredUpdates.push(() => { nodeAbsorbResource(nodes, resources, n1, r2, STEP_DELTA) });
     }else
     if(n2 && r1) {
-        console.log("node absorb resource")
+       //console.log("node absorb resource")
         deferredUpdates.push(() => { nodeAbsorbResource(nodes, resources, n2, r1, STEP_DELTA) });
     }else
 
     //Node-Bubble collision
     if(n1 && b2) {
-        console.log("node absorb bubble")
+       //console.log("node absorb bubble")
         deferredUpdates.push(() => { nodeAbsorbBubble(nodes, bubbles, n1, b2, STEP_DELTA) });
     }else
     if(n2 && b1) {
-        console.log("node absorb bubble")
+       //console.log("node absorb bubble")
         deferredUpdates.push(() => { nodeAbsorbBubble(nodes, bubbles, n2, b1, STEP_DELTA) });
     }else
 

@@ -34,12 +34,12 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
     useFrame(() => {
         const bubble = currentState.bubbles.find(bubble => bubble.id === bubbleId)
         if(!bubble) {
-            console.log("bubble not found")
+           //console.log("bubble not found")
             return
         }
 
         if(!meshRef.current) {
-            console.log("bubble not found")
+           //console.log("bubble not found")
             return
         }
 
@@ -49,14 +49,14 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
                 meshRef.current.position.set(startPosition.x, startPosition.y, 0)
             }
             else {
-                console.log("bubble start position not found")
+               //console.log("bubble start position not found")
             }
-            console.log("bubble not found")
+           //console.log("bubble not found")
         }
         const radius = massToRadius(bubble.mass)
         const newRadius = MathUtils.lerp(meshRef.current.scale.x, radius, 0.1)
         meshRef.current.scale.set(newRadius, newRadius, newRadius)
-        console.log("bubble position:", bubble.position)
+       //console.log("bubble position:", bubble.position)
         const newX = MathUtils.lerp(meshRef.current.position.x, bubble.position.x, 0.1)
         const newY = MathUtils.lerp(meshRef.current.position.y, bubble.position.y, 0.1)
         meshRef.current.position.set(newX, newY, 0)
@@ -67,7 +67,7 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
     const outlineColor = darkenColor(baseColor, 0.2); // Darken by 20%
 
     useEffect(() => {
-        console.log("setIsBubbleSelected: ui", isSelected)
+       //console.log("setIsBubbleSelected: ui", isSelected)
         dispatch(setIsBubbleSelected(isSelected))
     }, [isSelected])
     

@@ -68,9 +68,9 @@ export const BubblesControlsEmit = ({ bubbleId, isHovered } : { bubbleId: string
 
         setDirection(directionVector);
 
-        console.log("bb mouse:", worldMouse);
-        console.log("bb position:", position);
-        console.log("bb direction:", directionVector);
+       //console.log("bb mouse:", worldMouse);
+       //console.log("bb position:", position);
+       //console.log("bb direction:", directionVector);
     });
 
     //Click action
@@ -115,7 +115,7 @@ export const BubblesControlsEmit = ({ bubbleId, isHovered } : { bubbleId: string
                     dispatch(setIsBubbleSelected(false))
                     setHasProcessedTx(true)
                     setIsEmitting(false)
-                    console.log("is predicting bubble", input)
+                   //console.log("is predicting bubble", input)
                 
                 // //Client add input
                 // const isBehind = input.timestamp < currentState.timestamp
@@ -129,10 +129,10 @@ export const BubblesControlsEmit = ({ bubbleId, isHovered } : { bubbleId: string
                 // //Snapshot add input
                 // snapshotRollback(input.timestamp)
                 // handleInput(input, true)
-                // console.log("is predicting", input)
-                // console.log("is predicting", timestamp)
+                ////console.log("is predicting", input)
+                ////console.log("is predicting", timestamp)
             })
-        console.log("tx:", tx)
+       //console.log("tx:", tx)
     }, [tx])
 
     //Scroll action

@@ -45,7 +45,7 @@ export const getBubbleResourceMass = (bubble: Bubble, resource: ResourceType): n
 }
 
 export const setBubbleResourceMass = (bubble: Bubble, resource: ResourceType, mass: number): void => {
-    console.log("404::setBubbleResourceMass", bubble.resources, resource, mass)
+   //console.log("404::setBubbleResourceMass", bubble.resources, resource, mass)
     if(!bubble.resources) bubble.resources = new Map();
     const bubbleResource = bubble.resources?.get(resource);
     if(!bubbleResource) bubble.resources.set(resource, { resource, mass });
@@ -61,12 +61,12 @@ export const createBubble = (timestamp:number, bubbles: Map<string, Bubble>, wor
     const bubble = { owner, balance: 0, body, fixture, controllable };
     bubble.body.setUserData(generateBubbleId(bubbles, owner));
     bubbles.set(bubble.body.getUserData() as string, bubble);
-    console.log('new event creating bubble', {
-        owner,
-        balance: 0,
-        position: {x, y},
-        controllable,
-    })
+//    //console.log('new event creating bubble', {
+//         owner,
+//         balance: 0,
+//         position: {x, y},
+//         controllable,
+//     })
     addEvent({
         type: EventsType.CreateBubble,
         id: bubble.body.getUserData() as string,
@@ -105,7 +105,7 @@ export const updateBubble = (
         if(!bubble.resources.has(resourceType.resource)) bubble.resources.set(resourceType.resource, { resource: resourceType.resource, mass: 0 }); 
         const resource = bubble.resources.get(resourceType.resource);
         resource.mass += resourceAbsorbed;
-        console.log("updateBubble resource", bubble.resources);
+       //console.log("updateBubble resource", bubble.resources);
     }
 
 }
@@ -114,7 +114,7 @@ export const updateBubble = (
 export const emitBubble = (timestamp: number, bubbles: Map<string, Bubble>, bubble: Bubble, mass: number, direction: Vec2): Bubble => {
     //if(!bubble.controllable) throw new Error("Cannot emit from a non-controllable bubble");
     if(mass > bubble.body.getMass()) throw new Error("Cannot emit more than of the bubble's mass");
-    console.log("emitting bubble", mass, bubble.body.getMass() );
+   //console.log("emitting bubble", mass, bubble.body.getMass() );
     const radius = bubble.fixture.getShape().getRadius();
     const emittedBubbleRadius = massToRadius(mass);
     const centerDelta = direction.clone().mul(radius+emittedBubbleRadius);
@@ -151,12 +151,12 @@ export const emitResource = (
     direction: Vec2,
 ): Resource => {
     if(mass > getBubbleResourceMass(bubble, resourceType)) throw new Error("Cannot emit more than the bubble's resource mass");
-    console.log("emitting resource", resourceType, mass, getBubbleResourceMass(bubble, resourceType));
+   //console.log("emitting resource", resourceType, mass, getBubbleResourceMass(bubble, resourceType));
     const radius = bubble.fixture.getShape().getRadius();
     const emittedResourceRadius = massToRadius(mass);
     const centerDelta = direction.clone().mul(radius+emittedResourceRadius);
     const emittedResourcePosition = bubble.body.getPosition().clone().add(centerDelta);
-    const emittedResource = createResource(timestamp, world, resources, resourceType, emittedResourcePosition.x, emittedResourcePosition.y, mass);
+    const emittedResource = createResource(timestamp, world, resources, resourceType, emittedResourcePosition.x, emittedResourcePosition.y, mass, bubble.body.getUserData() as string);
     const totalMomentum = bubble.body.getLinearVelocity().clone().mul(bubble.body.getMass());
 
     const newBubbleMass = bubble.body.getMass() - mass;
@@ -239,7 +239,7 @@ export const absorbResource = (bubbles: Map<string, Bubble>, resources: Map<stri
         const relativeMomentum = absorbedResourceMomentum.sub(bubbleMomentum);
         //the closer the relative momentum is to zero, the more the bubble is moving in the same direction as the resource
         const shouldNotClash = relativeMomentum.length() < 1;
-        console.log("clash relativeMomentum", relativeMomentum.length(), shouldNotClash);
+       //console.log("clash relativeMomentum", relativeMomentum.length(), shouldNotClash);
         // if(!shouldNotClash){
         //     updateBubble(bubbles, bubble, newBubbleMass-amountAbsorbed, -amountAbsorbed, absorbedResource);
         //     updateResource(resources, absorbedResource, newAbsorbedResourceMass);

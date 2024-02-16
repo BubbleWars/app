@@ -195,7 +195,7 @@ const handleSpawnPortal = (input: SpawnPortal, client:boolean): boolean => {
 }
 
 const handleEmit = (input: Emit, client:boolean): boolean => {
-    console.log("Handling emit with input:", JSON.stringify(input));
+   //console.log("Handling emit with input:", JSON.stringify(input));
     //console.log("Portals:", JSON.stringify(portals));
     //console.log(portals)
     //console.log("Bubbles:", JSON.stringify(bubbles));
@@ -210,15 +210,15 @@ const handleEmit = (input: Emit, client:boolean): boolean => {
         bubbles.has(input.from.toLowerCase());
 
     if (!isPortal && !isBubble){ 
-        console.log("Input from is not a portal or bubble");
+       //console.log("Input from is not a portal or bubble");
         return false
     }
     if(!input?.timestamp) {
-        console.log("Input timestamp is undefined");
+       //console.log("Input timestamp is undefined");
         return false;
     }
     if(!input?.sender) {
-        console.log("Input sender is undefined");
+       //console.log("Input sender is undefined");
         return false;
     }
     if(!input?.executionTime) input.executionTime = input.timestamp;
@@ -230,16 +230,16 @@ const handleEmit = (input: Emit, client:boolean): boolean => {
             snapshotPortals.get(input.from.toLowerCase()) :
             portals.get(input.from.toLowerCase());
         if(!portal) {
-            console.log("Portal not found");
+           //console.log("Portal not found");
             return false
         }
 
         if(portal.owner.toLowerCase() !== user.address.toLowerCase()){
-            console.log("Portal owner is not user");
+           //console.log("Portal owner is not user");
             return false;
         }
         if(portal.mass <= input.mass){
-            console.log("Portal mass is less than input mass");
+           //console.log("Portal mass is less than input mass");
             return false;
         } 
     } else if(isBubble){
@@ -247,15 +247,15 @@ const handleEmit = (input: Emit, client:boolean): boolean => {
             snapshotBubbles.get(input.from.toLowerCase()) :
             bubbles.get(input.from.toLowerCase());
         if(!bubble){
-            console.log("Bubble not found");
+           //console.log("Bubble not found");
             return false;
         } 
         if(bubble.owner.toLowerCase() !== user.address.toLowerCase()) {
-            console.log("Bubble owner is not user");
+           //console.log("Bubble owner is not user");
             return false;
         }
         if(bubble.body.getMass() <= input.mass){
-            console.log("Bubble mass is less than input mass");
+           //console.log("Bubble mass is less than input mass");
             return false;
         } 
     }

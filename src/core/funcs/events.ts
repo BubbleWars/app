@@ -5,7 +5,7 @@ declare global {
 }
 
 let onEvent = (event: Event) => {
-    console.log(event)
+   //console.log(event)
 }
 
 export const setOnEvent = (callback: (event: Event) => void) => {

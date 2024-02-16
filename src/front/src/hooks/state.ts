@@ -79,7 +79,7 @@ export const useInspect = (inspect: Inspect) : {
         const _ = async () => {
             setLoading(true);
             const snapshot = await inspectState(inspect);
-            console.log("snapshot fetched", snapshot);
+           //console.log("snapshot fetched", snapshot);
             if (snapshot) setSnapshot(snapshot);
             else setError("Could not fetch snapshot");
             setLoading(false);
@@ -117,7 +117,7 @@ export const useNotices = () : {
     const newNotices = data?.notices?.edges?.map((edge) => edge.node) as Notice[];
     if (newNotices?.length > 0) setNotices([...notices, ...newNotices]);
 
-    console.log("notices main2", notices);
+   //console.log("notices main2", notices);
     
     return { 
         loading, 
@@ -143,11 +143,11 @@ export const useInputs = () : {
 
     useEffect(() => {
         dispatch(setInputs(inputs));
-        console.log("inputs effect", inputs);
+       //console.log("inputs effect", inputs);
     }, [inputs]);
 
     let storeInputs = useSelector((state) => state.inputs.inputs);
 
-    console.log("inputs main2", storeInputs);
+   //console.log("inputs main2", storeInputs);
     return { loading, error, inputs:storeInputs, cursor };
 }

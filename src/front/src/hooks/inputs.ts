@@ -8,7 +8,7 @@ import { useThree } from '@react-three/fiber';
 
 
 export const useCreateInput = (input: Input) => {
-    console.log("useCreateInput", input)
+   //console.log("useCreateInput", input)
     //Check if deposit input
     const isDeposit = input.type == InputType.Deposit;
     const functionName = isDeposit ? 'depositEther' : 'addInput';

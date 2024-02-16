@@ -96,7 +96,7 @@ export const snapshotInit = (initialState?: Snapshot) => {
             snapshotUsers.set(user.address, { address: user.address, balance: user.balance });
         })
         snapshotCurrentState.resources.forEach(resource =>{
-            const newResource = createResource(snapshotLastTimestamp, snapshotWorld, snapshotResources, resource.type, resource.position.x, resource.position.y, resource.mass)
+            const newResource = createResource(snapshotLastTimestamp, snapshotWorld, snapshotResources, resource.type, resource.position.x, resource.position.y, resource.mass, resource.owner)
             newResource.body.setLinearVelocity(Vec2(resource.velocity.x, resource.velocity.y))
         })
         snapshotCurrentState.nodes.forEach(node => {
@@ -115,7 +115,7 @@ export const snapshotInit = (initialState?: Snapshot) => {
     // const bubble2 = createBubble(snapshotBubbles, snapshotWorld, "0x000", 10, 3, 5, true);
     // bubble2.body.setLinearVelocity(Vec2(-1.33, 1.33));
 
-    // console.log("snapshotWorld init", snapshotWorld)
+    ////console.log("snapshotWorld init", snapshotWorld)
 
     snapshotWorld.on("begin-contact", handleSnapshotContact)
 }
@@ -141,7 +141,7 @@ export const snapshotRun = (end: number, callback?: () => void, client:boolean= 
     snapshotPendingInputs.sort((a, b) => a.executionTime - b.executionTime)
         .filter(input => input.executionTime < current)
 
-    console.log("Pending inputs in run", snapshotPendingInputs)
+   //console.log("Pending inputs in run", snapshotPendingInputs)
 
     // Run the simulation
     while (current < end) {
@@ -191,7 +191,7 @@ export const snapshotRun = (end: number, callback?: () => void, client:boolean= 
         callback?.()
     } 
 
-    console.log("ran snapshotWorld for", current - snapshotLastTimestamp, "seconds")
+   //console.log("ran snapshotWorld for", current - snapshotLastTimestamp, "seconds")
  
     // Update the last timestamp
     snapshotLastTimestamp = current
@@ -212,7 +212,7 @@ export const snapshotRun = (end: number, callback?: () => void, client:boolean= 
     //ONLY CLIENT: For reconciliation
     snapshots.set(snapshotLastTimestamp, Object.assign({}, snapshotCurrentState));
     
-    console.log("snapshot", snapshots)   
-    console.log(snapshots); 
-    console.log("world state", snapshotCurrentState)
+    //console.log("snapshot", snapshots)   
+    //console.log(snapshots); 
+    //console.log("world state", snapshotCurrentState)
 }

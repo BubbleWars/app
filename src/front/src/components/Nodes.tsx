@@ -5,7 +5,7 @@ import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
 import { currentState } from '../../../core/world'
 import { snapshotCurrentState } from '../../../core/snapshots'
-import { Outlines } from '@react-three/drei'
+import { Outlines, Sparkles } from '@react-three/drei'
 import { darkenColor } from '../utils'
 
 export const Node = ({ nodeId } : { nodeId: string }) => {
@@ -15,9 +15,9 @@ export const Node = ({ nodeId } : { nodeId: string }) => {
     useFrame(() => {
         const node = currentState.nodes.find(node => node.id === nodeId)
         if(!node) return
-        const radius = massToRadius(Math.max(node.mass, 1)) + 10;
+        const radius = massToRadius(Math.max(node.mass, 1)) + 1;
         meshRef.current.scale.set(radius, radius, radius)
-        console.log("node position:", node.position)
+       //console.log("node position:", node.position)
         meshRef.current.position.set(node.position.x, node.position.y, 0)
         meshRef.current.updateMatrix()
     })  
@@ -28,6 +28,7 @@ export const Node = ({ nodeId } : { nodeId: string }) => {
     
     return (
         <>
+        
         <mesh
             ref={meshRef}
             onPointerEnter={() => {if(!isSelected)setIsHovered(true)}}
@@ -40,6 +41,13 @@ export const Node = ({ nodeId } : { nodeId: string }) => {
                 <meshBasicMaterial
                     color={baseColor}
                     />
+                    <Sparkles 
+            color={baseColor} 
+            size={1000000}
+            count={2}
+            
+            speed={1}
+            />
             </mesh>
             
         </>

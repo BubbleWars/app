@@ -5,7 +5,7 @@ import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
 import { currentState } from '../../../core/world'
 import { snapshotCurrentState } from '../../../core/snapshots'
-import { Outlines } from '@react-three/drei'
+import { Outlines, Sparkles } from '@react-three/drei'
 import { darkenColor } from '../utils'
 import { resourceStartPositions } from './Game'
 import { MathUtils } from 'three'
@@ -17,12 +17,12 @@ export const Resource = ({ resourceId } : { resourceId: string }) => {
     useFrame(() => {
         const resource = currentState.resources.find(resource => resource.id === resourceId)
         if(!resource) {
-            console.log("resource not found")
+           //console.log("resource not found")
             return
         }
 
         if(!meshRef.current) {
-            console.log("resource not found")
+           //console.log("resource not found")
             return
         }
 
@@ -32,14 +32,23 @@ export const Resource = ({ resourceId } : { resourceId: string }) => {
                 meshRef.current.position.set(startPosition.x, startPosition.y, 0)
             }
             else {
-                console.log("resource start position not found")
+                //return
+                //get node position
+                const node = currentState.nodes.find(node => node.id === resource.owner)
+                if(node) {
+                    meshRef.current.position.set(node.position.x, node.position.y, 0)
+                }
+                else {
+                    meshRef.current.position.set(resource.position.x, resource.position.y, 0)
+                }
+               //console.log("resource start position not found")
             }
-            console.log("resource not found")
+           //console.log("resource not found")
         }
-        const radius = massToRadius(resource.mass) + 50;
-        const newRadius = MathUtils.lerp(meshRef.current.scale.x, radius, 0.1) + 100;
+        const radius = massToRadius(resource.mass);
+        const newRadius = MathUtils.lerp(meshRef.current.scale.x, radius, 0.1)
         meshRef.current.scale.set(newRadius, newRadius, newRadius)
-        console.log("resource position:", resource.position)
+       //console.log("resource position:", resource.position)
         const newX = MathUtils.lerp(meshRef.current.position.x, resource.position.x, 0.1)
         const newY = MathUtils.lerp(meshRef.current.position.y, resource.position.y, 0.1)
         meshRef.current.position.set(newX, newY, 0)
@@ -64,6 +73,13 @@ export const Resource = ({ resourceId } : { resourceId: string }) => {
                 <meshBasicMaterial
                     color={baseColor}
                     />
+                    <Sparkles 
+            color={baseColor} 
+            size={100}
+            scale={10000}
+            count={2}
+            speed={1}
+            />
             </mesh>
             
         </>

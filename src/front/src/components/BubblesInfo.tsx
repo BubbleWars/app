@@ -20,7 +20,7 @@ export const BubblesInfo = ({ bubbleId } : { bubbleId: string }) => {
     const energy = bubble.resources
         .find(resource => resource.resource == ResourceType.Energy)
     const energyAmount = energy ? energy.mass : 0
-    console.log("resources main", bubble.resources)
+   //console.log("resources main", bubble.resources)
     return (
         <>
 

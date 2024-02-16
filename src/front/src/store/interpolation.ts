@@ -14,11 +14,11 @@ export const interpolationSlice = createSlice({
   initialState: { from: null } as InterpolationState,
   reducers: {
     setSelectedEntityId: (state, action: PayloadAction<string | null>) => {
-      console.log("setSelectedEntityId", action.payload)
+     //console.log("setSelectedEntityId", action.payload)
         state.selectedEntityId = action.payload;
     },
     setIsBubbleSelected: (state, action: PayloadAction<boolean>) => {
-      console.log("setIsBubbleSelected", action.payload)
+     //console.log("setIsBubbleSelected", action.payload)
         state.isBubbleSelected = action.payload;
     },
     setInterpolation: (state, action: PayloadAction<number>) => {

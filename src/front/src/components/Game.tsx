@@ -24,8 +24,8 @@ export const resourceStartPositions : {[key: string]: {x: number, y: number}} = 
 export const resourceDestroyPositions : {[key: string]: {x: number, y: number}} = {}
 
 export const Game = ({snapshot, inputs, notices} : {snapshot: Snapshot, inputs: Input[], notices:Notice[]}) => {
-    console.log("22 inputs:", inputs)
-    console.log("22 notices:", notices)
+   //console.log("22 inputs:", inputs)
+   //console.log("22 notices:", notices)
     // Get current timestamps
     const machineTimestamp = useMachineTimestamp(snapshot, notices)
     const blockTimestamp = useBlockTimestamp();
@@ -35,8 +35,8 @@ export const Game = ({snapshot, inputs, notices} : {snapshot: Snapshot, inputs: 
 
     //Initialize client state
     const [lastTimestampHandled, setLastTimestampHandled] = useState<number>(snapshot.timestamp)
-    console.log("lastTimestampHandled:", lastTimestampHandled)
-    console.log("snapshot recieved", snapshot)
+   //console.log("lastTimestampHandled:", lastTimestampHandled)
+   //console.log("snapshot recieved", snapshot)
     //Game object ids
     const [bubbleIds, setBubbleIds] = useState<string[]>([])
     const [portalIds, setPortalIds] = useState<string[]>([])
@@ -48,12 +48,12 @@ export const Game = ({snapshot, inputs, notices} : {snapshot: Snapshot, inputs: 
         if(!snapshot) return
         init(snapshot)
         snapshotInit(snapshot)
-        console.log("init snapshot:", snapshot)
+       //console.log("init snapshot:", snapshot)
         setBubbleIds(snapshot.bubbles.map(bubble => bubble.id))
         setPortalIds(snapshot.portals.map(portal => portal.id))
         setNodeIds(snapshot.nodes.map(node => node.id))
         setResourceIds(snapshot.resources.map(resource => resource.id))
-        console.log("init world:", world)
+       //console.log("init world:", world)
     }, [snapshot])
 
     //Check for new inputs, make sure to only run on new inputs
@@ -64,7 +64,7 @@ export const Game = ({snapshot, inputs, notices} : {snapshot: Snapshot, inputs: 
                 .filter((input) => input.timestamp > lastTimestampHandled)
                 .forEach((input) => {
                     const isBehind = input.timestamp < blockTimestamp
-                    console.log("new input11", input)
+                   //console.log("new input11", input)
                     clearEvents()
                     if(isBehind) {
                         snapshotRollback(input.timestamp)
@@ -95,21 +95,21 @@ export const Game = ({snapshot, inputs, notices} : {snapshot: Snapshot, inputs: 
                         //only if event.id does not exist within bubbleIds
                         if(event.type == EventsType.CreateBubble){
                             if(!bubbleIds.includes(event.id)){
-                                console.log("new event 11", event)
+                               //console.log("new event 11", event)
                                 bubbleStartPositions[event.id] = event.position
-                                setOnEvent(()=>{})
+                                //setOnEvent(()=>{})
                             }
                         }else if(event.type == EventsType.DestroyBubble){
                             if(bubbleIds.includes(event.id)){
-                                console.log("new event 22", event)
+                               //console.log("new event 22", event)
                                 bubbleDestroyPositions[event.id] = event.position
-                                setOnEvent(()=>{})
+                                //setOnEvent(()=>{})
                             }
                         }else if(event.type == EventsType.CreateResource){
                             if(!resourceIds.includes(event.id)){
-                                console.log("new event 33", event)
+                               //console.log("new event 33", event)
                                 resourceStartPositions[event.id] = event.position
-                                setOnEvent(()=>{})
+                                //setOnEvent(()=>{})
                             }
                         }
                         
@@ -135,8 +135,8 @@ export const Game = ({snapshot, inputs, notices} : {snapshot: Snapshot, inputs: 
 
         //Rollback and update client state
         // const end = Math.max(Date.now() / 1000, blockTimestamp)
-        console.log("setting snapshotCurrentState:", snapshotCurrentState)
-        console.log("setting currentState:", currentState)
+       //console.log("setting snapshotCurrentState:", snapshotCurrentState)
+       //console.log("setting currentState:", currentState)
         rollbackToState(snapshotCurrentState)
         // run(end)
 
@@ -149,25 +149,25 @@ export const Game = ({snapshot, inputs, notices} : {snapshot: Snapshot, inputs: 
 
     //Predict client state
     useFrame((state) => {
-        console.log("new delta", state.clock.getDelta())
+       //console.log("new delta", state.clock.getDelta())
         const now = Date.now() / 1000
         // if(interpolation.from){
         //     const maxTimeToRun = Math.min(now, interpolation.from)
-        //     console.log("interpolating: ", maxTimeToRun, now)
+        //    //console.log("interpolating: ", maxTimeToRun, now)
         //     run(maxTimeToRun)
         //     dispatch(interpolate({step: 0.09, end: now}))
         // }else{
             run(now)
         // }
         setBubbleIds(currentState.bubbles.map(bubble => bubble.id))
-        console.log("123at", currentState.bubbles);
-        console.log("123at", currentState.bubbles.map(bubble => bubble.id))
+       //console.log("123at", currentState.bubbles);
+       //console.log("123at", currentState.bubbles.map(bubble => bubble.id))
         setPortalIds(currentState.portals.map(portal => portal.id))
         setNodeIds(currentState.nodes.map(node => node.id))
         setResourceIds(currentState.resources.map(resource => resource.id))
     })
 
-    console.log(inputs)
+   //console.log(inputs)
     return (
         <>
             <Portals portals={portalIds ?? []} />

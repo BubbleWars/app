@@ -9,30 +9,34 @@ import { Canvas, extend } from '@react-three/fiber'
 import { CustomCameraControls } from './components/CameraControls'
 import * as THREE from 'three'
 import { Text3D } from '@react-three/drei'
+import { ScreenTitle } from './components/screens/ScreenTitle'
 
 function App() {
   const { snapshot } = useInspect({type:InspectType.State, value: 0})
   const { inputs } = useInputs();
   const { notices } = useNotices();
+  const { address, isConnected, isConnecting } = useAccount()
+
 
   return (
     <>
       <Canvas 
-      gl={{ gammaFactor: 2.2, outputEncoding: THREE.sRGBEncoding }}
         orthographic={true} 
-        camera={{ position: [0, 0, 10], zoom: 10, near: 0.01, far: 1000 }}
+        camera={{ position: [0, 0, 100], zoom: 10, near: 0.01, far: 1000 }}
         style={{ height: '100vh', width: '100vw' }}
       >
-        <ambientLight intensity={1} color={"white"} />
-
-        {/* <color attach="background" args={['#272730']} /> */}
+        <ambientLight intensity={1} />
+        <color attach="background" args={['#272730']} />
         <CustomCameraControls/>
+        {!isConnected && <ScreenTitle /> }
+
         <Game snapshot={snapshot} inputs={inputs} notices ={notices} />
-        <gridHelper 
+
+        {/* <gridHelper 
           position={[0, 0, -10]}
           rotation={[Math.PI / 2, 0, 0]}
-          args={[5000, 100, 0xebebeb, 0xebebeb]}
-        />
+          args={[10000, 250, 0x00ffffff, 0x00ffffff]}
+        /> */}
         
       </Canvas>
       <GameBar />

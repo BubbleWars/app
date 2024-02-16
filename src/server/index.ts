@@ -12,16 +12,16 @@ console.log("HTTP rollup_server url is " + rollup_server);
 init();
 
 async function handle_advance(data) {
-  console.log("Received advance request data" + JSON.stringify(data));
+ //console.log("Received advance request data" + JSON.stringify(data));
   const input = parseInput(data);
-  console.log("Parsed input " + JSON.stringify(input));
+ //console.log("Parsed input " + JSON.stringify(input));
   if (!input) return "reject";
   if (await handleInput(input)) return "accept";
   return "reject";
 }
 
 async function handle_inspect(data) {
-  console.log("Received inspect request data " + JSON.stringify(data));
+ //console.log("Received inspect request data " + JSON.stringify(data));
   const inspect = parseInspect(data);
   if (!inspect) return "reject";
   await handleInspect(inspect)
@@ -45,10 +45,10 @@ var finish = { status: "accept" };
       body: JSON.stringify({ status: "accept" }),
     });
 
-    console.log("Received finish status " + finish_req.status);
+   //console.log("Received finish status " + finish_req.status);
 
     if (finish_req.status == 202) {
-      console.log("No pending rollup request, trying again");
+     //console.log("No pending rollup request, trying again");
     } else {
       const rollup_req = await finish_req.json();
       var handler = handlers[rollup_req["request_type"]];

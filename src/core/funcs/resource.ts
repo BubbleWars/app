@@ -9,6 +9,7 @@ import { addEvent } from "./events";
 import { EventsType } from "../types/events";
 import { createNoise2D } from "simplex-noise";
 import Alea from "alea";
+import { time } from "console";
 
 //Generates random initial starting point for resource nodes
 export const generateNodes = (
@@ -16,17 +17,24 @@ export const generateNodes = (
     nodes: Map<string, ResourceNode>,
     amount: number,
 ): void => {
-    const prng = Alea(6969);
+    const prng = Alea(7969);
     const noise = createNoise2D(prng);
+    let count = 0;
 
-    for(let x=-WORLD_WIDTH/2; x<WORLD_WIDTH/2; x+=100){
-        for(let y=-WORLD_HEIGHT/2; y<WORLD_HEIGHT/2; y+=100){
+    for(let y=-WORLD_WIDTH/2; y<WORLD_WIDTH/2; y+=100){
+        for(let x=-WORLD_HEIGHT/2; x<WORLD_HEIGHT/2; x+=100){
             
             const value = noise(x/100, y/100);
-            console.log("noise value", value);
-            if(value > 0.9) createNode(world, nodes, ResourceType.Energy, x, y, 0);
+            //console.log("noise value", value);
+            if(value > 0.9) {
+                createNode(world, nodes, ResourceType.Energy, x, y, 0);
+                count++;
+            }
+            //if(count >= 50) return;
         }
     }
+
+   //console.log("spawned nodes", count);
 
 }
 
@@ -78,6 +86,7 @@ export const createResource = (
     x: number,
     y: number,
     mass: number,
+    owner: string = ZeroAddress,
 ): Resource => {
     const radius = massToRadius(mass);
     const body = world.createBody({position: Vec2(x, y), type: "dynamic", linearDamping: DAMPENING});
@@ -88,18 +97,18 @@ export const createResource = (
         resource: type,
         body,
         fixture,
-        owner: ZeroAddress,
+        owner,
         balance: 0,
     };
     resource.body.setUserData(`resource-${resources.size}`);
     resources.set(resource.body.getUserData() as string, resource);
-    console.log("404::creating resource", {
-        id: `${resources.size}`,
-        resource: type,
-        position: {x, y},
-        owner: ZeroAddress,
-        balance: 0,
-    });
+//    //console.log("404::creating resource", {
+//         id: `${resources.size}`,
+//         resource: type,
+//         position: {x, y},
+//         owner: ZeroAddress,
+//         balance: 0,
+//     });
 
     addEvent({
         timestamp,
@@ -150,11 +159,11 @@ export const nodeEmitResource = (
     emittedMass: number,
     direction: Vec2,
 ): Resource => {
-    const radius = massToRadius(newNodeMass)
+    const radius = massToRadius(newNodeMass)+1;
     const emittedResourceRadius = massToRadius(emittedMass);
     const centerDelta = direction.clone().mul(radius+emittedResourceRadius);
     const emittedResourcePosition = node.body.getPosition().clone().add(centerDelta);
-    const emittedResource = createResource(timestamp, world, resources, node.resource, emittedResourcePosition.x, emittedResourcePosition.y, emittedMass);
+    const emittedResource = createResource(timestamp, world, resources, node.resource, emittedResourcePosition.x, emittedResourcePosition.y, emittedMass, node.id);
 
     //Apply mass conservation
     const newResourceMass = newNodeMass;
@@ -163,7 +172,7 @@ export const nodeEmitResource = (
 
     //Apply momentum
     const emittedResourceVelocityDirection = direction.clone();
-    const emittedResourceVelocityMagnitude = (node.mass / emittedResource.body.getMass())*EMISSION_SPEED;
+    const emittedResourceVelocityMagnitude = (node.mass / emittedResource.body.getMass())*EMISSION_SPEED*0.1;
     const emittedResourceRelativeVelocity = emittedResourceVelocityDirection.mul(emittedResourceVelocityMagnitude);
     const emittedResourceVelocity = node.body.getLinearVelocity().clone().add(emittedResourceRelativeVelocity);
     emittedResource.body.setLinearVelocity(emittedResourceVelocity);
@@ -192,7 +201,7 @@ export const nodeEmitBubble = (
 
     //Apply momentum
     const emittedBubbleVelocityDirection = direction.clone();
-    const emittedBubbleVelocityMagnitude = (node.mass / emittedBubble.body.getMass())*EMISSION_SPEED;
+    const emittedBubbleVelocityMagnitude = (node.mass / emittedBubble.body.getMass())*EMISSION_SPEED * 0.1;
     const emittedBubbleRelativeVelocity = emittedBubbleVelocityDirection.mul(emittedBubbleVelocityMagnitude);
     const emittedBubbleVelocity = node.body.getLinearVelocity().clone().add(emittedBubbleRelativeVelocity);
     emittedBubble.body.setLinearVelocity(emittedBubbleVelocity);
@@ -207,7 +216,7 @@ export const nodeAbsorbResource = (
     absorbedResource: Resource,
     timeElapsed: number,
 ): void => {
-
+   //console.log("node absorbing resource", absorbedResource, timeElapsed, MASS_PER_SECOND)
     const amountAbsorbed = Math.min(absorbedResource.body.getMass(), (MASS_PER_SECOND * timeElapsed));
     const newResourceMass = absorbedResource.body.getMass() - amountAbsorbed;
     node.pendingResourceMass += amountAbsorbed;
@@ -225,7 +234,7 @@ export const nodeAbsorbBubble = (
     const amountAbsorbed = Math.min(absorbedBubble.body.getMass(), (MASS_PER_SECOND * timeElapsed));
     const newBubbleMass = absorbedBubble.body.getMass() - amountAbsorbed;
     node.pendingEthMass += amountAbsorbed;
-    console.log("node absorbing bubble", absorbedBubble, amountAbsorbed, newBubbleMass);
+   //console.log("331node absorbing bubble", absorbedBubble, amountAbsorbed, newBubbleMass);
 
     updateBubble(bubbles, absorbedBubble, newBubbleMass);
 }
@@ -279,10 +288,10 @@ export const handleEmission = (
     mass: number,
     direction: Vec2,
 ): Resource | Bubble | undefined => {
-    console.log("handling emission", mass);
+   //console.log("handling emission", mass);
     //console.log("node", node);
     const { newMass, emission } = getEmission(node, mass);
-    console.log("emission", newMass, emission);
+   //console.log("emission", newMass, emission);
     if(mass > 0) 
      return nodeEmitResource(timestamp, world, node, resources, newMass, emission, direction);
     if(mass < 0)
@@ -327,35 +336,18 @@ export const handleNodeUpdates = (
     nodes.forEach(node => {
         //Check if resources have been injected
         //If so emit bubbles
-        if(node.pendingResourceMass){
-            console.log("pending resource mass", node.pendingResourceMass);
-            const resourceMassToConvert = Math.min(node.pendingResourceMass, (MASS_PER_SECOND * timeElapsed));
-            handleEmission(
-            timestamp,
-            world,
-            node,
-            bubbles,
-            resources,
-            -resourceMassToConvert,
-            Vec2(
-            node.emissionDirection.x, 
-            node.emissionDirection.y
-            )
-            );
-            node.pendingResourceMass -= resourceMassToConvert;
-
-            //update emission direction, change angle by 1 degree
-            const angle = Math.atan2(node.emissionDirection.y, node.emissionDirection.x);
-            const newAngle = angle + (Math.PI/180);
-            node.emissionDirection.x = Math.cos(newAngle);
-            node.emissionDirection.y = Math.sin(newAngle);
+        if(!node.lastEmission) node.lastEmission = timestamp;
+        const lastEmission = node.lastEmission;
+        if(timestamp - lastEmission < 0.5){
+            return;
         }
 
+       //console.log("handling node updates", node.id, node.pendingEthMass, node.pendingResourceMass);
         //Check if bubbles have been injected
         //If so emit resources
         if(node.pendingEthMass){
-            console.log("pending eth mass", node.pendingEthMass);
-            const ethMassToConvert = Math.min(node.pendingEthMass, (MASS_PER_SECOND * timeElapsed));
+           //console.log("pending eth mass", node.pendingEthMass);
+            const ethMassToConvert = Math.min(node.pendingEthMass, 0.1);
             handleEmission(
                 timestamp,
                 world,
@@ -370,12 +362,36 @@ export const handleNodeUpdates = (
             );
             node.pendingEthMass -= ethMassToConvert;
             
-            //update emission direction, change angle by 1 degree
-            const angle = Math.atan2(node.emissionDirection.y, node.emissionDirection.x);
-            const newAngle = angle + (Math.PI/180);
-            node.emissionDirection.x = Math.cos(newAngle);
-            node.emissionDirection.y = Math.sin(newAngle);
+            
+            
+        }else if(node.pendingResourceMass){
+           //console.log("pending resource mass", node.pendingResourceMass);
+            const resourceMassToConvert = Math.min(node.pendingResourceMass,0.1);
+            handleEmission(
+            timestamp,
+            world,
+            node,
+            bubbles,
+            resources,
+            -resourceMassToConvert,
+            Vec2(
+            node.emissionDirection.x, 
+            node.emissionDirection.y
+            )
+            );
+            node.pendingResourceMass -= resourceMassToConvert;
+            
         }
+
+        
+
+        //update emission direction, change angle by 30 degrees
+        const angle = Math.atan2(node.emissionDirection.y, node.emissionDirection.x);
+        const newAngle = angle + (Math.PI/6);
+        node.emissionDirection.x = Math.cos(newAngle);
+        node.emissionDirection.y = Math.sin(newAngle);
+        
+        node.lastEmission = timestamp;
     });
 }
 

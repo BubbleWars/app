@@ -33,7 +33,7 @@ export const Portal = ({ portalId } : { portalId: string }) => {
         const radius = massToRadius(portal.mass)
         const newRadius = MathUtils.lerp(meshRef.current.scale.x, radius, 0.1)
         meshRef.current.scale.set(newRadius, newRadius, newRadius)
-        console.log("portal position:", portal.position)
+       //console.log("portal position:", portal.position)
         meshRef.current.position.set(portal.position.x, portal.position.y, 0)
         meshRef.current.updateMatrix()
     })  
@@ -43,7 +43,7 @@ export const Portal = ({ portalId } : { portalId: string }) => {
     const outlineColor = darkenColor(baseColor, 0.2); // Darken by 20%
 
     useEffect(() => {
-        console.log("setIsBubbleSelected: ui", isSelected)
+       //console.log("setIsBubbleSelected: ui", isSelected)
         dispatch(setIsBubbleSelected(isSelected))
     }, [isSelected])
 

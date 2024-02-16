@@ -27,7 +27,7 @@ export const CustomCameraControls = () => {
 
     useFrame(() => {
       if(isBubbleSelected) {
-        console.log("isBubbleSelected")
+       //console.log("isBubbleSelected")
         //controls.current?.enabled = false
       }else{
         controls.current?.update()

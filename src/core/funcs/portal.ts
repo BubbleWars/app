@@ -159,11 +159,11 @@ export const portalEmitBubble = (timestamp: number, bubbles: Map<string, Bubble>
     const emittedBubbleRadius = massToRadius(mass);
     const centerDelta = direction.clone().mul(portalRadius + emittedBubbleRadius);
     const emittedBubblePosition = portal.body.getPosition().clone().add(centerDelta);
-    console.log("emittedBubblePosition", emittedBubblePosition);
+   //console.log("emittedBubblePosition", emittedBubblePosition);
     const emittedBubble = createBubble(timestamp, bubbles, portal.body.getWorld(), portal.owner, emittedBubblePosition.x, emittedBubblePosition.y, mass, false);
-    console.log("emittedBubblePosition after create", JSON.stringify(emittedBubble.body.getPosition()));
-    console.log("123at", emittedBubble.body.getUserData());
-    console.log("123at", bubbles)
+   //console.log("emittedBubblePosition after create", JSON.stringify(emittedBubble.body.getPosition()));
+   //console.log("123at", emittedBubble.body.getUserData());
+   //console.log("123at", bubbles)
     //Apply mass conservation
     const newPortalMass = portal.mass - mass;
     updatePortal(portal, newPortalMass);
@@ -174,7 +174,7 @@ export const portalEmitBubble = (timestamp: number, bubbles: Map<string, Bubble>
     const emittedBubbleRelativeVelocity = emittedBubbleVelocityDirection.mul(emittedBubbleVelocityMagnitude);
     const emittedBubbleVelocity = portal.body.getLinearVelocity().clone().add(emittedBubbleRelativeVelocity);
     emittedBubble.body.setLinearVelocity(emittedBubbleVelocity);
-    console.log("emittedBubblePosition after velocity", JSON.stringify(emittedBubble.body.getPosition()));
+   //console.log("emittedBubblePosition after velocity", JSON.stringify(emittedBubble.body.getPosition()));
 
     return emittedBubble;
 }
@@ -184,7 +184,7 @@ export const portalAbsorbResource = (portals: Map<string, Portal>, resources: Ma
     const amountAbsorbed = Math.min(absorbedResource.body.getMass(), MASS_PER_SECOND * timeElapsed);
     const newPortalMass = portal.mass + amountAbsorbed;
     const newResourceMass = absorbedResource.body.getMass() - amountAbsorbed;
-    console.log("portalAbsorbBubble", amountAbsorbed, newPortalMass);
+   //console.log("portalAbsorbBubble", amountAbsorbed, newPortalMass);
     updatePortal(portal, newPortalMass);
 
     //Add resource to portal
@@ -208,11 +208,11 @@ export const portalEmitResource = (
     const emittedResourceRadius = massToRadius(mass);
     const centerDelta = direction.clone().mul(portalRadius + emittedResourceRadius);
     const emittedResourcePosition = portal.body.getPosition().clone().add(centerDelta);
-    console.log("emittedResourcePosition", emittedResourcePosition);
-    const emittedResource = createResource(timestamp, world, resources, resource, emittedResourcePosition.x, emittedResourcePosition.y, mass);
-    console.log("emittedResourcePosition after create", JSON.stringify(emittedResource.body.getPosition()));
-    console.log("123at", emittedResource.body.getUserData());
-    console.log("123at", resources)
+   //console.log("emittedResourcePosition", emittedResourcePosition);
+    const emittedResource = createResource(timestamp, world, resources, resource, emittedResourcePosition.x, emittedResourcePosition.y, mass, portal.body.getUserData() as string);
+   //console.log("emittedResourcePosition after create", JSON.stringify(emittedResource.body.getPosition()));
+   //console.log("123at", emittedResource.body.getUserData());
+   //console.log("123at", resources)
     //Apply mass conservation
     const newPortalMass = portal.mass - mass;
     updatePortal(portal, newPortalMass);
@@ -224,7 +224,7 @@ export const portalEmitResource = (
     const emittedResourceRelativeVelocity = emittedResourceVelocityDirection.mul(emittedResourceVelocityMagnitude);
     const emittedResourceVelocity = portal.body.getLinearVelocity().clone().add(emittedResourceRelativeVelocity);
     emittedResource.body.setLinearVelocity(emittedResourceVelocity);
-    console.log("emittedResourcePosition after velocity", JSON.stringify(emittedResource.body.getPosition()));
+   //console.log("emittedResourcePosition after velocity", JSON.stringify(emittedResource.body.getPosition()));
 
     return emittedResource;
 }

@@ -93,7 +93,7 @@ export const init = (initialState?: Snapshot) => {
             users.set(user.address, { address: user.address, balance: user.balance });
         })
         currentState.resources.forEach(resource =>{
-            const newResource = createResource(lastTimestamp, world, resources, resource.type, resource.position.x, resource.position.y, resource.mass)
+            const newResource = createResource(lastTimestamp, world, resources, resource.type, resource.position.x, resource.position.y, resource.mass, resource.owner)
             newResource.body.setLinearVelocity(Vec2(resource.velocity.x, resource.velocity.y))
         })
         currentState.nodes.forEach(node => {
@@ -112,7 +112,7 @@ export const init = (initialState?: Snapshot) => {
     // const bubble2 = createBubble(bubbles, world, "0x000", 10, 3, 5, true);
     // bubble2.body.setLinearVelocity(Vec2(-1.33, 1.33));
 
-    // console.log("world init", world)
+    ////console.log("world init", world)
     world.on("begin-contact", handleContact)
 }
 
@@ -185,7 +185,7 @@ export const run = (end: number, callback?: () => void, client:boolean= false) =
         callback?.()
     } 
 
-    console.log("ran world for", current - lastTimestamp, "seconds")
+   //console.log("ran world for", current - lastTimestamp, "seconds")
  
     // Update the last timestamp
     lastTimestamp = current
@@ -204,5 +204,5 @@ export const run = (end: number, callback?: () => void, client:boolean= false) =
     )
 
     
-    console.log("world state", currentState)
+    //console.log("world state", currentState)
 }
