@@ -2,6 +2,7 @@ body, html {
   padding: 0;
   margin: 0;
   background-color: white;
+  color: white;
 }
 
 .game-bar {
@@ -32,8 +33,14 @@ body, html {
 }
 
 .screen-title h1 {
-  color: white;
   font-size: 70px;
+}
+
+.screen-title h2 {
+  font-size: 30px;
+  font-weight: bolder;
+  word-spacing: -5px;
+
 }
 
 .screen-title p {
@@ -43,20 +50,78 @@ body, html {
   word-spacing: -1px;
 }
 
+.input-currency {
+  position: relative;
+  right: 0;
+}
+
+button {
+  color: black;
+}
+
 .screen-title button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   font-family: "Press Start 2P", system-ui;
   font-weight: 400;
   font-style: normal;
   font-size: larger;
   margin-top: 20px;
-  padding: 20px 40px;
+  padding: 25px 45px;
   border: none;
   background-color: #f0f0f0;
   cursor: pointer;
+  color: black;
   transition: background-color 0.3s, transform 0.3s; /* Add transform to the transition */
 }
 
-.screen-title button:hover {
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+input {
+  display: flex;
+  width: 100px;
+  align-items: center;
+  font-family: "Press Start 2P", system-ui;
+  font-weight: 400;
+  font-style: normal;
+  font-size: larger;
+  border: none;
+  border-radius: 5px;
+  background-color: #f0f0f0;
+  color: black;
+  cursor: pointer;
+  margin: 0;
+  padding: 0px;
+  transition: background-color 0.3s, transform 0.3s; /* Add transform to the transition */
+}
+
+button:hover {
   background-color: #009688; /* Change to your desired hover background color */
   transform: scale(1.1); /* Increase the size of the button on hover */
 }
+
+.input-bg {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: "Press Start 2P", system-ui;
+  font-weight: 400;
+  font-style: normal;
+  font-size: larger;
+  border: none;
+  background-color: #f0f0f0;
+
+  color: black;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s; /* Add transform to the transition */
+
+}
+
+
+

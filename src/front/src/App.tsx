@@ -10,6 +10,7 @@ import { CustomCameraControls } from './components/CameraControls'
 import * as THREE from 'three'
 import { Text3D } from '@react-three/drei'
 import { ScreenTitle } from './components/screens/ScreenTitle'
+import { ScreenSpawnPortal } from './components/screens/ScreenSpawnPortal'
 
 function App() {
   const { snapshot } = useInspect({type:InspectType.State, value: 0})
@@ -41,6 +42,7 @@ function App() {
       </Canvas>
       <GameBar />
       <ScreenTitle />
+      <ScreenSpawnPortal />
     </>
   )
 }

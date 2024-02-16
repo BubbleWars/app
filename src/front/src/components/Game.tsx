@@ -5,7 +5,7 @@ import { Notice } from '../generated-src/graphql'
 import { CustomCameraControls } from './CameraControls'
 import { Portals } from './Portals'
 import { Bubbles } from './Bubbles'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { currentState, init, lastTimestamp, rollbackToState, run, world } from '../../../core/world'
 import { handleInput } from '../../../core/funcs/inputs'
 import { Input } from '../../../core/types/inputs'
@@ -41,7 +41,7 @@ export const Game = ({snapshot, inputs, notices} : {snapshot: Snapshot, inputs: 
     const [bubbleIds, setBubbleIds] = useState<string[]>([])
     const [portalIds, setPortalIds] = useState<string[]>([])
     const [nodeIds, setNodeIds] = useState<string[]>([])
-    const [resourceIds, setResourceIds] = useState<string[]>([])
+    const [resourceIds, setResourceIds] = useState<string[]>([])        
 
     //Initialize client state
     useEffect(() => {

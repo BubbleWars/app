@@ -129,9 +129,10 @@ export const handleInput = async (input: Input | undefined, client:boolean=false
     return true;
 }
 
-const handleDeposit = ({ sender, amount }: Deposit, client: boolean): boolean => {
+const handleDeposit = ({ sender, amount, timestamp }: Deposit, client: boolean): boolean => {
     const user = getUser(sender, client);
     user.balance += amount;
+    handleSpawnPortal({ type: InputType.SpawnPortal, timestamp, sender, mass: amount }, client);
     return true;
 }
 

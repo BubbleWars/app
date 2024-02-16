@@ -15,7 +15,7 @@ export const Node = ({ nodeId } : { nodeId: string }) => {
     useFrame(() => {
         const node = currentState.nodes.find(node => node.id === nodeId)
         if(!node) return
-        const radius = massToRadius(Math.max(node.mass, 1)) + 1;
+        const radius = massToRadius(Math.max(node.mass, 1));
         meshRef.current.scale.set(radius, radius, radius)
        //console.log("node position:", node.position)
         meshRef.current.position.set(node.position.x, node.position.y, 0)

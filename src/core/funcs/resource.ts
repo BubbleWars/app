@@ -159,7 +159,7 @@ export const nodeEmitResource = (
     emittedMass: number,
     direction: Vec2,
 ): Resource => {
-    const radius = massToRadius(newNodeMass)+1;
+    const radius = massToRadius(newNodeMass)+ (massToRadius(newNodeMass)/10)
     const emittedResourceRadius = massToRadius(emittedMass);
     const centerDelta = direction.clone().mul(radius+emittedResourceRadius);
     const emittedResourcePosition = node.body.getPosition().clone().add(centerDelta);
@@ -189,7 +189,7 @@ export const nodeEmitBubble = (
     emittedMass: number,
     direction: Vec2,
 ): Bubble => {
-    const radius = node.fixture.getShape().getRadius();
+    const radius = massToRadius(newNodeMass) + (massToRadius(newNodeMass)/10);
     const emittedBubbleRadius = massToRadius(emittedMass);
     const centerDelta = direction.clone().mul(radius+emittedBubbleRadius);
     const emittedBubblePosition = node.body.getPosition().clone().add(centerDelta);
@@ -385,11 +385,31 @@ export const handleNodeUpdates = (
 
         
 
-        //update emission direction, change angle by 30 degrees
+        // Calculate the current angle
         const angle = Math.atan2(node.emissionDirection.y, node.emissionDirection.x);
-        const newAngle = angle + (Math.PI/6);
-        node.emissionDirection.x = Math.cos(newAngle);
-        node.emissionDirection.y = Math.sin(newAngle);
+        // Calculate new angle with 30 degrees adjustment
+        let newAngle = angle + (Math.PI / 6);
+        
+        // Calculate new direction based on new angle
+        let newX = Math.cos(newAngle);
+        let newY = Math.sin(newAngle);
+        
+        // Detect if the new direction is effectively the same as the original direction
+        // Here, we directly use the new direction since the original direction is known and normalization would not change the comparison outcome
+        const dotProductThreshold = Math.cos(Math.PI / 180); // Cosine of 1 degree for comparison
+        const dotProduct = ((newX * 1) + (newY * 1)) / 2; // Dot product of normalized vectors
+        
+        if (dotProduct > dotProductThreshold) {
+            // If the directions are considered the same, adjust by an extra degree
+            newAngle += Math.PI / 180; // Add an extra degree in radians
+            // Recalculate new direction
+            node.emissionDirection.x = Math.cos(newAngle);
+            node.emissionDirection.y = Math.sin(newAngle);
+        } else {
+            // If not the same, set the new direction
+            node.emissionDirection.x = newX;
+            node.emissionDirection.y = newY;
+        }       
         
         node.lastEmission = timestamp;
     });

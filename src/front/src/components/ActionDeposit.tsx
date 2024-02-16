@@ -19,7 +19,7 @@ export const ActionDeposit = () => {
             disabled={isError || isLoading}
             onClick={() => write?.()}
         >
-            <p>Deposit</p>
+            <p>Spawn</p>
             <input type="number" value={amount} onChange={(e) => setAmount(parseInt(e.target.value))} />
             <p>{isError ? 'Error' : isLoading ? 'Loading' : isSuccess ? 'Success' : 'Idle'}</p>
         </button>
