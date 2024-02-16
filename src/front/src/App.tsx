@@ -27,10 +27,10 @@ function App() {
       >
         <ambientLight intensity={1} />
         <color attach="background" args={['#272730']} />
-        <CustomCameraControls/>
-        {!isConnected && <ScreenTitle /> }
 
         <Game snapshot={snapshot} inputs={inputs} notices ={notices} />
+        <CustomCameraControls/>
+
 
         {/* <gridHelper 
           position={[0, 0, -10]}
@@ -40,6 +40,7 @@ function App() {
         
       </Canvas>
       <GameBar />
+      <ScreenTitle />
     </>
   )
 }

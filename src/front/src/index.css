@@ -9,3 +9,54 @@ body, html {
   bottom: 0;
   height: 50px;
 }
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+.screen-title {
+  backdrop-filter: blur(10px);
+  position: fixed;
+  top: 0;
+  left:0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+
+    font-family: "Press Start 2P", system-ui;
+    font-weight: 400;
+    font-style: normal;
+    z-index: 1000;
+}
+
+.screen-title h1 {
+  color: white;
+  font-size: 70px;
+}
+
+.screen-title p {
+  color: white;
+  font-size: 15px;
+  font-weight: bolder;
+  word-spacing: -1px;
+}
+
+.screen-title button {
+  font-family: "Press Start 2P", system-ui;
+  font-weight: 400;
+  font-style: normal;
+  font-size: larger;
+  margin-top: 20px;
+  padding: 20px 40px;
+  border: none;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s; /* Add transform to the transition */
+}
+
+.screen-title button:hover {
+  background-color: #009688; /* Change to your desired hover background color */
+  transform: scale(1.1); /* Increase the size of the button on hover */
+}
