@@ -25,7 +25,7 @@ export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string
     if(!portal) return null
     const radius = massToRadius(portal.mass)
     const position = new THREE.Vector3(portal.position.x, portal.position.y, 0)
-    const length = 10
+    const length = radius+5;
     const [ direction, setDirection ] = useState<THREE.Vector3>(new THREE.Vector3(1, 0, 0))
     const [hasProcessedTx, setHasProcessedTx] = useState(false);
     const [ isEmitting, setIsEmitting ] = useState<boolean>(false)

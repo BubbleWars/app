@@ -44,7 +44,7 @@ export const generateNodeId = (nodes: Map<string, ResourceNode>): string => {
         const id = parseInt(node.id);
         if(id > max) max = id;
     });
-    return `${max+1}`;
+    return `node-${max+1}`;
 }
 
 export const createNode = (
@@ -54,13 +54,14 @@ export const createNode = (
     x: number,
     y: number,
     mass: number = 0,
+    id?: string
 ): ResourceNode  => {
     //default radius of nodes equates to 1 mass
     const radius = massToRadius(1);
     const body = world.createBody({position: Vec2(x,y), type: "static"});
     const fixture = body.createFixture({shape: Circle(radius), density: 1, restitution: 0, friction: 0});
     const node: ResourceNode = { 
-        id: generateNodeId(nodes),
+        id: id ?? generateNodeId(nodes),
         resource: type, 
         mass,
         body, 
@@ -87,20 +88,22 @@ export const createResource = (
     y: number,
     mass: number,
     owner: string = ZeroAddress,
+    id?: string
 ): Resource => {
     const radius = massToRadius(mass);
     const body = world.createBody({position: Vec2(x, y), type: "dynamic", linearDamping: DAMPENING});
     body.setMassData({mass, center: Vec2(0, 0), I: 0});
     const fixture = body.createFixture({shape: Circle(radius), density: 1, restitution: 0, friction: 0});
+    const resourceId = id ?? `resource-${resources.size}`;
     const resource: Resource = {
-        id: `${resources.size}`,
+        id: resourceId,
         resource: type,
         body,
         fixture,
         owner,
         balance: 0,
     };
-    resource.body.setUserData(`resource-${resources.size}`);
+    resource.body.setUserData(resourceId);
     resources.set(resource.body.getUserData() as string, resource);
 //    //console.log("404::creating resource", {
 //         id: `${resources.size}`,
@@ -159,7 +162,7 @@ export const nodeEmitResource = (
     emittedMass: number,
     direction: Vec2,
 ): Resource => {
-    const radius = massToRadius(newNodeMass)+ (massToRadius(newNodeMass)/10)
+    const radius = massToRadius(newNodeMass)+ 5;
     const emittedResourceRadius = massToRadius(emittedMass);
     const centerDelta = direction.clone().mul(radius+emittedResourceRadius);
     const emittedResourcePosition = node.body.getPosition().clone().add(centerDelta);

@@ -52,14 +52,16 @@ export const setBubbleResourceMass = (bubble: Bubble, resource: ResourceType, ma
     bubble.resources.set(resource, { resource, mass });
 }
 
-export const createBubble = (timestamp:number, bubbles: Map<string, Bubble>, world: World, owner: Address, x: number, y: number, mass: number, controllable: boolean): Bubble => {
+export const createBubble = (timestamp:number, bubbles: Map<string, Bubble>, world: World, owner: Address, x: number, y: number, mass: number, controllable: boolean, id?: string): Bubble => {
     const radius = massToRadius(mass);
     if(owner == ZeroAddress) throw new Error("Cannot create bubble with zero address");
     const body = world.createBody({position: Vec2(x, y), type: "dynamic", linearDamping: DAMPENING });
     body.setMassData({mass, center: Vec2(0, 0), I: 0});
     const fixture = body.createFixture({ shape: Circle(radius), density: 1, restitution: 0, friction: 0});
     const bubble = { owner, balance: 0, body, fixture, controllable };
-    bubble.body.setUserData(generateBubbleId(bubbles, owner));
+    //set id
+    if(id) bubble.body.setUserData(id);
+    else bubble.body.setUserData(generateBubbleId(bubbles, owner));
     bubbles.set(bubble.body.getUserData() as string, bubble);
 //    //console.log('new event creating bubble', {
 //         owner,

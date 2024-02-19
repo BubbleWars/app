@@ -19,7 +19,7 @@ export const PortalsInfo = ({ portalId } : { portalId: string }) => {
     const energy = portal.resources
     .find(resource => resource.resource == ResourceType.Energy)
 const energyAmount = energy ? energy.mass : 0
-console.log("404::resources main", portal.resources)
+//console.log("404::resources main", portal.resources)
     return (
         <>
             <CustomText 

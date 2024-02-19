@@ -36,7 +36,7 @@ export const Game = ({snapshot, inputs, notices} : {snapshot: Snapshot, inputs: 
     //Initialize client state
     const [lastTimestampHandled, setLastTimestampHandled] = useState<number>(snapshot.timestamp)
    //console.log("lastTimestampHandled:", lastTimestampHandled)
-   //console.log("snapshot recieved", snapshot)
+   console.log("snapshot recieved", snapshot)
     //Game object ids
     const [bubbleIds, setBubbleIds] = useState<string[]>([])
     const [portalIds, setPortalIds] = useState<string[]>([])
@@ -97,19 +97,19 @@ export const Game = ({snapshot, inputs, notices} : {snapshot: Snapshot, inputs: 
                             if(!bubbleIds.includes(event.id)){
                                //console.log("new event 11", event)
                                 bubbleStartPositions[event.id] = event.position
-                                //setOnEvent(()=>{})
+                                setOnEvent(()=>{})
                             }
                         }else if(event.type == EventsType.DestroyBubble){
                             if(bubbleIds.includes(event.id)){
                                //console.log("new event 22", event)
                                 bubbleDestroyPositions[event.id] = event.position
-                                //setOnEvent(()=>{})
+                                setOnEvent(()=>{})
                             }
                         }else if(event.type == EventsType.CreateResource){
                             if(!resourceIds.includes(event.id)){
                                //console.log("new event 33", event)
                                 resourceStartPositions[event.id] = event.position
-                                //setOnEvent(()=>{})
+                                setOnEvent(()=>{})
                             }
                         }
                         

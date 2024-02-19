@@ -77,7 +77,7 @@ export const init = (initialState?: Snapshot) => {
 
         //Set world state based on snapshot
         currentState.bubbles.forEach(bubble => {
-            const newBubble = createBubble(lastTimestamp,bubbles, world, bubble.owner, bubble.position.x, bubble.position.y, bubble.mass, false);
+            const newBubble = createBubble(lastTimestamp,bubbles, world, bubble.owner, bubble.position.x, bubble.position.y, bubble.mass, false, bubble.id);
             newBubble.body.setLinearVelocity(Vec2(bubble.velocity.x, bubble.velocity.y));
             bubble.resources.forEach(resource => {
                 setBubbleResourceMass(newBubble, resource.resource, resource.mass);
@@ -93,11 +93,11 @@ export const init = (initialState?: Snapshot) => {
             users.set(user.address, { address: user.address, balance: user.balance });
         })
         currentState.resources.forEach(resource =>{
-            const newResource = createResource(lastTimestamp, world, resources, resource.type, resource.position.x, resource.position.y, resource.mass, resource.owner)
+            const newResource = createResource(lastTimestamp, world, resources, resource.type, resource.position.x, resource.position.y, resource.mass, resource.owner, resource.id)
             newResource.body.setLinearVelocity(Vec2(resource.velocity.x, resource.velocity.y))
         })
         currentState.nodes.forEach(node => {
-            createNode(world, nodes, node.type, node.position.x, node.position.y, node.mass)
+            createNode(world, nodes, node.type, node.position.x, node.position.y, node.mass, node.id)
         })
         currentState.pendingInputs.forEach(input => {
             pendingInputs.push(input);
