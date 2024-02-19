@@ -98,5 +98,5 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
 export const Bubbles = ({ bubbles } : { bubbles: string[] }) => {
     return bubbles
         .map((bubble, index) => 
-            <Bubble key={index} bubbleId={bubble} />)
+            <Bubble key={bubble} bubbleId={bubble} />)
 }

@@ -18,7 +18,7 @@ export const Resource = ({ resourceId } : { resourceId: string }) => {
     const [ isSelected, setIsSelected ] = useState<boolean>(false)
     const [ disableLerp, setDisableLerp ] = useState<boolean>(false)
     useFrame(() => {
-        const resource = snapshotCurrentState.resources.find(resource => resource.id === resourceId)
+        const resource = currentState.resources.find(resource => resource.id === resourceId)
         if(!resource) {
            console.log("resource not found", resourceId)
            meshRef.current.position.set(0, 0, 0)
@@ -39,17 +39,17 @@ export const Resource = ({ resourceId } : { resourceId: string }) => {
             const startPosition = resourceStartPositions[resourceId]
             console.log("meshRef posision", meshRef.current.position)
             if(startPosition) {
-                //meshRef.current.position.set(startPosition.x, startPosition.y, 0)
+                meshRef.current.position.set(startPosition.x, startPosition.y, 0)
             }
             else {
                 //return
                 //get node position
                 const node = currentState.nodes.find(node => node.id === resource.owner)
                 if(node) {
-                    //meshRef.current.position.set(node.position.x, node.position.y, 0)
+                    meshRef.current.position.set(node.position.x, node.position.y, 0)
                 }
                 else {
-                    //meshRef.current.position.set(resource.position.x, resource.position.y, 0)
+                    meshRef.current.position.set(resource.position.x, resource.position.y, 0)
                 }
                //console.log("resource start position not found")
             }
