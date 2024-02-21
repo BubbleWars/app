@@ -64,6 +64,8 @@ export const updateState = (
             owner: node.owner,
             position: node.body.getPosition().clone(),
             mass: node.mass,
+            emissionDirection: node.emissionDirection,
+            lastEmission: node.lastEmission,
         }))
     
     state.resources = Array.from(resources.values())

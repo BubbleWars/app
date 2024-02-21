@@ -19,4 +19,5 @@ export interface ResourceNode extends Entity {
     pendingEthMass: number, // amount of ETH mass pending to be added to the node
     pendingResourceMass: number, // amount of resource added back to the node
     emissionDirection: {x: number, y: number},
+    lastEmission: number,
 }

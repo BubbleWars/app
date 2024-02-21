@@ -97,7 +97,7 @@ export const init = (initialState?: Snapshot) => {
             newResource.body.setLinearVelocity(Vec2(resource.velocity.x, resource.velocity.y))
         })
         currentState.nodes.forEach(node => {
-            createNode(world, nodes, node.type, node.position.x, node.position.y, node.mass, node.id)
+            createNode(world, nodes, node.type, node.position.x, node.position.y, node.mass, node.id, node.emissionDirection, node.lastEmission)
         })
         currentState.pendingInputs.forEach(input => {
             pendingInputs.push(input);

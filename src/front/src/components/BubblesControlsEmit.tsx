@@ -149,7 +149,7 @@ export const BubblesControlsEmit = ({ bubbleId, isHovered } : { bubbleId: string
         {(isReady && !isEmitting) && <>
             <Line
                 ref={lineRef}
-                color={'black'}
+                color={'white'}
                 lineWidth={2}
                 dashed={true}
                 points={[position, position.clone().add(direction.clone().multiplyScalar(length))]}
@@ -171,7 +171,7 @@ export const BubblesControlsEmit = ({ bubbleId, isHovered } : { bubbleId: string
         {isEmitting  && <>
             <Line
                 ref={lineRef}
-                color={'black'}
+                color={'white'}
                 lineWidth={2}
                 dashed={true}
                 points={[position, position.clone().add(direction.clone().multiplyScalar(length))]}
@@ -206,7 +206,7 @@ export const BubblesControlsEmit = ({ bubbleId, isHovered } : { bubbleId: string
             position={new THREE.Vector3(radius, radius, 0).add(position)}
             anchorX="center"
             anchorY="center"
-            color='black'
+            color='white'
         >
             Emit ETH
         </CustomText>
@@ -226,7 +226,7 @@ export const BubblesControlsEmit = ({ bubbleId, isHovered } : { bubbleId: string
                 position={new THREE.Vector3(radius, radius-2, 0).add(position)}
                 anchorX="center"
                 anchorY="center"
-                color='black'
+                color='white'
             >
             Emit EP
             </CustomText>

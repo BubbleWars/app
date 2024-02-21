@@ -6,8 +6,8 @@ export const CustomText = ({ children, position, color='white', size=8, anchorX=
         <Text 
             font="fonts/PressStart2P-Regular.ttf"
             color={color}
-            fontSize={size/2}
-            outlineColor={'black'}
+            fontSize={size}
+            outlineColor={'white'}
             outlineWidth={size/20}
             anchorX={anchorX}
             anchorY={anchorY}

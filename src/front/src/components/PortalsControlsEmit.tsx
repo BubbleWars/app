@@ -151,7 +151,7 @@ export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string
         {(isReady && !isEmitting) && <>
             <Line
                 ref={lineRef}
-                color={'black'}
+                color={'white'}
                 lineWidth={2}
                 dashed={true}
                 points={[position, position.clone().add(direction.clone().multiplyScalar(length))]}
@@ -173,7 +173,7 @@ export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string
         {isEmitting  && <>
             <Line
                 ref={lineRef}
-                color={'black'}
+                color={'white'}
                 lineWidth={2}
                 dashed={true}
                 points={[position, position.clone().add(direction.clone().multiplyScalar(length))]}
@@ -208,7 +208,7 @@ export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string
             position={new THREE.Vector3(radius, radius, 0).add(position)}
             anchorX="center"
             anchorY="center"
-            color='black'
+            color='white'
         >
             Emit ETH
         </CustomText>
@@ -228,7 +228,7 @@ export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string
                 position={new THREE.Vector3(radius, radius-2, 0).add(position)}
                 anchorX="center"
                 anchorY="center"
-                color='black'
+                color='white'
             >
             Emit EP
             </CustomText>

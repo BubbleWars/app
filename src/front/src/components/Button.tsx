@@ -57,7 +57,7 @@ export const Button = ({ onClick, label, position = [0, 0, 0], fontSize = 5 }) =
             </RoundedBox>
             <Text
                 ref={textRef}
-                color={hovered ? 'black' : 'white'}
+                color={hovered ? 'white' : 'white'}
                 fontSize={fontSize}
                 font="fonts/PressStart2P-Regular.ttf"
                 position={[0, 0, 0]}

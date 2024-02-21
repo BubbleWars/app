@@ -20,7 +20,7 @@ export const Resource = ({ resourceId } : { resourceId: string }) => {
     useFrame(() => {
         const resource = currentState.resources.find(resource => resource.id === resourceId)
         if(!resource) {
-           console.log("resource not found", resourceId)
+          //console.log("resource not found", resourceId)
            meshRef.current.position.set(0, 0, 0)
            meshRef.current.updateMatrix()
            //setDisableLerp(true)
@@ -28,7 +28,7 @@ export const Resource = ({ resourceId } : { resourceId: string }) => {
         }
 
         if(!meshRef.current) {
-           console.log("resource not found")
+          //console.log("resource not found")
            meshRef.current.position.set(0, 0, 0)
            meshRef.current.updateMatrix()
            //setDisableLerp(true)
@@ -37,7 +37,7 @@ export const Resource = ({ resourceId } : { resourceId: string }) => {
 
         if(!meshRef.current.position.x || !meshRef.current.position.y) {
             const startPosition = resourceStartPositions[resourceId]
-            console.log("meshRef posision", meshRef.current.position)
+           //console.log("meshRef posision", meshRef.current.position)
             if(startPosition) {
                 meshRef.current.position.set(startPosition.x, startPosition.y, 0)
             }
@@ -67,18 +67,18 @@ export const Resource = ({ resourceId } : { resourceId: string }) => {
     })  
     
     //blue in hex
-    const baseColor = "#ff0000";
+    const baseColor = "#87CEEB";
     const outlineColor = darkenColor(baseColor, 0.2); // Darken by 20%
     
     return (
         <>
-            <Text
+            {/* <Text
                 position={textPosition}
                 color={'white'}
                 fontSize={1}
             >
                 {resourceId}
-            </Text>
+            </Text> */}
         <mesh
             ref={meshRef}
             onPointerEnter={() => {if(!isSelected)setIsHovered(true)}}
@@ -91,13 +91,7 @@ export const Resource = ({ resourceId } : { resourceId: string }) => {
                 <meshBasicMaterial
                     color={baseColor}
                     />
-                    <Sparkles 
-            color={baseColor} 
-            size={100}
-            scale={10000}
-            count={2}
-            speed={1}
-            />
+                    
             </mesh>
             
         </>

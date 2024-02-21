@@ -32,6 +32,8 @@ export interface ResourceNodeState {
     type: ResourceType,
     position: { x: number, y: number },
     mass: number,
+    emissionDirection: { x: number, y: number },
+    lastEmission: number,
 }
 
 export interface ResourceState {

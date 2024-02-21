@@ -36,7 +36,7 @@ export const Game = ({snapshot, inputs, notices} : {snapshot: Snapshot, inputs: 
     //Initialize client state
     const [lastTimestampHandled, setLastTimestampHandled] = useState<number>(snapshot.timestamp)
    //console.log("lastTimestampHandled:", lastTimestampHandled)
-   console.log("snapshot recieved", snapshot)
+  //console.log("snapshot recieved", snapshot)
     //Game object ids
     const [bubbleIds, setBubbleIds] = useState<string[]>([])
     const [portalIds, setPortalIds] = useState<string[]>([])
