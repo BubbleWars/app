@@ -47,6 +47,16 @@ export const generateNodeId = (nodes: Map<string, ResourceNode>): string => {
     return `node-${max+1}`;
 }
 
+export const generateResourceId = (resources: Map<string, Resource>): string => {
+    let max = 0;
+    resources.forEach((value, key) => {
+        const split = key.split('-');
+            const number = parseInt(split[split.length-1]);
+            if(number > max) max = number;
+    });
+    return `resource-${max+1}`;
+}
+
 export const createNode = (
     world: World,
     nodes: Map<string, ResourceNode>, 
@@ -94,10 +104,10 @@ export const createResource = (
     id?: string
 ): Resource => {
     const radius = massToRadius(mass);
-    const body = world.createBody({position: Vec2(x, y), type: "dynamic", linearDamping: DAMPENING});
+    const body = world.createBody({position: Vec2(x, y), type: "dynamic", linearDamping: DAMPENING });
     body.setMassData({mass, center: Vec2(0, 0), I: 0});
     const fixture = body.createFixture({shape: Circle(radius), density: 1, restitution: 0, friction: 0});
-    const resourceId = id ?? `resource-${resources.size}`;
+    const resourceId = id ?? generateResourceId(resources)
     const resource: Resource = {
         id: resourceId,
         resource: type,
@@ -169,7 +179,7 @@ export const nodeEmitResource = (
     const emittedResourceRadius = massToRadius(emittedMass);
     const centerDelta = direction.clone().mul(radius+emittedResourceRadius);
     const emittedResourcePosition = node.body.getPosition().clone().add(centerDelta);
-    const emittedResource = createResource(timestamp, world, resources, node.resource, emittedResourcePosition.x, emittedResourcePosition.y, emittedMass, node.id);
+    const emittedResource = createResource(timestamp, world, resources, node.resource, emittedResourcePosition.x, emittedResourcePosition.y, emittedMass);
 
     //Apply mass conservation
     const newResourceMass = newNodeMass;
@@ -183,6 +193,7 @@ export const nodeEmitResource = (
     const emittedResourceVelocity = node.body.getLinearVelocity().clone().add(emittedResourceRelativeVelocity);
     emittedResource.body.setLinearVelocity(emittedResourceVelocity);
 
+    console.log("11emitted resource", emittedResourcePosition, )
     return emittedResource
 }
 
@@ -195,7 +206,7 @@ export const nodeEmitBubble = (
     emittedMass: number,
     direction: Vec2,
 ): Bubble => {
-    const radius = massToRadius(newNodeMass) + (massToRadius(newNodeMass)/10);
+    const radius = massToRadius(newNodeMass) + 5;
     const emittedBubbleRadius = massToRadius(emittedMass);
     const centerDelta = direction.clone().mul(radius+emittedBubbleRadius);
     const emittedBubblePosition = node.body.getPosition().clone().add(centerDelta);
@@ -239,10 +250,13 @@ export const nodeAbsorbBubble = (
 ): void => {
     const amountAbsorbed = Math.min(absorbedBubble.body.getMass(), (MASS_PER_SECOND * timeElapsed));
     const newBubbleMass = absorbedBubble.body.getMass() - amountAbsorbed;
-    node.pendingEthMass += amountAbsorbed;
+    //get emission
+    const { newMass, emission } = getEmission(node, amountAbsorbed);
+    node.pendingEthMass += emission;
    //console.log("331node absorbing bubble", absorbedBubble, amountAbsorbed, newBubbleMass);
 
     updateBubble(bubbles, absorbedBubble, newBubbleMass);
+    updateNode(node, newMass);
 }
 
 export const getAdjustedRatio = (node: ResourceNode): number => {
@@ -292,17 +306,19 @@ export const handleEmission = (
     bubbles: Map<string, Bubble>,
     resources: Map<string, Resource>,
     mass: number,
-    direction: Vec2,
+    startDir: Vec2,
 ): Resource | Bubble | undefined => {
    //console.log("handling emission", mass);
     //console.log("node", node);
-    console.log("emission", mass, direction);
-    const { newMass, emission } = getEmission(node, mass);
+    console.log("emission", mass, startDir);
+    //const { newMass, emission } = getEmission(node, mass);
+    const newMass = node.mass;
+    const emission = mass;
    //console.log("emission", newMass, emission);
     if(mass > 0)  {
         for(let i = 0; i < 16; i++) {
             const massToEmit = emission/16;
-            const direction = rotateVec2(Vec2(1, 0), Math.PI/8 * i);
+            const direction = rotateVec2(startDir, Math.PI/8 * i);
             nodeEmitResource(timestamp, world, node, resources, newMass, massToEmit, direction);
         }
     }
@@ -367,11 +383,9 @@ export const handleNodeUpdates = (
         if(node.pendingEthMass){
            //console.log("pending eth mass", node.pendingEthMass);
 
-            const ethMassToEmitPer = node.pendingEthMass;
-            //call handle emission looped 16 times
-            //to emit 16 bubbles
-            //emission direction should be start at 1,0 and rotate 1/16th of a circle each time
-            //for(let i = 0; i < 16; i++) {
+           const ethMassToEmitPer = node.pendingEthMass;
+           const emissionDir = Vec2(node.emissionDirection.x, node.emissionDirection.y);
+
             const direction = Vec2(1, 0);
                 handleEmission(
                     timestamp,
@@ -380,10 +394,13 @@ export const handleNodeUpdates = (
                     bubbles,
                     resources,
                     ethMassToEmitPer,
-                    direction
+                    emissionDir
                 );
             //}
             node.pendingEthMass -= ethMassToEmitPer;
+
+            const newEmissionDir = rotateVec2(emissionDir, 1)
+            node.emissionDirection = { x: newEmissionDir.x, y: newEmissionDir.y }
             
             
             

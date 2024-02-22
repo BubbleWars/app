@@ -17,6 +17,8 @@ export const Resource = ({ resourceId } : { resourceId: string }) => {
     const [ isHovered, setIsHovered ] = useState<boolean>(false)
     const [ isSelected, setIsSelected ] = useState<boolean>(false)
     const [ disableLerp, setDisableLerp ] = useState<boolean>(false)
+    const resource = currentState.resources.find(resource => resource.id === resourceId)
+    const mass = resource?.mass.toFixed(3);
     useFrame(() => {
         const resource = currentState.resources.find(resource => resource.id === resourceId)
         if(!resource) {
@@ -55,7 +57,7 @@ export const Resource = ({ resourceId } : { resourceId: string }) => {
             }
            //console.log("resource not found")
         }
-        const radius = massToRadius(resource.mass);
+        const radius = massToRadius(resource.mass) +0.1;
         const newRadius = MathUtils.lerp(meshRef.current.scale.x, radius, 0.1)
         meshRef.current.scale.set(newRadius, newRadius, newRadius)
        //console.log("resource position:", resource.position)
@@ -72,13 +74,12 @@ export const Resource = ({ resourceId } : { resourceId: string }) => {
     
     return (
         <>
-            {/* <Text
+            <CustomText
                 position={textPosition}
-                color={'white'}
-                fontSize={1}
+                size={0.5}
             >
-                {resourceId}
-            </Text> */}
+                {mass} EP
+            </CustomText>
         <mesh
             ref={meshRef}
             onPointerEnter={() => {if(!isSelected)setIsHovered(true)}}

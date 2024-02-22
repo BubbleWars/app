@@ -185,7 +185,7 @@ export const handleContact = (contact: Contact) => {
 
     //Resource-Reosurce collision
     if(r1 && r2) {
-        deferredUpdates.push(() => { resourceCollideResource(resources, r1, r2, STEP_DELTA) });
+        contact.setRestitution(1);
     }else
 
     //Bubble-Obstacle collision
@@ -261,7 +261,7 @@ export const handleSnapshotContact = (contact: Contact) => {
 
     //Resource-Reosurce collision
     if(r1 && r2) {
-        snapshotDeferredUpdates.push(() => { resourceCollideResource(snapshotResources, r1, r2, STEP_DELTA) });
+        contact.setRestitution(1);
     }else
 
     //Bubble-Obstacle collision
@@ -271,4 +271,6 @@ export const handleSnapshotContact = (contact: Contact) => {
     if(b2 && !b1) {
         contact.setRestitution(1);
     }
+
+
 }
