@@ -236,9 +236,13 @@ export const nodeAbsorbResource = (
    //console.log("node absorbing resource", absorbedResource, timeElapsed, MASS_PER_SECOND)
     const amountAbsorbed = Math.min(absorbedResource.body.getMass(), (MASS_PER_SECOND * timeElapsed));
     const newResourceMass = absorbedResource.body.getMass() - amountAbsorbed;
-    node.pendingResourceMass += amountAbsorbed;
+
+    //get emission
+    const { newMass, emission } = getEmission(node, -amountAbsorbed)
+    node.pendingResourceMass += emission;
 
     updateResource(resources, absorbedResource, newResourceMass);
+    updateNode(node, newMass);
 }
 
 export const nodeAbsorbBubble = (
@@ -313,7 +317,7 @@ export const handleEmission = (
     console.log("emission", mass, startDir);
     //const { newMass, emission } = getEmission(node, mass);
     const newMass = node.mass;
-    const emission = mass;
+    const emission = Math.abs(mass);
    //console.log("emission", newMass, emission);
     if(mass > 0)  {
         for(let i = 0; i < 16; i++) {
@@ -322,8 +326,13 @@ export const handleEmission = (
             nodeEmitResource(timestamp, world, node, resources, newMass, massToEmit, direction);
         }
     }
-    if(mass < 0)
-     return nodeEmitBubble(timestamp,world, bubbles, node, newMass, emission, direction);
+    if(mass < 0) {
+        for(let i = 0; i < 16; i++) {
+            const massToEmit = emission/16;
+            const direction = rotateVec2(startDir, Math.PI/8 * i);
+            nodeEmitBubble(timestamp, world, bubbles, node, newMass, massToEmit, direction);
+        }
+    }
 }
 
 // export const handleInflation = (
@@ -406,20 +415,21 @@ export const handleNodeUpdates = (
             
         }else if(node.pendingResourceMass){
            //console.log("pending resource mass", node.pendingResourceMass);
-            const resourceMassToConvert = Math.min(node.pendingResourceMass,0.1);
+            const resourceMassToConvert = node.pendingResourceMass;
+            const emissionDir = Vec2(node.emissionDirection.x, node.emissionDirection.y);
             handleEmission(
-            timestamp,
-            world,
-            node,
-            bubbles,
-            resources,
-            -resourceMassToConvert,
-            Vec2(
-            node.emissionDirection.x, 
-            node.emissionDirection.y
-            )
+                timestamp,
+                world,
+                node,
+                bubbles,
+                resources,
+                -resourceMassToConvert,
+                emissionDir
             );
             node.pendingResourceMass -= resourceMassToConvert;
+
+            const newEmissionDir = rotateVec2(emissionDir, 1)
+            node.emissionDirection = { x: newEmissionDir.x, y: newEmissionDir.y }
             
         }
 
