@@ -18,7 +18,9 @@ export const Resource = ({ resourceId } : { resourceId: string }) => {
     const [ isSelected, setIsSelected ] = useState<boolean>(false)
     const [ disableLerp, setDisableLerp ] = useState<boolean>(false)
     const resource = currentState.resources.find(resource => resource.id === resourceId)
-    const mass = resource?.mass.toFixed(3);
+    const mass = resource?.mass.toFixed(2);
+    const radius = massToRadius(parseInt(mass ?? "0")) +0.1;
+
     useFrame(() => {
         const resource = currentState.resources.find(resource => resource.id === resourceId)
         if(!resource) {
@@ -75,7 +77,7 @@ export const Resource = ({ resourceId } : { resourceId: string }) => {
     return (
         <>
             <CustomText
-                position={textPosition}
+                position={new THREE.Vector3(radius+1, radius+1, 0).add(textPosition)}
                 size={0.5}
             >
                 {mass} EP
