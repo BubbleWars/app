@@ -3,7 +3,7 @@ import { ethereumAddressToColor, massToRadius } from '../../../core/funcs/utils'
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
-import { currentState } from '../../../core/world'
+import { bubbles, currentState } from '../../../core/world'
 import { snapshotCurrentState } from '../../../core/snapshots'
 import { BubblesInfo } from './BubblesInfo'
 import { BubblesControlsEmit } from './BubblesControlsEmit'
@@ -62,8 +62,9 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
         meshRef.current.position.set(newX, newY, 0)
         meshRef.current.updateMatrix()
     })  
-    
-    const baseColor = ethereumAddressToColor(bubbleId.substring(0, bubbleId.length-2));
+
+    const owner = currentState.bubbles.find(bubble => bubble.id == bubbleId)?.owner ?? ""
+    const baseColor = ethereumAddressToColor(owner);
     const outlineColor = darkenColor(baseColor, 0.5); // Darken by 20%
 
     useEffect(() => {
@@ -84,7 +85,7 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
                 <Outlines thickness={0.1} color={outlineColor} />
                 <meshBasicMaterial
                     toneMapped={false}
-                    color={ethereumAddressToColor(bubbleId.substring(0, bubbleId.length-2))}
+                    color={baseColor}
                     />
             </mesh>
             

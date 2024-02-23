@@ -8,7 +8,7 @@ export const CustomText = ({ children, position, color='white', size=8, anchorX=
             color={color}
             fontSize={size}
             outlineColor={'black'}
-            outlineWidth={size/10}
+            outlineWidth={size/5}
             anchorX={anchorX}
             anchorY={anchorY}
             position={position.clone().add(new THREE.Vector3(0, 0, 6))}
