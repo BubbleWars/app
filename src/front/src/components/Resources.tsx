@@ -80,10 +80,13 @@ export const Resource = ({ resourceId } : { resourceId: string }) => {
     return (
         <>
             <CustomText
-                position={new THREE.Vector3(radius+1, radius+1, 0).add(textPosition)}
-                size={0.5}
+                position={new THREE.Vector3(radius+1, radius+0.5, 0).add(textPosition)}
+                //position={textPosition}
+                size={radius*2}
+                color={baseColor}
+                noOutline={true}
             >
-                {mass} EP  {kineticEnergy} KE
+                {mass} EP
             </CustomText>
         <mesh
             ref={meshRef}

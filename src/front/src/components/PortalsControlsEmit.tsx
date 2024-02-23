@@ -188,7 +188,7 @@ export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string
                 color="white"
                 position={position.clone().add(direction.clone().multiplyScalar(length))}>
                 
-                    {`Emiting... \n`}
+                    {`Emitting... \n`}
             </CustomText>
         </>}
             

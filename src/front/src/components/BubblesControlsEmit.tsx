@@ -186,7 +186,7 @@ export const BubblesControlsEmit = ({ bubbleId, isHovered } : { bubbleId: string
                 color="white"
                 position={position.clone().add(direction.clone().multiplyScalar(length))}>
                 
-                    {`Emmiting... \n`}
+                    {`Emitting... \n`}
             </CustomText>
         </>}
             
