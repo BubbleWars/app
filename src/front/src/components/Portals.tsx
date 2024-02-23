@@ -59,6 +59,7 @@ export const Portal = ({ portalId } : { portalId: string }) => {
                 <sphereGeometry />
                 <Outlines thickness={0.1} color={outlineColor} />
                 <meshBasicMaterial
+                toneMapped={false}
                     color={baseColor}
                 />
             </mesh>

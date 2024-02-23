@@ -12,4 +12,5 @@ export interface Puncture {
 export interface Bubble extends Entity {
     controllable: boolean,
     punctures?: Map<PuncturePoint, Puncture>,
+    lastPunctureEmit?: number
 }

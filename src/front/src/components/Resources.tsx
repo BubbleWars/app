@@ -3,13 +3,14 @@ import { ethereumAddressToColor, massToRadius } from '../../../core/funcs/utils'
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
-import { currentState } from '../../../core/world'
+import { currentState, resources } from '../../../core/world'
 import { snapshotCurrentState } from '../../../core/snapshots'
 import { Outlines, Sparkles, Text } from '@react-three/drei'
 import { darkenColor } from '../utils'
 import { resourceStartPositions } from './Game'
 import { MathUtils } from 'three'
 import { CustomText } from './CustomText'
+import { Vec2 } from 'planck-js'
 
 export const Resource = ({ resourceId } : { resourceId: string }) => {
     const meshRef = useRef<any>()
@@ -18,8 +19,10 @@ export const Resource = ({ resourceId } : { resourceId: string }) => {
     const [ isSelected, setIsSelected ] = useState<boolean>(false)
     const [ disableLerp, setDisableLerp ] = useState<boolean>(false)
     const resource = currentState.resources.find(resource => resource.id === resourceId)
-    const mass = resource?.mass.toFixed(2);
+    const mass = resource?.mass.toFixed(2) ?? "0";
     const radius = massToRadius(parseInt(mass ?? "0")) +0.1;
+    const velocity = resources.get(resourceId)?.body.getLinearVelocity()
+    const kineticEnergy = velocity?.clone().lengthSquared() * resource?.mass
 
     useFrame(() => {
         const resource = currentState.resources.find(resource => resource.id === resourceId)
@@ -80,7 +83,7 @@ export const Resource = ({ resourceId } : { resourceId: string }) => {
                 position={new THREE.Vector3(radius+1, radius+1, 0).add(textPosition)}
                 size={0.5}
             >
-                {mass} EP
+                {mass} EP  {kineticEnergy} KE
             </CustomText>
         <mesh
             ref={meshRef}
@@ -92,7 +95,8 @@ export const Resource = ({ resourceId } : { resourceId: string }) => {
                 <sphereGeometry />
                 <Outlines thickness={0.1} color={outlineColor} />
                 <meshBasicMaterial
-                    color={baseColor}
+                toneMapped={false}
+                    color={kineticEnergy > 5 ? '#ff0000' : baseColor}
                     />
                     
             </mesh>

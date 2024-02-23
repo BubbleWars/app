@@ -1,4 +1,4 @@
-import { Circle, Vec2, World } from "planck-js";
+import { Circle, Vec2, Velocity, World } from "planck-js";
 import { Bubble, PuncturePoint } from "../types/bubble";
 import { massToRadius, radiusToMass } from "./utils";
 import { Address } from "../types/address";
@@ -236,44 +236,47 @@ export const absorbResource = (bubbles: Map<string, Bubble>, resources: Map<stri
     const newAbsorbedResourceMomentum = absorbedResource.body.getLinearVelocity().clone().mul(absorbedResource.body.getMass()).sub(momentumAbsorbed);
     //Get the relative momentum between the bubble and the resource
     if(absorbedResource.resource == ResourceType.Energy){
-        const absorbedResourceMomentum = absorbedResource.body.getLinearVelocity().clone().mul(absorbedResource.body.getMass());
-        const bubbleMomentum = bubble.body.getLinearVelocity().clone().mul(bubble.body.getMass());
-        const relativeMomentum = absorbedResourceMomentum.sub(bubbleMomentum);
+        const resourceMass = absorbedResource.body.getMass();
+        const resourceVelocity = absorbedResource.body.getLinearVelocity();
+        const kineticEnergy = resourceVelocity.clone().lengthSquared() * resourceMass
         //the closer the relative momentum is to zero, the more the bubble is moving in the same direction as the resource
-        const shouldNotClash = relativeMomentum.length() < 1;
+        const shouldClash = kineticEnergy > 5;
        //console.log("clash relativeMomentum", relativeMomentum.length(), shouldNotClash);
-        // if(!shouldNotClash){
-        //     updateBubble(bubbles, bubble, newBubbleMass-amountAbsorbed, -amountAbsorbed, absorbedResource);
-        //     updateResource(resources, absorbedResource, newAbsorbedResourceMass);
-        //     //if bubble energy negative add a puncture
-        //     if(bubble.resources?.has(ResourceType.Energy))
-        //     if(bubble.resources?.get(ResourceType.Energy).mass < 0){
-        //         const energyDeficit = bubble.resources?.get(ResourceType.Energy).mass;
-        //         if(!bubble.punctures) bubble.punctures = new Map();
-        //         //puncture point is normalized vector from bubble to resource
-        //         const puncturePoint = absorbedResource.body.getPosition().clone().sub(bubble.body.getPosition());
-        //         const puncturePointNormalized: PuncturePoint = {
-        //             x: puncturePoint.clone().x / puncturePoint.clone().length(),
-        //             y: puncturePoint.clone().y / puncturePoint.clone().length(),
-        //         }
+        if(shouldClash){
+            updateBubble(bubbles, bubble, newBubbleMass-amountAbsorbed, -amountAbsorbed, absorbedResource);
+            updateResource(resources, absorbedResource, newAbsorbedResourceMass);
+            //if bubble energy negative add a puncture
+            const bubbleResourceMass = getBubbleResourceMass(bubble, ResourceType.Energy)
+            if(bubbleResourceMass)
+            if(bubbleResourceMass < 0){
+                const energyDeficit = bubbleResourceMass
+                if(!bubble.punctures) bubble.punctures = new Map();
+                //puncture point is normalized vector from bubble to resource
+                const puncturePoint = absorbedResource.body.getPosition().clone().sub(bubble.body.getPosition());
+                const puncturePointNormalized: PuncturePoint = {
+                    x: puncturePoint.clone().x / puncturePoint.clone().length(),
+                    y: puncturePoint.clone().y / puncturePoint.clone().length(),
+                }
 
-        //         if(!bubble.punctures.has(puncturePointNormalized)){
-        //             bubble.punctures.set(puncturePointNormalized, {amount: 0});
-        //         }
-        //         bubble.punctures.get(puncturePointNormalized).amount += -energyDeficit;
-        //         //now set resource to zero
-        //         bubble.resources.get(ResourceType.Energy).mass = 0; 
-        //     }
-        //     return;
-        // } else {
+                if(!bubble.punctures.has(puncturePointNormalized)){
+                    bubble.punctures.set(puncturePointNormalized, {amount: 0});
+                }
+                bubble.punctures.get(puncturePointNormalized).amount += -energyDeficit;
+                //now set resource to zero
+                setBubbleResourceMass(bubble, ResourceType.Energy, 0);
+            }
+            return;
+        } else {
             updateBubble(bubbles, bubble, newBubbleMass, amountAbsorbed, absorbedResource);
             updateResource(resources, absorbedResource, newAbsorbedResourceMass);
-        // }
-    }
+            if(bubble.body.isDynamic())
+                bubble.body.setLinearVelocity(newBubbleMomentum.mul(1 / newBubbleMass));
+            absorbedResource.body.setLinearVelocity(newAbsorbedResourceMomentum.mul(1 / newAbsorbedResourceMass));
+
+        }
+    
         //console.log("amountAbsorbed", amountAbsorbed, "newBubbleMass", newBubbleMass, "newAbsorbedResourceMass", newAbsorbedResourceMass);
-    if(bubble.body.isDynamic())
-        bubble.body.setLinearVelocity(newBubbleMomentum.mul(1 / newBubbleMass));
-    absorbedResource.body.setLinearVelocity(newAbsorbedResourceMomentum.mul(1 / newAbsorbedResourceMass));
+    }
 }
 
 export const handlePunctures = (
@@ -284,13 +287,20 @@ export const handlePunctures = (
 ): void => {
     if(!bubble.punctures) return;
     bubble.punctures.forEach((puncture, puncturePoint) => {
-        const amountEmitted = Math.min(puncture.amount, PUNCTURE_EMIT_PER_SECOND * timeElapsed);
-        if(amountEmitted > 0) {
-            const newPunctureAmount = puncture.amount - amountEmitted;
-            emitBubble(timestamp, bubbles, bubble, amountEmitted, Vec2(puncturePoint.x, puncturePoint.y));
-            puncture.amount = newPunctureAmount;
-            if(newPunctureAmount <= 0) bubble.punctures.delete(puncturePoint);
+        if(!bubble.lastPunctureEmit) bubble.lastPunctureEmit = timestamp;
+        
+        const timeSinceLast = timestamp - bubble.lastPunctureEmit;
+
+        if(timeSinceLast > 1){
+            const amountEmitted = Math.min(Math.max(puncture.amount*0.1, 0.01), puncture.amount)
+            if(amountEmitted > 0) {
+                const newPunctureAmount = puncture.amount - amountEmitted;
+                emitBubble(timestamp, bubbles, bubble, amountEmitted, Vec2(puncturePoint.x, puncturePoint.y));
+                puncture.amount = newPunctureAmount;
+                if(newPunctureAmount <= 0) bubble.punctures.delete(puncturePoint);
+            }
         }
+        
     })
 }
 

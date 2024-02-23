@@ -8,7 +8,7 @@ import { GameBar } from './components/GameBar'
 import { Canvas, extend } from '@react-three/fiber'
 import { CustomCameraControls } from './components/CameraControls'
 import * as THREE from 'three'
-import { Text3D } from '@react-three/drei'
+import { Text, Text3D } from '@react-three/drei'
 import { ScreenTitle } from './components/screens/ScreenTitle'
 import { ScreenSpawnPortal } from './components/screens/ScreenSpawnPortal'
 
@@ -26,21 +26,18 @@ function App() {
         camera={{ position: [0, 0, 100], zoom: 10, near: 0.01, far: 1000 }}
         style={{ height: '100vh', width: '100vw' }}
       >
-        <ambientLight intensity={1} />
-        <color attach="background" args={['#272730']} />
 
         <Game snapshot={snapshot} inputs={inputs} notices ={notices} />
         <CustomCameraControls/>
 
 
-        {/* <gridHelper 
+        <gridHelper 
           position={[0, 0, -10]}
           rotation={[Math.PI / 2, 0, 0]}
-          args={[10000, 250, 0x00ffffff, 0x00ffffff]}
-        /> */}
+          args={[10000, 550, 0xf5f5f5, 0xf5f5f5]}
+        />
         
       </Canvas>
-      <GameBar />
       <ScreenTitle />
       <ScreenSpawnPortal />
     </>

@@ -64,7 +64,7 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
     })  
     
     const baseColor = ethereumAddressToColor(bubbleId.substring(0, bubbleId.length-2));
-    const outlineColor = darkenColor(baseColor, 0.2); // Darken by 20%
+    const outlineColor = darkenColor(baseColor, 0.5); // Darken by 20%
 
     useEffect(() => {
        //console.log("setIsBubbleSelected: ui", isSelected)
@@ -83,6 +83,7 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
                 <sphereGeometry />
                 <Outlines thickness={0.1} color={outlineColor} />
                 <meshBasicMaterial
+                    toneMapped={false}
                     color={ethereumAddressToColor(bubbleId.substring(0, bubbleId.length-2))}
                     />
             </mesh>

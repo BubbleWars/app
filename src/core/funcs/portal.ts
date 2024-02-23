@@ -55,7 +55,7 @@ export const generateSpawnPoint = (
         // Generate a spawn point using deterministic hash
         const hashValueX = deterministicHash(attempt, 0);
         const hashValueY = deterministicHash(0, attempt);
-        spawnPoint = new Vec2(hashValueX * WORLD_WIDTH, hashValueY * WORLD_HEIGHT); // Scale to world dimensions
+        spawnPoint = new Vec2(hashValueX * WORLD_WIDTH/3, hashValueY * WORLD_HEIGHT/3); // Scale to world dimensions
 
         attempt++;
     }

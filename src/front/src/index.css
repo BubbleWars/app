@@ -3,6 +3,14 @@ body, html {
   margin: 0;
   background-color: white;
   color: white;
+  outline: 2px;
+  color: white; /* Text color */
+  text-shadow: 
+    -3px -3px 0 #000,  
+     3px -3px 0 #000,
+    -3px  3px 0 #000,
+     3px  3px 0 #000; /* Outline effect */
+
 }
 
 .game-bar {
@@ -12,6 +20,8 @@ body, html {
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+  
 
 .screen-title {
   backdrop-filter: blur(10px);

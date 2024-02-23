@@ -17,6 +17,7 @@ import { Nodes } from './Nodes'
 import { Resource, Resources } from './Resources'
 import { clearEvents, getAllEvents, getEvents, setOnEvent } from '../../../core/funcs/events'
 import { CreateBubble, EventsType } from '../../../core/types/events'
+import { Text } from '@react-three/drei'
 
 export const bubbleStartPositions : {[key: string]: {x: number, y: number}} = {}
 export const bubbleDestroyPositions : {[key: string]: {x: number, y: number}} = {}
@@ -36,7 +37,7 @@ export const Game = ({snapshot, inputs, notices} : {snapshot: Snapshot, inputs: 
     //Initialize client state
     const [lastTimestampHandled, setLastTimestampHandled] = useState<number>(snapshot.timestamp)
    //console.log("lastTimestampHandled:", lastTimestampHandled)
-  //console.log("snapshot recieved", snapshot)
+  console.log("snapshot recieved", snapshot)
     //Game object ids
     const [bubbleIds, setBubbleIds] = useState<string[]>([])
     const [portalIds, setPortalIds] = useState<string[]>([])

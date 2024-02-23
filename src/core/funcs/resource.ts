@@ -175,7 +175,7 @@ export const nodeEmitResource = (
     emittedMass: number,
     direction: Vec2,
 ): Resource => {
-    const radius = massToRadius(newNodeMass)+ 5;
+    const radius = massToRadius(newNodeMass)+ 0.2;
     const emittedResourceRadius = massToRadius(emittedMass);
     const centerDelta = direction.clone().mul(radius+emittedResourceRadius);
     const emittedResourcePosition = node.body.getPosition().clone().add(centerDelta);
@@ -206,7 +206,7 @@ export const nodeEmitBubble = (
     emittedMass: number,
     direction: Vec2,
 ): Bubble => {
-    const radius = massToRadius(newNodeMass) + 5;
+    const radius = massToRadius(newNodeMass) + 0.2;
     const emittedBubbleRadius = massToRadius(emittedMass);
     const centerDelta = direction.clone().mul(radius+emittedBubbleRadius);
     const emittedBubblePosition = node.body.getPosition().clone().add(centerDelta);

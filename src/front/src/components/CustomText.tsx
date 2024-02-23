@@ -7,12 +7,13 @@ export const CustomText = ({ children, position, color='white', size=8, anchorX=
             font="fonts/PressStart2P-Regular.ttf"
             color={color}
             fontSize={size}
-            outlineColor={'white'}
-            outlineWidth={size/20}
+            outlineColor={'black'}
+            outlineWidth={size/10}
             anchorX={anchorX}
             anchorY={anchorY}
             position={position.clone().add(new THREE.Vector3(0, 0, 6))}
         >
+            <meshBasicMaterial toneMapped={false} />
             {children}
         </Text>
     )
