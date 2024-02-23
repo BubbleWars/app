@@ -23,7 +23,7 @@ const energyAmount = energy ? energy.mass : 0
     return (
         <>
             <CustomText 
-                size={radius/3}
+                size={radius/6}
                 color="white"
                 position={textPosition}
             >
@@ -33,19 +33,21 @@ const energyAmount = energy ? energy.mass : 0
             
             >
             <CustomText
-                size={radius/7}
+                size={radius/10}
                 color="green"
                 position={new THREE.Vector3(-0, 0, 0)}
                 anchorX="right"
+                noOutline={true}
             >
                 {portal.mass.toFixed(2)} ETH
 
             </CustomText>
             <CustomText
-                size={radius/7}
+                size={radius/10}
                 color="blue"
                 position={new THREE.Vector3(1, 0, 0)}
                 anchorX="left"
+                noOutline={true}
                 >
                 {energyAmount.toFixed(2)} EP
                 </CustomText>

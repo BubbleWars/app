@@ -25,7 +25,7 @@ export const BubblesInfo = ({ bubbleId } : { bubbleId: string }) => {
         <>
 
             <CustomText 
-                size={radius/3}
+                size={radius/6}
                 position={textPosition}
             >
                 {truncateAddress(bubble.owner)}
@@ -34,19 +34,21 @@ export const BubblesInfo = ({ bubbleId } : { bubbleId: string }) => {
             
             >
             <CustomText
-                size={radius/7}
+                size={radius/10}
                 color="green"
                 position={new THREE.Vector3(-0, 0, 0)}
                 anchorX="right"
+                noOutline={true}
             >
                 {(bubble.mass - energyAmount).toFixed(2)} ETH
 
             </CustomText>
             <CustomText
-                size={radius/7}
+                size={radius/10}
                 color="blue"
                 position={new THREE.Vector3(radius/7, 0, 0)}
                 anchorX="left"
+                noOutline={true}
                 >
                 {energyAmount.toFixed(2)} EP
                 </CustomText>
