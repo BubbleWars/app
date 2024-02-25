@@ -17,6 +17,7 @@ import { Vec2 } from 'planck-js'
 import { CustomText } from './CustomText'
 import { ResourceType } from '../../../core/types/resource'
 import { setIsBubbleSelected } from '../store/interpolation'
+import { burnerAddress } from '../config'
 
 
 export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string, isHovered: boolean }) => {
@@ -34,7 +35,7 @@ export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string
     const [ emitEp, setEmitEp ] = useState<boolean>(false)
     const [ isReady, setIsReady ] = useState<boolean>(false)
     const lineRef = useRef<any>()
-    const {address} = useAccount()
+    const address = burnerAddress;
 
     //Input action
     const {
@@ -43,6 +44,7 @@ export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string
         isLoading,
         isSuccess,
         data,
+        submitTransaction,
     } = useCreateInput({
         type: InputType.Emit,
         mass,
@@ -84,7 +86,7 @@ export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string
         if(isReady) {
             //dispatch(setIsBubbleSelected(false))
             setIsEmitting(true)
-            write()
+            submitTransaction()
         }
     })
 
@@ -215,12 +217,12 @@ export const PortalsControlsEmit = ({ portalId, isHovered } : { portalId: string
         </group>
         <group
             onPointerEnter={() => {
-                setEmitEp(true); setEmitEth(false)}}
+                setEmitEp(true); setEmitEth(false)
+            }}
             onPointerDown={() =>{
                 setTimeout(() => {
                     setIsReady(true)
-                    }
-                    , 250)
+                }, 250)
             }}
          >
             <CustomText

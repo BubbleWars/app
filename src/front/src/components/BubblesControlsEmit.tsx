@@ -16,6 +16,7 @@ import { addInput } from '../store/inputs'
 import { CustomText } from './CustomText'
 import { ResourceType } from '../../../core/types/resource'
 import { setIsBubbleSelected } from '../store/interpolation'
+import { burnerAddress } from '../config'
 
 export const BubblesControlsEmit = ({ bubbleId, isHovered } : { bubbleId: string, isHovered: boolean }) => {
     const dispatch = useDispatch()
@@ -32,7 +33,7 @@ export const BubblesControlsEmit = ({ bubbleId, isHovered } : { bubbleId: string
     const [ emitEp, setEmitEp ] = useState<boolean>(false)
     const [ isReady, setIsReady ] = useState<boolean>(false)
     const lineRef = useRef<any>()
-    const {address} = useAccount()
+    const address = burnerAddress;
 
     //Input action
     const {
@@ -41,6 +42,7 @@ export const BubblesControlsEmit = ({ bubbleId, isHovered } : { bubbleId: string
         isLoading,
         isSuccess,
         data,
+        submitTransaction,
     } = useCreateInput({
         type: InputType.Emit,
         mass,
@@ -82,7 +84,7 @@ export const BubblesControlsEmit = ({ bubbleId, isHovered } : { bubbleId: string
         if(isReady) {
             //dispatch(setIsBubbleSelected(false))
             setIsEmitting(true)
-            write()
+            submitTransaction()
         }
     })
 

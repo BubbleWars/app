@@ -1,15 +1,19 @@
 import { useContractWrite } from "wagmi";
-import { CartesiDAppAddress, EtherPortal, InputBox } from "../contracts";
+import { CartesiDAppAddress, EtherPortal, InputBox, currentChain } from "../contracts";
 import { Input, InputType } from "../../../core/types/inputs";
 import { parseEther, toHex, zeroAddress } from "viem";
 import { useEffect, useState } from "react";
 import * as THREE from 'three';
 import { useThree } from '@react-three/fiber';
+import { burnerAccount, burnerAddress } from "../config";
+import { publicClient } from "../main";
+
 
 
 export const useCreateInput = (input: Input) => {
    //console.log("useCreateInput", input)
     //Check if deposit input
+    const [nonce, setNonce] = useState<number | undefined>(undefined);
     const isDeposit = input.type == InputType.Deposit;
     const functionName = isDeposit ? 'depositEther' : 'addInput';
     const args = isDeposit ? 
@@ -17,12 +21,37 @@ export const useCreateInput = (input: Input) => {
         [CartesiDAppAddress, toHex(JSON.stringify(input))]
     const contract = isDeposit ? EtherPortal : InputBox;
     const value = isDeposit ? parseEther(input.amount.toString()) : undefined;
-    return useContractWrite({
+
+    useEffect(()=>{
+        if(burnerAddress){
+            const fetchNonce = async () => {
+                const transactionCount = await publicClient({chainId: currentChain.id})
+                    .getTransactionCount({
+                    address: burnerAddress
+                })
+                setNonce(transactionCount)
+            }
+
+            fetchNonce()
+        }
+    },[burnerAddress, publicClient])
+
+    const val = useContractWrite({
         ...contract,
         functionName,
         args,
+        account: burnerAccount,
         value,
+        nonce
     })
+
+    return {
+        ...val,
+        submitTransaction: () => {
+            val.write()
+            setNonce(nonce + 1)
+        }
+    }
 }
 
 export const useOnClick = (handler: (event: MouseEvent) => void) => {

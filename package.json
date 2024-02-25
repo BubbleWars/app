@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "description": "JS DApp",
   "dependencies": {
+    "@latticexyz/faucet": "2.0.0-next.17",
     "alea": "^1.0.1",
+    "dotenv": "^16.4.5",
     "ethers": "^6.7.1",
     "planck-js": "^0.3.31",
     "simplex-noise": "^4.0.1"

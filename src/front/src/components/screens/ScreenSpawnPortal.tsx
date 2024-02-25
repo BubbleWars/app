@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAccount, useConnect } from "wagmi";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import { truncateAddress } from "../../../../core/funcs/utils";
@@ -6,17 +6,25 @@ import { ActionDeposit } from '../ActionDeposit';
 import { currentState } from '../../../../core/world';
 import { useCreateInput } from '../../hooks/inputs';
 import { InputType } from '../../../../core/types/inputs';
+import { createClient as createFaucetClient } from "@latticexyz/faucet";
+import { RPC_URL } from '../../consts';
+import { burnerAddress } from '../../config';
+
+
 
 
 export const ScreenSpawnPortal = () => {
-    const { address, isConnected } = useAccount()
+    const address = burnerAddress;
+    const { isConnected } = useAccount()
     const [ buttonText, setButtonText ] = React.useState('Spawn')
+    const [ dripText, setDripText ] = React.useState('Drip')
     const [amount, setAmount] = useState(100)
     const { 
         write,
         isError, 
         isLoading, 
-        isSuccess
+        isSuccess,
+        submitTransaction
     } = useCreateInput({
         type: InputType.Deposit, 
         amount,
@@ -54,7 +62,7 @@ export const ScreenSpawnPortal = () => {
             disabled={isError || isLoading}
             onClick={
                 () => {
-                    write?.()
+                    submitTransaction?.()
                     setButtonText('Spawning...')
                 }
                 
@@ -63,6 +71,21 @@ export const ScreenSpawnPortal = () => {
 
             <p>{buttonText}</p>
         </button>
+
+        {/* <button 
+            disabled={isError || isLoading}
+            onClick={
+                () => {
+                    drip()
+                    setDripText('Dripping...')
+                }
+                
+            }
+        >
+
+            <p>{dripText}</p>
+        </button> */}
+
             </div>
             
 
