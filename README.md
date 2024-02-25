@@ -1,9 +1,7 @@
 # Bubblewars.io
 
-# Sunodo Installation Guide
-
-## Documentation
-For more detailed instructions, visit the [Sunodo Docs](https://docs.sunodo.io/guide/introduction/installing).
+## Dependencies
+Nodejs, Docker, Sunodo [Sunodo Docs](https://docs.sunodo.io/guide/introduction/installing).
 
 ## Quick Start
 
