@@ -38,8 +38,22 @@ jobs:
           sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
       - name: Install Sunodo
-        run: | 
-          npm install -g @sunodo/cli
+        run: |
+          success=false
+          attempts=0
+          max_attempts=3
+          while ! $success && [ $attempts -lt $max_attempts ]; do
+            npm install -g @sunodo/cli && success=true || success=false
+            attempts=$((attempts + 1))
+            if ! $success; then
+              echo "Attempt $attempts to install Sunodo failed. Trying again in 5 seconds..."
+              sleep 5
+            fi
+          done
+          if ! $success; then
+            echo "Failed to install Sunodo after $max_attempts attempts."
+            exit 1
+          fi
 
       - name: Install Dependencies
         run: npm install
@@ -71,7 +85,7 @@ jobs:
         env:
           PORT: 2001
           RPC_HTTP_URL: http://localhost:8545
-          FAUCET_PRIVATE_KEY: ${{ secrets.FAUCET_PRIVATE_KEY }}
+          FAUCET_PRIVATE_KEY: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
           DRIP_AMOUNT_ETHER: 200
         run: |
           pnpm install @latticexyz/faucet@next
