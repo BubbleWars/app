@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -48,10 +48,12 @@ jobs:
         run: sunodo run --no-backend &
 
       - name: Wait for Blockchain Setup
-        run: sleep 30 # Adjust the sleep duration as needed
+        run: sleep 180 # Adjust the sleep duration as needed
 
       - name: Start Node Backend
-        run: npm run dev & 
+        run: | 
+          npm i
+          npm run dev & 
       
       - name: Wait for Backend Setup
         run: sleep 20 # Adjust the sleep duration as needed
