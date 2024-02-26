@@ -39,23 +39,23 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-      - name: Install Sunodo
-        run: |
-          success=false
-          attempts=0
-          max_attempts=3
-          while ! $success && [ $attempts -lt $max_attempts ]; do
-            pnpm install -g @sunodo/cli && success=true || success=false
-            attempts=$((attempts + 1))
-            if ! $success; then
-              echo "Attempt $attempts to install Sunodo failed. Trying again in 5 seconds..."
-              sleep 5
-            fi
-          done
-          if ! $success; then
-            echo "Failed to install Sunodo after $max_attempts attempts."
-            exit 1
-          fi
+      # - name: Install Sunodo
+      #   run: |
+      #     success=false
+      #     attempts=0
+      #     max_attempts=3
+      #     while ! $success && [ $attempts -lt $max_attempts ]; do
+      #       pnpm install -g @sunodo/cli && success=true || success=false
+      #       attempts=$((attempts + 1))
+      #       if ! $success; then
+      #         echo "Attempt $attempts to install Sunodo failed. Trying again in 5 seconds..."
+      #         sleep 5
+      #       fi
+      #     done
+      #     if ! $success; then
+      #       echo "Failed to install Sunodo after $max_attempts attempts."
+      #       exit 1
+      #     fi
 
       - name: Install Dependencies
         run: npm install
@@ -67,7 +67,9 @@ jobs:
         run: sleep 190 # Adjust the sleep duration as needed
 
       - name: Start Node Backend
-        run: npm run dev & 
+        run: | 
+          npm i
+          npm run dev & 
       
       - name: Wait for Backend Setup
         run: sleep 20 # Adjust the sleep duration as needed
