@@ -18,7 +18,9 @@ jobs:
           node-version: '21.5.0'
 
       - name: Install pnpm
-        run: npm install -g pnpm
+        run: |
+          curl -fsSL https://get.pnpm.io/install.sh | sh -
+          source /root/.bashrc
 
       - name: Install Docker
         run: |
@@ -43,7 +45,7 @@ jobs:
           attempts=0
           max_attempts=3
           while ! $success && [ $attempts -lt $max_attempts ]; do
-            npm install -g @sunodo/cli && success=true || success=false
+            pnpm install -g @sunodo/cli && success=true || success=false
             attempts=$((attempts + 1))
             if ! $success; then
               echo "Attempt $attempts to install Sunodo failed. Trying again in 5 seconds..."
