@@ -75,6 +75,6 @@ jobs:
           DRIP_AMOUNT_ETHER: 200
         run: |
           pnpm install @latticexyz/faucet@next
-          pnpm faucet-server &
+          pnpm faucet-server & 
         
 
