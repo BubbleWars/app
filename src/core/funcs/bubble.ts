@@ -10,6 +10,7 @@ import { addEvent } from "./events";
 import { EventsType } from "../types/events";
 import { time, timeStamp } from "console";
 import { ZeroAddress } from "ethers";
+import { BubbleState } from "../types/state";
 
 const PUNCTURE_EMIT_PER_SECOND = 100;
 
@@ -52,13 +53,13 @@ export const setBubbleResourceMass = (bubble: Bubble, resource: ResourceType, ma
     bubble.resources.set(resource, { resource, mass });
 }
 
-export const createBubble = (timestamp:number, bubbles: Map<string, Bubble>, world: World, owner: Address, x: number, y: number, mass: number, controllable: boolean, id?: string): Bubble => {
+export const createBubble = (timestamp:number, bubbles: Map<string, Bubble>, world: World, owner: Address, x: number, y: number, mass: number, controllable: boolean, id?: string, bubbleState?: BubbleState): Bubble => {
     const radius = massToRadius(mass);
     if(owner == ZeroAddress) throw new Error("Cannot create bubble with zero address");
     const body = world.createBody({position: Vec2(x, y), type: "dynamic", linearDamping: DAMPENING });
     body.setMassData({mass, center: Vec2(0, 0), I: 0});
     const fixture = body.createFixture({ shape: Circle(radius), density: 1, restitution: 0, friction: 0});
-    const bubble = { owner, balance: 0, body, fixture, controllable };
+    const bubble:Bubble = { owner, balance: 0, body, fixture, controllable };
     //set id
     if(id) bubble.body.setUserData(id);
     else bubble.body.setUserData(generateBubbleId(bubbles, owner));
@@ -69,6 +70,16 @@ export const createBubble = (timestamp:number, bubbles: Map<string, Bubble>, wor
 //         position: {x, y},
 //         controllable,
 //     })
+
+    if(bubbleState){
+        bubble.lastPunctureEmit = bubbleState.lastPunctureEmit
+
+        if(!bubble.punctures) bubble.punctures = new Map();
+        bubbleState.punctures.forEach(({ point, puncture }) => {
+            bubble.punctures?.set(point, puncture)
+        })
+    }
+
     addEvent({
         type: EventsType.CreateBubble,
         id: bubble.body.getUserData() as string,
@@ -291,13 +302,14 @@ export const handlePunctures = (
         
         const timeSinceLast = timestamp - bubble.lastPunctureEmit;
 
-        if(timeSinceLast > 1){
-            const amountEmitted = Math.min(Math.max(puncture.amount*0.1, 0.01), puncture.amount)
+        if(timeSinceLast > 1.5){
+            const amountEmitted = Math.min(Math.min(puncture.amount, 0.1), getBubbleMass(bubble))
             if(amountEmitted > 0) {
                 const newPunctureAmount = puncture.amount - amountEmitted;
                 emitBubble(timestamp, bubbles, bubble, amountEmitted, Vec2(puncturePoint.x, puncturePoint.y));
                 puncture.amount = newPunctureAmount;
                 if(newPunctureAmount <= 0) bubble.punctures.delete(puncturePoint);
+                bubble.lastPunctureEmit = timestamp
             }
         }
         

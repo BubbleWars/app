@@ -80,7 +80,7 @@ export const snapshotInit = (initialState?: Snapshot) => {
 
         //Set world state based on snapshot
         snapshotCurrentState.bubbles.forEach(bubble => {
-            const newBubble = createBubble(snapshotLastTimestamp, snapshotBubbles, snapshotWorld, bubble.owner, bubble.position.x, bubble.position.y, bubble.mass, false, bubble.id);
+            const newBubble = createBubble(snapshotLastTimestamp, snapshotBubbles, snapshotWorld, bubble.owner, bubble.position.x, bubble.position.y, bubble.mass, false, bubble.id, bubble);
             newBubble.body.setLinearVelocity(Vec2(bubble.velocity.x, bubble.velocity.y));
             bubble.resources.forEach(resource => {
                 setBubbleResourceMass(newBubble, resource.resource, resource.mass);

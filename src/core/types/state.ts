@@ -1,3 +1,4 @@
+import { Puncture, PuncturePoint } from "./bubble";
 import { Event } from "./events";
 import { InputWithExecutionTime } from "./inputs";
 import { ResourceType } from "./resource";
@@ -10,6 +11,8 @@ export interface BubbleState {
     velocity: { x: number, y: number },
     mass: number,
     resources: { resource: ResourceType, mass: number }[],
+    punctures: { point: PuncturePoint,  puncture: Puncture }[],
+    lastPunctureEmit: number | undefined
 }
 
 export interface PortalState {

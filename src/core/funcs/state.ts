@@ -33,14 +33,27 @@ export const updateState = (
             balance: user.balance,
         }))
     state.bubbles = Array.from(bubbles.values())
-        .map(bubble => ({
-            id: bubble.body.getUserData() as string,
-            owner: bubble.owner,
-            position: bubble.body.getPosition().clone(),
-            velocity: bubble.body.getLinearVelocity().clone(),
-            mass: bubble.body.getMass(),
-            resources: Array.from((bubble.resources ?? []).values())
-        }))
+        .map(bubble => {
+            const puncturesMap = bubble.punctures ?? new Map()
+            const punctures = Array.from(puncturesMap?.values())
+            const puncturePoints = Array.from(puncturesMap?.keys())
+            return {
+                id: bubble.body.getUserData() as string,
+                owner: bubble.owner,
+                position: bubble.body.getPosition().clone(),
+                velocity: bubble.body.getLinearVelocity().clone(),
+                mass: bubble.body.getMass(),
+                resources: Array.from((bubble.resources ?? []).values()),
+                lastPunctureEmit: bubble.lastPunctureEmit,
+                punctures: puncturePoints.map((value, index) => {
+                    return {
+                        point: value,
+                        puncture: punctures[index]
+                    }
+                })
+            }
+            
+        })
     state.portals = Array.from(portals.values())
         .map(portal => ({
             id: portal.body.getUserData() as string,
