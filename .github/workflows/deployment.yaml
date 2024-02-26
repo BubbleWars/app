@@ -1,0 +1,65 @@
+name: Deploy Bubblewars.io
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install Docker
+        run: |
+          # Add Docker's official GPG key:
+          sudo apt-get update
+          sudo apt-get install ca-certificates curl
+          sudo install -m 0755 -d /etc/apt/keyrings
+          sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+          sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+          # Add the repository to Apt sources:
+          echo \
+            "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+            $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+            sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+          sudo apt-get update
+          sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+      - name: Install Sunodo
+        run: | 
+          npm install -g @sunodo/cli
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Set up Local Blockchain and Smart Contracts
+        run: sunodo run --no-backend
+
+      - name: Start Node Backend
+        run: npm run dev
+
+      - name: Run Front End
+        run: |
+          cd src/front
+          npm i
+          npm run dev
+
+      - name: Deploy Faucet Server
+        env:
+          PORT: 2001
+          RPC_HTTP_URL: http://localhost:8545
+          FAUCET_PRIVATE_KEY: ${{ secrets.FAUCET_PRIVATE_KEY }}
+          DRIP_AMOUNT_ETHER: 200
+        run: |
+          pnpm install @latticexyz/faucet@next
+          pnpm faucet-server
+
