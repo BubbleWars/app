@@ -17,6 +17,9 @@ jobs:
         with:
           node-version: '16'
 
+      - name: Install pnpm
+        run: npm install -g pnpm
+
       - name: Install Docker
         run: |
           # Add Docker's official GPG key:
@@ -42,16 +45,25 @@ jobs:
         run: npm install
 
       - name: Set up Local Blockchain and Smart Contracts
-        run: sunodo run --no-backend
+        run: sunodo run --no-backend &
+
+      - name: Wait for Blockchain Setup
+        run: sleep 30 # Adjust the sleep duration as needed
 
       - name: Start Node Backend
-        run: npm run dev
+        run: npm run dev & 
+      
+      - name: Wait for Backend Setup
+        run: sleep 20 # Adjust the sleep duration as needed
 
       - name: Run Front End
         run: |
           cd src/front
           npm i
-          npm run dev
+          npm run dev &
+      
+      - name: Wait for Front-End Setup
+        run: sleep 20 # Adjust the sleep duration as needed
 
       - name: Deploy Faucet Server
         env:
@@ -61,5 +73,6 @@ jobs:
           DRIP_AMOUNT_ETHER: 200
         run: |
           pnpm install @latticexyz/faucet@next
-          pnpm faucet-server
+          pnpm faucet-server &
+        
 
