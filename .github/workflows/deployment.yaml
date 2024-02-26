@@ -67,9 +67,7 @@ jobs:
         run: sleep 190 # Adjust the sleep duration as needed
 
       - name: Start Node Backend
-        run: | 
-          npm i
-          npm run dev & 
+        run: npm run dev & 
       
       - name: Wait for Backend Setup
         run: sleep 20 # Adjust the sleep duration as needed
