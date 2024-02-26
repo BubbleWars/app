@@ -48,7 +48,7 @@ jobs:
         run: sunodo run --no-backend &
 
       - name: Wait for Blockchain Setup
-        run: sleep 180 # Adjust the sleep duration as needed
+        run: sleep 190 # Adjust the sleep duration as needed
 
       - name: Start Node Backend
         run: | 
