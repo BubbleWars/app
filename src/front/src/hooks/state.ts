@@ -11,6 +11,17 @@ import { getPublicClient } from "wagmi/actions";
 import { useDispatch, useSelector } from "react-redux";
 import { setInputs } from "../store/inputs";
 
+const DefaultSnapshot = {
+    "timestamp": 0,
+    "pendingInputs": [],
+    "users": [],
+    "bubbles": [],
+    "portals": [],
+    "nodes": [],
+    "resources": [],
+    "obstacles": []
+}
+
 //Get latest timestamp from blockchain
 export const useBlockTimestamp = () : number => {
     const [timestamp, setTimestamp] = useState<number>(0);
@@ -71,7 +82,7 @@ export const useInspect = (inspect: Inspect) : {
     error: any,
     snapshot: Snapshot | undefined,
 } => {
-    const [snapshot, setSnapshot] = useState<Snapshot | undefined>(undefined);
+    const [snapshot, setSnapshot] = useState<Snapshot | undefined>(DefaultSnapshot)
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<any>(undefined);
 
