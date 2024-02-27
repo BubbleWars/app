@@ -1,5 +1,5 @@
 import './App.css'
-import { useAccount, useConnect, useEnsName } from 'wagmi'
+import { Connector, useAccount, useConnect, useEnsName } from 'wagmi'
 import { InjectedConnector } from 'wagmi/connectors/injected'
 import { useBlockTimestamp, useInputs, useInspect, useLocalTimestamp, useMachineTimestamp, useNotices } from './hooks/state'
 import { InspectType } from '../../core/types/inputs'
@@ -40,7 +40,7 @@ function App() {
         
       </Canvas>
       <ScreenTitle isConnectedFunc={(bool)=>{setIsConnected(bool)}} />
-      {isConnected && <ScreenSpawnPortal />}
+      <ScreenSpawnPortal />
     </>
   )
 }

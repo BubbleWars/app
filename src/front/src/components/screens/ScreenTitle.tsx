@@ -2,30 +2,32 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAccount, useBalance, useConnect, useSwitchNetwork } from "wagmi";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import { truncateAddress } from "../../../../core/funcs/utils";
-import { burnerAddress } from '../../config';
+import { burnerAccount, burnerAddress } from '../../config';
 import { createClient as createFaucetClient } from "@latticexyz/faucet";
 import { FAUCET_URL, RPC_URL } from '../../consts';
-import { etherUnits } from 'viem';
+import { createWalletClient, custom, etherUnits, http } from 'viem';
 import { ethers } from 'ethers';
 import { BigNumberish } from 'ethers';
+import { MockConnector } from 'wagmi/connectors/mock';
+import { currentChain } from '../../contracts';
 
 const faucetClient = createFaucetClient({
     url: FAUCET_URL
 });
 
-export const ScreenTitle = ({isConnectedFunc} : {isConnectedFunc: (bool:boolean)=>void}) => {
+export const ScreenTitle = () => {
     const [ buttonText, setButtonText ] = React.useState('Connect')
-    const [ isConnected, setConnected ] = React.useState(false)
-    const [ isConnecting, setConnecting ] = React.useState(false)
-
-    const connect = () =>{
-        setConnecting(true)
-        setTimeout(()=>{
-            setConnected(true)
-            setConnecting(false)
-            isConnectedFunc(true)
-        }, 1000)
-    }
+    const { address, isConnected, isConnecting } = useAccount()
+    const { connect } = useConnect({connector: new MockConnector({
+        options: {
+            chainId: currentChain.id,
+            walletClient: createWalletClient({
+                account: burnerAccount,
+                transport: http(RPC_URL)
+            })
+        },
+        chains: [currentChain]
+    })})
 
     const { data, isError, isLoading } = useBalance({
         address: burnerAddress
@@ -60,7 +62,7 @@ export const ScreenTitle = ({isConnectedFunc} : {isConnectedFunc: (bool:boolean)
         } else {
             setButtonText('Connect')
         }
-    }, [isConnected, isConnecting, burnerAddress])
+    }, [isConnected, isConnecting, address])
 
     const isFunded = useMemo(() => {
         return balance > 0
