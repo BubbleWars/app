@@ -92,5 +92,11 @@ jobs:
         run: |
           pnpm install @latticexyz/faucet@next
           pm2 start --name faucet-server "pnpm faucet-server"
+      
+      - name: Save PM2 Process List
+        run: pm2 save
+
+      - name: Setup PM2 to Resurrect on Reboot
+        run: pm2 startup
         
 
