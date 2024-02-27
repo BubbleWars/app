@@ -61,7 +61,7 @@ jobs:
         run: npm install
 
       - name: Set up Local Blockchain and Smart Contracts
-        run: sunodo run --no-backend &
+        run: pm2 start --name blockchain "sunodo run --no-backend" 
 
       - name: Wait for Blockchain Setup
         run: sleep 30 # Adjust the sleep duration as needed
@@ -69,7 +69,7 @@ jobs:
       - name: Start Node Backend
         run: | 
           npm i
-          npm run dev & 
+          pm2 start --name node-backend "npm run dev" 
       
       - name: Wait for Backend Setup
         run: sleep 20 # Adjust the sleep duration as needed
@@ -78,7 +78,7 @@ jobs:
         run: |
           cd src/front
           npm i
-          npm run dev &
+          pm2 start --name front-end "npm run dev"
       
       - name: Wait for Front-End Setup
         run: sleep 20 # Adjust the sleep duration as needed
@@ -91,6 +91,6 @@ jobs:
           DRIP_AMOUNT_ETHER: 200
         run: |
           pnpm install @latticexyz/faucet@next
-          pnpm faucet-server & 
+          pm2 start --name faucet-server "pnpm faucet-server"
         
 
