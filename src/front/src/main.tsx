@@ -10,6 +10,7 @@ import { URL_QUERY_GRAPHQL } from './consts/index.ts';
 import { currentChain } from './contracts.ts';
 import { Provider } from 'react-redux';
 import store from './store/index.ts';
+import { JsonRpcProvider } from 'ethers';
 
 //Configure Apollo
 const client = new ApolloClient({

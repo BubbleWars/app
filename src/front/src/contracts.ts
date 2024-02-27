@@ -16,8 +16,8 @@ import { RPC_URL } from "./consts";
 
 export const currentChain = defineChain({
     id: 1_337,
-    name: 'Localhost',
-    network: 'localhost',
+    name: 'bubblewars_anvil',
+    network: 'bubblewars_anvil',
     nativeCurrency: {
         decimals: 18,
         name: 'Ether',

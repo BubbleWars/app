@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useAccount, useBalance, useConnect } from "wagmi";
+import { useAccount, useBalance, useConnect, useSwitchNetwork } from "wagmi";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import { truncateAddress } from "../../../../core/funcs/utils";
 import { burnerAddress } from '../../config';
@@ -15,8 +15,16 @@ const faucetClient = createFaucetClient({
 
 export const ScreenTitle = () => {
     const [ buttonText, setButtonText ] = React.useState('Connect')
-    const { address, isConnected, isConnecting } = useAccount()
-    const { connect } = useConnect({connector: new InjectedConnector()})
+    const [ isConnected, setConnected ] = React.useState(false)
+    const [ isConnecting, setConnecting ] = React.useState(false)
+
+    const connect = () =>{
+        setConnecting(true)
+        setTimeout(()=>{
+            setConnected(true)
+            setConnecting(false)
+        }, 1000)
+    }
 
     const { data, isError, isLoading } = useBalance({
         address: burnerAddress
