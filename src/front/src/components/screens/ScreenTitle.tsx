@@ -59,7 +59,7 @@ export const ScreenTitle = () => {
         } else {
             setButtonText('Connect')
         }
-    }, [isConnected, isConnecting, address])
+    }, [isConnected, isConnecting, burnerAddress])
 
     const isFunded = useMemo(() => {
         return balance > 0
