@@ -59,12 +59,19 @@ jobs:
 
       - name: Install Dependencies
         run: npm install
+      
+      - name: Clear Existing PM2 Processes
+        run: |
+          pm2 delete blockchain || true
+          pm2 delete node-backend || true
+          pm2 delete front-end || true
+          pm2 delete faucet-server || true
 
       - name: Set up Local Blockchain and Smart Contracts
         run: pm2 start --name blockchain "sunodo run --no-backend" 
 
       - name: Wait for Blockchain Setup
-        run: sleep 30 # Adjust the sleep duration as needed
+        run: sleep 120 # Adjust the sleep duration as needed
 
       - name: Start Node Backend
         run: | 
