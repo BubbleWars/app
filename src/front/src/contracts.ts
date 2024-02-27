@@ -11,8 +11,23 @@ import {
 } from "@cartesi/rollups";
 import { erc20ABI } from "wagmi";
 import { localhost } from "viem/chains";
+import { defineChain } from "viem";
+import { RPC_URL } from "./consts";
 
-export const currentChain = localhost;
+export const currentChain = defineChain({
+    id: 1_337,
+    name: 'Localhost',
+    network: 'localhost',
+    nativeCurrency: {
+        decimals: 18,
+        name: 'Ether',
+        symbol: 'ETH',
+    },
+    rpcUrls: {
+        default: { http: [RPC_URL] },
+        public: { http: [RPC_URL] },
+    },
+})
 
 export const CartesiDAppFactoryAddress = "0x7122cd1221C20892234186facfE8615e6743Ab02";
 export const DAppAddressRelayAddress = "0xF5DE34d6BbC0446E2a45719E718efEbaaE179daE";

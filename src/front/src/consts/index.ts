@@ -1,4 +1,4 @@
-const BASE_URL = `${window.location.protocol}//${window.location.hostname}`;
+export const BASE_URL = `${window.location.protocol}//${window.location.hostname}`;
 
 export const INSPECTOR_URL = `${BASE_URL}:8080/inspect`;
 export const URL_QUERY_GRAPHQL = `${BASE_URL}:8080/graphql`;
