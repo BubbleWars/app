@@ -9,6 +9,8 @@ import { InputType } from '../../../../core/types/inputs';
 import { createClient as createFaucetClient } from "@latticexyz/faucet";
 import { RPC_URL } from '../../consts';
 import { burnerAddress } from '../../config';
+import { useDispatch } from 'react-redux';
+import { setPan } from '../../store/interpolation';
 
 
 
@@ -19,6 +21,8 @@ export const ScreenSpawnPortal = () => {
     const [ buttonText, setButtonText ] = React.useState('Spawn')
     const [ dripText, setDripText ] = React.useState('Drip')
     const [amount, setAmount] = useState(100)
+    const dispatch = useDispatch()
+    
     const { 
         write,
         isError, 
@@ -39,7 +43,11 @@ export const ScreenSpawnPortal = () => {
             if (portal) setIsPortal(true);
         const intervalId = setInterval(() => {
             const portal = currentState.portals.find(portal => portal.owner.toLowerCase() === address?.toLowerCase());
-            if (portal) setIsPortal(true);
+            if (portal) {
+                setIsPortal(true)
+                dispatch(setPan({x: portal.position.x, y: portal.position.y}))
+                clearInterval(intervalId)
+            }
         }, 1000);
     
         // Clear the interval on component unmount or if the dependencies change

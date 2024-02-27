@@ -185,7 +185,7 @@ export const run = (end: number, callback?: () => void, client:boolean= false) =
         callback?.()
     } 
 
-   console.log("ran world for", current - lastTimestamp, "seconds")
+   //console.log("ran world for", current - lastTimestamp, "seconds")
  
     // Update the last timestamp
     lastTimestamp = current
@@ -205,5 +205,5 @@ export const run = (end: number, callback?: () => void, client:boolean= false) =
 
     
     //console.log("world state", currentState)
-    console.log("resource state", currentState.resources)
+    //console.log("resource state", currentState.resources)
 }

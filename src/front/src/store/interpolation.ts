@@ -7,12 +7,16 @@ interface InterpolationState {
   from: number | null;
   isBubbleSelected: boolean;
   selectedEntityId: string | null;
+  pan: { x: number, y: number } | null;
 }
 
 export const interpolationSlice = createSlice({
   name: 'inputs',
   initialState: { from: null } as InterpolationState,
   reducers: {
+    setPan: (state, action: PayloadAction<{x: number, y: number} | null>) => {
+        state.pan = action.payload;
+    },
     setSelectedEntityId: (state, action: PayloadAction<string | null>) => {
      //console.log("setSelectedEntityId", action.payload)
         state.selectedEntityId = action.payload;
@@ -38,6 +42,6 @@ export const interpolationSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { setInterpolation, endInterpolation, interpolate, setIsBubbleSelected, setSelectedEntityId } = interpolationSlice.actions;
+export const { setInterpolation, endInterpolation, interpolate, setIsBubbleSelected, setSelectedEntityId, setPan } = interpolationSlice.actions;
 
 export default interpolationSlice.reducer;
