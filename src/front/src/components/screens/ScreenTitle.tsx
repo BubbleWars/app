@@ -13,7 +13,7 @@ const faucetClient = createFaucetClient({
     url: FAUCET_URL
 });
 
-export const ScreenTitle = () => {
+export const ScreenTitle = ({isConnectedFunc} : {isConnectedFunc: (bool:boolean)=>void}) => {
     const [ buttonText, setButtonText ] = React.useState('Connect')
     const [ isConnected, setConnected ] = React.useState(false)
     const [ isConnecting, setConnecting ] = React.useState(false)
@@ -23,6 +23,7 @@ export const ScreenTitle = () => {
         setTimeout(()=>{
             setConnected(true)
             setConnecting(false)
+            isConnectedFunc(true)
         }, 1000)
     }
 

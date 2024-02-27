@@ -11,12 +11,13 @@ import * as THREE from 'three'
 import { Text, Text3D } from '@react-three/drei'
 import { ScreenTitle } from './components/screens/ScreenTitle'
 import { ScreenSpawnPortal } from './components/screens/ScreenSpawnPortal'
+import { useState } from 'react'
 
 function App() {
   const { snapshot } = useInspect({type:InspectType.State, value: 0})
   const { inputs } = useInputs();
   const { notices } = useNotices();
-  const { address, isConnected, isConnecting } = useAccount()
+  const [isConnected, setIsConnected] = useState(false)
 
 
   return (
@@ -38,8 +39,8 @@ function App() {
         />
         
       </Canvas>
-      <ScreenTitle />
-      <ScreenSpawnPortal />
+      <ScreenTitle isConnectedFunc={(bool)=>{setIsConnected(bool)}} />
+      {isConnected && <ScreenSpawnPortal />}
     </>
   )
 }

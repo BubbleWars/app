@@ -15,7 +15,6 @@ import { burnerAddress } from '../../config';
 
 export const ScreenSpawnPortal = () => {
     const address = burnerAddress;
-    const { isConnected } = useAccount()
     const [ buttonText, setButtonText ] = React.useState('Spawn')
     const [ dripText, setDripText ] = React.useState('Drip')
     const [amount, setAmount] = useState(100)
@@ -46,7 +45,6 @@ export const ScreenSpawnPortal = () => {
         return () => clearInterval(intervalId);
     }, [address]);
 
-    if(!isConnected) return null
     if(isPortal) return null
 
     return (
