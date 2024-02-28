@@ -182,7 +182,7 @@ export const init = (initialState?: Snapshot) => {
 };
 
 export const rollbackToState = (snapshot: Snapshot) => {
-    if (!snapshot) throw new Error("Snapshot not found");
+    if (!snapshot) return;
     currentState = Object.assign({}, snapshot);
     //reset
     world = new World({

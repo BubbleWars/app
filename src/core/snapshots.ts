@@ -187,7 +187,7 @@ export const snapshotInit = (initialState?: Snapshot) => {
 
 export const snapshotRollback = (timestamp: number) => {
     const snapshot = snapshots.get(timestamp);
-    if (!snapshot) throw new Error("Snapshot not found");
+    if (!snapshot) return;
     snapshotCurrentState = Object.assign({}, snapshot);
     //reset
     snapshotWorld = new World({
