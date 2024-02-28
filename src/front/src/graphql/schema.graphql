@@ -25,11 +25,26 @@ type Input {
   "Get report from this particular input given the report's index"
   report(index: Int!): Report!
   "Get vouchers from this particular input with support for pagination"
-  vouchers(first: Int, last: Int, after: String, before: String): VoucherConnection!
+  vouchers(
+    first: Int
+    last: Int
+    after: String
+    before: String
+  ): VoucherConnection!
   "Get notices from this particular input with support for pagination"
-  notices(first: Int, last: Int, after: String, before: String): NoticeConnection!
+  notices(
+    first: Int
+    last: Int
+    after: String
+    before: String
+  ): NoticeConnection!
   "Get reports from this particular input with support for pagination"
-  reports(first: Int, last: Int, after: String, before: String): ReportConnection!
+  reports(
+    first: Int
+    last: Int
+    after: String
+    before: String
+  ): ReportConnection!
 }
 
 "Validity proof for an output"
@@ -77,13 +92,34 @@ type Query {
   "Get report based on its index"
   report(reportIndex: Int!, inputIndex: Int!): Report!
   "Get inputs with support for pagination"
-  inputs(first: Int, last: Int, after: String, before: String, where: InputFilter): InputConnection!
+  inputs(
+    first: Int
+    last: Int
+    after: String
+    before: String
+    where: InputFilter
+  ): InputConnection!
   "Get vouchers with support for pagination"
-  vouchers(first: Int, last: Int, after: String, before: String): VoucherConnection!
+  vouchers(
+    first: Int
+    last: Int
+    after: String
+    before: String
+  ): VoucherConnection!
   "Get notices with support for pagination"
-  notices(first: Int, last: Int, after: String, before: String): NoticeConnection!
+  notices(
+    first: Int
+    last: Int
+    after: String
+    before: String
+  ): NoticeConnection!
   "Get reports with support for pagination"
-  reports(first: Int, last: Int, after: String, before: String): ReportConnection!
+  reports(
+    first: Int
+    last: Int
+    after: String
+    before: String
+  ): ReportConnection!
 }
 
 "Pagination entry"
@@ -146,8 +182,10 @@ type ReportConnection {
 
 "Filter object to restrict results depending on input properties"
 input InputFilter {
-  "Filter only inputs with index lower than a given value" indexLowerThan: Int
-  "Filter only inputs with index greater than a given value" indexGreaterThan: Int
+  "Filter only inputs with index lower than a given value"
+  indexLowerThan: Int
+  "Filter only inputs with index greater than a given value"
+  indexGreaterThan: Int
 }
 
 scalar BigInt

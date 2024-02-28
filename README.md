@@ -1,6 +1,7 @@
 # Bubblewars.io
 
 ## Dependencies
+
 Nodejs, Docker, Sunodo [Sunodo Docs](https://docs.sunodo.io/guide/introduction/installing).
 
 ## Quick Start
@@ -38,14 +39,13 @@ Navigate to the front end directory, install dependencies, specify your variable
 
 ```bash
 pnpm install @latticexyz/faucet@next
-export PORT=2001 
-export RPC_HTTP_URL=http://localhost:8545 
+export PORT=2001
+export RPC_HTTP_URL=http://localhost:8545
 export FAUCET_PRIVATE_KEY=<PRIVATE_KEY>
-export DRIP_AMOUNT_ETHER=100 
+export DRIP_AMOUNT_ETHER=100
 pnpm faucet-server
 ```
 
-
 Please note that commands should be run in the terminal and might require administrative privileges depending on your system setup.
 
-*This document was last edited on the date the screenshot was taken.*
+_This document was last edited on the date the screenshot was taken._

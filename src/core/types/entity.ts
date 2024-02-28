@@ -3,12 +3,15 @@ import { Address } from "./address";
 import { Resource, ResourceType } from "./resource";
 
 export interface Entity {
-  owner: Address,
-  balance: number,
-  body: Body,
-  fixture: Fixture,
-  resources?: Map<ResourceType, {
-    resource: ResourceType,
-    mass: number,
-  }>,
+  owner: Address;
+  balance: number;
+  body: Body;
+  fixture: Fixture;
+  resources?: Map<
+    ResourceType,
+    {
+      resource: ResourceType;
+      mass: number;
+    }
+  >;
 }

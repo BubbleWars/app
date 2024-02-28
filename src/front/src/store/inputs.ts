@@ -1,5 +1,5 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Input } from '../../../core/types/inputs';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Input } from "../../../core/types/inputs";
 
 // Define a type for the slice state
 interface InputsState {
@@ -7,14 +7,16 @@ interface InputsState {
 }
 
 export const inputsSlice = createSlice({
-  name: 'inputs',
+  name: "inputs",
   initialState: { inputs: [] } as InputsState,
   reducers: {
     setInputs: (state, action: PayloadAction<Input[]>) => {
-      action.payload.forEach(input => {
+      action.payload.forEach((input) => {
         // Check if input is already in the state using a unique identifier
-        const isInputExists = state.inputs.some(stateInput =>
-          stateInput.timestamp === input.timestamp && stateInput.sender === input.sender // Example combination
+        const isInputExists = state.inputs.some(
+          (stateInput) =>
+            stateInput.timestamp === input.timestamp &&
+            stateInput.sender === input.sender, // Example combination
         );
         if (!isInputExists) {
           state.inputs.push(input);
@@ -22,14 +24,16 @@ export const inputsSlice = createSlice({
       });
     },
     addInput: (state, action: PayloadAction<Input>) => {
-        const isInputExists = state.inputs.some(stateInput =>
-            stateInput.timestamp === action.payload.timestamp && stateInput.sender === action.payload.sender // Example combination
-        );
-        if (!isInputExists) {
-         //console.log("is predicting portal", action.payload.timestamp);
-            state.inputs.push(action.payload);
-        }
-    }
+      const isInputExists = state.inputs.some(
+        (stateInput) =>
+          stateInput.timestamp === action.payload.timestamp &&
+          stateInput.sender === action.payload.sender, // Example combination
+      );
+      if (!isInputExists) {
+        //console.log("is predicting portal", action.payload.timestamp);
+        state.inputs.push(action.payload);
+      }
+    },
     // You can add more reducer functions here as needed
   },
 });

@@ -1,11 +1,20 @@
-import * as THREE from 'three'; 
-import { useEffect, useRef, useMemo } from 'react';
-import { useThree, useFrame, extend } from '@react-three/fiber';
-import { OutlinePass, RenderPass, EffectComposer } from 'three/examples/jsm/Addons.js';
+import * as THREE from "three";
+import { useEffect, useRef, useMemo } from "react";
+import { useThree, useFrame, extend } from "@react-three/fiber";
+import {
+  OutlinePass,
+  RenderPass,
+  EffectComposer,
+} from "three/examples/jsm/Addons.js";
 
 extend({ EffectComposer, RenderPass, OutlinePass });
 
-const Outline = ({ children, edgeColor = '#ffffff', edgeStrength = 3, edgeThickness = 1 }) => {
+const Outline = ({
+  children,
+  edgeColor = "#ffffff",
+  edgeStrength = 3,
+  edgeThickness = 1,
+}) => {
   const { gl, scene, camera, size } = useThree();
   const composer = useRef();
   const aspect = useMemo(() => new Vector2(size.width, size.height), [size]);

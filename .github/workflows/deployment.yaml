@@ -15,7 +15,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '21.5.0'
+          node-version: "21.5.0"
 
       - name: Install pnpm
         run: |
@@ -59,7 +59,7 @@ jobs:
 
       - name: Install Dependencies
         run: npm install
-      
+
       - name: Clear Existing PM2 Processes
         run: |
           pm2 delete blockchain || true
@@ -68,16 +68,16 @@ jobs:
           pm2 delete faucet-server || true
 
       - name: Set up Local Blockchain and Smart Contracts
-        run: pm2 start --name blockchain "sunodo run --no-backend" 
+        run: pm2 start --name blockchain "sunodo run --no-backend"
 
       - name: Wait for Blockchain Setup
         run: sleep 120 # Adjust the sleep duration as needed
 
       - name: Start Node Backend
-        run: | 
+        run: |
           npm i
-          pm2 start --name node-backend "npm run dev" 
-      
+          pm2 start --name node-backend "npm run dev"
+
       - name: Wait for Backend Setup
         run: sleep 20 # Adjust the sleep duration as needed
 
@@ -86,7 +86,7 @@ jobs:
           cd src/front
           npm i
           pm2 start --name front-end "npm run dev"
-      
+
       - name: Wait for Front-End Setup
         run: sleep 20 # Adjust the sleep duration as needed
 
@@ -100,11 +100,9 @@ jobs:
           cd src/front
           pnpm install @latticexyz/faucet@next
           pm2 start --name faucet-server "pnpm faucet-server"
-      
+
       - name: Save PM2 Process List
         run: pm2 save
 
       - name: Setup PM2 to Resurrect on Reboot
         run: pm2 startup
-        
-

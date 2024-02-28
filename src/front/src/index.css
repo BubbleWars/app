@@ -1,16 +1,16 @@
-body, html {
+body,
+html {
   padding: 0;
   margin: 0;
   background-color: white;
   color: white;
   outline: 2px;
   color: white; /* Text color */
-  text-shadow: 
-    -3px -3px 0 #000,  
-     3px -3px 0 #000,
-    -3px  3px 0 #000,
-     3px  3px 0 #000; /* Outline effect */
-
+  text-shadow:
+    -3px -3px 0 #000,
+    3px -3px 0 #000,
+    -3px 3px 0 #000,
+    3px 3px 0 #000; /* Outline effect */
 }
 
 .game-bar {
@@ -19,27 +19,24 @@ body, html {
   height: 50px;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-
-  
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
 
 .screen-title {
   backdrop-filter: blur(10px);
   position: fixed;
   top: 0;
-  left:0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 
-
-    font-family: "Press Start 2P", system-ui;
-    font-weight: 400;
-    font-style: normal;
-    z-index: 1000;
+  font-family: "Press Start 2P", system-ui;
+  font-weight: 400;
+  font-style: normal;
+  z-index: 1000;
 }
 
 .screen-title h1 {
@@ -50,7 +47,6 @@ body, html {
   font-size: 30px;
   font-weight: bolder;
   word-spacing: -5px;
-
 }
 
 .screen-title p {
@@ -83,7 +79,9 @@ button {
   background-color: #f0f0f0;
   cursor: pointer;
   color: black;
-  transition: background-color 0.3s, transform 0.3s; /* Add transform to the transition */
+  transition:
+    background-color 0.3s,
+    transform 0.3s; /* Add transform to the transition */
 }
 
 .button-group {
@@ -108,7 +106,9 @@ input {
   cursor: pointer;
   margin: 0;
   padding: 0px;
-  transition: background-color 0.3s, transform 0.3s; /* Add transform to the transition */
+  transition:
+    background-color 0.3s,
+    transform 0.3s; /* Add transform to the transition */
 }
 
 button:hover {
@@ -129,9 +129,7 @@ button:hover {
 
   color: black;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.3s; /* Add transform to the transition */
-
+  transition:
+    background-color 0.3s,
+    transform 0.3s; /* Add transform to the transition */
 }
-
-
-
