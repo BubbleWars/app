@@ -68,9 +68,8 @@ export const useMachineTimestamp = (
 export const useLocalTimestamp = (): number => {
     const [timestamp, setTimestamp] = useState<number>(0);
     useEffect(() => {
-        const _ = async () =>
-            setInterval(() => setTimestamp(Date.now() / 1000), 1000);
-        _();
+        const intervalId = setInterval(() => setTimestamp(Date.now() / 1000), 1000);
+        return () => clearInterval(intervalId);
     }, []);
     return timestamp;
 };
