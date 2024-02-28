@@ -1,108 +1,108 @@
 name: Deploy Bubblewars.io
 
 on:
-  push:
-    branches:
-      - main
+    push:
+        branches:
+            - main
 
 jobs:
-  build-and-deploy:
-    runs-on: self-hosted
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+    build-and-deploy:
+        runs-on: self-hosted
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v3
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "21.5.0"
+            - name: Install Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: "21.5.0"
 
-      - name: Install pnpm
-        run: |
-          curl -fsSL https://get.pnpm.io/install.sh | sh -
-          source /root/.bashrc
+            - name: Install pnpm
+              run: |
+                  curl -fsSL https://get.pnpm.io/install.sh | sh -
+                  source /root/.bashrc
 
-      - name: Install Docker
-        run: |
-          # Add Docker's official GPG key:
-          sudo apt-get update
-          sudo apt-get install -y ca-certificates curl
-          sudo install -m 0755 -d /etc/apt/keyrings
-          sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-          sudo chmod a+r /etc/apt/keyrings/docker.asc
+            - name: Install Docker
+              run: |
+                  # Add Docker's official GPG key:
+                  sudo apt-get update
+                  sudo apt-get install -y ca-certificates curl
+                  sudo install -m 0755 -d /etc/apt/keyrings
+                  sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+                  sudo chmod a+r /etc/apt/keyrings/docker.asc
 
-          # Add the repository to Apt sources:
-          echo \
-            "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-            $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-            sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-          sudo apt-get update
-          sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+                  # Add the repository to Apt sources:
+                  echo \
+                    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+                    $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+                    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+                  sudo apt-get update
+                  sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-      # - name: Install Sunodo
-      #   run: |
-      #     success=false
-      #     attempts=0
-      #     max_attempts=3
-      #     while ! $success && [ $attempts -lt $max_attempts ]; do
-      #       pnpm install -g @sunodo/cli && success=true || success=false
-      #       attempts=$((attempts + 1))
-      #       if ! $success; then
-      #         echo "Attempt $attempts to install Sunodo failed. Trying again in 5 seconds..."
-      #         sleep 5
-      #       fi
-      #     done
-      #     if ! $success; then
-      #       echo "Failed to install Sunodo after $max_attempts attempts."
-      #       exit 1
-      #     fi
+            # - name: Install Sunodo
+            #   run: |
+            #     success=false
+            #     attempts=0
+            #     max_attempts=3
+            #     while ! $success && [ $attempts -lt $max_attempts ]; do
+            #       pnpm install -g @sunodo/cli && success=true || success=false
+            #       attempts=$((attempts + 1))
+            #       if ! $success; then
+            #         echo "Attempt $attempts to install Sunodo failed. Trying again in 5 seconds..."
+            #         sleep 5
+            #       fi
+            #     done
+            #     if ! $success; then
+            #       echo "Failed to install Sunodo after $max_attempts attempts."
+            #       exit 1
+            #     fi
 
-      - name: Install Dependencies
-        run: npm install
+            - name: Install Dependencies
+              run: npm install
 
-      - name: Clear Existing PM2 Processes
-        run: |
-          pm2 delete blockchain || true
-          pm2 delete node-backend || true
-          pm2 delete front-end || true
-          pm2 delete faucet-server || true
+            - name: Clear Existing PM2 Processes
+              run: |
+                  pm2 delete blockchain || true
+                  pm2 delete node-backend || true
+                  pm2 delete front-end || true
+                  pm2 delete faucet-server || true
 
-      - name: Set up Local Blockchain and Smart Contracts
-        run: pm2 start --name blockchain "sunodo run --no-backend"
+            - name: Set up Local Blockchain and Smart Contracts
+              run: pm2 start --name blockchain "sunodo run --no-backend"
 
-      - name: Wait for Blockchain Setup
-        run: sleep 120 # Adjust the sleep duration as needed
+            - name: Wait for Blockchain Setup
+              run: sleep 120 # Adjust the sleep duration as needed
 
-      - name: Start Node Backend
-        run: |
-          npm i
-          pm2 start --name node-backend "npm run host"
+            - name: Start Node Backend
+              run: |
+                  npm i
+                  pm2 start --name node-backend "npm run host"
 
-      - name: Wait for Backend Setup
-        run: sleep 20 # Adjust the sleep duration as needed
+            - name: Wait for Backend Setup
+              run: sleep 20 # Adjust the sleep duration as needed
 
-      - name: Run Front End
-        run: |
-          cd src/front
-          npm i
-          pm2 start --name front-end "npm run dev"
+            - name: Run Front End
+              run: |
+                  cd src/front
+                  npm i
+                  pm2 start --name front-end "npm run dev"
 
-      - name: Wait for Front-End Setup
-        run: sleep 20 # Adjust the sleep duration as needed
+            - name: Wait for Front-End Setup
+              run: sleep 20 # Adjust the sleep duration as needed
 
-      - name: Deploy Faucet Server
-        env:
-          PORT: 2001
-          RPC_HTTP_URL: http://localhost:8545
-          FAUCET_PRIVATE_KEY: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
-          DRIP_AMOUNT_ETHER: 200
-        run: |
-          cd src/front
-          pnpm install @latticexyz/faucet@next
-          pm2 start --name faucet-server "pnpm faucet-server"
+            - name: Deploy Faucet Server
+              env:
+                  PORT: 2001
+                  RPC_HTTP_URL: http://localhost:8545
+                  FAUCET_PRIVATE_KEY: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+                  DRIP_AMOUNT_ETHER: 200
+              run: |
+                  cd src/front
+                  pnpm install @latticexyz/faucet@next
+                  pm2 start --name faucet-server "pnpm faucet-server"
 
-      - name: Save PM2 Process List
-        run: pm2 save
+            - name: Save PM2 Process List
+              run: pm2 save
 
-      - name: Setup PM2 to Resurrect on Reboot
-        run: pm2 startup
+            - name: Setup PM2 to Resurrect on Reboot
+              run: pm2 startup

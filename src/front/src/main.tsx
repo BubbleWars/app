@@ -13,29 +13,29 @@ import store from "./store/index.ts";
 
 //Configure Apollo
 const client = new ApolloClient({
-  uri: URL_QUERY_GRAPHQL,
-  cache: new InMemoryCache(),
+    uri: URL_QUERY_GRAPHQL,
+    cache: new InMemoryCache(),
 });
 
 //Configure Wagmi
 export const { publicClient, webSocketPublicClient } = configureChains(
-  [currentChain],
-  [publicProvider()],
+    [currentChain],
+    [publicProvider()],
 );
 const config = createConfig({
-  autoConnect: true,
-  publicClient,
-  webSocketPublicClient,
+    autoConnect: true,
+    publicClient,
+    webSocketPublicClient,
 });
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <Provider store={store}>
-    <ApolloProvider client={client}>
-      <WagmiConfig config={config}>
-        <React.StrictMode>
-          <App />
-        </React.StrictMode>
-      </WagmiConfig>
-    </ApolloProvider>
-  </Provider>,
+    <Provider store={store}>
+        <ApolloProvider client={client}>
+            <WagmiConfig config={config}>
+                <React.StrictMode>
+                    <App />
+                </React.StrictMode>
+            </WagmiConfig>
+        </ApolloProvider>
+    </Provider>,
 );

@@ -6,26 +6,26 @@ import { ActionEmit } from "./ActionEmit";
 import { ActionWithdraw } from "./ActionWithdraw";
 
 export const GameBar = () => {
-  const { address, isConnected, isConnecting } = useAccount();
-  const { connect } = useConnect({ connector: new InjectedConnector() });
+    const { address, isConnected, isConnecting } = useAccount();
+    const { connect } = useConnect({ connector: new InjectedConnector() });
 
-  const ProfileButton = () => {
-    if (isConnected) return <div>Connected to {address}</div>;
-    if (isConnecting) return <div>Connecting...</div>;
-    return <button onClick={() => connect()}>Connect</button>;
-  };
+    const ProfileButton = () => {
+        if (isConnected) return <div>Connected to {address}</div>;
+        if (isConnecting) return <div>Connecting...</div>;
+        return <button onClick={() => connect()}>Connect</button>;
+    };
 
-  return (
-    <div className="game-bar">
-      <ProfileButton />
-      {isConnected && (
-        <>
-          <ActionDeposit />
-          <ActionWithdraw />
-          <ActionSpawnPortal />
-          <ActionEmit address={address ?? ""} />
-        </>
-      )}
-    </div>
-  );
+    return (
+        <div className="game-bar">
+            <ProfileButton />
+            {isConnected && (
+                <>
+                    <ActionDeposit />
+                    <ActionWithdraw />
+                    <ActionSpawnPortal />
+                    <ActionEmit address={address ?? ""} />
+                </>
+            )}
+        </div>
+    );
 };
