@@ -78,7 +78,7 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
                 ref={meshRef}
                 onPointerEnter={() => {if(!isSelected)setIsHovered(true)}}
             onPointerLeave={() => setIsHovered(false)}
-            onClick={() => {setIsSelected(!isSelected); setIsHovered(false)}}
+            onClick={() => {setIsSelected(!isSelected && isHovered); setIsHovered(false)}}
             onContextMenu={() => setIsSelected(false)}
             >
                 <sphereGeometry />
@@ -90,7 +90,7 @@ export const Bubble = ({ bubbleId } : { bubbleId: string }) => {
             </mesh>
             
             {isSelected && <BubblesControlsEmit isHovered={isHovered} bubbleId={bubbleId} />}
-            <BubblesInfo bubbleId={bubbleId} />
+            <BubblesInfo bubbleId={bubbleId} position={meshRef.current?.position} />
             
         </>
         

@@ -4,19 +4,24 @@ import { massToRadius, truncateAddress } from "../../../core/funcs/utils"
 import * as THREE from 'three'
 import { CustomText } from "./CustomText"
 import { ResourceType } from "../../../core/types/resource"
+import { useDispatch, useSelector } from "react-redux"
+import { setLock } from "../store/interpolation"
 
 
 
-export const BubblesInfo = ({ bubbleId } : { bubbleId: string }) => {
+export const BubblesInfo = ({ bubbleId, position } : { bubbleId: string | null, position: THREE.Vector3 }) => {
+    const dispatch = useDispatch()
+    const lock = useSelector((state: any) => state.interpolation.lock)
     const bubble = currentState.bubbles.find(bubble => bubble.id === bubbleId)
     if(!bubble) return null
+    if(!position) return null
     const radius = massToRadius(bubble.mass)
-    const textPosition = new THREE.Vector3(bubble.position.x, bubble.position.y, 0)
+    const textPosition = position;
     const zeroPosition = new THREE.Vector3(0, 0, 0)
     const lineHeightVector = new THREE.Vector3(0, -radius/3, 0)
     const pos1 = textPosition.clone().add(lineHeightVector.clone().multiplyScalar(0)).clone()
     const pos2 = textPosition.clone().add(lineHeightVector.clone().multiplyScalar(1)).clone()
-    const pos3 = textPosition.clone().add(lineHeightVector.clone().multiplyScalar(2)).clone()
+    const pos3 = textPosition.clone().add(new THREE.Vector3(radius, -radius, 0)).clone()
     const energy = bubble.resources
         .find(resource => resource.resource == ResourceType.Energy)
     const energyAmount = energy ? energy.mass : 0
@@ -51,6 +56,24 @@ export const BubblesInfo = ({ bubbleId } : { bubbleId: string }) => {
                 noOutline={true}
                 >
                 {energyAmount.toFixed(2)} EP
+                </CustomText>
+            </group>
+
+            <group position={pos3}
+                onClick={() => {
+                    if(lock == bubbleId)
+                        dispatch(setLock(null))
+                    else dispatch(setLock(bubbleId))
+                }}
+            >
+                <CustomText
+                    size={radius/3}
+                    color="black"
+                    position={zeroPosition}
+                    anchorX="center"
+                    noOutline={true}
+                >
+                    {lock == bubbleId ? "X" : "🔓"}
                 </CustomText>
             </group>
             
