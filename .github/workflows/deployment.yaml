@@ -71,7 +71,7 @@ jobs:
               run: pm2 start --name blockchain "sunodo run --no-backend"
 
             - name: Wait for Blockchain Setup
-              run: sleep 120 # Adjust the sleep duration as needed
+              run: sleep 30 # Adjust the sleep duration as needed
 
             - name: Start Node Backend
               run: |
@@ -85,7 +85,9 @@ jobs:
               run: |
                   cd src/front
                   npm i
-                  pm2 start --name front-end "npm run dev"
+                  npm run build
+                  cd dist
+                  pm2 start --name front-end "npx serve -l 3000"
 
             - name: Wait for Front-End Setup
               run: sleep 20 # Adjust the sleep duration as needed

@@ -514,7 +514,6 @@ export const handlePunctures = (
     bubble: Bubble,
     timeElapsed: number,
 ): void => {
-    console.log("handlePunctures", timeElapsed);
     if (!bubble.punctures) return;
     bubble.punctures.forEach((puncture, puncturePoint) => {
         if (!bubble.lastPunctureEmit) bubble.lastPunctureEmit = timestamp;
