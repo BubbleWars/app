@@ -2,7 +2,7 @@ import { Contact } from "planck-js";
 import { STEP_DELTA } from "../consts";
 import { Address } from "../types/address";
 import { Bubble } from "../types/bubble";
-import { Input, InputWithExecutionTime } from "../types/inputs";
+import { InputWithExecutionTime } from "../types/inputs";
 import { Obstacle } from "../types/obstacle";
 import { Portal } from "../types/portal";
 import { Snapshot } from "../types/state";
@@ -26,11 +26,7 @@ import {
   snapshotTempTimestamp,
 } from "../snapshots";
 import { Resource, ResourceNode } from "../types/resource";
-import {
-  nodeAbsorbBubble,
-  nodeAbsorbResource,
-  resourceCollideResource,
-} from "./resource";
+import { nodeAbsorbBubble, nodeAbsorbResource } from "./resource";
 
 export const updateState = (
   state: Snapshot,

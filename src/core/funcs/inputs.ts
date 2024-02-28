@@ -28,7 +28,6 @@ import { User } from "../types/user";
 import {
   createPortal,
   generateSpawnPoint,
-  portalAbsorbBubble,
   portalEmitBubble,
   portalEmitResource,
 } from "./portal";

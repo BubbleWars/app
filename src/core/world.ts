@@ -5,10 +5,10 @@ import { Resource, ResourceNode } from "./types/resource";
 import { Obstacle } from "./types/obstacle";
 import { Address } from "./types/address";
 import { User } from "./types/user";
-import { Input, InputWithExecutionTime } from "./types/inputs";
+import { InputWithExecutionTime } from "./types/inputs";
 import { Snapshot } from "./types/state";
-import { MAX_ADVANCE_STATE_TIME, STEP_DELTA } from "./consts";
-import { handleInput, handlePendingInputs } from "./funcs/inputs";
+import { STEP_DELTA } from "./consts";
+import { handlePendingInputs } from "./funcs/inputs";
 import { updateState, handleContact } from "./funcs/state";
 import {
   applyPortalGravity,
@@ -185,6 +185,7 @@ export const run = (
   callback?: () => void,
   client: boolean = false,
 ) => {
+  client;
   // Set the current time to the last timestamp
   if (lastTimestamp == 0) lastTimestamp = end;
   tempTimestamp = lastTimestamp;

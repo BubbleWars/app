@@ -76,7 +76,7 @@ jobs:
       - name: Start Node Backend
         run: |
           npm i
-          pm2 start --name node-backend "npm run dev"
+          pm2 start --name node-backend "npm run host"
 
       - name: Wait for Backend Setup
         run: sleep 20 # Adjust the sleep duration as needed

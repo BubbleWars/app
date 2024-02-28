@@ -1,6 +1,6 @@
 import { Body, Fixture } from "planck-js";
 import { Address } from "./address";
-import { Resource, ResourceType } from "./resource";
+import { ResourceType } from "./resource";
 
 export interface Entity {
   owner: Address;

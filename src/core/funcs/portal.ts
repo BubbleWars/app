@@ -4,7 +4,6 @@ import { Address } from "../types/address";
 import { massToRadius } from "./utils";
 import {
   EMISSION_SPEED,
-  GRAVITATIONAL_CONSTANT,
   MASS_PER_SECOND,
   WORLD_HEIGHT,
   WORLD_WIDTH,
@@ -16,7 +15,6 @@ import { Resource, ResourceType } from "../types/resource";
 import { createResource, updateResource } from "./resource";
 
 function deterministicHash(x: number, y: number): number {
-  let seed = 0x2f6e2b1;
   let hash = (Math.floor(x) * 0x1f1f1f1f) ^ Math.floor(y);
   hash = Math.sin(hash) * 10000;
   return hash - Math.floor(hash);
@@ -29,6 +27,7 @@ export const generateSpawnPoint = (
   obstacles: Map<string, Obstacle>,
   mass: number,
 ): Vec2 => {
+  world;
   const minimumDistance = massToRadius(mass) * 2;
   let spawnPoint = new Vec2(0, 0);
   let isSafeLocation = false;

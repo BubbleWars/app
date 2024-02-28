@@ -1,6 +1,6 @@
 import { Circle, Vec2, World } from "planck-js";
 import { Resource, ResourceNode, ResourceType } from "../types/resource";
-import { massToRadius, radiusToMass } from "./utils";
+import { massToRadius } from "./utils";
 import { ZeroAddress } from "ethers";
 import {
   DAMPENING,
@@ -15,7 +15,6 @@ import { addEvent } from "./events";
 import { EventsType } from "../types/events";
 import { createNoise2D } from "simplex-noise";
 import Alea from "alea";
-import { time } from "console";
 
 //Generates random initial starting point for resource nodes
 export const generateNodes = (
@@ -23,6 +22,7 @@ export const generateNodes = (
   nodes: Map<string, ResourceNode>,
   amount: number,
 ): void => {
+  amount;
   const prng = Alea(7969);
   const noise = createNoise2D(prng);
   let count = 0;
@@ -56,6 +56,7 @@ export const generateResourceId = (
 ): string => {
   let max = 0;
   resources.forEach((value, key) => {
+    value;
     const split = key.split("-");
     const number = parseInt(split[split.length - 1]);
     if (number > max) max = number;
@@ -381,7 +382,7 @@ export const handleEmission = (
   resources: Map<string, Resource>,
   mass: number,
   startDir: Vec2,
-): Resource | Bubble | undefined => {
+): Resource | Bubble | undefined | any => {
   //console.log("handling emission", mass);
   //console.log("node", node);
   console.log("emission", mass, startDir);
@@ -462,6 +463,7 @@ export const handleNodeUpdates = (
   resources: Map<string, Resource>,
   timeElapsed: number,
 ): void => {
+  timeElapsed;
   nodes.forEach((node) => {
     //Check if resources have been injected
     //If so emit bubbles
@@ -483,7 +485,6 @@ export const handleNodeUpdates = (
         node.emissionDirection.y,
       );
 
-      const direction = Vec2(1, 0);
       handleEmission(
         timestamp,
         world,
@@ -524,31 +525,31 @@ export const handleNodeUpdates = (
   });
 };
 
-export const resourceCollideResource = (
-  resources: Map<string, Resource>,
-  resourceA: Resource,
-  resourceB: Resource,
-  timeElapsed: number,
-): void => {
-  //Get relative momentum between two resources
-  // const momentumA = resourceA.body.getLinearVelocity().clone().mul(resourceA.body.getMass());
-  // const momentumB = resourceB.body.getLinearVelocity().clone().mul(resourceB.body.getMass());
-  // const relativeMomentum = momentumA.clone().sub(momentumB);
-  // //If close enough then absorb
-  // const shouldAbsorb = relativeMomentum.length() < 0.1;
-  // const biggerResource = resourceA.body.getMass() > resourceB.body.getMass() ? resourceA : resourceB;
-  // const smallerResource = resourceA.body.getMass() > resourceB.body.getMass() ? resourceB : resourceA;
-  // const amountAbsorbed = Math.min(smallerResource.body.getMass(), (MASS_PER_SECOND * timeElapsed));
-  // if(shouldAbsorb){
-  //     const newSmallerResourceMass = smallerResource.body.getMass() - amountAbsorbed;
-  //     const newBiggerResourceMass = biggerResource.body.getMass() + amountAbsorbed;
-  //     updateResource(resources, smallerResource, newSmallerResourceMass);
-  //     updateResource(resources, biggerResource, newBiggerResourceMass);
-  // }else {
-  //     //Clash with eachother and destroy resource
-  //     const newSmallerResourceMass = smallerResource.body.getMass() - amountAbsorbed;
-  //     const newBiggerResourceMass = biggerResource.body.getMass() - amountAbsorbed;
-  //     updateResource(resources, smallerResource, newSmallerResourceMass);
-  //     updateResource(resources, biggerResource, newBiggerResourceMass);
-  // }
-};
+// export const resourceCollideResource = (
+//   resources: Map<string, Resource>,
+//   resourceA: Resource,
+//   resourceB: Resource,
+//   timeElapsed: number,
+// ): void => {
+//   //Get relative momentum between two resources
+//   // const momentumA = resourceA.body.getLinearVelocity().clone().mul(resourceA.body.getMass());
+//   // const momentumB = resourceB.body.getLinearVelocity().clone().mul(resourceB.body.getMass());
+//   // const relativeMomentum = momentumA.clone().sub(momentumB);
+//   // //If close enough then absorb
+//   // const shouldAbsorb = relativeMomentum.length() < 0.1;
+//   // const biggerResource = resourceA.body.getMass() > resourceB.body.getMass() ? resourceA : resourceB;
+//   // const smallerResource = resourceA.body.getMass() > resourceB.body.getMass() ? resourceB : resourceA;
+//   // const amountAbsorbed = Math.min(smallerResource.body.getMass(), (MASS_PER_SECOND * timeElapsed));
+//   // if(shouldAbsorb){
+//   //     const newSmallerResourceMass = smallerResource.body.getMass() - amountAbsorbed;
+//   //     const newBiggerResourceMass = biggerResource.body.getMass() + amountAbsorbed;
+//   //     updateResource(resources, smallerResource, newSmallerResourceMass);
+//   //     updateResource(resources, biggerResource, newBiggerResourceMass);
+//   // }else {
+//   //     //Clash with eachother and destroy resource
+//   //     const newSmallerResourceMass = smallerResource.body.getMass() - amountAbsorbed;
+//   //     const newBiggerResourceMass = biggerResource.body.getMass() - amountAbsorbed;
+//   //     updateResource(resources, smallerResource, newSmallerResourceMass);
+//   //     updateResource(resources, biggerResource, newBiggerResourceMass);
+//   // }
+// };

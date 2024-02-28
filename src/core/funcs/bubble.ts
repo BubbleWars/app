@@ -1,6 +1,6 @@
 import { Circle, Vec2, World } from "planck-js";
 import { Bubble, PuncturePoint } from "../types/bubble";
-import { massToRadius, radiusToMass } from "./utils";
+import { massToRadius } from "./utils";
 import { Address } from "../types/address";
 import { DAMPENING, EMISSION_SPEED, MASS_PER_SECOND } from "../consts";
 import { Resource, ResourceType } from "../types/resource";
@@ -321,7 +321,6 @@ export const absorbBubble = (
 
   // Determine the overlap if the bubbles were to continue their paths
   const potentialOverlap = totalRadii - futureDistance;
-  const addedAmountAbsorbed = radiusToMass(potentialOverlap);
 
   //console.log("potentialOverlap", potentialOverlap);
 
@@ -397,7 +396,6 @@ export const absorbResource = (
 
   // Determine the overlap if the bubbles were to continue their paths
   const potentialOverlap = totalRadii - futureDistance;
-  const addedAmountAbsorbed = radiusToMass(potentialOverlap);
 
   //console.log("potentialOverlap", potentialOverlap);
 
@@ -494,6 +492,7 @@ export const handlePunctures = (
   bubble: Bubble,
   timeElapsed: number,
 ): void => {
+  console.log("handlePunctures", timeElapsed);
   if (!bubble.punctures) return;
   bubble.punctures.forEach((puncture, puncturePoint) => {
     if (!bubble.lastPunctureEmit) bubble.lastPunctureEmit = timestamp;
