@@ -85,12 +85,12 @@ export const CustomCameraControls = () => {
                 const x = THREE.MathUtils.lerp(
                     camera.position.x,
                     bubble.position.x,
-                    0.1,
+                    0.05,
                 );
                 const y = THREE.MathUtils.lerp(
                     camera.position.y,
                     bubble.position.y,
-                    0.1,
+                    0.05,
                 );
                 camera.position.x = x;
                 camera.position.y = y;
