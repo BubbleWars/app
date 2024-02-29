@@ -67,6 +67,7 @@ jobs:
                   pm2 delete front-end || true
                   pm2 delete faucet-server || true
                   pm2 delete state-indexer || true
+                  pm2 delete state-viewer || true
 
             - name: Set up Local Blockchain and Smart Contracts
               run: pm2 start --name blockchain "sunodo run --no-backend"
@@ -84,6 +85,8 @@ jobs:
                   cd src/indexer
                   npm i
                   pm2 start --name state-indexer "npm run host"
+                  pm2 start --name state-viewer "npm run loadtest"
+
 
             # - name: Wait for Backend Setup
             #   run: sleep 20 # Adjust the sleep duration as needed

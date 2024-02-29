@@ -102,6 +102,7 @@ export const BubblesControlsEmit = ({
     const tx = useWaitForTransaction({
         chainId: currentChain.id,
         hash: data?.hash,
+        confirmations: 5,
     });
     useEffect(() => {
         if (!tx) return;

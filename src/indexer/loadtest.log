@@ -1,0 +1,10 @@
+[2/29/2024, 4:39:28 PM] @colyseus/loadtest
+endpoint: ws://localhost:2567
+roomName: world
+numClients: 1
+logLevel: all
+output: /home/glockiana/Documents/incubator/BubbleWars/bubblewars-dapp/src/indexer/loadtest.log
+[2/29/2024, 4:41:03 PM] Finished. Summary:
+    Successful connections: 1
+    Failed connections: 0
+    Total errors: 0

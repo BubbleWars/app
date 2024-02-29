@@ -11,7 +11,7 @@
     "start": "tsx watch src/index.ts",
     "dev": "tsx --inspect src/index.ts",
     "host": "tsx  src/index.ts",
-    "loadtest": "tsx loadtest/example.ts --room my_room --numClients 2",
+    "loadtest": "tsx loadtest/example.ts --room world --numClients 1",
     "build": "npm run clean && tsc",
     "clean": "rimraf build",
     "test": "mocha -r tsx test/**_test.ts --exit --timeout 15000"
