@@ -81,7 +81,7 @@ export const onInput = (callback: (input: Input) => void) => {
                     console.log("timestamp from cache", timestamp)
                 }
                 else
-                    Number((await publicClient.getBlock({blockNumber: transaction.blockNumber})).timestamp)
+                    timestamp = Number((await publicClient.getBlock({blockNumber: transaction.blockNumber})).timestamp)
 
 
                 if(transaction?.to?.toLowerCase() == ETH_PORTAL_ADDRESS.toLowerCase()) {
@@ -131,8 +131,13 @@ export const onBlock = (callback: (block: number) => void) => {
 
                 blockNumberToTimestamp[Number(block.number)] = newBlockTimestamp
                 if (Object.keys(blockNumberToTimestamp).length > 100) {
-                    //Remove the oldest block
-                    delete blockNumberToTimestamp[Object.keys(blockNumberToTimestamp)[0] as any]
+                    // Convert keys to numbers, sort them, and get the smallest (oldest) key
+                    const oldestKey = Object.keys(blockNumberToTimestamp)
+                    .map(Number) // Convert keys to numbers
+                    .sort((a, b) => a - b)[0]; // Sort numerically and get the first element
+
+                    // Remove the oldest block
+                    delete blockNumberToTimestamp[oldestKey];                
                 }
             }
         }

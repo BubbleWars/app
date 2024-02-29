@@ -1,5 +1,5 @@
 import { useFrame } from "@react-three/fiber";
-import { Snapshot } from "../../../core/types/state";
+import { BubbleState, PortalState, Snapshot } from "../../../core/types/state";
 import { Portals } from "./Portals";
 import { Bubbles } from "./Bubbles";
 import { useEffect, useState } from "react";
@@ -22,9 +22,116 @@ import { clearEvents, setOnEvent } from "../../../core/funcs/events";
 import { EventsType } from "../../../core/types/events";
 import { Client } from "colyseus.js";
 import { INDEXER_URL } from "../consts";
+import { current } from "@reduxjs/toolkit";
+import { User } from "../../../core/types/user";
+import { Puncture, PuncturePoint } from "../../../core/types/bubble";
+import { ResourceType } from "../../../core/types/resource";
 
-const client = new Client(INDEXER_URL);
-const room = await client.joinOrCreate("world");
+// const client = new Client(INDEXER_URL);
+// const room = await client.joinOrCreate("world");
+
+// const schemaToSnapshot = () => {
+
+// }
+// room.state.onChange(() => {
+//     const { timestamp, users, bubbles, portals } = room.state;
+
+//     //Timestamp
+//     currentState.timestamp = timestamp
+
+//     //Users
+//     currentState.users.length = 0;
+//     users.forEach((user) => {
+//         const tempUser: User = {
+//             address: user.address,
+//             balance: user.balance
+//         }
+//         currentState.users.push(tempUser)
+//     })
+
+//     //Bubbles
+//     currentState.bubbles.length = 0;
+//     users.forEach((user) => {
+//         const tempUser: User = {
+//             address: user.address,
+//             balance: user.balance
+//         }
+//         currentState.users.push(tempUser)
+//     })
+
+//     bubbles.forEach((bubble) => {
+//         const resources: {
+//             resource: ResourceType;
+//             mass: number;
+//         }[] = []
+//         bubble.resources.forEach((value)=>{
+//             resources.push({
+//                 resource: value.resource,
+//                 mass: value.mass
+//             })
+//         })
+//         const punctures: {
+//             point: PuncturePoint;
+//             puncture: Puncture;
+//         }[] = []
+//         bubble.punctures.forEach((value)=>{
+
+//         })
+//         const tempBubble: BubbleState = {
+//             id: bubble.id,
+//             owner: bubble.owner,
+//             position: {
+//                 x: bubble.positionX,
+//                 y: bubble.positionY,
+//             },
+//             velocity: {
+//                 x: bubble.velocityX,
+//                 y: bubble.velocityY,
+//             },
+//             mass: bubble.mass,
+//             resources,
+//             punctures,
+//             lastPunctureEmit: bubble.lastPunctureEmit,
+//         }
+//         currentState.bubbles.push(tempBubble)
+
+//     })
+
+//     //Portals
+//     currentState.portals.length = 0;
+//     portals.forEach((portal) => {
+//         const resources: {
+//             resource: ResourceType;
+//             mass: number;
+//         }[] = []
+//         portal.resources.forEach((value)=>{
+//             resources.push({
+//                 resource: value.resource,
+//                 mass: value.mass
+//             })
+//         })
+//         const tempPortal: PortalState = {
+//             id: portal.id,
+//             owner: portal.owner,
+//             position: {
+//                 x: portal.positionX,
+//                 y: portal.positionY,
+//             },
+//             mass: portal.mass,
+//             resources,
+//         }
+//         currentState.portals.push(tempPortal)
+
+//     })
+// });
+
+
+// room.state.listen("resources", (resources) => {
+   
+// })
+// room.state.listen("nodes", (nodes) => {
+
+// })
 
 export const bubbleStartPositions: { [key: string]: { x: number; y: number } } =
     {};
@@ -59,7 +166,7 @@ export const Game = ({
         snapshot.timestamp,
     );
     //console.log("lastTimestampHandled:", lastTimestampHandled)
-    console.log("snapshot recieved", snapshot);
+    //console.log("snapshot recieved", snapshot);
     //Game object ids
     const [bubbleIds, setBubbleIds] = useState<string[]>([]);
     const [portalIds, setPortalIds] = useState<string[]>([]);

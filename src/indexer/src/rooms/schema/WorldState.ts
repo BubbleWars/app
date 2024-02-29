@@ -21,7 +21,7 @@ export class InputWithExecutionTimeSchema extends Schema  {
 }
 
 export class EntityResourceStateSchema extends Schema {
-    @type("string") resource: string = "";
+    @type("number") resource: number = 0;
     @type("number") mass: number = 0;
 }
 
@@ -63,7 +63,7 @@ export class ObstacleStateSchema extends Schema {
 
 export class ResourceNodeStateSchema extends Schema {
     @type("string") id: string = "";
-    @type("string") type: string = "";
+    @type("number") type: number = 0;
     @type("number") positionX: number = 0;
     @type("number") positionY: number = 0;
     @type("number") mass: number = 0;
@@ -75,7 +75,7 @@ export class ResourceNodeStateSchema extends Schema {
 export class ResourceStateSchema extends Schema {
     @type("string") id: string = "";
     @type("string") owner: string = "";
-    @type("string") type: string = "";
+    @type("number") type: number = 0;
     @type("number") positionX: number = 0;
     @type("number") positionY: number = 0;
     @type("number") velocityX: number = 0;

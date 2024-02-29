@@ -79,10 +79,11 @@ const updateState = (state: WorldState, snapshot: Snapshot): WorldState => {
     newNode.positionX = node.position.x;
     newNode.positionY = node.position.y;
     newNode.mass = node.mass;
-    newNode.type = node.type as unknown as string;
+    newNode.type = node.type;
     newNode.emissionDirectionX = node.emissionDirection.x;
     newNode.emissionDirectionY = node.emissionDirection.y;
     newNode.lastEmission = node.lastEmission;
+    state.nodes.push(newNode);
   });
 
   //set resources
@@ -96,7 +97,7 @@ const updateState = (state: WorldState, snapshot: Snapshot): WorldState => {
     newResource.velocityX = resource.velocity.x;
     newResource.velocityY = resource.velocity.y;
     newResource.mass = resource.mass;
-    newResource.type = resource.type as unknown as string;
+    newResource.type = resource.type;
     state.resources.push(newResource);
   });
 
