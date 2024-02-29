@@ -91,9 +91,7 @@ jobs:
               run: |
                   cd src/front
                   npm i
-                  npm run build
-                  cd dist
-                  pm2 start --name front-end "npx serve -l 80"
+                  pm2 start --name front-end "npm run host"
 
             - name: Wait for Front-End Setup
               run: sleep 20 # Adjust the sleep duration as needed
