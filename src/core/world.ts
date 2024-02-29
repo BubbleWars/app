@@ -278,6 +278,8 @@ export const run = (
         lastTimestamp,
     );
 
+    //console.log("world state", currentState.timestamp);
+
     //console.log("world state", currentState)
     //console.log("resource state", currentState.resources)
 };

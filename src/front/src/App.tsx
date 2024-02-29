@@ -23,8 +23,6 @@ import { useState } from "react";
 function App() {
     const { snapshot } = useInspect({ type: InspectType.State, value: 0 });
     const { inputs } = useInputs();
-    const { notices } = useNotices();
-    const [isConnected, setIsConnected] = useState(false);
 
     return (
         <>
@@ -38,20 +36,16 @@ function App() {
                 }}
                 style={{ height: "100vh", width: "100vw" }}
             >
-                <Game snapshot={snapshot} inputs={inputs} notices={notices} />
+                <Game snapshot={snapshot} inputs={inputs} />
                 <CustomCameraControls />
 
                 <gridHelper
                     position={[0, 0, -10]}
                     rotation={[Math.PI / 2, 0, 0]}
-                    args={[10000, 550, 0xf5f5f5, 0xf5f5f5]}
+                    args={[10000, 1000, 0xf5f5f5, 0xf5f5f5]}
                 />
             </Canvas>
-            <ScreenTitle
-                isConnectedFunc={(bool) => {
-                    setIsConnected(bool);
-                }}
-            />
+            <ScreenTitle />
             <ScreenSpawnPortal />
         </>
     );

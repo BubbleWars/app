@@ -68,6 +68,8 @@ export const parseInput = (data: AdvanceData): Input | false => {
     const inputIndex = metadata?.input_index;
     const epochIndex = metadata?.epoch_index;
 
+    console.log("Recieved payload: ", payload);
+
     if (sender.toLowerCase() == ETH_PORTAL_ADDRESS.toLowerCase()) {
         const binary = decodePacked(["address", "uint256"], payload);
         const address = binary[0];
@@ -291,11 +293,11 @@ const handleEmit = (input: Emit, client: boolean): boolean => {
         : bubbles.has(input.from.toLowerCase());
 
     if (!isPortal && !isBubble) {
-        //console.log("Input from is not a portal or bubble");
+        console.log("Input from is not a portal or bubble");
         return false;
     }
     if (!input?.timestamp) {
-        //console.log("Input timestamp is undefined");
+        console.log("Input timestamp is undefined");
         return false;
     }
     if (!input?.sender) {
