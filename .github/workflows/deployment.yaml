@@ -94,8 +94,8 @@ jobs:
                   npm i
                   pm2 start --name front-end "npm run host"
 
-            - name: Wait for Front-End Setup
-              run: sleep 20 # Adjust the sleep duration as needed
+            # - name: Wait for Front-End Setup
+            #   run: sleep 20 # Adjust the sleep duration as needed
 
             - name: Deploy Faucet Server
               env:
