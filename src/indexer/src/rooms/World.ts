@@ -1,12 +1,14 @@
 import { Room, Client } from "@colyseus/core";
 import { MyRoomState } from "./schema/MyRoomState";
-import { BubbleStateSchema, EntityResourceStateSchema, ObstacleStateSchema, PortalStateSchema, ResourceNodeStateSchema, ResourceStateSchema, UserSchema, WorldState } from "./schema/WorldState";
+import { BubbleStateSchema, EntityResourceStateSchema, ObstacleStateSchema, PortalStateSchema, ResourceNodeStateSchema, ResourceStateSchema, UserSchema, Vector2Schema, WorldState } from "./schema/WorldState";
 import { currentState, init, rollbackToState, run } from "../../../core/world";
 import { snapshotRollback, snapshotRun, snapshots, snapshotInit, snapshotCurrentState } from "../../../core/snapshots";
 import { onBlock, onInput, onInspect } from "./indexer";
 import { handleInput } from "../../../core/funcs/inputs";
 import { Snapshot } from "../../../core/types/state";
 import { ArraySchema } from "@colyseus/schema";
+import { setOnEvent } from "../../../core/funcs/events";
+import { EventsType } from "../../../core/types/events";
 
 const updateState = (state: WorldState, snapshot: Snapshot): WorldState => {
   state.timestamp = snapshot.timestamp;
@@ -107,18 +109,28 @@ const updateState = (state: WorldState, snapshot: Snapshot): WorldState => {
 
 }
 
+const started = false;
+
 export class World extends Room<WorldState> {
   maxClients = 1000;
   blockTimestamp: number = 0;
   recievedStartupInspect = false;
+  unwatchInputs: () => void = () => {};
+  unwatchBlock: () => void = () => {};
+
 
   onCreate (options: any) {
+    //this.unwatchBlock();
+    //this.unwatchInputs();
+
+    //if(this.recievedStartupInspect) return;
+    console.log("World room created!", options);
     this.setState(new WorldState());
 
     this.setSimulationInterval((deltaTime) => this.update(deltaTime));
 
     onInspect((snapshot) => {
-      //console.log("recieved snapshot", snapshot);
+      console.log("recieved snapshot", snapshot);
       updateState(this.state, snapshot);
       init(snapshot);
       snapshotInit(snapshot);
@@ -126,8 +138,9 @@ export class World extends Room<WorldState> {
     });
 
 
-    onBlock((blockTimestamp) => {
-      if (!this.recievedStartupInspect) return;
+    this.unwatchBlock = onBlock((blockTimestamp) => {
+      console.log("recieved block", blockTimestamp);
+      //if (!this.recievedStartupInspect) return;
       this.blockTimestamp = blockTimestamp
       snapshotRun(this.blockTimestamp);
       rollbackToState(snapshotCurrentState);
@@ -138,8 +151,41 @@ export class World extends Room<WorldState> {
       }
     });
 
-    onInput((input) => {
-      if (!this.recievedStartupInspect) return;
+    this.unwatchInputs = onInput((input) => {
+
+      setOnEvent((event: Event | any) => {
+        //only if event.id does not exist within bubbleIds
+        if (event.type == EventsType.CreateBubble) {
+            //if (!bubbleIds.includes(event.id)) {
+                //console.log("new event 11", event)
+                const pos = new Vector2Schema();
+                pos.x = event.position.x;
+                pos.y = event.position.y;
+                this.state.syncBubbleStartPositions.set(event.id, pos);
+                setOnEvent(() => {});
+            //}
+        } else if (event.type == EventsType.DestroyBubble) {
+            //if (bubbleIds.includes(event.id)) {
+                //console.log("new event 22", event)
+                //bubbleDestroyPositions[event.id] =
+                    event.position;
+                setOnEvent(() => {});
+            //}
+        } else if (event.type == EventsType.CreateResource) {
+            //if (!resourceIds.includes(event.id)) {
+                //console.log("new event 33", event)
+                const pos = new Vector2Schema();
+                pos.x = event.position.x;
+                pos.y = event.position.y;
+                this.state.syncResourceStartPositions.set(event.id, pos);
+                    event.position;
+                setOnEvent(() => {});
+            //}
+        }
+      });
+
+      console.log("recieved input", input);
+      //if (!this.recievedStartupInspect) return;
       const isBehind = input.timestamp < this.blockTimestamp;
       if (isBehind) {
         snapshotRollback(input.timestamp);
@@ -149,6 +195,7 @@ export class World extends Room<WorldState> {
       handleInput(input, true);
 
       if (isBehind) snapshotRun(this.blockTimestamp, () => {}, true);
+      
 
     });
 
@@ -169,13 +216,17 @@ export class World extends Room<WorldState> {
   }
 
   onDispose() {
-    console.log("room", this.roomId, "disposing...");
+    this.unwatchBlock();
+    this.unwatchInputs();
+    this.recievedStartupInspect = false;
+    this.setSimulationInterval(null);
   }
 
   update (time: number) {
     //
     // handle game loop
     //
+    //console.log("update", time);
     const now = Date.now() / 1000;
     run(now)
     updateState(this.state, currentState);

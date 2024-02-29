@@ -21,8 +21,8 @@ import { ScreenSpawnPortal } from "./components/screens/ScreenSpawnPortal";
 import { useState } from "react";
 
 function App() {
-    const { snapshot } = useInspect({ type: InspectType.State, value: 0 });
-    const { inputs } = useInputs();
+    //const { snapshot } = useInspect({ type: InspectType.State, value: 0 });
+    //const { inputs } = useInputs();
 
     return (
         <>
@@ -36,7 +36,7 @@ function App() {
                 }}
                 style={{ height: "100vh", width: "100vw" }}
             >
-                <Game snapshot={snapshot} inputs={inputs} />
+                <Game />
                 <CustomCameraControls />
 
                 <gridHelper

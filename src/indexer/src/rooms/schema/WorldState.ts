@@ -1,4 +1,4 @@
-import { Schema, ArraySchema, type } from "@colyseus/schema";
+import { Schema, ArraySchema, type, MapSchema } from "@colyseus/schema";
 
 export class Vector2Schema extends Schema {
     @type("number") x: number = 0;
@@ -41,6 +41,9 @@ export class BubbleStateSchema extends Schema {
     @type([ EntityResourceStateSchema ]) resources = new ArraySchema<EntityResourceStateSchema>();
     @type([ BubblePunctureSchema ]) punctures = new ArraySchema<BubblePunctureSchema>();
     @type("number") lastPunctureEmit: number = 0;
+    @type("number") startPositionX: number = 0;
+    @type("number") startPositionY: number = 0;
+
 }
 
 export class PortalStateSchema extends Schema {
@@ -93,4 +96,7 @@ export class WorldState extends Schema {
     @type([ ObstacleStateSchema ]) obstacles = new ArraySchema<ObstacleStateSchema>();
     @type([ ResourceNodeStateSchema ]) nodes = new ArraySchema<ResourceNodeStateSchema>();
     @type([ ResourceStateSchema ]) resources = new ArraySchema<ResourceStateSchema>();
+    @type({ map: Vector2Schema }) syncBubbleStartPositions = new MapSchema<Vector2Schema>();
+    @type({ map: Vector2Schema }) syncBubbleEndPositions = new MapSchema<Vector2Schema>();
+    @type({ map: Vector2Schema }) syncResourceStartPositions = new MapSchema<Vector2Schema>();
 }

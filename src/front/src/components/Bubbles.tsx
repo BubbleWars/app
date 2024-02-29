@@ -48,7 +48,9 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
         }
 
         if (!meshRef.current.position.x || !meshRef.current.position.y) {
+
             const startPosition = bubbleStartPositions[bubbleId];
+            console.log("fetching start position", startPosition)
             if (startPosition) {
                 meshRef.current.position.set(
                     startPosition.x,

@@ -14,6 +14,10 @@ const ETH_PORTAL_ADDRESS = "0xFfdbe43d4c855BF7e0f105c400A50857f53AB044";
 
 const blockNumberToTimestamp: {[key: number]: number} = {}
 
+let inputSet = false;
+let inspectSet = false;
+let blockSet = false;
+
 //Inspect the state of the Cartesi Machine
 export const inspectState = async (
     inspect: Inspect,
@@ -52,7 +56,7 @@ export const publicClient = createPublicClient({
 
 export const onInspect = async (callback: (snapshot: Snapshot) => void) => {
     const snapshot = await inspectState({ type: InspectType.State, value: 0 })
-    console.log("snapshot", snapshot.portals)
+    console.log("snapshot", snapshot)
     callback(snapshot)
 }
 
@@ -102,13 +106,18 @@ export const onInput = (callback: (input: Input) => void) => {
                     })
                 }
                 else {
-                     const data = logs[0].data
-                    //from hex to string
-                    
-                    const json = hexToString(data)
-                    const input: Input = JSON.parse(json.substring(json.indexOf('{'), json.lastIndexOf('}') + 1));
-                    console.log("input", input)
-                    callback({...input, timestamp, sender: transaction.from})
+                    try {
+                        const data = logs[0].data
+                        //from hex to string
+                        const json = hexToString(data)
+                        console.log("json", json)
+                        const input: Input = JSON.parse(json.substring(json.indexOf('{"'), json.lastIndexOf('}') + 1));
+                        console.log("input", input)
+                        callback({...input, timestamp, sender: transaction.from})
+                    }
+                    catch(e) {  
+                        console.log("error", e)
+                    }
                 }
 
                 
@@ -118,6 +127,8 @@ export const onInput = (callback: (input: Input) => void) => {
             })
         }
     })
+    return unwatch
+    inspectSet = true
 }
 
 export const onBlock = (callback: (block: number) => void) => {
@@ -142,4 +153,6 @@ export const onBlock = (callback: (block: number) => void) => {
             }
         }
     })
+    return unwatch
+    blockSet = true
 }
