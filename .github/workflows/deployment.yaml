@@ -70,16 +70,22 @@ jobs:
             - name: Set up Local Blockchain and Smart Contracts
               run: pm2 start --name blockchain "sunodo run --no-backend"
 
-            - name: Wait for Blockchain Setup
-              run: sleep 30 # Adjust the sleep duration as needed
+            # - name: Wait for Blockchain Setup
+            #   run: sleep 30 # Adjust the sleep duration as needed
 
             - name: Start Node Backend
               run: |
                   npm i
                   pm2 start --name node-backend "npm run host"
+            
+            - name: Start State Indexing Server
+              run: |
+                  cd src/indexer
+                  npm i
+                  pm2 start --name state-indexer "npm run host"
 
-            - name: Wait for Backend Setup
-              run: sleep 20 # Adjust the sleep duration as needed
+            # - name: Wait for Backend Setup
+            #   run: sleep 20 # Adjust the sleep duration as needed
 
             - name: Run Front End
               run: |
