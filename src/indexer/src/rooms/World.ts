@@ -1,6 +1,6 @@
 import { Room, Client } from "@colyseus/core";
 import { MyRoomState } from "./schema/MyRoomState";
-import { BubbleStateSchema, EntityResourceStateSchema, PortalStateSchema, WorldState } from "./schema/WorldState";
+import { BubbleStateSchema, EntityResourceStateSchema, ObstacleStateSchema, PortalStateSchema, ResourceNodeStateSchema, ResourceStateSchema, UserSchema, WorldState } from "./schema/WorldState";
 import { currentState, init, rollbackToState, run } from "../../../core/world";
 import { snapshotRollback, snapshotRun, snapshots, snapshotInit, snapshotCurrentState } from "../../../core/snapshots";
 import { onBlock, onInput, onInspect } from "./indexer";
@@ -10,6 +10,16 @@ import { ArraySchema } from "@colyseus/schema";
 
 const updateState = (state: WorldState, snapshot: Snapshot): WorldState => {
   state.timestamp = snapshot.timestamp;
+  //set users
+  state.users.clear();
+  snapshot.users.forEach((user) => {
+    const newUser = new UserSchema();
+    newUser.address = user.address;
+    newUser.balance = user.balance;
+    state.users.push(newUser);
+  });
+
+  //set bubbles
   state.bubbles.clear();
   snapshot.bubbles.forEach((bubble) => {
     const newBubble = new BubbleStateSchema();
@@ -29,6 +39,8 @@ const updateState = (state: WorldState, snapshot: Snapshot): WorldState => {
     state.bubbles.push(newBubble);
     
   });
+
+  //set portals
   state.portals.clear();
   snapshot.portals.forEach((portal) => {
     const newPortal = new PortalStateSchema();
@@ -46,6 +58,49 @@ const updateState = (state: WorldState, snapshot: Snapshot): WorldState => {
     state.portals.push(newPortal);
 
   });
+
+  //Set obstacles
+  state.obstacles.clear();
+  snapshot.obstacles.forEach((obstacle) => {
+    const newObstacle = new ObstacleStateSchema();
+    newObstacle.id = obstacle.id;
+    newObstacle.positionX = obstacle.position.x;
+    newObstacle.positionY = obstacle.position.y;
+    newObstacle.velocityX = obstacle.velocity.x;
+    newObstacle.velocityY = obstacle.velocity.y;
+    state.obstacles.push(newObstacle);
+  });
+
+  //set nodes
+  state.nodes.clear();
+  snapshot.nodes.forEach((node) => {
+    const newNode = new ResourceNodeStateSchema();
+    newNode.id = node.id;
+    newNode.positionX = node.position.x;
+    newNode.positionY = node.position.y;
+    newNode.mass = node.mass;
+    newNode.type = node.type as unknown as string;
+    newNode.emissionDirectionX = node.emissionDirection.x;
+    newNode.emissionDirectionY = node.emissionDirection.y;
+    newNode.lastEmission = node.lastEmission;
+  });
+
+  //set resources
+  state.resources.clear();
+  snapshot.resources.forEach((resource) => {
+    const newResource = new ResourceStateSchema();
+    newResource.id = resource.id;
+    newResource.owner = resource.owner;
+    newResource.positionX = resource.position.x;
+    newResource.positionY = resource.position.y;
+    newResource.velocityX = resource.velocity.x;
+    newResource.velocityY = resource.velocity.y;
+    newResource.mass = resource.mass;
+    newResource.type = resource.type as unknown as string;
+    state.resources.push(newResource);
+  });
+
+  
   return state;
   
 

@@ -20,6 +20,11 @@ import { Nodes } from "./Nodes";
 import { Resources } from "./Resources";
 import { clearEvents, setOnEvent } from "../../../core/funcs/events";
 import { EventsType } from "../../../core/types/events";
+import { Client } from "colyseus.js";
+import { INDEXER_URL } from "../consts";
+
+const client = new Client(INDEXER_URL);
+const room = await client.joinOrCreate("world");
 
 export const bubbleStartPositions: { [key: string]: { x: number; y: number } } =
     {};
@@ -32,6 +37,9 @@ export const resourceStartPositions: {
 export const resourceDestroyPositions: {
     [key: string]: { x: number; y: number };
 } = {};
+
+
+const SIMULATE_IN_CLIENT = false;
 
 export const Game = ({
     snapshot,
