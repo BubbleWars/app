@@ -66,6 +66,7 @@ jobs:
                   pm2 delete node-backend || true
                   pm2 delete front-end || true
                   pm2 delete faucet-server || true
+                  pm2 delete state-indexer || true
 
             - name: Set up Local Blockchain and Smart Contracts
               run: pm2 start --name blockchain "sunodo run --no-backend"
