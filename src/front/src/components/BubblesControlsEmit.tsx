@@ -4,7 +4,7 @@ import { currentState, rollbackToState } from "../../../core/world";
 import { useEffect, useRef, useState } from "react";
 import { Line, Text3D } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useCreateInput, useOnClick, useOnWheel } from "../hooks/inputs";
+import { useCreateInput, useOnClick, useOnWheel, waitForEmission } from "../hooks/inputs";
 import { Emit, InputType } from "../../../core/types/inputs";
 import { useAccount, useWaitForTransaction } from "wagmi";
 import { currentChain } from "../contracts";
@@ -19,8 +19,9 @@ import { useDispatch } from "react-redux";
 import { addInput } from "../store/inputs";
 import { CustomText } from "./CustomText";
 import { ResourceType } from "../../../core/types/resource";
-import { setIsBubbleSelected } from "../store/interpolation";
+import { setControlsActive, setIsBubbleSelected } from "../store/interpolation";
 import { burnerAddress } from "../config";
+import { setOnEvent } from "../../../core/funcs/events";
 
 export const BubblesControlsEmit = ({
     bubbleId,
@@ -93,60 +94,66 @@ export const BubblesControlsEmit = ({
         }
         if (isReady) {
             //dispatch(setIsBubbleSelected(false))
+            dispatch(setControlsActive(false));
             setIsEmitting(true);
             submitTransaction();
-        }
-    });
-
-    //Tx prediction
-    const tx = useWaitForTransaction({
-        chainId: currentChain.id,
-        hash: data?.hash,
-        confirmations: 5,
-    });
-    useEffect(() => {
-        if (!tx) return;
-        if (!tx.data?.blockNumber) return;
-        if (hasProcessedTx) return;
-        setHasProcessedTx(true);
-        getPublicClient({ chainId: currentChain.id })
-            .getBlock({ blockNumber: tx.data.blockNumber })
-            .then((block) => {
-                const timestamp = Number(block.timestamp);
-                const input: Emit = {
-                    type: InputType.Emit,
-                    timestamp,
-                    mass,
-                    from: bubbleId,
-                    direction: { x: direction.x, y: direction.y },
-                    sender: address,
-                    executionTime: timestamp,
-                    prediction: true,
-                    emissionType: emitEth ? "bubble" : ResourceType.Energy,
-                };
-                dispatch(addInput(input));
+            waitForEmission(bubbleId, bubble.mass, mass, () => {
                 dispatch(setIsBubbleSelected(false));
                 setHasProcessedTx(true);
                 setIsEmitting(false);
-                //console.log("is predicting bubble", input)
+                setIsReady(false);
+            })
+        }
+    });
 
-                // //Client add input
-                // const isBehind = input.timestamp < currentState.timestamp
-                // if(isBehind) {
-                //     const state = snapshots.get(input.timestamp)
-                //     if(!state) return
-                //     rollbackToState(state)
-                // }
-                // handleInput(input)
+    // //Tx prediction
+    // const tx = useWaitForTransaction({
+    //     chainId: currentChain.id,
+    //     hash: data?.hash,
+    //     confirmations: 1,
+    // });
+    // useEffect(() => {
+    //     if (!tx) return;
+    //     if (!tx.data?.blockNumber) return;
+    //     if (hasProcessedTx) return;
+    //     setHasProcessedTx(true);
+    //     getPublicClient({ chainId: currentChain.id })
+    //         .getBlock({ blockNumber: tx.data.blockNumber })
+    //         .then((block) => {
+    //             const timestamp = Number(block.timestamp);
+    //             const input: Emit = {
+    //                 type: InputType.Emit,
+    //                 timestamp,
+    //                 mass,
+    //                 from: bubbleId,
+    //                 direction: { x: direction.x, y: direction.y },
+    //                 sender: address,
+    //                 executionTime: timestamp,
+    //                 prediction: true,
+    //                 emissionType: emitEth ? "bubble" : ResourceType.Energy,
+    //             };
+    //             dispatch(addInput(input));
+    //             setHasProcessedTx(true);
+    //             setIsEmitting(false);
+    //             //console.log("is predicting bubble", input)
 
-                // //Snapshot add input
-                // snapshotRollback(input.timestamp)
-                // handleInput(input, true)
-                ////console.log("is predicting", input)
-                ////console.log("is predicting", timestamp)
-            });
-        //console.log("tx:", tx)
-    }, [tx]);
+    //             // //Client add input
+    //             // const isBehind = input.timestamp < currentState.timestamp
+    //             // if(isBehind) {
+    //             //     const state = snapshots.get(input.timestamp)
+    //             //     if(!state) return
+    //             //     rollbackToState(state)
+    //             // }
+    //             // handleInput(input)
+
+    //             // //Snapshot add input
+    //             // snapshotRollback(input.timestamp)
+    //             // handleInput(input, true)
+    //             ////console.log("is predicting", input)
+    //             ////console.log("is predicting", timestamp)
+    //         });
+    //     //console.log("tx:", tx)
+    // }, [tx]);
 
     //Scroll action
     useOnWheel((event) => {
@@ -234,12 +241,13 @@ export const BubblesControlsEmit = ({
                         onPointerDown={() => {
                             setTimeout(() => {
                                 setIsReady(true);
+                                dispatch(setControlsActive(true));
                             }, 250);
                         }}
                     >
                         <CustomText
                             size={emitEth ? 1.2 : 1.1}
-                            position={new THREE.Vector3(radius, radius, 0).add(
+                            position={new THREE.Vector3(radius*2, radius*2, 0).add(
                                 position,
                             )}
                             anchorX="center"
@@ -257,14 +265,15 @@ export const BubblesControlsEmit = ({
                         onPointerDown={() => {
                             setTimeout(() => {
                                 setIsReady(true);
+                                dispatch(setControlsActive(true));
                             }, 250);
                         }}
                     >
                         <CustomText
                             size={emitEp ? 1.2 : 1.1}
                             position={new THREE.Vector3(
-                                radius,
-                                radius - 2,
+                                radius*2,
+                               (radius*2) - 2,
                                 0,
                             ).add(position)}
                             anchorX="center"

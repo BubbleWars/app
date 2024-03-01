@@ -51,7 +51,6 @@ export const currentChain = defineChain({
 export const publicClient = createPublicClient({
     chain: currentChain,
     transport: http(),
-    pollingInterval: 10,
 })
 
 export const onInspect = async (callback: (snapshot: Snapshot) => void) => {

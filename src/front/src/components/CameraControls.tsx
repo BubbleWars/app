@@ -29,6 +29,10 @@ export class CustomControls extends OrbitControls {
         this.enableRotate = enable;
     }
 
+    setEnablePan(enable: boolean) {
+        this.enablePan = enable;
+    }
+
     // Additional custom logic can be added here if needed
 }
 
@@ -44,6 +48,7 @@ export const CustomCameraControls = () => {
 
     const pan = useSelector((state: any) => state.interpolation.pan);
     const lock = useSelector((state: any) => state.interpolation.lock);
+    const controlsActive = useSelector((state: any) => state.interpolation.controlsActive);
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -55,8 +60,7 @@ export const CustomCameraControls = () => {
     }, [pan]);
 
     useFrame(() => {
-        if (isBubbleSelected) {
-            controls.current?.setEnableZoom(false);
+        if (controlsActive) {
             if (lock) {
                 const bubble = currentState.bubbles.find(
                     (bubble) => bubble.id == lock,
@@ -74,10 +78,14 @@ export const CustomCameraControls = () => {
                     );
                     camera.position.x = x;
                     camera.position.y = y;
+                    
                 }
+                controls.current?.setEnablePan(false);
+
             }
+            controls.current?.setEnableZoom(false);
+
         } else if (lock) {
-            controls.current?.setEnableZoom(true);
             const bubble = currentState.bubbles.find(
                 (bubble) => bubble.id == lock,
             );
@@ -95,19 +103,22 @@ export const CustomCameraControls = () => {
                 camera.position.x = x;
                 camera.position.y = y;
             }
+            controls.current?.setEnableZoom(false);
+            controls.current?.setEnablePan(false);
         } else {
+            controls.current?.setEnablePan(true);
             controls.current?.setEnableZoom(true);
-            controls.current?.setEnableRotate(false);
 
             //set rotation to 0
             camera.rotation.x = 0;
             camera.rotation.y = 0;
             camera.rotation.z = 0;
         }
+        controls.current?.setEnableRotate(false);
     });
 
     //if(isBubbleSelected) return null
-    if (lock) return null;
+    //if (lock) return null;
 
     return <customControls ref={controls} args={[camera, gl.domElement]} />;
 };

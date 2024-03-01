@@ -86,10 +86,10 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
     const baseColor = ethereumAddressToColor(owner);
     const outlineColor = darkenColor(baseColor, 0.25); // Darken by 20%
 
-    useEffect(() => {
-        //console.log("setIsBubbleSelected: ui", isSelected)
-        dispatch(setIsBubbleSelected(isSelected));
-    }, [isSelected]);
+    // useEffect(() => {
+    //     //console.log("setIsBubbleSelected: ui", isSelected)
+    //     dispatch(setIsBubbleSelected(isSelected));
+    // }, [isSelected]);
 
     return (
         <>
