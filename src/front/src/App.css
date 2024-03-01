@@ -1,1 +1,17 @@
 @import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+.canvas-container {
+    position: relative; /* Establishes a positioning context */
+    width: 100vw; /* Full width */
+    height: 100vh; /* Full height */
+}
+
+.user-stats-bar {
+    position: absolute; /* Positioned absolutely relative to its nearest positioned ancestor */
+    bottom: 0; /* Align to the bottom */
+    left: 0; /* Align to the left */
+    width: 100%; /* Full width */
+
+    color: black; /* Text color */
+    padding: 10px; /* Padding around the content */
+    box-sizing: border-box; /* Ensures padding is included in width */
+}

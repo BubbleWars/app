@@ -1,0 +1,9 @@
+.user-stats-bar {
+    position: absolute;
+    bottom: 0; /* Adjust as needed */
+    left: 0; /* Adjust as needed */
+    width: 100%; /* Adjust as needed */
+
+    padding: 20px;
+    box-sizing: border-box;
+}
