@@ -7,6 +7,7 @@ import { FAUCET_URL, RPC_URL } from "../../consts";
 import { createWalletClient, http } from "viem";
 import { MockConnector } from "wagmi/connectors/mock";
 import { currentChain } from "../../contracts";
+import { waitForTransaction } from "wagmi/actions";
 
 const faucetClient = createFaucetClient({
     url: FAUCET_URL,
@@ -14,6 +15,7 @@ const faucetClient = createFaucetClient({
 
 export const ScreenTitle = () => {
     const [buttonText, setButtonText] = React.useState("Connect");
+    const [ fetchingFunds, setFetchingFunds ] = React.useState(false)
     const { address, isConnected, isConnecting } = useAccount();
     const { connect } = useConnect({
         connector: new MockConnector({
@@ -40,28 +42,36 @@ export const ScreenTitle = () => {
 
     const shouldFetchFunds = useMemo(() => {
         if (isError || isLoading) return false;
-        return balance <= 0;
-    }, [balance]);
+        return balance <= 0.5;
+    }, [balance, isError, isLoading]);
 
     const fetchFunds = useCallback(() => {
-        faucetClient.drip.mutate({
-            address: burnerAddress as "0x{string}",
-        });
+        const _ = async () => {
+            setFetchingFunds(true)
+            const tx = await faucetClient.drip.mutate({
+                address: burnerAddress as "0x{string}",
+            });
+            await waitForTransaction({chainId: currentChain.id, hash: tx, confirmations: 1})   
+            setFetchingFunds(false)
+        }
+        _();
     }, [burnerAddress]);
 
     useEffect(() => {
-        if (!waitingForBalance && shouldFetchFunds) fetchFunds();
-    }, [shouldFetchFunds, waitingForBalance]);
+        if (shouldFetchFunds) fetchFunds();
+    }, [shouldFetchFunds]);
 
     useEffect(() => {
-        if (isConnected) {
+        if(fetchingFunds) {
+            setButtonText("Fetching funds...")
+        } else if (isConnected) {
             setButtonText("Connected to " + truncateAddress(burnerAddress));
         } else if (isConnecting) {
             setButtonText("Connecting...");
         } else {
             setButtonText("Connect");
         }
-    }, [isConnected, isConnecting, address]);
+    }, [isConnected, isConnecting, address, fetchingFunds, balance]);
 
     // const isFunded = useMemo(() => {
     //     return balance > 0

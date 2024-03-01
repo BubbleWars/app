@@ -105,7 +105,7 @@ jobs:
                   PORT: 2001
                   RPC_HTTP_URL: http://localhost:8545
                   FAUCET_PRIVATE_KEY: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
-                  DRIP_AMOUNT_ETHER: 200
+                  DRIP_AMOUNT_ETHER: 110
               run: |
                   cd src/front
                   pnpm install @latticexyz/faucet@next
