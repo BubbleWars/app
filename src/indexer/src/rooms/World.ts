@@ -117,6 +117,7 @@ export class World extends Room<WorldState> {
   recievedStartupInspect = false;
   unwatchInputs: () => void = () => {};
   unwatchBlock: () => void = () => {};
+  autoDispose = false;
 
 
   onCreate (options: any) {
@@ -216,10 +217,13 @@ export class World extends Room<WorldState> {
   }
 
   onDispose() {
+    console.log("is disposing")
     this.unwatchBlock();
     this.unwatchInputs();
     this.recievedStartupInspect = false;
     this.setSimulationInterval(null);
+    init();
+    snapshotInit();
   }
 
   update (time: number) {
