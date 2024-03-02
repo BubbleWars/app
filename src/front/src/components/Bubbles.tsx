@@ -16,6 +16,7 @@ import {
     setIsBubbleSelected,
     setSelectedEntityId,
 } from "../store/interpolation";
+import { burnerAddress } from "../config";
 
 export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
     const meshRef = useRef<any>();
@@ -104,8 +105,10 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
                 }}
                 onPointerLeave={() => setIsHovered(false)}
                 onClick={() => {
-                    setIsSelected(!isSelected && isHovered);
-                    setIsHovered(false);
+                    if(burnerAddress.toLowerCase() == owner.toLowerCase()) {
+                        setIsSelected(!isSelected && isHovered);
+                        setIsHovered(false);
+                    }
                 }}
                 onContextMenu={() => setIsSelected(false)}
             >

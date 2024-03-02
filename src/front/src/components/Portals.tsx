@@ -18,6 +18,7 @@ import {
     setSelectedEntityId,
 } from "../store/interpolation";
 import { MathUtils } from "three";
+import { burnerAddress } from "../config";
 
 export const Portal = ({ portalId }: { portalId: string }) => {
     const meshRef = useRef<any>();
@@ -66,8 +67,10 @@ export const Portal = ({ portalId }: { portalId: string }) => {
                 }}
                 onPointerLeave={() => setIsHovered(false)}
                 onClick={() => {
-                    setIsSelected(!isSelected);
-                    setIsHovered(false);
+                    if(burnerAddress.toLowerCase() === portalId.toLowerCase()) {
+                        setIsSelected(!isSelected);
+                        setIsHovered(false);
+                    }
                 }}
                 onContextMenu={() => setIsSelected(false)}
                 ref={meshRef}
