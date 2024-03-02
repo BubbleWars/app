@@ -23,6 +23,16 @@ To get the node backend code up and running, use:
 npm run dev
 ```
 
+### Starting the Indexer
+
+This is responsible for simulating and syncing all of the clients with game state. Using Colyseus, Websockets, Node.js, etc.
+
+```bash
+cd src/indexer
+npm i
+npm run dev
+```
+
 ### Running the Front End
 
 Navigate to the front end directory and start the development server:

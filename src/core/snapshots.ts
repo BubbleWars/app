@@ -75,7 +75,7 @@ export const applyDeferredUpdates = () => {
 
 export const snapshotInit = (initialState?: Snapshot) => {
     if (!initialState?.nodes || initialState.nodes.length == 0) {
-        generateNodes(snapshotWorld, snapshotNodes, 1);
+        //generateNodes(snapshotWorld, snapshotNodes, 1);
     }
     if (initialState) {
         //reset all state

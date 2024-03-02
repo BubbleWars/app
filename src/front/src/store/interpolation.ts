@@ -3,6 +3,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 // Define a type for the slice state
 interface InterpolationState {
     from: number | null;
+    controlsActive: boolean;
     isBubbleSelected: boolean;
     selectedEntityId: string | null;
     pan: { x: number; y: number } | null;
@@ -13,6 +14,9 @@ export const interpolationSlice = createSlice({
     name: "inputs",
     initialState: { from: null } as InterpolationState,
     reducers: {
+        setControlsActive: (state, action: PayloadAction<boolean>) => {
+            state.controlsActive = action.payload;
+        },
         setLock: (state, action: PayloadAction<string | null>) => {
             state.lock = action.payload;
         },
@@ -59,6 +63,7 @@ export const {
     setSelectedEntityId,
     setPan,
     setLock,
+    setControlsActive,
 } = interpolationSlice.actions;
 
 export default interpolationSlice.reducer;

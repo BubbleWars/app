@@ -51,7 +51,7 @@ export const Portal = ({ portalId }: { portalId: string }) => {
 
     // Calculate the outline color based on the Ethereum address
     const baseColor = ethereumAddressToColor(portalId);
-    const outlineColor = darkenColor(baseColor, 0.2); // Darken by 20%
+    const outlineColor = darkenColor(baseColor, 0.7); // Darken by 20%
 
     useEffect(() => {
         //console.log("setIsBubbleSelected: ui", isSelected)
@@ -73,7 +73,7 @@ export const Portal = ({ portalId }: { portalId: string }) => {
                 ref={meshRef}
             >
                 <sphereGeometry />
-                <Outlines thickness={0.1} color={outlineColor} />
+                <Outlines thickness={0.15} color={outlineColor} />
                 <meshBasicMaterial toneMapped={false} color={baseColor} />
             </mesh>
             {isSelected && (

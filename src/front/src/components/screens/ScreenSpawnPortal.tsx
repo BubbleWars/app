@@ -67,9 +67,9 @@ export const ScreenSpawnPortal = () => {
                     <input
                         type="number"
                         value={amount}
-                        onChange={(e) => setAmount(parseInt(e.target.value))}
+                        onChange={(e) => setAmount(parseInt(e.target.value ? e.target.value : "0"))}
                     />
-                    <h2>ETH</h2>
+                    <p>ETH</p>
                 </div>
                 <button
                     disabled={isError || isLoading}
@@ -78,7 +78,7 @@ export const ScreenSpawnPortal = () => {
                         setButtonText("Spawning...");
                     }}
                 >
-                    <p>{buttonText}</p>
+                    {buttonText}
                 </button>
 
                 {/* <button 

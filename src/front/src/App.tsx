@@ -23,10 +23,8 @@ import { ScreenSpawnPortal } from "./components/screens/ScreenSpawnPortal";
 import { useState } from "react";
 
 function App() {
-    const { snapshot } = useInspect({ type: InspectType.State, value: 0 });
-    const { inputs } = useInputs();
-    const { notices } = useNotices();
-    const [isConnected, setIsConnected] = useState(false);
+    //const { snapshot } = useInspect({ type: InspectType.State, value: 0 });
+    //const { inputs } = useInputs();
 
     return (
         <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
@@ -40,20 +38,18 @@ function App() {
                 }}
                 style={{ width: "100%", height: "100%" }}
             >
-                <Game snapshot={snapshot} inputs={inputs} notices={notices} />
+                <color attach="background" args={["#fdf6e3"]} />
+                <Game />
                 <CustomCameraControls />
                 <gridHelper
                     position={[0, 0, -10]}
                     rotation={[Math.PI / 2, 0, 0]}
-                    args={[10000, 550, 0xf5f5f5, 0xf5f5f5]}
+                    args={[10000, 10000, 0xeee8d5, 0xeee8d5]}
                 />
             </Canvas>
-            {/* Overlay Components */}
-            <ScreenTitle
-                isConnectedFunc={(bool) => {
-                    setIsConnected(bool);
-                }}
-            />
+
+            <ScreenTitle />
+
             <ScreenSpawnPortal />
             <UserStatsBar />
             <BubbleStats />
