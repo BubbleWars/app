@@ -143,3 +143,9 @@ button:hover {
         font-family: "Lilita One", sans-serif;
     color: white;
 }
+
+.input-bg p {
+    box-shadow: none;
+    text-shadow: none;
+    margin-top: 30px;
+}
