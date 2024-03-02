@@ -63,13 +63,13 @@ export const ScreenTitle = () => {
 
     useEffect(() => {
         if(fetchingFunds) {
-            setButtonText("Fetching funds...")
+            setButtonText("Fetching funds for burner...")
         } else if (isConnected) {
             setButtonText("Connected to " + truncateAddress(burnerAddress));
         } else if (isConnecting) {
-            setButtonText("Connecting...");
+            setButtonText("Loading...");
         } else {
-            setButtonText("Connect");
+            setButtonText("Play");
         }
     }, [isConnected, isConnecting, address, fetchingFunds, balance]);
 
@@ -82,7 +82,7 @@ export const ScreenTitle = () => {
     return (
         <div className="screen-title">
             <h1>Bubblewars.io</h1>
-            <p>Absorb ETH. Grow your bubbles. Conquer the world.</p>
+            <p>Absorb ETH. Grow your bubbles. Conquer the infinite canvas.</p>
             <div className="screen-title-buttons">
                 <button
                     onClick={() => {

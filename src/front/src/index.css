@@ -3,13 +3,14 @@ html {
     padding: 0;
     margin: 0;
     background-color: white;
-    color: black;
+    color: white;
     outline: 2px;
     font-family: "Lilita One", sans-serif;
     font-weight: 400;
     font-style: normal;
-    word-spacing: 10px;
-    
+    text-shadow:4px 4px 4px black;  
+    -webkit-text-stroke-width: 2px;
+            -webkit-text-stroke-color: black; 
 }
 
 .game-bar {
@@ -37,21 +38,20 @@ html {
 }
 
 .screen-title h1 {
-    font-size: 100px;
+    font-size: 150px;
     letter-spacing: 5px;
     font-weight: bolder;
 }
 
 .screen-title h2 {
-    font-size: 30px;
+    font-size: 80px;
     font-weight: bolder;
-    word-spacing: -5px;
 }
 
 .screen-title p {
-    font-size: 15px;
+    margin-top: -40px;
+    font-size: 30px;
     font-weight: bolder;
-    word-spacing: -1px;
 }
 
 .input-currency {
@@ -60,25 +60,29 @@ html {
 }
 
 button {
-    color: black;
+    font-family: "Lilita One", sans-serif;
+    color: white    ;
 }
 
-.screen-title button {
+button {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-weight: 400;
     font-style: normal;
-    font-size: larger;
+    font-size: 40px;
+    font-weight: bolder;
     margin-top: 20px;
     padding: 25px 45px;
-    border: none;
-    background-color: #f0f0f0;
+    border: 2px solid black;
+    border-radius: 10px;
+    background-color: white;
+
     cursor: pointer;
-    color: black;
     transition:
         background-color 0.3s,
         transform 0.3s; /* Add transform to the transition */
+    color: white;
+
 }
 
 .button-group {
@@ -97,19 +101,23 @@ input {
     font-size: larger;
     border: none;
     border-radius: 5px;
-    background-color: #f0f0f0;
-    color: black;
+    background-color: white;
     cursor: pointer;
     margin: 0;
     padding: 0px;
     transition:
         background-color 0.3s,
         transform 0.3s; /* Add transform to the transition */
+        font-family: "Lilita One", sans-serif;
+    color: white;
+
 }
 
 button:hover {
     background-color: #009688; /* Change to your desired hover background color */
     transform: scale(1.1); /* Increase the size of the button on hover */
+    color: white;
+
 }
 
 .input-bg {
@@ -120,11 +128,18 @@ button:hover {
     font-style: normal;
     font-size: larger;
     border: none;
-    background-color: #f0f0f0;
+    background-color: white;
+    border: 2px solid black;
+    border-radius: 15px;
+    cursor: pointer;
+    padding: 0px 20px;
 
     color: black;
     cursor: pointer;
     transition:
         background-color 0.3s,
         transform 0.3s; /* Add transform to the transition */
+
+        font-family: "Lilita One", sans-serif;
+    color: white;
 }

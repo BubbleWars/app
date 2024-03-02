@@ -24,7 +24,7 @@ export const useCreateInput = (input: Input) => {
         ? [CartesiDAppAddress, zeroAddress]
         : [CartesiDAppAddress, toHex(JSON.stringify(input))];
     const contract = isDeposit ? EtherPortal : InputBox;
-    const value = isDeposit ? parseEther(input.amount.toString()) : undefined;
+    const value = isDeposit ? parseEther((input.amount ?? 0).toString()) : undefined;
 
     useEffect(() => {
         if (burnerAddress) {
