@@ -98,6 +98,10 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
                 onPointerEnter={() => {
                     if (!isSelected) setIsHovered(true);
                 }}
+                onPointerMissed={() => {
+                    setIsHovered(false)
+                    setIsBubbleSelected(false)
+                }}
                 onPointerLeave={() => setIsHovered(false)}
                 onClick={() => {
                     setIsSelected(!isSelected && isHovered);

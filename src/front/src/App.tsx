@@ -19,10 +19,11 @@ import { Text, Text3D } from "@react-three/drei";
 import { ScreenTitle } from "./components/screens/ScreenTitle";
 import { ScreenSpawnPortal } from "./components/screens/ScreenSpawnPortal";
 import { useState } from "react";
+import { useOnClick } from "./hooks/inputs";
 
 function App() {
     //const { snapshot } = useInspect({ type: InspectType.State, value: 0 });
-    //const { inputs } = useInputs();
+    //const { inputs } = useInputs();    
 
     return (
         <>
@@ -36,7 +37,7 @@ function App() {
                 }}
                 style={{ height: "100vh", width: "100vw" }}
             >
-                <color attach="background" args={["#fdf6e3"]} />
+                <color attach="background" args={["#fdfaf1"]} />
                 <Game />
                 <CustomCameraControls />
 

@@ -247,7 +247,7 @@ export const BubblesControlsEmit = ({
                     >
                         <CustomText
                             size={emitEth ? 1.2 : 1.1}
-                            position={new THREE.Vector3(radius*2, radius*2, 0).add(
+                            position={new THREE.Vector3(radius+2, radius+2, 0).add(
                                 position,
                             )}
                             anchorX="center"
@@ -272,8 +272,8 @@ export const BubblesControlsEmit = ({
                         <CustomText
                             size={emitEp ? 1.2 : 1.1}
                             position={new THREE.Vector3(
-                                radius*2,
-                               (radius*2) - 2,
+                                radius+2,
+                               (radius+2) - 2,
                                 0,
                             ).add(position)}
                             anchorX="center"

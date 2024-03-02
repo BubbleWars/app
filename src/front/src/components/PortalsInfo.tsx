@@ -36,11 +36,11 @@ export const PortalsInfo = ({ portalId }: { portalId: string }) => {
     //console.log("404::resources main", portal.resources)
     return (
         <>
-        <CustomText size={radius / 12} position={textPosition.clone().add(new THREE.Vector3(0, 1, 0))}>
-                PORTAL
-            </CustomText>
             <CustomText size={radius / 3} color="white" position={textPosition}>
                 {truncateAddress(portal.owner)}
+            </CustomText>
+            <CustomText size={radius / 12} position={textPosition.clone().add(new THREE.Vector3(0, radius/4, 0))}>
+                PORTAL
             </CustomText>
             <group position={pos2}>
                 <CustomText
