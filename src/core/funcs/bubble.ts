@@ -172,8 +172,10 @@ export const emitBubble = (
     direction: Vec2,
 ): Bubble => {
     //if(!bubble.controllable) throw new Error("Cannot emit from a non-controllable bubble");
-    if (mass > bubble.body.getMass())
-        throw new Error("Cannot emit more than of the bubble's mass");
+    if (mass > bubble.body.getMass()){
+        console.log("Cannot emit more than of the bubble's mass");
+        return;
+    }
     //console.log("emitting bubble", mass, bubble.body.getMass() );
     const radius = bubble.fixture.getShape().getRadius();
     const emittedBubbleRadius = massToRadius(mass);
@@ -237,8 +239,10 @@ export const emitResource = (
     mass: number,
     direction: Vec2,
 ): Resource => {
-    if (mass > getBubbleResourceMass(bubble, resourceType))
-        throw new Error("Cannot emit more than the bubble's resource mass");
+    if (mass > getBubbleResourceMass(bubble, resourceType)){
+        console.log("Cannot emit more than the bubble's resource mass");
+        return;
+    }
     //console.log("emitting resource", resourceType, mass, getBubbleResourceMass(bubble, resourceType));
     const radius = bubble.fixture.getShape().getRadius();
     const emittedResourceRadius = massToRadius(mass);

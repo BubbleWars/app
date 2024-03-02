@@ -237,8 +237,10 @@ export const portalEmitBubble = (
     mass: number,
     direction: Vec2 = new Vec2(1, 1),
 ): Bubble => {
-    if (mass > getPortalMass(portal))
-        throw new Error("Cannot emit more than the portal's mass");
+    if (mass > getPortalMass(portal)){
+        console.log("Cannot emit more than the portal's mass");
+        return;
+    }
     const portalRadius = portal.fixture.getShape().getRadius();
     const emittedBubbleRadius = massToRadius(mass);
     const centerDelta = direction
@@ -321,8 +323,10 @@ export const portalEmitResource = (
     mass: number,
     direction: Vec2 = new Vec2(1, 1),
 ): Resource => {
-    if (mass > getPortalResourceMass(portal, resource))
-        throw new Error("Cannot emit more than the portal's resource mass");
+    if (mass > getPortalResourceMass(portal, resource)){
+        console.log("Cannot emit more than the portal's resource mass");
+        return;
+    }
     const portalRadius = portal.fixture.getShape().getRadius();
     const emittedResourceRadius = massToRadius(mass);
     const centerDelta = direction
