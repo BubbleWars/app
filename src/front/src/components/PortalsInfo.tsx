@@ -16,7 +16,7 @@ export const PortalsInfo = ({ portalId }: { portalId: string }) => {
         portal.position.y,
         0,
     );
-    const lineHeightVector = new THREE.Vector3(0, -1.5, 0);
+    const lineHeightVector = new THREE.Vector3(0, -radius/3, 0);
     const pos1 = textPosition
         .clone()
         .add(lineHeightVector.clone().multiplyScalar(0))
@@ -54,7 +54,7 @@ export const PortalsInfo = ({ portalId }: { portalId: string }) => {
                 <CustomText
                     size={radius / 8}
                     color="blue"
-                    position={new THREE.Vector3(1, 0, 0)}
+                    position={new THREE.Vector3(radius/15, 0, 0)}
                     anchorX="left"
                 >
                     {energyAmount.toFixed(2)} EP
