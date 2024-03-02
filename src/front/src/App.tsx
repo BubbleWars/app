@@ -1,6 +1,8 @@
 import "./App.css";
 import { Connector, useAccount, useConnect, useEnsName } from "wagmi";
 import { InjectedConnector } from "wagmi/connectors/injected";
+import { UserStatsBar } from "./components/UserStatsBar";
+import { BubbleStats } from "./components/BubbleStats";
 import {
     useBlockTimestamp,
     useInputs,
@@ -25,7 +27,7 @@ function App() {
     //const { inputs } = useInputs();
 
     return (
-        <>
+        <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
             <Canvas
                 orthographic={true}
                 camera={{
@@ -34,21 +36,24 @@ function App() {
                     near: 0.01,
                     far: 1000,
                 }}
-                style={{ height: "100vh", width: "100vw" }}
+                style={{ width: "100%", height: "100%" }}
             >
                 <color attach="background" args={["#fdf6e3"]} />
                 <Game />
                 <CustomCameraControls />
-
                 <gridHelper
                     position={[0, 0, -10]}
                     rotation={[Math.PI / 2, 0, 0]}
                     args={[10000, 10000, 0xeee8d5, 0xeee8d5]}
                 />
             </Canvas>
+
             <ScreenTitle />
+
             <ScreenSpawnPortal />
-        </>
+            <UserStatsBar />
+            <BubbleStats />
+        </div>
     );
 }
 

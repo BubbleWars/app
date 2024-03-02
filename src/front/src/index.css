@@ -5,12 +5,14 @@ html {
     background-color: white;
     color: white;
     outline: 2px;
+
     font-family: "Lilita One", sans-serif;
     font-weight: 400;
     font-style: normal;
     text-shadow:4px 4px 4px black;  
     -webkit-text-stroke-width: 2px;
             -webkit-text-stroke-color: black; 
+
 }
 
 .game-bar {
@@ -78,10 +80,12 @@ button {
     background-color: white;
 
     cursor: pointer;
+
     transition:
         background-color 0.3s,
         transform 0.3s; /* Add transform to the transition */
     color: white;
+
 
 }
 
@@ -105,11 +109,13 @@ input {
     cursor: pointer;
     margin: 0;
     padding: 0px;
+
     transition:
         background-color 0.3s,
         transform 0.3s; /* Add transform to the transition */
         font-family: "Lilita One", sans-serif;
     color: white;
+
 
 }
 
@@ -136,10 +142,12 @@ button:hover {
 
     color: black;
     cursor: pointer;
+
     transition:
         background-color 0.3s,
         transform 0.3s; /* Add transform to the transition */
 
         font-family: "Lilita One", sans-serif;
     color: white;
+
 }
