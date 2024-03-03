@@ -258,32 +258,7 @@ export const PortalsControlsEmit = ({
                             Emit ETH
                         </CustomText>
                     </group>
-                    <group
-                        onPointerEnter={() => {
-                            setEmitEp(true);
-                            setEmitEth(false);
-                        }}
-                        onPointerDown={() => {
-                            setTimeout(() => {
-                                setIsReady(true);
-                                dispatch(setControlsActive(true));
-                            }, 250);
-                        }}
-                    >
-                        <CustomText
-                            size={emitEp ? 1.2 : 1.1}
-                            position={new THREE.Vector3(
-                                radius + 2,
-                                (radius+2) - 2,
-                                0,
-                            ).add(position)}
-                            anchorX="center"
-                            anchorY="center"
-                            color="white"
-                        >
-                            Emit EP
-                        </CustomText>
-                    </group>
+                    
                 </>
             )}
         </>
