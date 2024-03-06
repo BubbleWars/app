@@ -6,5 +6,5 @@ export const STEP_DELTA = 1 / 60;
 export const MAX_ADVANCE_STATE_TIME = 500;
 export const MIN_MASS = 0.000001;
 export const EMISSION_SPEED = 0.4;
-export const DAMPENING = 0.05;
+export const DAMPENING = 0.03;
 export const ENERGY_NODE_COUNT = 100;

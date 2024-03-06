@@ -22,7 +22,7 @@ export const CustomText = ({
     | any) => {
     return (
         <Text
-            font="fonts/PressStart2P-Regular.ttf"
+            font="fonts/LilitaOne-Regular.ttf"
             color={color}
             fontSize={size}
             outlineColor={"black"}

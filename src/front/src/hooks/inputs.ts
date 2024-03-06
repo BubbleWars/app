@@ -109,29 +109,47 @@ export const waitForEmission = (id: string, initialMass:number, emissionMass:num
     const portal = currentState.portals.find((portal) => portal.id == id);
     console.log("wait for emission");
     let intervalId: NodeJS.Timeout;
+    let timeoutId: NodeJS.Timeout;
+
+    // Function to clear both interval and timeout
+    const clearTimers = () => {
+        clearInterval(intervalId);
+        clearTimeout(timeoutId);
+    };
+
+    // Function to check conditions and possibly clear interval
+    const checkAndClear = (currentMass: number) => {
+        console.log("initialMass", initialMass, "currentMass", currentMass)
+        if (currentMass <= initialMass - emissionMass) {
+            clearTimers();
+            callback();
+        }
+    };
+
     if(bubble){
-        //check for mass to decrease by emissionMass
+        // Check for mass to decrease by emissionMass
         intervalId = setInterval(() => {
             const newBubble = currentState.bubbles.find((bubble) => bubble.id == id);
-            console.log("initialMass", initialMass, "currentMass", newBubble.mass)
-            if (newBubble && newBubble.mass <= initialMass - emissionMass) {
-                clearInterval(intervalId);
-                callback();
+            if (newBubble) {
+                checkAndClear(newBubble.mass);
             }
-            
         }, 100);
     }else if(portal){
         intervalId = setInterval(() => {
             const newPortal = currentState.portals.find((portal) => portal.id == id);
-            console.log("initialMass", initialMass, "currentMass", newPortal.mass)
-            if (newPortal && newPortal.mass <= initialMass - emissionMass) {
-                clearInterval(intervalId);
-                callback();
+            if (newPortal) {
+                checkAndClear(newPortal.mass);
             }
         }, 100);
-
-        
     }
 
-    return () => clearInterval(intervalId);
+    // Set a timeout to force callback execution after 10 seconds
+    timeoutId = setTimeout(() => {
+        clearTimers(); // Ensure to clear the interval as well
+        callback(); // Force the callback execution
+    }, 10000);
+
+    // Return a cleanup function to clear interval and timeout
+    return clearTimers;
 }
+
