@@ -1,9 +1,10 @@
+/* UserStatsBar.css */
 .user-stats-bar {
     position: absolute;
-    bottom: 0; /* Adjust as needed */
-    left: 0; /* Adjust as needed */
-    width: 100%; /* Adjust as needed */
-
+    bottom: 0;
+    left: 0;
+    width: calc(90% - 40px); /* Adjust as needed, subtract padding/margin */
     padding: 20px;
     box-sizing: border-box;
+    background: rgba(0, 123, 255, 0.5); /* Faded blue background */
 }

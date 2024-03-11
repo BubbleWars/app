@@ -6,6 +6,14 @@ import { currentState } from "../../../core/world";
 import { setLock } from "../store/interpolation";
 
 export const BubbleStats = () => {
+    const colors = [
+        "#FF6384",
+        "#36A2EB",
+        "#FFCE56",
+        "#cc65fe",
+        "#ff6347",
+        "#36a2eb",
+    ];
     const { isConnected } = useAccount();
     const dispatch = useDispatch();
     const lock = useSelector((state: any) => state.interpolation.lock);
@@ -16,26 +24,32 @@ export const BubbleStats = () => {
     };
 
     const renderUserBubbles = () => {
-        // Ensure addresses are compared in a case-insensitive manner
         const normalizedBurnerAddress = burnerAddress.toLowerCase();
 
-        // Filter bubbles owned by the burnerAddress
         const userBubbles = Array.from(currentState.bubbles.values()).filter(
-            (bubble) => bubble.owner.toLowerCase() === normalizedBurnerAddress
+            (bubble) => bubble.owner.toLowerCase() === normalizedBurnerAddress,
         );
 
-        //display info for each of the user's bubbles
-        return userBubbles.map((bubble, index) => (
-            <div
-                key={index}
-                onClick={() => handleBubbleClick(bubble.id)}
-                style={{ cursor: "pointer" }}
-            >
-                <p>Bubble ID: {bubble.id}</p>
-                <p>Mass: {bubble.mass}</p>
-                {/* Render other bubble properties as needed */}
-            </div>
-        ));
+        return userBubbles.map((bubble, index) => {
+            const color = colors[index % colors.length]; // Cycle through the colors
+            return (
+                <div
+                    key={index}
+                    onClick={() => handleBubbleClick(bubble.id)}
+                    style={{
+                        cursor: "pointer",
+                        backgroundColor: color,
+                        padding: "10px",
+                        margin: "10px 0",
+                        borderRadius: "5px",
+                        color: "white",
+                    }}
+                >
+                    <p>Bubble ID: {bubble.id.split("-")[1]}</p>
+                    <p>Mass: {Number(bubble.mass).toFixed(3)}</p>
+                </div>
+            );
+        });
     };
 
     const renderContent = () => {

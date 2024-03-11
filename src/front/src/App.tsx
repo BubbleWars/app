@@ -1,4 +1,5 @@
 import "./App.css";
+import "bootstrap/dist/css/bootstrap.min.css";
 import { Connector, useAccount, useConnect, useEnsName } from "wagmi";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import { UserStatsBar } from "./components/UserStatsBar";
@@ -25,10 +26,13 @@ import { useOnClick } from "./hooks/inputs";
 
 function App() {
     //const { snapshot } = useInspect({ type: InspectType.State, value: 0 });
-    //const { inputs } = useInputs();    
+    //const { inputs } = useInputs();
 
     return (
-        <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
+        <div
+            className="position-relative"
+            style={{ width: "100vw", height: "100vh" }}
+        >
             <Canvas
                 orthographic={true}
                 camera={{
@@ -52,8 +56,15 @@ function App() {
             <ScreenTitle />
 
             <ScreenSpawnPortal />
-            <UserStatsBar />
-            <BubbleStats />
+            <div className="position-absolute bottom-0 start-0 p-3">
+                <UserStatsBar />
+            </div>
+            <div
+                className="position-absolute top-0 end-0 p-3"
+                style={{ maxWidth: "20%", overflowY: "auto", height: "100vh" }}
+            >
+                <BubbleStats />
+            </div>
         </div>
     );
 }
