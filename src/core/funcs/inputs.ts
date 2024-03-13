@@ -14,6 +14,7 @@ import { ethers } from "ethers";
 import {
     bubbles,
     currentState,
+    nodes,
     obstacles,
     pendingInputs,
     portals,
@@ -36,6 +37,7 @@ import { emitBubble, emitResource } from "./bubble";
 import { Vec2 } from "planck-js";
 import {
     snapshotBubbles,
+    snapshotNodes,
     snapshotPendingInputs,
     snapshotPortals,
     snapshotResources,
@@ -249,10 +251,11 @@ const handleSpawnPortal = (input: SpawnPortal, client: boolean): boolean => {
     user.balance -= amount;
     if (client) {
         const { x, y } = generateSpawnPoint(
+            input.timestamp,
             snapshotWorld,
             snapshotPortals,
             snapshotBubbles,
-            obstacles,
+            snapshotNodes,
             amount,
         );
         createPortal(
@@ -265,10 +268,11 @@ const handleSpawnPortal = (input: SpawnPortal, client: boolean): boolean => {
         );
     } else {
         const { x, y } = generateSpawnPoint(
+            input.timestamp,
             world,
             portals,
             bubbles,
-            obstacles,
+            nodes,
             amount,
         );
         createPortal(portals, world, user.address, x, y, amount);

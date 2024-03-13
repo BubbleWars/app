@@ -11,7 +11,7 @@ import {
 import { Bubble } from "../types/bubble";
 import { createBubble, setBubbleResourceMass, updateBubble } from "./bubble";
 import { Obstacle } from "../types/obstacle";
-import { Resource, ResourceType } from "../types/resource";
+import { Resource, ResourceNode, ResourceType } from "../types/resource";
 import { createResource, updateResource } from "./resource";
 
 function deterministicHash(x: number, y: number): number {
@@ -20,71 +20,77 @@ function deterministicHash(x: number, y: number): number {
     return hash - Math.floor(hash);
 }
 
+function pseudoRandom(seed) {
+    let x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+}
+
 export const generateSpawnPoint = (
+    timestamp: number,
     world: World,
     portals: Map<string, Portal>,
     bubbles: Map<string, Bubble>,
-    obstacles: Map<string, Obstacle>,
+    nodes: Map<string, ResourceNode>,
     mass: number,
+    maxDistanceFromLastPortal: number = 300 // Maximum distance from the last portal
 ): Vec2 => {
-    world;
-    const minimumDistanceFromPortals = 30; // Minimum distance from any portal
-    const rangeFromLatestPortal = 50; // Range within which to spawn from the latest portal
-    let spawnPoint = new Vec2(0, 0);
-    let isSafeLocation = false;
+    const minimumSafeDistance = 100; // Minimum safe distance from other objects
+    let safeSpawnFound = false;
     let attempt = 0;
+    let spawnPoint = new Vec2(0, 0);
+    const entityRadius = massToRadius(mass);
 
-    // Assuming massToRadius and other necessary functions and constants (WORLD_WIDTH, WORLD_HEIGHT) are defined elsewhere
-
-    const latestPortal = Array.from(portals.values()).pop(); // Get the latest portal added to the map
-    if (!latestPortal) {
-        return new Vec2(0, 0);
+    // Retrieve the last portal's position
+    const lastPortal = Array.from(portals.values()).pop(); 
+    let lastPortalPosition = new Vec2(0, 0);
+    if (lastPortal) {
+        lastPortalPosition = lastPortal.body.getPosition();
     }
 
-    const latestPortalPosition = latestPortal.body.getPosition();
+    while (!safeSpawnFound && attempt < 1000) {
+        const seed = timestamp + attempt;
+        const angle = pseudoRandom(seed) * 2 * Math.PI; // Generate a random angle
+        const distance = pseudoRandom(seed + 1) * maxDistanceFromLastPortal; // Generate a random distance within the max range
+        const x = lastPortalPosition.x + distance * Math.cos(angle);
+        const y = lastPortalPosition.y + distance * Math.sin(angle);
 
-    while (!isSafeLocation) {
-        attempt++;
-        isSafeLocation = true;
+        spawnPoint = new Vec2(x, y);
 
-        // Generate a spawn point within ±50 of the latest portal's position
-        const hashValueX = deterministicHash(attempt, 0);
-        const hashValueY = deterministicHash(0, attempt);
+        let isSafe = true;
 
-        spawnPoint = new Vec2(
-            latestPortalPosition.x + ((hashValueX % 101) - 50), // ensures variation within -50 to +50 range of the latest portal's x-coordinate
-            latestPortalPosition.y + ((hashValueY % 101) - 50), // ensures variation within -50 to +50 range of the latest portal's y-coordinate
-        );
-
-        // Check if spawn point respects the minimum distance from all portals
+        // Check distance from portals
         portals.forEach((portal) => {
-            if (Vec2.distance(spawnPoint, portal.body.getPosition()) < minimumDistanceFromPortals) {
-                isSafeLocation = false;
+            const portalRadius = portal.fixture.getShape().getRadius();
+            if (Vec2.distance(spawnPoint, portal.body.getPosition()) < entityRadius + portalRadius + minimumSafeDistance) {
+                isSafe = false;
             }
         });
 
-        // Add checks for bubbles and obstacles as needed, similar to the portal distance check
-
-        // Assuming bubbles and obstacles also must respect the minimumDistanceFromPortals constraint
-        // Example for bubbles:
+        // Check distance from bubbles
         bubbles.forEach((bubble) => {
-            if (Vec2.distance(spawnPoint, bubble.body.getPosition()) < minimumDistanceFromPortals) {
-                isSafeLocation = false;
+            const bubbleRadius = bubble.fixture.getShape().getRadius();
+            if (Vec2.distance(spawnPoint, bubble.body.getPosition()) < entityRadius + bubbleRadius + minimumSafeDistance) {
+                isSafe = false;
             }
         });
 
-        // // Check distance from existing obstacles
-        // obstacles.forEach((obstacle) => {
-        //     if (Vec2.distance(spawnPoint, obstacle.body.getPosition()) < minimumDistance) {
-        //         isSafeLocation = false;
-        //     }
-        // });
+        // Check distance from nodes
+        nodes.forEach((node) => {
+            const nodeRadius = node.fixture.getShape().getRadius();
+            if (Vec2.distance(spawnPoint, node.body.getPosition()) < entityRadius + nodeRadius + minimumSafeDistance) {
+                isSafe = false;
+            }
+        });
 
-        attempt++;
+        if (isSafe) {
+            safeSpawnFound = true;
+        } else {
+            attempt++;
+        }
     }
 
-    if (!isSafeLocation) {
-        throw new Error("Failed to find a safe spawn point after 1000 attempts");
+    if (!safeSpawnFound) {
+        throw new Error("Failed to find a safe spawn point after " + attempt + " attempts");
     }
 
     return spawnPoint;
