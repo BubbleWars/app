@@ -32,7 +32,7 @@ export const generateNodes = (
             const value = noise(x / 100, y / 100);
             //console.log("noise value", value);
             if (value > 0.9) {
-                //createNode(world, nodes, ResourceType.Energy, x, y, 0);
+                createNode(world, nodes, ResourceType.Energy, x, y, 0);
                 count++;
             }
             //if(count >= 50) return;
@@ -382,7 +382,7 @@ export const handleEmission = (
     mass: number,
     startDir: Vec2,
 ): Resource | Bubble | undefined | any => {
-    //console.log("handling emission", mass);
+    console.log("handling emission", mass);
     //console.log("node", node);
     console.log("emission", mass, startDir);
     //const { newMass, emission } = getEmission(node, mass);

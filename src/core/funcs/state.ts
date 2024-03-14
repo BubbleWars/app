@@ -225,17 +225,17 @@ export const handleContact = (contact: Contact) => {
     }
 
     //Node-Bubble collision
-    // else if (n1 && b2) {
-    //     //console.log("node absorb bubble")
-    //     deferredUpdates.push(() => {
-    //         nodeAbsorbBubble(nodes, bubbles, n1, b2, STEP_DELTA);
-    //     });
-    // } else if (n2 && b1) {
-    //     //console.log("node absorb bubble")
-    //     deferredUpdates.push(() => {
-    //         nodeAbsorbBubble(nodes, bubbles, n2, b1, STEP_DELTA);
-    //     });
-    // }
+    else if (n1 && b2) {
+        //console.log("node absorb bubble")
+        deferredUpdates.push(() => {
+            nodeAbsorbBubble(nodes, bubbles, n1, b2, STEP_DELTA);
+        });
+    } else if (n2 && b1) {
+        //console.log("node absorb bubble")
+        deferredUpdates.push(() => {
+            nodeAbsorbBubble(nodes, bubbles, n2, b1, STEP_DELTA);
+        });
+    }
 
     //Resource-Reosurce collision
     else if (r1 && r2) {
@@ -384,27 +384,27 @@ export const handleSnapshotContact = (contact: Contact) => {
     }
 
     //Node-Bubble collision
-    // else if (n1 && b2) {
-    //     snapshotDeferredUpdates.push(() => {
-    //         nodeAbsorbBubble(
-    //             snapshotNodes,
-    //             snapshotBubbles,
-    //             n1,
-    //             b2,
-    //             STEP_DELTA,
-    //         );
-    //     });
-    // } else if (n2 && b1) {
-    //     snapshotDeferredUpdates.push(() => {
-    //         nodeAbsorbBubble(
-    //             snapshotNodes,
-    //             snapshotBubbles,
-    //             n2,
-    //             b1,
-    //             STEP_DELTA,
-    //         );
-    //     });
-    // }
+    else if (n1 && b2) {
+        snapshotDeferredUpdates.push(() => {
+            nodeAbsorbBubble(
+                snapshotNodes,
+                snapshotBubbles,
+                n1,
+                b2,
+                STEP_DELTA,
+            );
+        });
+    } else if (n2 && b1) {
+        snapshotDeferredUpdates.push(() => {
+            nodeAbsorbBubble(
+                snapshotNodes,
+                snapshotBubbles,
+                n2,
+                b1,
+                STEP_DELTA,
+            );
+        });
+    }
 
     //Resource-Reosurce collision
     else if (r1 && r2) {

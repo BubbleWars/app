@@ -3,7 +3,7 @@ import { BubbleState, PortalState, Snapshot } from "../../../core/types/state";
 import { Portals } from "./Portals";
 import { Bubbles } from "./Bubbles";
 import { useEffect, useState } from "react";
-import { currentState, init, rollbackToState, run } from "../../../core/world";
+import { currentState, init, nodes, rollbackToState, run } from "../../../core/world";
 import { handleInput } from "../../../core/funcs/inputs";
 import { Input } from "../../../core/types/inputs";
 import { useBlockTimestamp } from "../hooks/state";
@@ -47,7 +47,7 @@ export const resourceDestroyPositions: {
 } = {};
 
 room.state.onChange(() => {
-    const { timestamp, users, bubbles, portals, syncBubbleStartPositions } = room.state;
+    const { timestamp, users, bubbles, portals, nodes, resources, syncBubbleStartPositions } = room.state;
 
     //Timestamp
     currentState.timestamp = timestamp
@@ -143,6 +143,46 @@ room.state.onChange(() => {
         }
         currentState.portals.push(tempPortal)
 
+    })
+
+    //Nodes
+    currentState.nodes.length = 0;
+    nodes.forEach((node) => {
+        const tempNode = {
+            id: node.id,
+            type: node.type,
+            position: {
+                x: node.positionX,
+                y: node.positionY,
+            },
+            mass: node.mass,
+            emissionDirection: {
+                x: node.emissionDirectionX,
+                y: node.emissionDirectionY,
+            },
+            lastEmission: node.lastEmission,
+        }
+        currentState.nodes.push(tempNode)
+    })
+
+    //Resources
+    currentState.resources.length = 0;
+    resources.forEach((resource) => {
+        const tempResource = {
+            id: resource.id,
+            type: resource.type,
+            position: {
+                x: resource.positionX,
+                y: resource.positionY,
+            },
+            mass: resource.mass,
+            owner: resource.owner,
+            velocity: {
+                x: resource.velocityX,
+                y: resource.velocityY,
+            },
+        }
+        currentState.resources.push(tempResource)
     })
 });
 
