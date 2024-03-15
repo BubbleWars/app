@@ -257,7 +257,7 @@ export const BubblesControlsEmit = ({
                             Emit ETH
                         </CustomText>
                     </group>
-                    {/* <group
+                    <group
                         onPointerEnter={() => {
                             setEmitEp(true);
                             setEmitEth(false);
@@ -282,7 +282,7 @@ export const BubblesControlsEmit = ({
                         >
                             Emit EP
                         </CustomText>
-                    </group> */}
+                    </group>
                 </>
             )}
         </>
