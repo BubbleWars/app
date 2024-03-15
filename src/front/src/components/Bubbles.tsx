@@ -59,7 +59,33 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
                     0,
                 );
             } else {
-                //console.log("bubble start position not found")
+                //Get start position from bubble.from
+                const fromBubble = currentState.bubbles.find((bubble) => bubble.id == bubble.from );
+                const fromPortal = currentState.portals.find((portal) => portal.id == bubble.from );
+                const fromNode = currentState.nodes.find((node) => node.id == bubble.from );
+
+                if(fromBubble) {
+                    meshRef.current.position.set(
+                        fromBubble.position.x,
+                        fromBubble.position.y,
+                        0,
+                    );
+                } else if(fromPortal) {
+                    meshRef.current.position.set(
+                        fromPortal.position.x,
+                        fromPortal.position.y,
+                        0,
+                    );
+                } else if(fromNode) {
+                    meshRef.current.position.set(
+                        fromNode.position.x,
+                        fromNode.position.y,
+                        0,
+                    );
+                } else {
+                    console.log("bubble.from not found")
+                }
+
             }
             //console.log("bubble not found")
         }

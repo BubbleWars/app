@@ -103,6 +103,7 @@ export const snapshotInit = (initialState?: Snapshot) => {
                 false,
                 bubble.id,
                 bubble,
+                bubble.from,
             );
             newBubble.body.setLinearVelocity(
                 Vec2(bubble.velocity.x, bubble.velocity.y),

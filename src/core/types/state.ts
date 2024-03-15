@@ -12,6 +12,7 @@ export interface BubbleState {
     resources: { resource: ResourceType; mass: number }[];
     punctures: { point: PuncturePoint; puncture: Puncture }[];
     lastPunctureEmit: number | undefined;
+    from: string | undefined;
 }
 
 export interface PortalState {

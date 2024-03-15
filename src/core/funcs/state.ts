@@ -63,6 +63,7 @@ export const updateState = (
                     puncture: punctures[index],
                 };
             }),
+            from: bubble.from,
         };
     });
     state.portals = Array.from(portals.values()).map((portal) => ({

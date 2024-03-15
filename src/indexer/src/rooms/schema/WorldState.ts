@@ -43,7 +43,7 @@ export class BubbleStateSchema extends Schema {
     @type("number") lastPunctureEmit: number = 0;
     @type("number") startPositionX: number = 0;
     @type("number") startPositionY: number = 0;
-
+    @type("string") from: string = "";
 }
 
 export class PortalStateSchema extends Schema {

@@ -269,6 +269,7 @@ export const nodeEmitBubble = (
         emittedBubblePosition.y,
         emittedMass,
         false,
+        node.id,
     );
 
     //Apply mass conservation

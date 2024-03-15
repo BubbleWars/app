@@ -89,7 +89,7 @@ export const createBubble = (
         restitution: 0,
         friction: 0,
     });
-    const bubble: Bubble = { owner, balance: 0, body, fixture, controllable };
+    const bubble: Bubble = { owner, balance: 0, body, fixture, controllable, from };
     //set id
     if (id) bubble.body.setUserData(id);
     else bubble.body.setUserData(generateBubbleId(bubbles, owner));
@@ -194,6 +194,7 @@ export const emitBubble = (
         emittedBubblePosition.y,
         mass,
         false,
+        bubble.body.getUserData() as string,
     );
     const totalMomentum = bubble.body
         .getLinearVelocity()
