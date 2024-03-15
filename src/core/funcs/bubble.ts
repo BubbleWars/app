@@ -72,6 +72,7 @@ export const createBubble = (
     controllable: boolean,
     id?: string,
     bubbleState?: BubbleState,
+    from?: string
 ): Bubble => {
     const radius = massToRadius(mass);
     if (owner == ZeroAddress)
