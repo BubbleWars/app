@@ -4,11 +4,12 @@ import { massToRadius } from "./utils";
 import { Address } from "../types/address";
 import { DAMPENING, EMISSION_SPEED, MASS_PER_SECOND } from "../consts";
 import { Resource, ResourceType } from "../types/resource";
-import { createResource, updateResource } from "./resource";
+import { createResource, rotateVec2, updateResource } from "./resource";
 import { addEvent } from "./events";
 import { EventsType } from "../types/events";
 import { ZeroAddress } from "ethers";
 import { BubbleState } from "../types/state";
+import { pseudoRandom } from "./portal";
 
 //const PUNCTURE_EMIT_PER_SECOND = 100;
 
@@ -171,6 +172,7 @@ export const emitBubble = (
     bubble: Bubble,
     mass: number,
     direction: Vec2,
+    emissionDirection?: Vec2,
 ): Bubble => {
     //if(!bubble.controllable) throw new Error("Cannot emit from a non-controllable bubble");
     if (mass > bubble.body.getMass()){
@@ -208,7 +210,7 @@ export const emitBubble = (
 
     //Apply momentum conservation
     const originalBubbleMomentum = totalMomentum.clone();
-    const emittedBubbleVelocityDirection = direction.clone();
+    const emittedBubbleVelocityDirection = emissionDirection ? emissionDirection.clone() : direction.clone();
     const emittedBubbleVelocityMagnitude =
         (bubble.body.getMass() / emittedBubble.body.getMass()) * EMISSION_SPEED;
     const emittedBubbleRelativeVelocity = emittedBubbleVelocityDirection.mul(
@@ -278,7 +280,7 @@ export const emitResource = (
 
     //Apply momentum conservation
     const originalBubbleMomentum = totalMomentum.clone();
-    const emittedResourceVelocityDirection = direction.clone();
+    const emittedResourceVelocityDirection = direction.clone()
     const emittedResourceVelocityMagnitude =
         (bubble.body.getMass() / emittedResource.body.getMass()) *
         EMISSION_SPEED;
@@ -526,11 +528,16 @@ export const handlePunctures = (
 
         const timeSinceLast = timestamp - bubble.lastPunctureEmit;
 
-        if (timeSinceLast > 1.5) {
+        if (timeSinceLast > 0.5) {
             const amountEmitted = Math.min(
                 Math.min(puncture.amount, 0.1),
                 getBubbleMass(bubble),
             );
+            //Create puncture direction vector as random direction within 40 degrees of puncture vector
+            const randomAngle = pseudoRandom(timestamp) * 70 - 35;
+            const puncturePointVec = Vec2(puncturePoint.x, puncturePoint.y);
+            const emissionDirection = rotateVec2(puncturePointVec, randomAngle);
+
             if (amountEmitted > 0) {
                 const newPunctureAmount = puncture.amount - amountEmitted;
                 emitBubble(
@@ -538,7 +545,8 @@ export const handlePunctures = (
                     bubbles,
                     bubble,
                     amountEmitted,
-                    Vec2(puncturePoint.x, puncturePoint.y),
+                    puncturePointVec,
+                    emissionDirection
                 );
                 puncture.amount = newPunctureAmount;
                 if (newPunctureAmount <= 0)

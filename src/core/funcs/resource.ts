@@ -449,7 +449,7 @@ export const handleEmission = (
 // }
 
 // Function to rotate a Vec2 by a given angle
-function rotateVec2(vector, angle) {
+export function rotateVec2(vector, angle) {
     const cos = Math.cos(angle);
     const sin = Math.sin(angle);
     return Vec2(
