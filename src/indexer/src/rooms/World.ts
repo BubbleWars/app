@@ -33,7 +33,7 @@ const updateState = (state: WorldState, snapshot: Snapshot): WorldState => {
     newBubble.velocityY = bubble.velocity.y;
     newBubble.mass = bubble.mass;
     newBubble.resources = new ArraySchema<EntityResourceStateSchema>();
-    newBubble.from = bubble.from;
+    newBubble.from = bubble.from ?? "";
     bubble.resources.forEach((resource) => {
       const newEntityResource = new EntityResourceStateSchema();
       newEntityResource.mass = resource.mass;
