@@ -201,8 +201,8 @@ export const Game = () => {
     //console.log("22 inputs:", inputs)
     //console.log("22 notices:", notices)
     // Get current timestamps
-    const blockTimestamp = useBlockTimestamp();
-    const dispatch = useDispatch();
+    //const blockTimestamp = useBlockTimestamp();
+    //const dispatch = useDispatch();
 
     //Initialize client state
     // const [lastTimestampHandled, setLastTimestampHandled] = useState<number>(
