@@ -113,6 +113,7 @@ room.state.onChange(() => {
             resources,
             punctures,
             lastPunctureEmit: bubble.lastPunctureEmit,
+            from: bubble.from,
         }
         currentState.bubbles.push(tempBubble)
 
@@ -355,7 +356,7 @@ export const Game = () => {
         setBubbleIds(currentState.bubbles.map((bubble) => bubble.id));
         //console.log("123at", currentState.bubbles);
         //console.log("123at", currentState.bubbles.map(bubble => bubble.id))
-        console.log("currentPortalIds", portalIds)
+        console.log("bubbles", currentState.bubbles);
         setPortalIds(currentState.portals.map((portal) => portal.id));
         setNodeIds(currentState.nodes.map((node) => node.id));
         setResourceIds(currentState.resources.map((resource) => resource.id));

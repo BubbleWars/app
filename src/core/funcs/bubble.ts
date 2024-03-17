@@ -90,7 +90,7 @@ export const createBubble = (
         restitution: 0,
         friction: 0,
     });
-    const bubble: Bubble = { owner, balance: 0, body, fixture, controllable, from };
+    const bubble: Bubble = { owner, balance: 0, body, fixture, controllable, from: from ?? "" };
     //set id
     if (id) bubble.body.setUserData(id);
     else bubble.body.setUserData(generateBubbleId(bubbles, owner));

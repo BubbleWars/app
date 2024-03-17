@@ -52,7 +52,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
 
             const startPosition = bubbleStartPositions[bubbleId];
             console.log("fetching start position", startPosition)
-            if (startPosition) {
+            if (false) {
                 meshRef.current.position.set(
                     startPosition.x,
                     startPosition.y,
@@ -60,9 +60,13 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
                 );
             } else {
                 //Get start position from bubble.from
-                const fromBubble = currentState.bubbles.find((bubble) => bubble.id == bubble.from );
+                const fromBubble = currentState.bubbles.find((newBubble) => { 
+                    return newBubble.id.toLowerCase() == bubble.from.toLowerCase() 
+                });
                 const fromPortal = currentState.portals.find((portal) => portal.id == bubble.from );
                 const fromNode = currentState.nodes.find((node) => node.id == bubble.from );
+
+                console.log("from node", bubble.from)
 
                 if(fromBubble) {
                     meshRef.current.position.set(
