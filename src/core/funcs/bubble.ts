@@ -196,6 +196,8 @@ export const emitBubble = (
         emittedBubblePosition.y,
         mass,
         false,
+        undefined,
+        undefined,
         bubble.body.getUserData() as string,
     );
     const totalMomentum = bubble.body

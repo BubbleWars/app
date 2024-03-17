@@ -266,7 +266,9 @@ export const portalEmitBubble = (
         emittedBubblePosition.y,
         mass,
         false,
-        portal.owner,
+        undefined,
+        undefined,
+        portal.owner
     );
     //console.log("emittedBubblePosition after create", JSON.stringify(emittedBubble.body.getPosition()));
     //console.log("123at", emittedBubble.body.getUserData());
