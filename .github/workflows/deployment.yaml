@@ -69,13 +69,13 @@ jobs:
                   pm2 delete faucet-server || true
                   pm2 delete state-indexer || true
             
-            # - name: Clear Existing Docker Containers
-            #   run: |
-            #       docker stop $(docker ps -aq) || true
-            #       docker rm -v $(docker ps -aq) || true
-            #       docker volume prune -f || true
-            #       docker rmi $(docker images -q) || true
-            #       docker volume prune -f || true
+            - name: Clear Existing Docker Containers
+              run: |
+                  docker stop $(docker ps -aq) || true
+                  docker rm -v $(docker ps -aq) || true
+                  docker volume prune -f || true
+                  docker rmi $(docker images -q) || true
+                  docker volume prune -f || true
 
             - name: Set up Local Blockchain and Smart Contracts
               run: pm2 start --name blockchain "sunodo run --no-backend"
