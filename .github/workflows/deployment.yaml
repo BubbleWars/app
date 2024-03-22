@@ -18,9 +18,7 @@ jobs:
                   node-version: "21.5.0"
 
             - name: Install pnpm
-              run: |
-                  curl -fsSL https://get.pnpm.io/install.sh | sh -
-                  source /root/.bashrc
+              run: npm install -g pnpm
 
             - name: Install Docker
               run: |
