@@ -22,11 +22,11 @@ export const CustomText = ({
     | any) => {
     return (
         <Text
-            font="fonts/LilitaOne-Regular.ttf"
+            font="fonts/whitrabt.ttf"
             color={color}
             fontSize={size}
             outlineColor={"black"}
-            outlineWidth={!noOutline ? size / 5 : 0}
+            outlineWidth={0.11}
             anchorX={anchorX as any}
             anchorY={anchorY as any}
             position={position.clone().add(new THREE.Vector3(0, 0, 6))}

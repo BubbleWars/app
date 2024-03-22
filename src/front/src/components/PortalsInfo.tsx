@@ -36,29 +36,35 @@ export const PortalsInfo = ({ portalId }: { portalId: string }) => {
     //console.log("404::resources main", portal.resources)
     return (
         <>
-            <CustomText size={radius / 3} color="white" position={textPosition}>
+            {/* <CustomText size={radius / 3.6} color="white" position={textPosition}>
                 {truncateAddress(portal.owner)}
             </CustomText>
             <CustomText size={radius / 12} position={textPosition.clone().add(new THREE.Vector3(0, radius/4, 0))}>
                 PORTAL
-            </CustomText>
-            <group position={pos2}>
-                <CustomText
-                    size={radius / 8}
-                    color="green"
-                    position={new THREE.Vector3(-0, 0, 0)}
-                    anchorX="right"
+            </CustomText> */}
+            <CustomText
+                    size={radius / 3.0}
+                    color="white"
+                    position={textPosition}
                 >
                     {portal.mass.toFixed(2)} ETH
                 </CustomText>
-                <CustomText
+            <group position={textPosition}>
+            <CustomText 
+                size={radius / 8} 
+                color="white" position={new THREE.Vector3(0, -radius/4, 0)}
+            >
+                {truncateAddress(portal.owner)}
+            </CustomText>
+                
+                {/* <CustomText
                     size={radius / 8}
                     color="blue"
                     position={new THREE.Vector3(radius/15, 0, 0)}
                     anchorX="left"
                 >
                     {energyAmount.toFixed(2)} EP
-                </CustomText>
+                </CustomText> */}
             </group>
         </>
     );
