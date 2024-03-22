@@ -1,17 +1,17 @@
 import * as THREE from "three";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
     ethereumAddressToColor,
     massToRadius,
 } from "../../../core/funcs/utils";
 import { currentState } from "../../../core/world";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { PortalState } from "../../../core/types/state";
 import { snapshotCurrentState } from "../../../core/snapshots";
 import { PortalsInfo } from "./PortalsInfo";
 import { PortalsControlsEmit } from "./PortalsControlsEmit";
-import { Outlines } from "@react-three/drei";
-import { darkenColor } from "../utils";
+import { MeshDistortMaterial, MeshWobbleMaterial, Outlines, PointMaterial, Sparkles, useCamera } from "@react-three/drei";
+import { darkenColor, lightenColor } from "../utils";
 import { useDispatch, useSelector } from "react-redux";
 import {
     setIsBubbleSelected,
@@ -19,6 +19,80 @@ import {
 } from "../store/interpolation";
 import { MathUtils } from "three";
 import { burnerAddress } from "../config";
+
+import vertexShader from "../shaders/portalVertexShader.glsl?raw";
+import fragmentShader from "../shaders/portalFragmentShader.glsl?raw";
+import Outline from "./Outline";
+
+const CustomGeometryParticles = (props: { count: number, radius: number, position: THREE.Vector3, color: THREE.Color | string }) => {
+  const { count, radius, position, color } = props;
+  const { camera } = useThree()
+  const zoom = camera.zoom
+  console.log("zoom:", zoom)
+
+  // This reference gives us direct access to our points
+  const points = useRef();
+
+  // Generate our positions attributes array
+  const particlesPosition = useMemo(() => {
+    const positions = new Float32Array(count * 3);
+    
+    for (let i = 0; i < count; i++) {
+      const distance = Math.sqrt(Math.random()) * radius
+      const theta = THREE.MathUtils.randFloatSpread(360); 
+  
+      let x = distance * Math.cos(theta);
+      let y = distance * Math.sin(theta);
+      // Since we're working in a 2D plane, z will always be 0
+      let z = 0;
+  
+      positions.set([x, y, z], i * 3);
+    }
+    
+    return positions;
+  }, [count, radius]);
+
+  const uniforms = useRef({
+    uTime: { value: 0.0 },
+    uRadius: { value: radius },
+    uColor: { value: (new THREE.Color(color)).convertLinearToSRGB() },
+    uZoom: { value: zoom },
+  }).current;
+
+  useEffect(() => {
+    uniforms.uRadius.value = radius;
+    uniforms.uColor.value = new THREE.Color(color).convertLinearToSRGB();
+    uniforms.uZoom.value = zoom;
+  }, [radius, color, zoom]);
+  
+
+  useFrame(() => {
+    uniforms.uTime.value += 0.01;
+    points.current.material.uniforms = uniforms; // Ensure uniforms are correctly referenced
+  
+    // Other updates...
+  });
+
+  return (
+    <points ref={points} position={position}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          count={particlesPosition.length / 3}
+          array={particlesPosition}
+          itemSize={3}
+        />
+      </bufferGeometry>
+      <shaderMaterial
+        depthWrite={false}
+        fragmentShader={fragmentShader}
+        vertexShader={vertexShader}
+        uniforms={uniforms}
+      />
+    </points>
+  );
+};
+
 
 export const Portal = ({ portalId }: { portalId: string }) => {
     const meshRef = useRef<any>();
@@ -36,6 +110,11 @@ export const Portal = ({ portalId }: { portalId: string }) => {
         (state: any) => state.interpolation.isBubbleSelected,
     );
     const isSelected = isBubbleSelected && selectedBubbleId == portalId;
+    
+    const portal = currentState.portals.find(
+        (portal) => portal.id === portalId,
+    );
+    const radius = massToRadius(portal.mass);
 
     useFrame(() => {
         const portal = currentState.portals.find(
@@ -52,7 +131,7 @@ export const Portal = ({ portalId }: { portalId: string }) => {
 
     // Calculate the outline color based on the Ethereum address
     const baseColor = ethereumAddressToColor(portalId);
-    const outlineColor = darkenColor(baseColor, 0.7); // Darken by 20%
+    const outlineColor = lightenColor(baseColor, 0.3);
 
     useEffect(() => {
         //console.log("setIsBubbleSelected: ui", isSelected)
@@ -61,6 +140,12 @@ export const Portal = ({ portalId }: { portalId: string }) => {
 
     return (
         <>
+          <CustomGeometryParticles 
+            count={200} 
+            radius={radius*2.2}
+            position={new THREE.Vector3(portal.position.x, portal.position.y, 0)} 
+            color={baseColor}
+          />
             <mesh
                 onPointerEnter={() => {
                     if (!isSelected) setIsHovered(true);
@@ -76,8 +161,10 @@ export const Portal = ({ portalId }: { portalId: string }) => {
                 ref={meshRef}
             >
                 <sphereGeometry />
-                <Outlines thickness={0.15} color={outlineColor} />
-                <meshBasicMaterial toneMapped={false} color={baseColor} />
+                <Outlines thickness={0.05} color={'black'} />
+                <meshBasicMaterial 
+                  color={baseColor} 
+                />
             </mesh>
             {isSelected && (
                 <PortalsControlsEmit
@@ -85,6 +172,7 @@ export const Portal = ({ portalId }: { portalId: string }) => {
                     portalId={portalId}
                 />
             )}
+            
             <PortalsInfo portalId={portalId} />
         </>
     );

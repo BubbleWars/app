@@ -28,24 +28,23 @@ function App() {
     return (
         <>
             <Canvas
+                
                 orthographic={true}
                 camera={{
                     position: [0, 0, 100],
-                    zoom: 10,
+                    zoom: 15,
                     near: 0.01,
                     far: 1000,
+                    fov: 10,
                 }}
+                gl={{ toneMapping: THREE.NoToneMapping}}
+                dpr={[1, 2]}
                 style={{ height: "100vh", width: "100vw" }}
             >
-                <color attach="background" args={["#fdfaf1"]} />
+                <color attach="background" args={[0xFAFAFA]} />
                 <Game />
                 <CustomCameraControls />
 
-                <gridHelper
-                    position={[0, 0, -10]}
-                    rotation={[Math.PI / 2, 0, 0]}
-                    args={[10000, 10000, 0xeee8d5, 0xeee8d5]}
-                />
             </Canvas>
             <ScreenTitle />
             <ScreenSpawnPortal />

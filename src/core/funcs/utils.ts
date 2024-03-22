@@ -68,7 +68,7 @@ export const truncateAddress = (
     address: string,
     length: number = 4,
 ): string => {
-    return address.slice(0, 2 + length) + "..." + address.slice(-length);
+    return address.slice(0, 2 + length) + ".." + address.slice(-length);
 };
 
 export const ethereumAddressToColor = (ethAddress: string) => {

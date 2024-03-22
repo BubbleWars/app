@@ -32,6 +32,7 @@ export class CustomControls extends OrbitControls {
     setEnablePan(enable: boolean) {
         this.enablePan = enable;
     }
+    
 
     // Additional custom logic can be added here if needed
 }
