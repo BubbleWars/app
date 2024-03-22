@@ -61,11 +61,8 @@ jobs:
             - name: Clear Existing PM2 Processes
               run: |
                   pm2 stop all || true
-                  pm2 delete blockchain || true
-                  pm2 delete node-backend || true
-                  pm2 delete front-end || true
-                  pm2 delete faucet-server || true
-                  pm2 delete state-indexer || true
+                  pm2 delete all || true
+                  pm2 flush
             
             - name: Clear Existing Docker Containers
               run: |
@@ -116,7 +113,7 @@ jobs:
               run: |
                   cd src/front
                   pnpm install @latticexyz/faucet@next
-                  pm2 start --name faucet-server "pnpm faucet-server"
+                  pm2 start --name faucet-server "node node_modules/.bin/faucet-server"
 
             - name: Save PM2 Process List
               run: pm2 save
