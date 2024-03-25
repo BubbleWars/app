@@ -12,7 +12,7 @@ After installing the necessary packages, run the following command to set up the
 
 ```bash
 npm i
-sunodo run --no-backend
+sunodo run --no-backend --block-time 2
 ```
 
 ### Starting the Node Backend

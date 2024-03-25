@@ -8,6 +8,8 @@ import { createWalletClient, http } from "viem";
 import { MockConnector } from "wagmi/connectors/mock";
 import { currentChain } from "../../contracts";
 import { waitForTransaction } from "wagmi/actions";
+import { Event } from "../../main";
+import { Events, ClientTimeout, PlayerConnection } from "../../types/events";
 
 const faucetClient = createFaucetClient({
     url: FAUCET_URL,
