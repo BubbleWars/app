@@ -6,6 +6,13 @@ The library has been build to sustain BubbleWars architecture.
 
 ## Usage
 
+Clone and inspall packages
+
+```sh
+git clone ...
+npm i
+```
+
 Build
 
 ```sh
