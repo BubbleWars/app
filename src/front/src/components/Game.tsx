@@ -30,6 +30,7 @@ import { ResourceType } from "../../../core/types/resource";
 const client = new Client(INDEXER_URL);
 const room = await client.joinOrCreate("world");
 
+
 const schemaToSnapshot = () => {
 
 }
@@ -186,6 +187,11 @@ room.state.onChange(() => {
         currentState.resources.push(tempResource)
     })
 });
+
+//Every 5 seconds check the state of the room
+setInterval(() => {
+    console.log("room state", room.connection.isOpen)
+}, 5000)
 
 
 // room.state.listen("resources", (resources) => {
