@@ -9,7 +9,7 @@ export enum Events {
 }
 
 /**
- * G Es Ts
+ * Global Events Types
  */
 export type EventsTypes = GameStart | GameEnd | PlayerConnection | PlayerDeath;
 

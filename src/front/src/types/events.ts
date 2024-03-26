@@ -14,7 +14,7 @@ export enum Events {
 }
 
 /**
- * Global Events Types Class
+ * Global Events Types
  */
 export type EventsTypes = ClientTimeout | ClientKill;
 
