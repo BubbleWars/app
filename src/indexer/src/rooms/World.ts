@@ -75,19 +75,19 @@ const updateState = (state: WorldState, snapshot: Snapshot): WorldState => {
   });
 
   //set nodes
-  // state.nodes.clear();
-  // snapshot.nodes.forEach((node) => {
-  //   const newNode = new ResourceNodeStateSchema();
-  //   newNode.id = node.id;
-  //   newNode.positionX = node.position.x;
-  //   newNode.positionY = node.position.y;
-  //   newNode.mass = node.mass;
-  //   newNode.type = node.type;
-  //   newNode.emissionDirectionX = node.emissionDirection.x;
-  //   newNode.emissionDirectionY = node.emissionDirection.y;
-  //   newNode.lastEmission = node.lastEmission;
-  //   state.nodes.push(newNode);
-  // });
+  state.nodes.clear();
+  snapshot.nodes.forEach((node) => {
+    const newNode = new ResourceNodeStateSchema();
+    newNode.id = node.id;
+    newNode.positionX = node.position.x;
+    newNode.positionY = node.position.y;
+    newNode.mass = node.mass;
+    newNode.type = node.type;
+    newNode.emissionDirectionX = node.emissionDirection.x;
+    newNode.emissionDirectionY = node.emissionDirection.y;
+    newNode.lastEmission = node.lastEmission;
+    state.nodes.push(newNode);
+  });
 
   //set resources
   state.resources.clear();
