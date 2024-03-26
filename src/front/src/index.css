@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Lilita+One&family=Rubik+Scribble&family=Rubik+Spray+Paint&display=swap');
+
 body,
 html {
     padding: 0;
@@ -19,7 +21,6 @@ html {
     height: 50px;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Lilita+One&family=Rubik+Scribble&family=Rubik+Spray+Paint&display=swap');
 .screen-title {
     backdrop-filter: blur(10px);
     position: fixed;
