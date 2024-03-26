@@ -73,7 +73,7 @@ jobs:
                   docker volume prune -f || true
 
             - name: Set up Local Blockchain and Smart Contracts
-              run: pm2 start --name blockchain "sunodo run --no-backend"
+              run: pm2 start --name blockchain "sunodo run --no-backend --block-time 1"
 
             # - name: Wait for Blockchain Setup
             #   run: sleep 30 # Adjust the sleep duration as needed
