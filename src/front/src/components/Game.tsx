@@ -217,7 +217,7 @@ setInterval(() => {
                 console.log("reconnected")
             })
     }
-}, 5000)
+}, 1000)
 
 
 // room.state.listen("resources", (resources) => {
