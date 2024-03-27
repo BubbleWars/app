@@ -100,12 +100,12 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
         const newX = MathUtils.lerp(
             meshRef.current.position.x,
             bubble.position.x,
-            0.5,
+            0.2,
         );
         const newY = MathUtils.lerp(
             meshRef.current.position.y,
             bubble.position.y,
-            0.5,
+            0.2,
         );
         meshRef.current.position.set(newX, newY, 0);
         meshRef.current.updateMatrix();
