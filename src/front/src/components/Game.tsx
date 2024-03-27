@@ -28,7 +28,7 @@ import { Puncture, PuncturePoint } from "../../../core/types/bubble";
 import { ResourceType } from "../../../core/types/resource";
 
 const client = new Client(INDEXER_URL);
-const room = await client.joinOrCreate("world");
+let room = await client.joinOrCreate("world");
 const reconnectionToken = room.reconnectionToken;
 
 
@@ -48,166 +48,174 @@ export const resourceDestroyPositions: {
     [key: string]: { x: number; y: number };
 } = {};
 
-room.state.onChange(() => {
-    const { timestamp, users, bubbles, portals, nodes, resources, syncBubbleStartPositions } = room.state;
+//Create init function for state.onChange
+const initStateServer = (room) => {
+    room.state.onChange(() => {
+        const { timestamp, users, bubbles, portals, nodes, resources, syncBubbleStartPositions } = room.state;
 
-    //Timestamp
-    currentState.timestamp = timestamp
+        //Timestamp
+        currentState.timestamp = timestamp
 
-    //Bubble start positions for interpolation
-    syncBubbleStartPositions.forEach((value, key) => {
-        bubbleStartPositions[key] = {
-            x: value.x,
-            y: value.y
-        }
-    })
+        //Bubble start positions for interpolation
+        syncBubbleStartPositions.forEach((value, key) => {
+            bubbleStartPositions[key] = {
+                x: value.x,
+                y: value.y
+            }
+        })
 
-    //Users
-    currentState.users.length = 0;
-    users.forEach((user) => {
-        const tempUser: User = {
-            address: user.address,
-            balance: user.balance
-        }
-        currentState.users.push(tempUser)
-    })
+        //Users
+        currentState.users.length = 0;
+        users.forEach((user) => {
+            const tempUser: User = {
+                address: user.address,
+                balance: user.balance
+            }
+            currentState.users.push(tempUser)
+        })
 
-    //Bubbles
-    currentState.bubbles.length = 0;
-    users.forEach((user) => {
-        const tempUser: User = {
-            address: user.address,
-            balance: user.balance
-        }
-        currentState.users.push(tempUser)
-    })
+        //Bubbles
+        currentState.bubbles.length = 0;
+        users.forEach((user) => {
+            const tempUser: User = {
+                address: user.address,
+                balance: user.balance
+            }
+            currentState.users.push(tempUser)
+        })
 
-    bubbles.forEach((bubble) => {
-        const resources: {
-            resource: ResourceType;
-            mass: number;
-        }[] = []
-        bubble.resources.forEach((value)=>{
-            resources.push({
-                resource: value.resource,
-                mass: value.mass
+        bubbles.forEach((bubble) => {
+            const resources: {
+                resource: ResourceType;
+                mass: number;
+            }[] = []
+            bubble.resources.forEach((value)=>{
+                resources.push({
+                    resource: value.resource,
+                    mass: value.mass
+                })
             })
-        })
-        const punctures: {
-            point: PuncturePoint;
-            puncture: Puncture;
-        }[] = []
-        bubble.punctures.forEach((value)=>{
+            const punctures: {
+                point: PuncturePoint;
+                puncture: Puncture;
+            }[] = []
+            bubble.punctures.forEach((value)=>{
 
-        })
-        const tempBubble: BubbleState = {
-            id: bubble.id,
-            owner: bubble.owner,
-            position: {
-                x: bubble.positionX,
-                y: bubble.positionY,
-            },
-            velocity: {
-                x: bubble.velocityX,
-                y: bubble.velocityY,
-            },
-            mass: bubble.mass,
-            resources,
-            punctures,
-            lastPunctureEmit: bubble.lastPunctureEmit,
-            from: bubble.from,
-        }
-        currentState.bubbles.push(tempBubble)
-
-    })
-
-    //Portals
-    currentState.portals.length = 0;
-    portals.forEach((portal) => {
-        const resources: {
-            resource: ResourceType;
-            mass: number;
-        }[] = []
-        portal.resources.forEach((value)=>{
-            resources.push({
-                resource: value.resource,
-                mass: value.mass
             })
+            const tempBubble: BubbleState = {
+                id: bubble.id,
+                owner: bubble.owner,
+                position: {
+                    x: bubble.positionX,
+                    y: bubble.positionY,
+                },
+                velocity: {
+                    x: bubble.velocityX,
+                    y: bubble.velocityY,
+                },
+                mass: bubble.mass,
+                resources,
+                punctures,
+                lastPunctureEmit: bubble.lastPunctureEmit,
+                from: bubble.from,
+            }
+            currentState.bubbles.push(tempBubble)
+
         })
-        const tempPortal: PortalState = {
-            id: portal.id,
-            owner: portal.owner,
-            position: {
-                x: portal.positionX,
-                y: portal.positionY,
-            },
-            mass: portal.mass,
-            resources,
-        }
-        currentState.portals.push(tempPortal)
 
-    })
+        //Portals
+        currentState.portals.length = 0;
+        portals.forEach((portal) => {
+            const resources: {
+                resource: ResourceType;
+                mass: number;
+            }[] = []
+            portal.resources.forEach((value)=>{
+                resources.push({
+                    resource: value.resource,
+                    mass: value.mass
+                })
+            })
+            const tempPortal: PortalState = {
+                id: portal.id,
+                owner: portal.owner,
+                position: {
+                    x: portal.positionX,
+                    y: portal.positionY,
+                },
+                mass: portal.mass,
+                resources,
+            }
+            currentState.portals.push(tempPortal)
 
-    //Nodes
-    currentState.nodes.length = 0;
-    nodes.forEach((node) => {
-        const tempNode = {
-            id: node.id,
-            type: node.type,
-            position: {
-                x: node.positionX,
-                y: node.positionY,
-            },
-            mass: node.mass,
-            emissionDirection: {
-                x: node.emissionDirectionX,
-                y: node.emissionDirectionY,
-            },
-            lastEmission: node.lastEmission,
-        }
-        currentState.nodes.push(tempNode)
-    })
+        })
 
-    //Resources
-    currentState.resources.length = 0;
-    resources.forEach((resource) => {
-        const tempResource = {
-            id: resource.id,
-            type: resource.type,
-            position: {
-                x: resource.positionX,
-                y: resource.positionY,
-            },
-            mass: resource.mass,
-            owner: resource.owner,
-            velocity: {
-                x: resource.velocityX,
-                y: resource.velocityY,
-            },
-        }
-        currentState.resources.push(tempResource)
-    })
-});
+        //Nodes
+        currentState.nodes.length = 0;
+        nodes.forEach((node) => {
+            const tempNode = {
+                id: node.id,
+                type: node.type,
+                position: {
+                    x: node.positionX,
+                    y: node.positionY,
+                },
+                mass: node.mass,
+                emissionDirection: {
+                    x: node.emissionDirectionX,
+                    y: node.emissionDirectionY,
+                },
+                lastEmission: node.lastEmission,
+            }
+            currentState.nodes.push(tempNode)
+        })
 
-room.connection.events.onclose = (e) => {
-    console.log("connection closed", e)
-}
-room.connection.events.onopen = (e) => {
-    console.log("connection opened", e)
-}
+        //Resources
+        currentState.resources.length = 0;
+        resources.forEach((resource) => {
+            const tempResource = {
+                id: resource.id,
+                type: resource.type,
+                position: {
+                    x: resource.positionX,
+                    y: resource.positionY,
+                },
+                mass: resource.mass,
+                owner: resource.owner,
+                velocity: {
+                    x: resource.velocityX,
+                    y: resource.velocityY,
+                },
+            }
+            currentState.resources.push(tempResource)
+        })
+    });
 
-room.connection.events.onerror = (e) => {
-    console.log("connection error", e)
+    room.connection.events.onclose = (e) => {
+        console.log("connection closed", e)
+    }
+    room.connection.events.onopen = (e) => {
+        console.log("connection opened", e)
+    }
+
+    room.connection.events.onerror = (e) => {
+        console.log("connection error", e)
+    }
 }
 
 //Every 5 seconds check the state of the room
+initStateServer(room)
 setInterval(() => {
     const isOpen = room.connection.isOpen
     console.log("room state", room.connection.isOpen)
     if(!isOpen){
         console.log("reconnecting")
-        client.reconnect(reconnectionToken)
-            .then(() => { console.log("reconnected")})
+        client.joinOrCreate("world")
+            .then((newRoom) => {
+                room = newRoom;
+                initStateServer(room)
+                console.log("reconnected")
+            })
     }
 }, 5000)
 
