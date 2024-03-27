@@ -29,6 +29,7 @@ import { ResourceType } from "../../../core/types/resource";
 
 const client = new Client(INDEXER_URL);
 const room = await client.joinOrCreate("world");
+const reconnectionToken = room.reconnectionToken;
 
 
 const schemaToSnapshot = () => {
@@ -188,9 +189,26 @@ room.state.onChange(() => {
     })
 });
 
+room.connection.events.onclose = (e) => {
+    console.log("connection closed", e)
+}
+room.connection.events.onopen = (e) => {
+    console.log("connection opened", e)
+}
+
+room.connection.events.onerror = (e) => {
+    console.log("connection error", e)
+}
+
 //Every 5 seconds check the state of the room
 setInterval(() => {
+    const isOpen = room.connection.isOpen
     console.log("room state", room.connection.isOpen)
+    if(!isOpen){
+        console.log("reconnecting")
+        client.reconnect(reconnectionToken)
+            .then(() => { console.log("reconnected")})
+    }
 }, 5000)
 
 
