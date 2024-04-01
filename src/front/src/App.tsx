@@ -31,7 +31,7 @@ function App() {
                 orthographic={true}
                 camera={{
                     position: [0, 0, 100],
-                    zoom: 10,
+                    zoom: 100,
                     near: 0.01,
                     far: 1000,
                 }}

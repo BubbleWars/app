@@ -17,6 +17,7 @@ import {
     setSelectedEntityId,
 } from "../store/interpolation";
 import { burnerAddress } from "../config";
+import { LERP_SPEED } from "../consts";
 
 export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
     const meshRef = useRef<any>();
@@ -100,12 +101,12 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
         const newX = MathUtils.lerp(
             meshRef.current.position.x,
             bubble.position.x,
-            0.1,
+            LERP_SPEED,
         );
         const newY = MathUtils.lerp(
             meshRef.current.position.y,
             bubble.position.y,
-            0.1,
+            LERP_SPEED,
         );
         meshRef.current.position.set(newX, newY, 0);
         meshRef.current.updateMatrix();

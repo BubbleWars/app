@@ -8,6 +8,7 @@ import { darkenColor } from "../utils";
 import { resourceStartPositions } from "./Game";
 import { MathUtils } from "three";
 import { CustomText } from "./CustomText";
+import { LERP_SPEED } from "../consts";
 
 export const Resource = ({ resourceId }: { resourceId: string }) => {
     const meshRef = useRef<any>();
@@ -87,12 +88,12 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
         const newX = MathUtils.lerp(
             meshRef.current.position.x,
             resource.position.x,
-            0.1,
+            LERP_SPEED,
         );
         const newY = MathUtils.lerp(
             meshRef.current.position.y,
             resource.position.y,
-            0.1,
+            LERP_SPEED,
         );
         setTextPosition(new THREE.Vector3(newX, newY, 0));
         meshRef.current.position.set(newX, newY, 0);

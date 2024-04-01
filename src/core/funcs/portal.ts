@@ -1,7 +1,7 @@
 import { World, Circle, Vec2 } from "planck-js";
 import { Portal } from "../types/portal";
 import { Address } from "../types/address";
-import { massToRadius } from "./utils";
+import { calculateEmissionVelocity, massToRadius } from "./utils";
 import {
     EMISSION_SPEED,
     MASS_PER_SECOND,
@@ -279,8 +279,7 @@ export const portalEmitBubble = (
 
     //Apply momentum conservation
     const emittedBubbleVelocityDirection = direction.clone();
-    const emittedBubbleVelocityMagnitude =
-        (portal.mass / emittedBubble.body.getMass()) * EMISSION_SPEED;
+    const emittedBubbleVelocityMagnitude = calculateEmissionVelocity();
     const emittedBubbleRelativeVelocity = emittedBubbleVelocityDirection.mul(
         emittedBubbleVelocityMagnitude,
     );
@@ -370,8 +369,7 @@ export const portalEmitResource = (
 
     //Apply momentum conservation
     const emittedResourceVelocityDirection = direction.clone();
-    const emittedResourceVelocityMagnitude =
-        (portal.mass / emittedResource.body.getMass()) * EMISSION_SPEED;
+    const emittedResourceVelocityMagnitude = calculateEmissionVelocity()
     const emittedResourceRelativeVelocity =
         emittedResourceVelocityDirection.mul(emittedResourceVelocityMagnitude);
     const emittedResourceVelocity = portal.body
