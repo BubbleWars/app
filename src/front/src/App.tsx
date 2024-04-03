@@ -20,6 +20,8 @@ import { ScreenTitle } from "./components/screens/ScreenTitle";
 import { ScreenSpawnPortal } from "./components/screens/ScreenSpawnPortal";
 import { useState } from "react";
 import { useOnClick } from "./hooks/inputs";
+import { BarSide } from "./components/ui/BarSide";
+import "../global.css"
 
 function App() {
     //const { snapshot } = useInspect({ type: InspectType.State, value: 0 });
@@ -47,6 +49,7 @@ function App() {
                     args={[10000, 10000, 0xeee8d5, 0xeee8d5]}
                 />
             </Canvas>
+            <BarSide />
             <ScreenTitle />
             <ScreenSpawnPortal />
         </>
