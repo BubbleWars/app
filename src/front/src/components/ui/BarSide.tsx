@@ -226,6 +226,9 @@ export const TabYours = () => {
     const portal = currentState.portals.find((portal) => portal.id.toLowerCase() == address.toLowerCase());
     const portalResources = portal ? portal.resources : [];
     const yourBubbles = currentState.bubbles.filter((bubble) => bubble.owner.toLowerCase() == address.toLowerCase());
+    const truncatedAddress = portal?.owner ? truncateAddress(portal.owner) : "No portal";
+    const portalMass = portal?.mass ?? 0;
+    const portalPosition = portal?.position ?? { x: 0, y: 0 };
     console.log(portal)
     return (
         <Accordion type="multiple" className="w-full" defaultValue={["portal", "bubbles", "liquidity"]}>
@@ -233,9 +236,9 @@ export const TabYours = () => {
                 <AccordionTrigger>Portal</AccordionTrigger>
                 <AccordionContent>
                     <div className="w-full flex flex-row items-center space-evenly space-x-3">
-                        <p>{truncateAddress(portal?.owner)}</p>
-                        <PositionIcon position={portal.position} />
-                        <p>{portal.mass.toFixed(2)} ETH</p>
+                        <p>{truncatedAddress}</p>
+                        <PositionIcon position={portalPosition} />
+                        <p>{portalMass.toFixed(2)} ETH</p>
                         <ResourcesIcon resources={portalResources} />
                     </div>
                 </AccordionContent>
