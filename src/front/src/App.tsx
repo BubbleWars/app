@@ -22,6 +22,7 @@ import { useState } from "react";
 import { useOnClick } from "./hooks/inputs";
 import { BarSide } from "./components/ui/BarSide";
 import "../global.css"
+import { BarBottom } from "./components/ui/BarBottom";
 
 function App() {
     //const { snapshot } = useInspect({ type: InspectType.State, value: 0 });
@@ -37,7 +38,7 @@ function App() {
                     near: 0.01,
                     far: 1000,
                 }}
-                style={{ height: "100vh", width: "100vw" }}
+                style={{ height: "90vh", width: "100vw" }}
             >
                 <color attach="background" args={["#fdfaf1"]} />
                 <Game />
@@ -50,6 +51,7 @@ function App() {
                 />
             </Canvas>
             <BarSide />
+            <BarBottom />
             <ScreenTitle />
             <ScreenSpawnPortal />
         </>

@@ -56,6 +56,16 @@ export const RESOURCE_TO_COLOR = {
     [ResourceType.Energy]: "#0000FF",
 };
 
+export const AddressView = ({ id }: { id: string }) => {
+    return (
+        <p className="bold color-blue">{truncateAddress(id)}</p>
+    )
+}
+
+export const MassView = ({ mass }: { mass: number }) => {
+    return <p className="bold blue">{mass.toFixed(2)} ETH</p>
+}
+
 export const CameraLock = ({ id }: { id: string }) => {
 
 }
@@ -85,11 +95,11 @@ export const ResourcesIcon = ({ resources } : { resources: { resource: ResourceT
 export const PositionIcon = ({ position }: { position: { x: number, y: number } }) => {
     return (
         <div className="flex items-center space-x-1">
+            <Crosshair1Icon className="h-4 w-4" />
             <div className="flex flex-row items-center">
                 <p>{position.x.toFixed(2)},</p>
                 <p>{position.y.toFixed(2)}</p>
             </div>
-            <Crosshair1Icon className="h-4 w-4" />
         </div>
     );
 }
@@ -106,12 +116,12 @@ export const VelocityIcon = ({ velocity }: { velocity: { x: number, y: number } 
 
     return (
         <div className="flex items-center">
-            <p>{magnitude} m/s</p>
             <svg width={svgSize} height={svgSize}>
                 <g transform={`translate(${centerX}, ${centerY}) rotate(${angle}, ${arrowSize / 2}, ${arrowSize / 2})`}>
                 <path d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z" fill="currentColor"/>
                 </g>
             </svg>
+            <p>{magnitude} m/s</p>
         </div>
     );
 }
@@ -178,21 +188,31 @@ export const ListPlayers = ({ players }: { players: User[] }) => {
 
 export const ListBubbles = ({ bubbles }: { bubbles: BubbleState[] }) => {
     return (
-        <ScrollArea className="rounded-md w-full">
-            <div className="">
-                {bubbles.map((bubble) => (
-                <>
-                    <div className="flex items-center space-x-5">
-                        <PositionIcon position={bubble.position} />
-                        <VelocityIcon velocity={bubble.velocity} />
-                        <p>{bubble.mass.toFixed(2)} ETH</p>
-                        <ResourcesIcon resources={bubble.resources} />
-                    </div>
-                    <Separator className="my-2" />
-                </>
-                ))}
-            </div>
+        <ScrollArea className="rounded-md border">
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Position</TableHead>
+                    <TableHead>Velocity</TableHead>
+                    <TableHead>Mass</TableHead>
+                    <TableHead>Resources</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {bubbles.map((bubble) => (
+                        <TableRow>
+                            <TableCell><AddressView id={bubble.id}/></TableCell>
+                            <TableCell><PositionIcon position={bubble.position} /></TableCell>
+                            <TableCell><VelocityIcon velocity={bubble.velocity} /></TableCell>
+                            <TableCell><MassView mass={bubble.mass}/></TableCell>
+                            <ResourcesIcon resources={bubble.resources} />
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
         </ScrollArea>
+        
     )
 }
 
@@ -208,8 +228,8 @@ export const TabYours = () => {
     const yourBubbles = currentState.bubbles.filter((bubble) => bubble.owner.toLowerCase() == address.toLowerCase());
     console.log(portal)
     return (
-        <Accordion type="multiple" className="w-full">
-            <AccordionItem value="portal">
+        <Accordion type="multiple" className="w-full" defaultValue={["portal", "bubbles", "liquidity"]}>
+            <AccordionItem value="portal" >
                 <AccordionTrigger>Portal</AccordionTrigger>
                 <AccordionContent>
                     <div className="w-full flex flex-row items-center space-evenly space-x-3">
@@ -239,14 +259,14 @@ export const TabYours = () => {
 export const TabAll = () => {
     const players = currentState.users;
     return (
-        <Accordion type="multiple" className="w-full">
-            <AccordionItem value="item-1">
+        <Accordion type="multiple" className="w-full" defaultValue={["players", "liquidity"]}>
+            <AccordionItem value="players">
                 <AccordionTrigger>Players</AccordionTrigger>
                 <AccordionContent>
                     <ListPlayers players={players} />
                 </AccordionContent>
             </AccordionItem>
-            <AccordionItem value="item-2">
+            <AccordionItem value="liquidity">
                 <AccordionTrigger>Nodes</AccordionTrigger>
                 <AccordionContent>
                     Node liquidity is not being provided by any players.
@@ -271,8 +291,8 @@ export const BarSide = () => {
         <Drawer.Content className="bg-white flex flex-col rounded-t-[10px] h-full w-[500px] mt-24 fixed bottom-0 right-0">
           <div className="p-4 bg-white flex-1 h-full">
             <div className="max-w-md mx-auto">
-              <Drawer.Title className="font-large mb-4">
-                World stats
+              <Drawer.Title className="font-medium font-bold mb-4">
+                <h1>World stats</h1>
               </Drawer.Title>
               <Tabs defaultValue="yours">
                     <TabsList defaultValue={"yours"}>
