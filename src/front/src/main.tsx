@@ -11,6 +11,7 @@ import { currentChain } from "./contracts.ts";
 import { Provider } from "react-redux";
 import store from "./store/index.ts";
 import { cEvent } from "./types/events.ts";
+import { PrivyProvider } from "@privy-io/react-auth";
 
 //Configure Apollo
 const client = new ApolloClient({
@@ -37,7 +38,31 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <ApolloProvider client={client}>
             <WagmiConfig config={config}>
                 <React.StrictMode>
-                    <App />
+                    <PrivyProvider
+                        appId="cltnxig1e024xevlx99u3d12d"
+                        config={{
+                            // Display email and wallet as login methods
+                            loginMethods: [
+                                "email",
+                                "wallet",
+                                "twitter",
+                                "discord",
+                                "farcaster",
+                            ],
+                            // Customize Privy's appearance in your app
+                            appearance: {
+                                theme: "light",
+                                accentColor: "#676FFF",
+                                logo: "https://your-logo-url",
+                            },
+                            // Create embedded wallets for users who don't have a wallet
+                            embeddedWallets: {
+                                createOnLogin: "users-without-wallets",
+                            },
+                        }}
+                    >
+                        <App />
+                    </PrivyProvider>
                 </React.StrictMode>
             </WagmiConfig>
         </ApolloProvider>

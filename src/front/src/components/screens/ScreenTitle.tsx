@@ -18,6 +18,7 @@ import {
   } from "@/components/ui/card"
 import { Button } from "../ui/button";
 
+import { usePrivy } from "@privy-io/react-auth";
 
 const faucetClient = createFaucetClient({
     url: FAUCET_URL,
@@ -25,7 +26,7 @@ const faucetClient = createFaucetClient({
 
 export const ScreenTitle = () => {
     const [buttonText, setButtonText] = React.useState("Connect");
-    const [ fetchingFunds, setFetchingFunds ] = React.useState(false)
+    const [fetchingFunds, setFetchingFunds] = React.useState(false);
     const { address, isConnected, isConnecting } = useAccount();
     const { connect } = useConnect({
         connector: new MockConnector({
@@ -57,13 +58,17 @@ export const ScreenTitle = () => {
 
     const fetchFunds = useCallback(() => {
         const _ = async () => {
-            setFetchingFunds(true)
+            setFetchingFunds(true);
             const tx = await faucetClient.drip.mutate({
                 address: burnerAddress as "0x{string}",
             });
-            await waitForTransaction({chainId: currentChain.id, hash: tx, confirmations: 1})   
-            setFetchingFunds(false)
-        }
+            await waitForTransaction({
+                chainId: currentChain.id,
+                hash: tx,
+                confirmations: 1,
+            });
+            setFetchingFunds(false);
+        };
         _();
     }, [burnerAddress]);
 
@@ -72,8 +77,8 @@ export const ScreenTitle = () => {
     }, [shouldFetchFunds]);
 
     useEffect(() => {
-        if(fetchingFunds) {
-            setButtonText("Fetching funds for burner...")
+        if (fetchingFunds) {
+            setButtonText("Fetching funds for burner...");
         } else if (isConnected) {
             setButtonText("Connected to " + truncateAddress(burnerAddress));
         } else if (isConnecting) {
@@ -82,7 +87,7 @@ export const ScreenTitle = () => {
             setButtonText("Play");
         }
     }, [isConnected, isConnecting, address, fetchingFunds, balance]);
-
+    const { login } = usePrivy();
     // const isFunded = useMemo(() => {
     //     return balance > 0
     // }, [balance])
@@ -104,8 +109,9 @@ export const ScreenTitle = () => {
                     className="w-[100px] text-center"
                 onClick={() => {
                     connect();
-                }}
-                >
+                    login();
+
+                }}>
                 {buttonText}
                 </Button>
             </div>

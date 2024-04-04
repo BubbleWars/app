@@ -23,10 +23,13 @@ import { useOnClick } from "./hooks/inputs";
 import { BarSide } from "./components/ui/BarSide";
 import "../global.css"
 import { BarBottom } from "./components/ui/BarBottom";
+import { usePrivy } from "@privy-io/react-auth";
 
 function App() {
     //const { snapshot } = useInspect({ type: InspectType.State, value: 0 });
-    //const { inputs } = useInputs();    
+    //const { inputs } = useInputs();
+
+    const { logout } = usePrivy();
 
     return (
         <>
@@ -58,6 +61,7 @@ function App() {
             <BarBottom />
             <ScreenTitle />
             <ScreenSpawnPortal />
+            <button onClick={logout}>Log out</button>
         </>
     );
 }

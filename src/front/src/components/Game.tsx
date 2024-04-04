@@ -51,7 +51,7 @@ export const resourceDestroyPositions: {
 //Create init function for state.onChange
 const initStateServer = (room) => {
     room.state.onChange(() => {
-        const { timestamp, users, bubbles, portals, nodes, resources, syncBubbleStartPositions } = room.state;
+        const { timestamp, users, bubbles, portals, nodes, resources, syncBubbleStartPositions, userSocials } = room.state;
 
         //Timestamp
         currentState.timestamp = timestamp

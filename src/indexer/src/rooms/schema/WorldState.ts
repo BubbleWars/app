@@ -10,7 +10,14 @@ export class UserSchema extends Schema {
     @type("number") balance: number = 0;
 }
 
-export class InputWithExecutionTimeSchema extends Schema  {
+export class UserSocialSchema extends Schema {
+    @type("string") address: string = "";
+    @type("string") pfpUrl: string = "";
+    @type("string") social: string = "";
+    @type("string") privyId: string = "";
+}
+
+export class InputWithExecutionTimeSchema extends Schema {
     @type("string") type: string = "";
     @type("number") executionTime: number = 0;
     @type("string") from: string = "";
@@ -33,13 +40,16 @@ export class BubblePunctureSchema extends Schema {
 export class BubbleStateSchema extends Schema {
     @type("string") id: string = "";
     @type("string") owner: string = "";
+
     @type("number") positionX: number = 0;
     @type("number") positionY: number = 0;
     @type("number") velocityX: number = 0;
     @type("number") velocityY: number = 0;
     @type("number") mass: number = 0;
-    @type([ EntityResourceStateSchema ]) resources = new ArraySchema<EntityResourceStateSchema>();
-    @type([ BubblePunctureSchema ]) punctures = new ArraySchema<BubblePunctureSchema>();
+    @type([EntityResourceStateSchema]) resources =
+        new ArraySchema<EntityResourceStateSchema>();
+    @type([BubblePunctureSchema]) punctures =
+        new ArraySchema<BubblePunctureSchema>();
     @type("number") lastPunctureEmit: number = 0;
     @type("number") startPositionX: number = 0;
     @type("number") startPositionY: number = 0;
@@ -52,7 +62,8 @@ export class PortalStateSchema extends Schema {
     @type("number") positionX: number = 0;
     @type("number") positionY: number = 0;
     @type("number") mass: number = 0;
-    @type([ EntityResourceStateSchema ]) resources = new ArraySchema<EntityResourceStateSchema>();
+    @type([EntityResourceStateSchema]) resources =
+        new ArraySchema<EntityResourceStateSchema>();
 }
 
 export class ObstacleStateSchema extends Schema {
@@ -61,7 +72,7 @@ export class ObstacleStateSchema extends Schema {
     @type("number") positionY: number = 0;
     @type("number") velocityX: number = 0;
     @type("number") velocityY: number = 0;
-    @type([ Vector2Schema ]) vertices = new ArraySchema<Vector2Schema>();
+    @type([Vector2Schema]) vertices = new ArraySchema<Vector2Schema>();
 }
 
 export class ResourceNodeStateSchema extends Schema {
@@ -78,6 +89,7 @@ export class ResourceNodeStateSchema extends Schema {
 export class ResourceStateSchema extends Schema {
     @type("string") id: string = "";
     @type("string") owner: string = "";
+
     @type("number") type: number = 0;
     @type("number") positionX: number = 0;
     @type("number") positionY: number = 0;
@@ -86,17 +98,24 @@ export class ResourceStateSchema extends Schema {
     @type("number") mass: number = 0;
 }
 
-
 export class WorldState extends Schema {
     @type("number") timestamp: number = 0;
-    @type([ InputWithExecutionTimeSchema ]) pendingInputs = new ArraySchema<InputWithExecutionTimeSchema>();
-    @type([ UserSchema ]) users = new ArraySchema<UserSchema>();
-    @type([ BubbleStateSchema ]) bubbles = new ArraySchema<BubbleStateSchema>();
-    @type([ PortalStateSchema ]) portals = new ArraySchema<PortalStateSchema>();
-    @type([ ObstacleStateSchema ]) obstacles = new ArraySchema<ObstacleStateSchema>();
-    @type([ ResourceNodeStateSchema ]) nodes = new ArraySchema<ResourceNodeStateSchema>();
-    @type([ ResourceStateSchema ]) resources = new ArraySchema<ResourceStateSchema>();
-    @type({ map: Vector2Schema }) syncBubbleStartPositions = new MapSchema<Vector2Schema>();
-    @type({ map: Vector2Schema }) syncBubbleEndPositions = new MapSchema<Vector2Schema>();
-    @type({ map: Vector2Schema }) syncResourceStartPositions = new MapSchema<Vector2Schema>();
+    @type([InputWithExecutionTimeSchema]) pendingInputs =
+        new ArraySchema<InputWithExecutionTimeSchema>();
+    @type([UserSchema]) users = new ArraySchema<UserSchema>();
+    @type([UserSocialSchema]) userSocials = new ArraySchema<UserSocialSchema>();
+    @type([BubbleStateSchema]) bubbles = new ArraySchema<BubbleStateSchema>();
+    @type([PortalStateSchema]) portals = new ArraySchema<PortalStateSchema>();
+    @type([ObstacleStateSchema]) obstacles =
+        new ArraySchema<ObstacleStateSchema>();
+    @type([ResourceNodeStateSchema]) nodes =
+        new ArraySchema<ResourceNodeStateSchema>();
+    @type([ResourceStateSchema]) resources =
+        new ArraySchema<ResourceStateSchema>();
+    @type({ map: Vector2Schema }) syncBubbleStartPositions =
+        new MapSchema<Vector2Schema>();
+    @type({ map: Vector2Schema }) syncBubbleEndPositions =
+        new MapSchema<Vector2Schema>();
+    @type({ map: Vector2Schema }) syncResourceStartPositions =
+        new MapSchema<Vector2Schema>();
 }
