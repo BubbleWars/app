@@ -1,6 +1,6 @@
 import { useState } from "react"
 import SlidingPanel from "react-sliding-side-panel"
-import { ChevronRightIcon, ChevronLeftIcon, Crosshair1Icon, CircleIcon } from '@radix-ui/react-icons'
+import { ChevronRightIcon, ChevronLeftIcon, Crosshair1Icon, CircleIcon, DotFilledIcon, Cross1Icon, ShadowIcon } from '@radix-ui/react-icons'
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
@@ -88,6 +88,31 @@ export const ResourcesIcon = ({ resources } : { resources: { resource: ResourceT
                     <CircleIcon className="h-4 w-4" style={{ fill: RESOURCE_TO_COLOR[resource.resource] }} />
                 </div>
             ))}
+                <div 
+                    key="blue" 
+                    className="flex items-center color-blue space-x-0"
+                >
+                    <p className="text-blue-600">0.00</p>
+                    <Cross1Icon color="blue-600" className="p-0 m-0 fill-blue-600 stroke-fill-blue-600 h-3 w-3" />
+                    <ShadowIcon  color="blue-600" className="h-3 w-3 p-0 m-0 fill-blue-600 stroke-fill-blue-600" />
+                </div>
+                <div
+                    key="red"
+                    className="flex items-center color-red space-x-0"
+                >
+                    <p className="text-red-600">0.00</p>
+                    <Cross1Icon color="red-600" className="p-0 m-0 fill-red-600 stroke-fill-red-600 h-3 w-3" />
+                    <ShadowIcon  color="red-600" className="h-3 w-3 p-0 m-0 fill-red-600 stroke-fill-red-600" />
+                </div>
+                <div
+                    key="green"
+                    className="flex items-center color-green space-x-0"
+                >
+                    <p className="text-green-600">0.00</p>
+                    <Cross1Icon color="green-600" className="p-0 m-0 fill-green-600 stroke-fill-green-600 h-3 w-3" />
+                    <ShadowIcon  color="green-600" className="h-3 w-3 p-0 m-0 fill-green-600 stroke-fill-green-600" />
+                </div>
+
         </div>
     );
 }
@@ -285,7 +310,7 @@ export const BarSide = () => {
     return (
         <Drawer.Root direction="right">
       <Drawer.Trigger asChild>
-        <Button className="fixed right-0 top-10" size="icon" color="white" >
+        <Button className="fixed right-0 top-10" size="icon" color="white" variant="outline" >
             <ChevronLeftIcon />
         </Button>
       </Drawer.Trigger>
