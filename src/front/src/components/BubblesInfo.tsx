@@ -6,6 +6,7 @@ import { CustomText } from "./CustomText";
 import { ResourceType } from "../../../core/types/resource";
 import { useDispatch, useSelector } from "react-redux";
 import { setLock } from "../store/interpolation";
+import { useDisplayName } from "./GetDisplayName";
 
 export const BubblesInfo = ({
     bubbleId,
@@ -19,10 +20,13 @@ export const BubblesInfo = ({
     const bubble = currentState.bubbles.find(
         (bubble) => bubble.id === bubbleId,
     );
+    const displayName = useDisplayName(bubble.owner);
+
     if (!bubble) return null;
     if (!position) return null;
     const radius = massToRadius(bubble.mass);
     const textPosition = position;
+
     const zeroPosition = new THREE.Vector3(0, 0, 0);
     const lineHeightVector = new THREE.Vector3(0, -radius / 3, 0);
     const pos2 = textPosition
@@ -37,11 +41,12 @@ export const BubblesInfo = ({
         (resource) => resource.resource == ResourceType.Energy,
     );
     const energyAmount = energy ? energy.mass : 0;
+
     //console.log("resources main", bubble.resources)
     return (
         <>
             <CustomText size={radius / 3} position={textPosition}>
-                {truncateAddress(bubble.owner)}
+                {displayName}
             </CustomText>
             <group position={pos2}>
                 <CustomText

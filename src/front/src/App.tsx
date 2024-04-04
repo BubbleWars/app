@@ -20,10 +20,13 @@ import { ScreenTitle } from "./components/screens/ScreenTitle";
 import { ScreenSpawnPortal } from "./components/screens/ScreenSpawnPortal";
 import { useState } from "react";
 import { useOnClick } from "./hooks/inputs";
+import { usePrivy } from "@privy-io/react-auth";
 
 function App() {
     //const { snapshot } = useInspect({ type: InspectType.State, value: 0 });
-    //const { inputs } = useInputs();    
+    //const { inputs } = useInputs();
+
+    const { logout } = usePrivy();
 
     return (
         <>
@@ -49,6 +52,7 @@ function App() {
             </Canvas>
             <ScreenTitle />
             <ScreenSpawnPortal />
+            <button onClick={logout}>Log out</button>
         </>
     );
 }
