@@ -1,6 +1,6 @@
 import { Circle, Vec2, World } from "planck-js";
 import { Resource, ResourceNode, ResourceType } from "../types/resource";
-import { massToRadius } from "./utils";
+import { calculateEmissionVelocity, massToRadius } from "./utils";
 import { ZeroAddress } from "ethers";
 import {
     DAMPENING,
@@ -230,8 +230,7 @@ export const nodeEmitResource = (
 
     //Apply momentum
     const emittedResourceVelocityDirection = direction.clone();
-    const emittedResourceVelocityMagnitude =
-        (1 / emittedResource.body.getMass()) * EMISSION_SPEED * 0.1;
+    const emittedResourceVelocityMagnitude = calculateEmissionVelocity();
     const emittedResourceRelativeVelocity =
         emittedResourceVelocityDirection.mul(emittedResourceVelocityMagnitude);
     const emittedResourceVelocity = node.body
@@ -278,8 +277,7 @@ export const nodeEmitBubble = (
 
     //Apply momentum
     const emittedBubbleVelocityDirection = direction.clone();
-    const emittedBubbleVelocityMagnitude =
-        (1 / emittedBubble.body.getMass()) * EMISSION_SPEED * 0.1;
+    const emittedBubbleVelocityMagnitude = calculateEmissionVelocity()
     const emittedBubbleRelativeVelocity = emittedBubbleVelocityDirection.mul(
         emittedBubbleVelocityMagnitude,
     );

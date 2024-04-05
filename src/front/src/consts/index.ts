@@ -5,3 +5,5 @@ export const URL_QUERY_GRAPHQL = `${BASE_URL}:8080/graphql`;
 export const RPC_URL = `${BASE_URL}:8545`;
 export const FAUCET_URL = `${BASE_URL}:2001/trpc`;
 export const INDEXER_URL = `${BASE_URL}:2567`;
+
+export const LERP_SPEED = 0.05;

@@ -20,6 +20,9 @@ import { ScreenTitle } from "./components/screens/ScreenTitle";
 import { ScreenSpawnPortal } from "./components/screens/ScreenSpawnPortal";
 import { useState } from "react";
 import { useOnClick } from "./hooks/inputs";
+import { BarSide } from "./components/ui/BarSide";
+import "../global.css";
+import { BarBottom } from "./components/ui/BarBottom";
 import { usePrivy } from "@privy-io/react-auth";
 
 function App() {
@@ -34,22 +37,24 @@ function App() {
                 orthographic={true}
                 camera={{
                     position: [0, 0, 100],
-                    zoom: 10,
+                    zoom: 100,
                     near: 0.01,
                     far: 1000,
                 }}
-                style={{ height: "100vh", width: "100vw" }}
+                style={{ height: "90vh", width: "100vw" }}
             >
-                <color attach="background" args={["#fdfaf1"]} />
+                <color attach="background" args={["#FFFFF7"]} />
                 <Game />
                 <CustomCameraControls />
 
                 <gridHelper
                     position={[0, 0, -10]}
                     rotation={[Math.PI / 2, 0, 0]}
-                    args={[10000, 10000, 0xeee8d5, 0xeee8d5]}
+                    args={[10000, 10000, 0xf9f9f5, 0xf9f9f5]}
                 />
             </Canvas>
+            <BarSide />
+            <BarBottom />
             <ScreenTitle />
             <ScreenSpawnPortal />
             <button onClick={logout}>Log out</button>

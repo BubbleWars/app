@@ -6,6 +6,7 @@ import { InputType } from "../../../../core/types/inputs";
 import { burnerAddress } from "../../config";
 import { useDispatch } from "react-redux";
 import { setPan } from "../../store/interpolation";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 
 export const ScreenSpawnPortal = () => {
     const address = burnerAddress;
@@ -57,12 +58,13 @@ export const ScreenSpawnPortal = () => {
 
     return (
         <div className="screen-title">
-            <h2>Spawn your portal.</h2>
-            <p>
-                This is where all of your bubbles will be emitted from. You will
-                spawn in a random place
-            </p>
-            <div className="button-group">
+            <Card className="w-[550px] h-[550px] flex flex-col justify-center">
+      <CardHeader>
+        <CardTitle className="w-full text-center font-bold">Spawn your portal</CardTitle>
+        <CardDescription className="w-full text-center">This is where all of your bubbles will be emitted from. You will spawn in a random place</CardDescription>
+        </CardHeader>
+        <CardContent>
+        <div className="button-group">
                 <div className="input-bg">
                     <input
                         type="number"
@@ -95,6 +97,9 @@ export const ScreenSpawnPortal = () => {
             <p>{dripText}</p>
         </button> */}
             </div>
+        </CardContent>
+        </Card>
+            
         </div>
     );
 };

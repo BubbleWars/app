@@ -19,7 +19,8 @@ export const Node = ({ nodeId }: { nodeId: string }) => {
         const node = currentState.nodes.find((node) => node.id === nodeId);
         if (!node) return;
         const radius = massToRadius(Math.max(node.mass, 1));
-        meshRef.current.scale.set(radius, radius, radius);
+        const newRadius = THREE.MathUtils.lerp(meshRef.current.scale.x, radius, 0.1);
+        meshRef.current.scale.set(newRadius, newRadius, newRadius);
         //console.log("node position:", node.position)
         meshRef.current.position.set(node.position.x, node.position.y, 0);
         meshRef.current.updateMatrix();

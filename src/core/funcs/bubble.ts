@@ -1,6 +1,6 @@
 import { Circle, Vec2, World } from "planck-js";
 import { Bubble, PuncturePoint } from "../types/bubble";
-import { massToRadius } from "./utils";
+import { calculateEmissionVelocity, massToRadius } from "./utils";
 import { Address } from "../types/address";
 import { DAMPENING, EMISSION_SPEED, MASS_PER_SECOND } from "../consts";
 import { Resource, ResourceType } from "../types/resource";
@@ -213,8 +213,7 @@ export const emitBubble = (
     //Apply momentum conservation
     const originalBubbleMomentum = totalMomentum.clone();
     const emittedBubbleVelocityDirection = emissionDirection ? emissionDirection.clone() : direction.clone();
-    const emittedBubbleVelocityMagnitude =
-        (bubble.body.getMass() / emittedBubble.body.getMass()) * EMISSION_SPEED;
+    const emittedBubbleVelocityMagnitude = calculateEmissionVelocity();
     const emittedBubbleRelativeVelocity = emittedBubbleVelocityDirection.mul(
         emittedBubbleVelocityMagnitude,
     );
@@ -283,9 +282,7 @@ export const emitResource = (
     //Apply momentum conservation
     const originalBubbleMomentum = totalMomentum.clone();
     const emittedResourceVelocityDirection = direction.clone()
-    const emittedResourceVelocityMagnitude =
-        (bubble.body.getMass() / emittedResource.body.getMass()) *
-        EMISSION_SPEED;
+    const emittedResourceVelocityMagnitude = calculateEmissionVelocity()
     const emittedResourceRelativeVelocity =
         emittedResourceVelocityDirection.mul(emittedResourceVelocityMagnitude);
     const emittedResourceVelocity = bubble.body

@@ -10,6 +10,7 @@ import { URL_QUERY_GRAPHQL } from "./consts/index.ts";
 import { currentChain } from "./contracts.ts";
 import { Provider } from "react-redux";
 import store from "./store/index.ts";
+import { cEvent } from "./types/events.ts";
 import { PrivyProvider } from "@privy-io/react-auth";
 
 //Configure Apollo
@@ -28,6 +29,9 @@ const config = createConfig({
     publicClient,
     webSocketPublicClient,
 });
+
+//Configure Event System Class
+export const Event = new cEvent();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <Provider store={store}>
