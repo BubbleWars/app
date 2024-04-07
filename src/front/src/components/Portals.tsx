@@ -24,7 +24,7 @@ import vertexShader from "../shaders/portalVertexShader.glsl?raw";
 import fragmentShader from "../shaders/portalFragmentShader.glsl?raw";
 import Outline from "./Outline";
 
-const CustomGeometryParticles = (props: { count: number, radius: number, position: THREE.Vector3, color: THREE.Color | string }) => {
+export const CustomGeometryParticles = (props: { count: number, radius: number, position: THREE.Vector3, color: THREE.Color | string }) => {
   const { count, radius, position, color } = props;
   const { camera } = useThree()
   const zoom = camera.zoom
@@ -141,7 +141,7 @@ export const Portal = ({ portalId }: { portalId: string }) => {
     return (
         <>
           <CustomGeometryParticles 
-            count={200} 
+            count={20} 
             radius={radius*2.2}
             position={new THREE.Vector3(portal.position.x, portal.position.y, 0)} 
             color={baseColor}

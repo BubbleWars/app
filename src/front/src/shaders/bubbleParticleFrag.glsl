@@ -6,7 +6,8 @@ varying float vDistance;
 
 void main() {
   vec3 color = uColor; // Use the uniform color
-    float alpha = 0.5; // Use the distance to the center to calculate the alpha value
+  //the lower vDistance is, the more transparent the pixel will be
+    float alpha  = 1.0 - vDistance;
     gl_FragColor = vec4(color, alpha);
   
 }

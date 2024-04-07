@@ -453,7 +453,7 @@ export const absorbResource = (
                 absorbedResource,
                 newAbsorbedResourceMass,
             );
-            //if bubble energy negative add a puncture
+            //Getting the sheild
             const bubbleResourceMass = getBubbleResourceMass(
                 bubble,
                 ResourceType.Energy,

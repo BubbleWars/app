@@ -1,6 +1,7 @@
 uniform float uTime;
 uniform float uRadius;
 uniform float uZoom; // Uniform for camera zoom level
+uniform vec2 uDirection; // Uniform for direction of rotation on the Z axis
 
 varying float vDistance;
 
@@ -27,13 +28,20 @@ mat3 rotation3dZ(float angle) {
   );
 }
 
-
 void main() {
-  float distanceFactor = pow(uRadius - distance(position, vec3(0.0)), 1.5);
-  float size = distanceFactor * 60.0 + 150.0;
-  vec3 particlePosition = position * rotation3dZ(uTime * 0.03 * distanceFactor);
+  // Calculate the angle from the uDirection vector
+  float angle = atan(uDirection.y, -uDirection.x);
+  
+  // Apply rotation around the Y-axis
+  vec3 particlePosition = position * rotation3dY(uTime * 0.3);
+  
+  // Now, apply the rotation based on uDirection around the Z-axis
+  particlePosition = particlePosition * rotation3dZ(angle);
 
-  vDistance = distanceFactor;
+  // Now translate by uRadius along uDirection
+  particlePosition -= vec3(uRadius * uDirection.x * 4.0, uRadius * uDirection.y * 4.0, 0.0);
+
+  vDistance = particlePosition.z + 0.1;
 
   vec4 modelPosition = modelMatrix * vec4(particlePosition, 1.0);
   vec4 viewPosition = viewMatrix * modelPosition;
@@ -41,8 +49,8 @@ void main() {
 
   gl_Position = projectedPosition;
 
- // Adjust point size based on the zoom level
-  gl_PointSize = 1.0 * uZoom; // Divide size by zoom to counteract the scaling effect of zooming
+  // Adjust point size based on the zoom level
+  gl_PointSize = 0.5 * uZoom; // Use a base size and adjust based on zoom level
 
   // Optionally, apply a further size attenuation factor here if necessary
   // gl_PointSize *= attenuationFactor;

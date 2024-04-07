@@ -2,14 +2,14 @@ import {
     ethereumAddressToColor,
     massToRadius,
 } from "../../../core/funcs/utils";
-import { useEffect, useRef, useState } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
 import { currentState } from "../../../core/world";
 import { BubblesInfo } from "./BubblesInfo";
 import { BubblesControlsEmit } from "./BubblesControlsEmit";
 import { Outlines } from "@react-three/drei";
 import { darkenColor } from "../utils";
-import { MathUtils } from "three";
+import * as THREE from "three";
 import { bubbleStartPositions } from "./Game";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -18,6 +18,84 @@ import {
 } from "../store/interpolation";
 import { burnerAddress } from "../config";
 import { LERP_SPEED } from "../consts";
+import { MathUtils } from "three";
+
+
+import vertexShader from "../shaders/bubbleParticleVert.glsl?raw";
+import fragmentShader from "../shaders/bubbleParticleFrag.glsl?raw";
+import { CustomGeometryParticles } from "./Portals";
+
+
+const BubbleMovementParticles =(props: { count: number, radius: number, position: THREE.Vector3, color: THREE.Color | string, direction: { x: number, y: number}, height: number }) => {
+    const { count, radius, color, height, direction } = props;
+  const { camera } = useThree()
+  const zoom = camera.zoom
+  console.log("zoom:", zoom)
+
+  // This reference gives us direct access to our points
+  const points = useRef();
+
+  // Generate our positions attributes array
+  const particlesPosition = useMemo(() => {
+    const positions = new Float32Array(count * 3);
+    
+    for (let i = 0; i < count; i++) {
+      const distance = radius
+      const theta = THREE.MathUtils.randFloatSpread(360);
+  
+      let x = distance * Math.cos(theta);
+      let y = i * (height / count) - height / 2;
+      // Since we're working in a 2D plane, z will always be 0
+      let z = distance * Math.sin(theta);
+  
+      positions.set([x, y, z], i * 3);
+    }
+    
+    return positions;
+  }, [count, radius]);
+
+  const uniforms = useRef({
+    uTime: { value: 0.0 },
+    uRadius: { value: radius },
+    uColor: { value: (new THREE.Color(color)).convertLinearToSRGB() },
+    uZoom: { value: zoom },
+    uDirection: { value: new THREE.Vector2(0, 1) },
+  }).current;
+
+  useEffect(() => {
+    uniforms.uRadius.value = radius;
+    uniforms.uColor.value = new THREE.Color(color).convertLinearToSRGB();
+    uniforms.uZoom.value = zoom;
+    uniforms.uDirection.value = new THREE.Vector2(direction.x, direction.y);
+  }, [radius, color, zoom, direction]);
+  
+
+  useFrame(() => {
+    uniforms.uTime.value += 0.1;
+    points.current.material.uniforms = uniforms; // Ensure uniforms are correctly referenced
+  
+    // Other updates...
+  });
+
+  return (
+    <points ref={points} position={props.position}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          count={particlesPosition.length / 3}
+          array={particlesPosition}
+          itemSize={3}
+        />
+      </bufferGeometry>
+      <shaderMaterial
+        depthWrite={false}
+        fragmentShader={fragmentShader}
+        vertexShader={vertexShader}
+        uniforms={uniforms}
+      />
+    </points>
+  );
+  };
 
 export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
     const meshRef = useRef<any>();
@@ -34,6 +112,14 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
         (state: any) => state.interpolation.isBubbleSelected,
     );
     const isSelected = isBubbleSelected && selectedBubbleId == bubbleId;
+
+    const bubble = currentState.bubbles.find(
+        (bubble) => bubble.id == bubbleId,
+    );
+
+    const velocity = bubble.velocity;
+    const inverseVelocity = { x: -velocity.x, y: -velocity.y };
+    const radius = massToRadius(bubble.mass);
 
     useFrame(() => {
         const bubble = currentState.bubbles.find(
@@ -125,6 +211,14 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
 
     return (
         <>
+            <BubbleMovementParticles
+                direction={velocity}
+                height={radius*2}
+                count={20}
+                radius={radius*2}
+                position={new THREE.Vector3(bubble.position.x, bubble.position.y, 0)}
+                color={baseColor}
+            />
             <mesh
                 ref={meshRef}
                 onPointerEnter={() => {
