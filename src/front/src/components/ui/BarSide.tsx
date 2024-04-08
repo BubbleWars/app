@@ -58,12 +58,12 @@ export const RESOURCE_TO_COLOR = {
 
 export const AddressView = ({ id }: { id: string }) => {
     return (
-        <p className="bold color-blue">{truncateAddress(id)}</p>
+        <p className="text-xs bold color-blue">{truncateAddress(id)}</p>
     )
 }
 
 export const MassView = ({ mass }: { mass: number }) => {
-    return <p className="bold blue">{mass.toFixed(2)} ETH</p>
+    return <p className="text-xs bold blue">{mass.toFixed(2)} ETH</p>
 }
 
 export const CameraLock = ({ id }: { id: string }) => {
@@ -92,25 +92,25 @@ export const ResourcesIcon = ({ resources } : { resources: { resource: ResourceT
                     key="blue" 
                     className="flex items-center color-blue space-x-0"
                 >
-                    <p className="text-blue-600">0.00</p>
-                    <Cross1Icon color="blue-600" className="p-0 m-0 fill-blue-600 stroke-fill-blue-600 h-3 w-3" />
-                    <ShadowIcon  color="blue-600" className="h-3 w-3 p-0 m-0 fill-blue-600 stroke-fill-blue-600" />
+                    <p className="text-xs text-blue-500">0.00</p>
+                    <Cross1Icon color="blue-500" className="item-center p-0 m-0 fill-blue-500 stroke-fill-blue-500 h-2 w-2" />
+                    <ShadowIcon  color="blue-500" className="item-center h-2 w-2 p-0 m-0 fill-blue-500 stroke-fill-blue-500" />
                 </div>
                 <div
                     key="red"
                     className="flex items-center color-red space-x-0"
                 >
-                    <p className="text-red-600">0.00</p>
-                    <Cross1Icon color="red-600" className="p-0 m-0 fill-red-600 stroke-fill-red-600 h-3 w-3" />
-                    <ShadowIcon  color="red-600" className="h-3 w-3 p-0 m-0 fill-red-600 stroke-fill-red-600" />
+                    <p className="text-xs text-red-500">0.00</p>
+                    <Cross1Icon color="red-500" className="item-center p-0 m-0 fill-red-500 stroke-fill-red-500 h-2 w-2" />
+                    <ShadowIcon  color="red-500" className="item-center h-2 w-2 p-0 m-0 fill-red-500 stroke-fill-red-500" />
                 </div>
                 <div
                     key="green"
                     className="flex items-center color-green space-x-0"
                 >
-                    <p className="text-green-600">0.00</p>
-                    <Cross1Icon color="green-600" className="p-0 m-0 fill-green-600 stroke-fill-green-600 h-3 w-3" />
-                    <ShadowIcon  color="green-600" className="h-3 w-3 p-0 m-0 fill-green-600 stroke-fill-green-600" />
+                    <p className="text-xs text-green-500">0.00</p>
+                    <Cross1Icon color="green-500" className="item-center p-0 m-0 fill-green-500 stroke-fill-green-500 h-2 w-2" />
+                    <ShadowIcon  color="green-500" className="itemr-center h-2 w-2 p-0 m-0 fill-green-500 stroke-fill-green-500" />
                 </div>
 
         </div>
@@ -122,8 +122,8 @@ export const PositionIcon = ({ position }: { position: { x: number, y: number } 
         <div className="flex items-center space-x-1">
             <Crosshair1Icon className="h-4 w-4" />
             <div className="flex flex-row items-center">
-                <p>{position.x.toFixed(2)},</p>
-                <p>{position.y.toFixed(2)}</p>
+                <p className="text-xs text-gray-500">{position.x.toFixed(2)},</p>
+                <p className="text-xs text-gray-500">{position.y.toFixed(2)}</p>
             </div>
         </div>
     );
@@ -190,7 +190,7 @@ export const ListPlayers = ({ players }: { players: User[] }) => {
                                 <TableRow>
                                     <TableCell>{truncateAddress(player.address)}</TableCell>
                                     <TableCell><PositionIcon position={player.position} /></TableCell>
-                                    <TableCell>{player.mass} ETH</TableCell>
+                                    <TableCell><MassView mass={player.mass} /></TableCell>
                                     <TableCell><ResourcesIcon resources={player.resources} /></TableCell>
                                     <TableCell>
                                         <CollapsibleTrigger asChild>

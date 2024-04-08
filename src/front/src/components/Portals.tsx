@@ -142,7 +142,7 @@ export const Portal = ({ portalId }: { portalId: string }) => {
     return (
         <>
           <CustomGeometryParticles 
-            count={30} 
+            count={60} 
             radius={radius*4.2}
             position={new THREE.Vector3(portal.position.x, portal.position.y, 0)} 
             color={baseColor}

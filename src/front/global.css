@@ -92,3 +92,18 @@
   z-index: 1000;
 }
 
+@font-face {
+  font-family: 'Aux Mono';
+  src: local('Aux Mono Regular'), local('Aux-Mono-Regular'),
+      url('fonts/AuxMono-Regular.woff2') format('woff2'),
+      url('fonts/AuxMono-Regular.woff') format('woff'),
+      url('fonts/AuxMono-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+body {
+  font-family: 'Aux Mono';
+  letter-spacing: 0px;
+}
+

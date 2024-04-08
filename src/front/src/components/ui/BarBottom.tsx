@@ -1,13 +1,33 @@
 import { burnerAddress } from "@/config"
 import { UserView } from "./UserView"
 import { currentState } from "../../../../core/world";
-import { PositionIcon, ResourcesIcon } from "./BarSide";
+import { MassView, PositionIcon, ResourcesIcon } from "./BarSide";
+import { useEffect, useMemo, useState } from "react";
+import { Resource, ResourceType } from "../../../../core/types/resource";
+import { ResourceState } from "../../../../core/types/state";
+import { useFrame } from "@react-three/fiber";
 
 export const BarBottom = () => {
     const address = burnerAddress;
     const portal = currentState.portals.find(portal => portal.id.toLowerCase() == address.toLowerCase());
-    const balance = portal?.mass ?? 0;
-    const position = portal?.position ?? { x: 0, y: 0 }
+    const [ balance, setBalance ] = useState<number>(0);
+    const [ position, setPosition ] = useState<{x: number, y: number}>({x: 0, y: 0});
+    const [ resources, setResources ] = useState<{resource: ResourceType, mass: number}[]>([]);
+
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            const portal = currentState.portals.find(portal => portal.id.toLowerCase() == address.toLowerCase());
+            if(portal) {
+                setBalance(portal.mass);
+                setPosition(portal.position);
+                setResources(portal.resources);
+            }
+        }, 1000)
+        return () => clearInterval(intervalId);
+    }, [])
+
+
+
     return (
         <div className="bg-white flex flex-row h-[10vh] w-full fixed bottom-0 right-0 space-x-6 p-4 items-center">
             <UserView address={address} />
@@ -17,11 +37,11 @@ export const BarBottom = () => {
             </div>
             <div className="flex flex-col items-left">
                 <p className="text-sm font-semibold">Mass</p>
-                <p className="">{balance.toFixed(2)} ETH</p>
+                <p className=""><MassView mass={balance} /></p>
             </div>
             <div className="flex flex-col items-left">
                 <p className="text-sm font-semibold">Resources</p>
-                <ResourcesIcon resources={portal?.resources ?? []} />
+                <ResourcesIcon resources={resources} />
             </div>
         </div>
     )

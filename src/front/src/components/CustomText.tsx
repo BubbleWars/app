@@ -22,7 +22,7 @@ export const CustomText = ({
     | any) => {
     return (
         <Text
-            font="fonts/whitrabt.ttf"
+            font="fonts/AuxMono-Regular.ttf"
             color={color}
             fontSize={size}
             outlineColor={"black"}
