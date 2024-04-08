@@ -208,7 +208,10 @@ export class Event<Events, EventsTypes> {
      * both the callback and the length as null
      */
     public unsubscribeIndex(event: Events, index: number) {
-        if (!this.hasCallback(event)) {
+        if (
+            !this.hasCallback(event) ||
+            index >= this.getNumberOfCallbacks(event)
+        ) {
             return { callback: null as null, newLength: null as null };
         }
 
@@ -221,20 +224,15 @@ export class Event<Events, EventsTypes> {
             },
         ];
         let newLength: number | null = null;
+        let unsubscribedCallback = callbacks[index];
 
-        let unsubscribedCallback:
-            | { func: (data: EventsTypes) => void; await: Boolean }
-            | { func: (data: EventsTypes) => Promise<void>; await: Boolean }
-            | null = index >= callbacks.length ? null : callbacks[index];
-        if (unsubscribedCallback != null) {
-            for (let i = index; i < callbacks.length - 1; ++i) {
-                callbacks[i] = callbacks[i + 1];
-            }
-
-            callbacks.pop();
-            newLength = callbacks.length;
-            this.eventsMap.set(event, callbacks);
+        for (let i = index; i < callbacks.length - 1; ++i) {
+            callbacks[i] = callbacks[i + 1];
         }
+
+        callbacks.pop();
+        newLength = callbacks.length;
+        this.eventsMap.set(event, callbacks);
 
         return { callback: unsubscribedCallback, newLength: newLength };
     }
@@ -254,6 +252,8 @@ export class Event<Events, EventsTypes> {
         if (!this.hasCallback(event)) {
             return { callback: null as null, newLength: null as null };
         }
+
+        // implement
 
         return { callback: null, newLength: null };
     }
