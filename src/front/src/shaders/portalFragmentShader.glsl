@@ -6,7 +6,7 @@ varying float vDistance;
 
 void main() {
   vec3 color = uColor; // Use the uniform color
-    float alpha = 0.5; // Use the distance to the center to calculate the alpha value
+    float alpha = 0.6; // Use the distance to the center to calculate the alpha value
     gl_FragColor = vec4(color, alpha);
   
 }

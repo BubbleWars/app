@@ -39,7 +39,8 @@ void main() {
   particlePosition = particlePosition * rotation3dZ(angle);
 
   // Now translate by uRadius along uDirection
-  particlePosition -= vec3(uRadius * uDirection.x * 4.0, uRadius * uDirection.y * 4.0, 0.0);
+  //vec3 normalizedUDirection = normalize(uDirection);
+  particlePosition -= vec3(uRadius * uDirection.x*2.0, uRadius * uDirection.y*2.0, 0.0);
 
   vDistance = particlePosition.z + 0.1;
 

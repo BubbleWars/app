@@ -38,7 +38,8 @@ export const CustomGeometryParticles = (props: { count: number, radius: number, 
     const positions = new Float32Array(count * 3);
     
     for (let i = 0; i < count; i++) {
-      const distance = Math.sqrt(Math.random()) * radius
+        //distance is between radius and 2*radius
+      const distance = (Math.random() * radius * 2) - radius;
       const theta = THREE.MathUtils.randFloatSpread(360); 
   
       let x = distance * Math.cos(theta);
@@ -141,8 +142,8 @@ export const Portal = ({ portalId }: { portalId: string }) => {
     return (
         <>
           <CustomGeometryParticles 
-            count={20} 
-            radius={radius*2.2}
+            count={30} 
+            radius={radius*4.2}
             position={new THREE.Vector3(portal.position.x, portal.position.y, 0)} 
             color={baseColor}
           />

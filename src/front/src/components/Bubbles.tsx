@@ -118,6 +118,10 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
     );
 
     const velocity = bubble.velocity;
+    const normalizedVelocity = {
+        x: velocity.x / Math.sqrt(velocity.x ** 2 + velocity.y ** 2),
+        y: velocity.y / Math.sqrt(velocity.x ** 2 + velocity.y ** 2),
+    }
     const inverseVelocity = { x: -velocity.x, y: -velocity.y };
     const radius = massToRadius(bubble.mass);
 
@@ -212,10 +216,10 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
     return (
         <>
             <BubbleMovementParticles
-                direction={velocity}
+                direction={normalizedVelocity}
                 height={radius*2}
                 count={20}
-                radius={radius*2}
+                radius={radius}
                 position={new THREE.Vector3(bubble.position.x, bubble.position.y, 0)}
                 color={baseColor}
             />
