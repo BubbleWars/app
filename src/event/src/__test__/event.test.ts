@@ -8,6 +8,7 @@ import {
 } from "../types/events.example";
 
 const CALLBACK_NEWLENGTH_NULL = { callback: null, newLength: null };
+const DEF_DELAY = 1000;
 
 describe("Event System Unit Tests", () => {
     // Console spy
@@ -17,7 +18,7 @@ describe("Event System Unit Tests", () => {
     var e = new Event<Events, EventsTypes>();
 
     afterEach(() => {
-        //consoleSpy.mockReset();
+        consoleSpy.mockReset();
         // NOTE: Has to be caster for each component with their Events and EventsTypes
         e = new Event<Events, EventsTypes>();
     });
@@ -54,16 +55,24 @@ describe("Event System Unit Tests", () => {
         var totalEtherLobby = 0;
 
         expect(
-            e.subscribe(Events.PlayerConnection, (data: PlayerConnection) => {
-                playersCounter += 1;
-                totalEtherLobby += data.ether;
+            e.subscribe(Events.PlayerConnection, {
+                func: async (data: PlayerConnection) => {
+                    playersCounter += 1;
+                    totalEtherLobby += data.ether;
+
+                    return Promise.resolve();
+                },
+                await: true,
             }),
         ).toBe(0);
 
         expect(
-            e.subscribe(Events.PlayerConnection, (data: PlayerConnection) => {
-                console.log(`Player just joined, id: ${data.playerId}`);
-                console.log(`At timestamp: ${data.timestamp.toString()}`);
+            e.subscribe(Events.PlayerConnection, {
+                func: (data: PlayerConnection) => {
+                    console.log(`Player just joined, id: ${data.playerId}`);
+                    console.log(`At timestamp: ${data.timestamp.toString()}`);
+                },
+                await: true,
             }),
         ).toBe(1);
 
@@ -83,22 +92,34 @@ describe("Event System Unit Tests", () => {
         expect(totalEtherLobby).toBe(1234);
     });
 
-    it("Unsubscribe", () => {
+    it("Throw, Unsubscribe", () => {
         const l1 = "First checkss...";
         const l2 = "Game Started yayy";
         const l3 = "This is the final loading";
 
-        const c1 = (data: GameStart) => {
-            console.log(l1);
+        const c1 = {
+            func: async (data: GameStart) => {
+                console.log(l1);
+            },
+            await: true,
         };
-        const c2 = (data: GameStart) => {
-            console.log(l2);
+        const c2 = {
+            func: (data: GameStart) => {
+                console.log(l2);
+            },
+            await: true,
         };
-        const c3 = (data: GameStart) => {
-            console.log(l3);
+        const c3 = {
+            func: (data: GameStart) => {
+                console.log(l3);
+            },
+            await: true,
         };
 
-        e.subscribe(Events.GameEnd, (data: GameEnd) => {});
+        e.subscribe(Events.GameEnd, {
+            func: (data: GameEnd) => {},
+            await: true,
+        });
         e.subscribe(Events.GameStart, c1);
         e.subscribe(Events.GameStart, c2);
         e.subscribe(Events.GameStart, c3);
@@ -130,7 +151,7 @@ describe("Event System Unit Tests", () => {
             }),
         ).toBe(undefined);
 
-        expect(consoleSpy).toHaveBeenCalled();
+        expect(consoleSpy).toHaveBeenCalledTimes(1);
         expect(consoleSpy).toHaveBeenCalledWith(l2);
 
         expect(
@@ -148,4 +169,79 @@ describe("Event System Unit Tests", () => {
         expect(e.hasCallback(Events.GameStart)).toBe(false);
         expect(e.getNumberOfCallbacks(Events.GameStart)).toBe(0);
     });
+
+    it("Async", async () => {
+        var counter = 0;
+
+        const l1 = "First checkss...";
+        const l2 = "Game Started yayy";
+        const l3 = "This is the final loading";
+
+        const c0 = {
+            func: (data: GameEnd) => {},
+            await: true,
+        };
+        const c1 = {
+            func: async (data: GameStart) => {
+                console.log(l1);
+                counter += 1;
+            },
+            await: true,
+        };
+        const c2 = {
+            func: async (data: GameStart) => {
+                await sleep(100); // 0.1s
+                console.log(l2);
+                counter += 1;
+            },
+            await: undefined,
+        };
+        const c3 = {
+            func: (data: GameStart) => {
+                console.log(l3);
+                counter += 1;
+            },
+            await: true,
+        };
+
+        e.subscribe(Events.GameEnd, c0);
+        e.subscribe(Events.GameStart, c1);
+        e.subscribe(Events.GameStart, c2);
+        e.subscribe(Events.GameStart, c3);
+
+        expect(e.hasCallback(Events.GameEnd)).toBe(true);
+        expect(e.hasCallback(Events.GameStart)).toBe(true);
+        expect(e.getNumberOfCallbacks(Events.GameStart)).toBe(3);
+
+        expect(e.getCallback(Events.GameStart, 2)).toEqual(c3);
+
+        expect(e.unsubscribe(Events.GameStart, 4)).toStrictEqual(
+            CALLBACK_NEWLENGTH_NULL,
+        );
+        expect(e.unsubscribe(Events.GameEnd, 0)).toStrictEqual({
+            callback: c0,
+            newLength: 0,
+        });
+
+        expect(consoleSpy).toHaveBeenCalledTimes(0);
+
+        e.throw(Events.GameStart, {
+            ether: 1234,
+            timestamp: 156790,
+            playerId: "sjdDRRRR",
+        });
+
+        expect(consoleSpy).toHaveBeenCalledTimes(2);
+        expect(consoleSpy).toHaveBeenNthCalledWith(1, l1);
+        expect(consoleSpy).toHaveBeenNthCalledWith(2, l3);
+        await sleep(200);
+        expect(consoleSpy).toHaveBeenCalledTimes(3);
+        expect(consoleSpy).toHaveBeenNthCalledWith(3, l2);
+    });
+
+    it("insertSubscribe", async () => {});
 });
+
+function sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms || DEF_DELAY));
+}
