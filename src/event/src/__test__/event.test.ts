@@ -37,10 +37,10 @@ describe("Event System Unit Tests", () => {
                 byPlayerId: "",
             }),
         ).toBe(null);
-        expect(e.unsubscribe(Events.PlayerConnection, 0)).toStrictEqual(
+        expect(e.unsubscribeIndex(Events.PlayerConnection, 0)).toStrictEqual(
             CALLBACK_NEWLENGTH_NULL,
         );
-        expect(e.popUnsubscribe(Events.PlayerConnection)).toStrictEqual(
+        expect(e.unsubscribe(Events.PlayerConnection)).toStrictEqual(
             CALLBACK_NEWLENGTH_NULL,
         );
     });
@@ -130,7 +130,7 @@ describe("Event System Unit Tests", () => {
 
         expect(e.getCallback(Events.GameStart, 2)).toEqual(c3);
 
-        expect(e.popUnsubscribe(Events.GameStart)).toEqual({
+        expect(e.unsubscribe(Events.GameStart)).toEqual({
             callback: c3,
             newLength: 2,
         });
@@ -215,10 +215,10 @@ describe("Event System Unit Tests", () => {
 
         expect(e.getCallback(Events.GameStart, 2)).toEqual(c3);
 
-        expect(e.unsubscribe(Events.GameStart, 4)).toStrictEqual(
+        expect(e.unsubscribeIndex(Events.GameStart, 4)).toStrictEqual(
             CALLBACK_NEWLENGTH_NULL,
         );
-        expect(e.unsubscribe(Events.GameEnd, 0)).toStrictEqual({
+        expect(e.unsubscribeIndex(Events.GameEnd, 0)).toStrictEqual({
             callback: c0,
             newLength: 0,
         });
@@ -239,7 +239,8 @@ describe("Event System Unit Tests", () => {
         expect(consoleSpy).toHaveBeenNthCalledWith(3, l2);
     });
 
-    it("insertSubscribe", async () => {});
+    it("subscribeIndex", async () => {});
+    it("unsubscribeCallback", async () => {});
 });
 
 function sleep(ms: number) {

@@ -114,7 +114,7 @@ export class Event<Events, EventsTypes> {
      * @param event Event Type
      * @param index Index to insert at
      * @param callback Callback Function
-     * @param await If awaits for asynchrronous callback, defaults to false
+     * @param await If awaits for asynchrronous callback, defaults to true
      * @returns the index of the subscribed callback,
      */
     public subscribeIndex(
@@ -123,19 +123,19 @@ export class Event<Events, EventsTypes> {
         callback: (
             data: EventsTypes,
         ) => Promise<void> | ((data: EventsTypes) => void),
-        await: Boolean = false,
+        await: Boolean = true,
     ): number {
-        let clb = {
-            func: callback,
-            await: await,
-        };
-
         if (
             !this.hasCallback(event) ||
             this.getNumberOfCallbacks(event) <= index
         ) {
             return this.subscribe(event, callback, await);
         }
+
+        let clb = {
+            func: callback,
+            await: await,
+        };
 
         if (clb.await != true || clb.constructor.name !== "AsyncFunction") {
             clb.await = false;
@@ -169,7 +169,8 @@ export class Event<Events, EventsTypes> {
     }
 
     /**
-     * throw throws the event and executes all callbacks, it waits for asynchronous call that have been specified. From first to last
+     * throw throws the event and executes all callbacks, it waits for asynchronous call
+     * that have been specified. From first to last
      * @param event Even Type
      * @param data Event Data
      * @returns null if there ar no callbacks, void if there are
@@ -253,9 +254,35 @@ export class Event<Events, EventsTypes> {
             return { callback: null as null, newLength: null as null };
         }
 
-        // implement
+        let callbacks = this.eventsMap.get(event) as [
+            {
+                func: (
+                    data: EventsTypes,
+                ) => Promise<void> | ((data: EventsTypes) => void);
+                await: Boolean;
+            },
+        ];
 
-        return { callback: null, newLength: null };
+        if (callbacks[callbacks.length - 1].func == callback) {
+            callbacks.pop();
+            return { callback: callback, newLength: callbacks.length + 1 };
+        }
+
+        let newLength: number | null = null;
+
+        for (let i = 0; i < callbacks.length - 1; i++) {
+            if (callbacks[i].func == callback) {
+                newLength = i;
+            }
+
+            if (newLength != null) {
+                callbacks[i] = callbacks[i + 1];
+            }
+        }
+
+        return newLength == null
+            ? { callback: null, newLength: null }
+            : { callback: callback, newLength: newLength };
     }
 
     /**
