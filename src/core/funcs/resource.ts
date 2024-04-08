@@ -1,7 +1,7 @@
 import { Circle, Vec2, World } from "planck-js";
 import { Resource, ResourceNode, ResourceType } from "../types/resource";
 import { massToRadius } from "./utils";
-import { N, ZeroAddress } from "ethers";
+import { ZeroAddress } from "ethers";
 import {
     DAMPENING,
     EMISSION_SPEED,
@@ -32,7 +32,17 @@ export const generateNodes = (
             const value = noise(x / 100, y / 100);
             //console.log("noise value", value);
             if (value > 0.9) {
-                createNode(world, nodes, ResourceType.Energy, x, y, 0);
+                // Generate random resource type
+                createNode(
+                    world,
+                    nodes,
+                    Math.round(
+                        (Object.keys(ResourceType).length / 2) * Math.random(),
+                    ),
+                    x,
+                    y,
+                    0,
+                );
                 count++;
             }
             //if(count >= 50) return;
@@ -67,7 +77,7 @@ export const generateResourceId = (
 export const createNode = (
     world: World,
     nodes: Map<string, ResourceNode>,
-    type: ResourceType = ResourceType.Energy,
+    type: ResourceType,
     x: number,
     y: number,
     mass: number = 0,
@@ -108,7 +118,7 @@ export const createResource = (
     timestamp: number,
     world: World,
     resources: Map<string, Resource>,
-    type: ResourceType = ResourceType.Energy,
+    type: ResourceType,
     x: number,
     y: number,
     mass: number,
