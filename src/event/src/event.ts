@@ -6,7 +6,7 @@ export class Event<Events, EventsTypes> {
                 func: (
                     data: EventsTypes,
                 ) => Promise<void> | ((data: EventsTypes) => void);
-                await: Boolean;
+                wait: Boolean;
             },
         ]
     >();
@@ -35,7 +35,7 @@ export class Event<Events, EventsTypes> {
                 func: (
                     data: EventsTypes,
                 ) => Promise<void> | ((data: EventsTypes) => void);
-                await: Boolean;
+                wait: Boolean;
             },
         ];
         return eCallbacks.length;
@@ -61,17 +61,17 @@ export class Event<Events, EventsTypes> {
                 func: (
                     data: EventsTypes,
                 ) => Promise<void> | ((data: EventsTypes) => void);
-                await: Boolean;
+                wait: Boolean;
             },
         ];
-        return eCallbacks[index];
+        return eCallbacks[index].func;
     }
 
     /**
      * subscribe appends a callback to the given event type
      * @param event Event Type
      * @param callback Callback Function
-     * @param await If awaits for asynchrronous callback, defaults to false
+     * @param wait If awaits for asynchrronous callback, defaults to true
      * @returns the index of the subscribed callback
      */
     public subscribe(
@@ -79,15 +79,15 @@ export class Event<Events, EventsTypes> {
         callback: (
             data: EventsTypes,
         ) => Promise<void> | ((data: EventsTypes) => void),
-        await: Boolean = false,
+        wait: Boolean = false,
     ): number {
         let clb = {
             func: callback,
-            await: await,
+            wait: wait,
         };
 
-        if (clb.await != true || clb.constructor.name !== "AsyncFunction") {
-            clb.await = false;
+        if (clb.wait != true) {
+            clb.wait = false;
         }
 
         if (!this.hasCallback(event)) {
@@ -100,7 +100,7 @@ export class Event<Events, EventsTypes> {
                 func: (
                     data: EventsTypes,
                 ) => Promise<void> | ((data: EventsTypes) => void);
-                await: Boolean;
+                wait: Boolean;
             },
         ];
         let index = callbacks.push(clb) - 1;
@@ -114,7 +114,7 @@ export class Event<Events, EventsTypes> {
      * @param event Event Type
      * @param index Index to insert at
      * @param callback Callback Function
-     * @param await If awaits for asynchrronous callback, defaults to true
+     * @param wait If awaits for asynchronous callback, defaults to true
      * @returns the index of the subscribed callback,
      */
     public subscribeIndex(
@@ -123,22 +123,22 @@ export class Event<Events, EventsTypes> {
         callback: (
             data: EventsTypes,
         ) => Promise<void> | ((data: EventsTypes) => void),
-        await: Boolean = true,
+        wait: Boolean = false,
     ): number {
         if (
             !this.hasCallback(event) ||
             this.getNumberOfCallbacks(event) <= index
         ) {
-            return this.subscribe(event, callback, await);
+            return this.subscribe(event, callback, wait);
         }
 
         let clb = {
             func: callback,
-            await: await,
+            wait: wait,
         };
 
-        if (clb.await != true || clb.constructor.name !== "AsyncFunction") {
-            clb.await = false;
+        if (clb.wait != true) {
+            clb.wait = false;
         }
 
         let callbacks = this.eventsMap.get(event) as [
@@ -146,7 +146,7 @@ export class Event<Events, EventsTypes> {
                 func: (
                     data: EventsTypes,
                 ) => Promise<void> | ((data: EventsTypes) => void);
-                await: Boolean;
+                wait: Boolean;
             },
         ];
 
@@ -169,8 +169,8 @@ export class Event<Events, EventsTypes> {
     }
 
     /**
-     * throw throws the event and executes all callbacks, it waits for asynchronous call
-     * that have been specified. From first to last
+     * throwSync throws the event and executes all callbacks, it does not wait for asynchronous
+     * call that have been specified. From first to last. It cannot be waited
      * @param event Even Type
      * @param data Event Data
      * @returns null if there ar no callbacks, void if there are
@@ -185,26 +185,55 @@ export class Event<Events, EventsTypes> {
                 func: (
                     data: EventsTypes,
                 ) => Promise<void> | ((data: EventsTypes) => void);
-                await: Boolean;
+                wait: Boolean;
             },
         ];
 
-        callbacks.forEach(async (c) => {
-            if (c.await) {
-                await c.func(data);
-                return;
-            }
-
+        for (const c of callbacks) {
             c.func(data);
-        });
+        }
     }
 
     /**
-     * unsubscribeIndex unsubscribe a callback to the given event type at the given index
+     * throwAsync throws the event and executes all callbacks, it waits for asynchronous call
+     * that have been specified. From first to last. It can be waited
+     * @param event Even Type
+     * @param data Event Data
+     * @returns null if there ar no callbacks, void if there are
+     */
+    public async throwAsync(
+        event: Events,
+        data: EventsTypes,
+    ): Promise<void | null> {
+        if (!this.hasCallback(event)) {
+            return null;
+        }
+
+        let callbacks = this.eventsMap.get(event) as [
+            {
+                func: (
+                    data: EventsTypes,
+                ) => Promise<void> | ((data: EventsTypes) => void);
+                wait: Boolean;
+            },
+        ];
+
+        for (const c of callbacks) {
+            if (c.wait) {
+                await c.func(data);
+                continue;
+            }
+
+            c.func(data);
+        }
+    }
+
+    /**
+     * unsubscribeIndex unsubscribes a callback to the given event type at the given index
      * @param event Event Type
      * @param index Index to insert at
      * @param callback Callback Function
-     * @param await If awaits for asynchronous callback, defaults to false
+     * @param wait If awaits for asynchronous callback, defaults to false
      * @returns callback and the new callbacks length, if the index is out of bound returns
      * both the callback and the length as null
      */
@@ -221,7 +250,7 @@ export class Event<Events, EventsTypes> {
                 func: (
                     data: EventsTypes,
                 ) => Promise<void> | ((data: EventsTypes) => void);
-                await: Boolean;
+                wait: Boolean;
             },
         ];
         let newLength: number | null = null;
@@ -235,16 +264,67 @@ export class Event<Events, EventsTypes> {
         newLength = callbacks.length;
         this.eventsMap.set(event, callbacks);
 
-        return { callback: unsubscribedCallback, newLength: newLength };
+        return { callback: unsubscribedCallback.func, newLength: newLength };
     }
 
     /**
-     * unsubscribe pops the last callback of the Event
+     * unsubscribeFirstCallback eliminates the first callback that match the desired from
+     * the Event
      * @param event Event Type
+     * @param callback Callback Function to eliminate
      * @returns the callback and the new callbacks length, if there are none it returns
      * both as null
      */
-    public unsubscribeCallback(
+    public unsubscribeFirstCallback(
+        event: Events,
+        callback: (
+            data: EventsTypes,
+        ) => Promise<void> | ((data: EventsTypes) => void),
+    ) {
+        // Broken
+
+        if (!this.hasCallback(event)) {
+            return { callback: null as null, newLength: null as null };
+        }
+
+        let callbacks = this.eventsMap.get(event) as [
+            {
+                func: (
+                    data: EventsTypes,
+                ) => Promise<void> | ((data: EventsTypes) => void);
+                wait: Boolean;
+            },
+        ];
+
+        let index: number | null = null;
+
+        for (let i = 0; i < callbacks.length; i++) {
+            if (callbacks[i].func == callback) {
+                index = i;
+                break;
+            }
+        }
+
+        if (index == null) {
+            return { callback: null, newLength: null };
+        }
+
+        for (let i = 0; i < callbacks.length - 1; i++) {
+            callbacks[i] = callbacks[i + 1];
+        }
+
+        return { callback: callbacks.pop(), newLength: callbacks.length };
+    }
+
+    /**
+     * unsubscribeAllCallback eliminates all callbacks that match the desired from
+     * the Event
+     * @param event Event Type
+     * @param callback Callback Function to eliminate
+     * @returns the callback and the new callbacks length, if there are none it returns
+     * both as null
+     */
+    public unsubscribeAllCallback(
         event: Events,
         callback: (
             data: EventsTypes,
@@ -259,30 +339,15 @@ export class Event<Events, EventsTypes> {
                 func: (
                     data: EventsTypes,
                 ) => Promise<void> | ((data: EventsTypes) => void);
-                await: Boolean;
+                wait: Boolean;
             },
         ];
 
-        if (callbacks[callbacks.length - 1].func == callback) {
-            callbacks.pop();
-            return { callback: callback, newLength: callbacks.length + 1 };
-        }
+        let counter: number = 0;
+        let tail: number = 0;
+        let head: number = 0;
 
-        let newLength: number | null = null;
-
-        for (let i = 0; i < callbacks.length - 1; i++) {
-            if (callbacks[i].func == callback) {
-                newLength = i;
-            }
-
-            if (newLength != null) {
-                callbacks[i] = callbacks[i + 1];
-            }
-        }
-
-        return newLength == null
-            ? { callback: null, newLength: null }
-            : { callback: callback, newLength: newLength };
+        // implement
     }
 
     /**
@@ -301,14 +366,14 @@ export class Event<Events, EventsTypes> {
                 func: (
                     data: EventsTypes,
                 ) => Promise<void> | ((data: EventsTypes) => void);
-                await: Boolean;
+                wait: Boolean;
             },
         ];
         let newLength = callbacks.length - 1;
         let callback = callbacks.pop();
         this.eventsMap.set(event, callbacks);
 
-        return { callback: callback, newLength: newLength };
+        return { callback: callback?.func, newLength: newLength };
     }
 
     /**
