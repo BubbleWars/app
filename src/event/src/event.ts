@@ -281,8 +281,6 @@ export class Event<Events, EventsTypes> {
             data: EventsTypes,
         ) => Promise<void> | ((data: EventsTypes) => void),
     ) {
-        // Broken
-
         if (!this.hasCallback(event)) {
             return { callback: null as null, newLength: null as null };
         }
@@ -299,7 +297,7 @@ export class Event<Events, EventsTypes> {
         let index: number | null = null;
 
         for (let i = 0; i < callbacks.length; i++) {
-            if (callbacks[i].func == callback) {
+            if (callbacks[i].func === callback) {
                 index = i;
                 break;
             }
@@ -309,7 +307,7 @@ export class Event<Events, EventsTypes> {
             return { callback: null, newLength: null };
         }
 
-        for (let i = 0; i < callbacks.length - 1; i++) {
+        for (let i = index; i < callbacks.length - 1; i++) {
             callbacks[i] = callbacks[i + 1];
         }
 
