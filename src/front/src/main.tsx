@@ -6,7 +6,7 @@ import "../../core/world.ts";
 import { WagmiConfig, createConfig, configureChains } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
 import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
-import { URL_QUERY_GRAPHQL } from "./consts/index.ts";
+import { RPC_URL, URL_QUERY_GRAPHQL } from "./consts/index.ts";
 import { currentChain } from "./contracts.ts";
 import { Provider } from "react-redux";
 import store from "./store/index.ts";
@@ -43,12 +43,13 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                         config={{
                             // Display email and wallet as login methods
                             loginMethods: [
-                                "email",
                                 "wallet",
                                 "twitter",
                                 "discord",
                                 "farcaster",
                             ],
+                            supportedChains: [currentChain],
+                            defaultChain: currentChain,
                             // Customize Privy's appearance in your app
                             appearance: {
                                 theme: "light",

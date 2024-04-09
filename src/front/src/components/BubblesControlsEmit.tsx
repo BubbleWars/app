@@ -4,7 +4,12 @@ import { currentState, rollbackToState } from "../../../core/world";
 import { useEffect, useRef, useState } from "react";
 import { Line, Text3D } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useCreateInput, useOnClick, useOnWheel, waitForEmission } from "../hooks/inputs";
+import {
+    useCreateInput,
+    useOnClick,
+    useOnWheel,
+    waitForEmission,
+} from "../hooks/inputs";
 import { Emit, InputType } from "../../../core/types/inputs";
 import { useAccount, useWaitForTransaction } from "wagmi";
 import { currentChain } from "../contracts";
@@ -20,8 +25,8 @@ import { addInput } from "../store/inputs";
 import { CustomText } from "./CustomText";
 import { ResourceType } from "../../../core/types/resource";
 import { setControlsActive, setIsBubbleSelected } from "../store/interpolation";
-import { burnerAddress } from "../config";
 import { setOnEvent } from "../../../core/funcs/events";
+import { useWallets } from "@privy-io/react-auth";
 
 export const BubblesControlsEmit = ({
     bubbleId,
@@ -34,6 +39,8 @@ export const BubblesControlsEmit = ({
     const bubble = currentState.bubbles.find(
         (bubble) => bubble.id === bubbleId,
     );
+    const wallets = useWallets();
+    const connectedAddress = wallets[0]?.address ? `${wallets[0].address}` : "";
     if (!bubble) return null;
     const radius = massToRadius(bubble.mass);
     const position = new THREE.Vector3(bubble.position.x, bubble.position.y, 0);
@@ -48,7 +55,7 @@ export const BubblesControlsEmit = ({
     const [emitEp, setEmitEp] = useState<boolean>(false);
     const [isReady, setIsReady] = useState<boolean>(false);
     const lineRef = useRef<any>();
-    const address = burnerAddress;
+    const address = connectedAddress;
 
     //Input action
     const { write, isError, isLoading, isSuccess, data, submitTransaction } =
@@ -102,7 +109,7 @@ export const BubblesControlsEmit = ({
                 setHasProcessedTx(true);
                 setIsEmitting(false);
                 setIsReady(false);
-            })
+            });
         }
     });
 
@@ -247,9 +254,11 @@ export const BubblesControlsEmit = ({
                     >
                         <CustomText
                             size={emitEth ? 1.2 : 1.1}
-                            position={new THREE.Vector3(radius+2, radius+2, 0).add(
-                                position,
-                            )}
+                            position={new THREE.Vector3(
+                                radius + 2,
+                                radius + 2,
+                                0,
+                            ).add(position)}
                             anchorX="center"
                             anchorY="center"
                             color="white"
@@ -272,8 +281,8 @@ export const BubblesControlsEmit = ({
                         <CustomText
                             size={emitEp ? 1.2 : 1.1}
                             position={new THREE.Vector3(
-                                radius+2,
-                               (radius+2) - 2,
+                                radius + 2,
+                                radius + 2 - 2,
                                 0,
                             ).add(position)}
                             anchorX="center"

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useAccount, useBalance, useConnect } from "wagmi";
 import { truncateAddress } from "../../../../core/funcs/utils";
-import { burnerAccount, burnerAddress } from "../../config";
+
 import { createClient as createFaucetClient } from "@latticexyz/faucet";
 import { FAUCET_URL, RPC_URL } from "../../consts";
 import { createWalletClient, http } from "viem";
@@ -18,38 +18,31 @@ import {
 } from "@/components/ui/card";
 import { Button } from "../ui/button";
 
-import { usePrivy } from "@privy-io/react-auth";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
 
 const faucetClient = createFaucetClient({
     url: FAUCET_URL,
 });
 
 export const ScreenTitle = () => {
+    const { walletConnectors } = usePrivy();
+    const { wallets } = useWallets();
+    const connectedAddress = wallets[0]?.address ? `${wallets[0].address}` : "";
+
+    console.log("The connected address is:   " + connectedAddress);
+
     const [buttonText, setButtonText] = React.useState("Connect");
+    const [isButtonClicked, setButtonClicked] = React.useState(false);
     const [fetchingFunds, setFetchingFunds] = React.useState(false);
     const { address, isConnected, isConnecting } = useAccount();
-    const { connect } = useConnect({
-        connector: new MockConnector({
-            options: {
-                chainId: currentChain.id,
-                walletClient: createWalletClient({
-                    account: burnerAccount,
-                    transport: http(RPC_URL),
-                }),
-            },
-            chains: [currentChain],
-        }),
-    });
 
     const { data, isError, isLoading } = useBalance({
-        address: burnerAddress,
+        address: connectedAddress,
     });
 
     const balance = useMemo(() => {
         return parseFloat(data?.formatted ?? "0");
     }, [data]);
-
-    const waitingForBalance = isLoading;
 
     const shouldFetchFunds = useMemo(() => {
         if (isError || isLoading) return false;
@@ -60,7 +53,7 @@ export const ScreenTitle = () => {
         const _ = async () => {
             setFetchingFunds(true);
             const tx = await faucetClient.drip.mutate({
-                address: burnerAddress as "0x{string}",
+                address: connectedAddress,
             });
             await waitForTransaction({
                 chainId: currentChain.id,
@@ -70,7 +63,7 @@ export const ScreenTitle = () => {
             setFetchingFunds(false);
         };
         _();
-    }, [burnerAddress]);
+    }, [connectedAddress]);
 
     useEffect(() => {
         if (shouldFetchFunds) fetchFunds();
@@ -80,7 +73,7 @@ export const ScreenTitle = () => {
         if (fetchingFunds) {
             setButtonText("Fetching funds for burner...");
         } else if (isConnected) {
-            setButtonText("Connected to " + truncateAddress(burnerAddress));
+            setButtonText("Connected to " + truncateAddress(connectedAddress));
         } else if (isConnecting) {
             setButtonText("Loading...");
         } else {
@@ -92,8 +85,7 @@ export const ScreenTitle = () => {
     //     return balance > 0
     // }, [balance])
 
-    if (isConnected) return null;
-
+    if (isButtonClicked) return null;
     return (
         <div className="screen-title">
             <Card className="w-[550px] h-[550px] flex flex-col justify-center">
@@ -111,7 +103,7 @@ export const ScreenTitle = () => {
                         <Button
                             className="w-[100px] text-center"
                             onClick={() => {
-                                connect();
+                                setButtonClicked(true);
                             }}
                         >
                             {buttonText}

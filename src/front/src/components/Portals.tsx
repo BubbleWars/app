@@ -18,9 +18,13 @@ import {
     setSelectedEntityId,
 } from "../store/interpolation";
 import { MathUtils } from "three";
-import { burnerAddress } from "../config";
+
+import { useWallets } from "@privy-io/react-auth";
 
 export const Portal = ({ portalId }: { portalId: string }) => {
+    const { wallets } = useWallets();
+
+    const connectedAddress = wallets[0]?.address ? `${wallets[0].address}` : "";
     const meshRef = useRef<any>();
     const [isHovered, setIsHovered] = useState<boolean>(false);
     //const [ isSelected, setIsSelected ] = useState<boolean>(false)
@@ -67,7 +71,10 @@ export const Portal = ({ portalId }: { portalId: string }) => {
                 }}
                 onPointerLeave={() => setIsHovered(false)}
                 onClick={() => {
-                    if(burnerAddress.toLowerCase() === portalId.toLowerCase()) {
+                    if (
+                        connectedAddress.toLowerCase() ===
+                        portalId.toLowerCase()
+                    ) {
                         setIsSelected(!isSelected);
                         setIsHovered(false);
                     }

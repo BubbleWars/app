@@ -1,32 +1,35 @@
 // privyApi.ts
-import fetch from "node-fetch";
+import { PrivyClient } from "@privy-io/server-auth";
+import { UserSocialSchema } from "./schema/WorldState";
 
 const PRIVY_APP_ID = "cltnxig1e024xevlx99u3d12d";
 const PRIVY_APP_SECRET =
     "5dAcUvbKpvUxK1hhcTq5omd66oafc9PMcjCEES7ARAM47G1p5SZZ4hCmP4Gb9FTJkbvg7XxGwANoAjM546RV9p9x";
 
-const fetchPageOfUsers = async (cursor?: string) => {
-    const url =
-        "https://auth.privy.io/api/v1/users" +
-        (cursor ? `?cursor=${cursor}` : "");
-    const response = await fetch(url, {
-        method: "GET",
-        headers: {
-            Authorization: `Basic ${Buffer.from(`${PRIVY_APP_ID}:${PRIVY_APP_SECRET}`).toString("base64")}`,
-            "privy-app-id": PRIVY_APP_ID,
-        },
-    });
-    return response.json();
-};
+const privy = new PrivyClient(PRIVY_APP_ID, PRIVY_APP_SECRET);
 
-export const fetchAllUsers = async () => {
-    let cursor;
-    let query: any;
-    let users: any = [];
-    do {
-        query = await fetchPageOfUsers(cursor);
-        users = users.concat(query.data);
-        cursor = query.next_cursor;
-    } while (cursor !== null);
-    return users;
+// @type("string") address: string = "";
+// @type("string") pfpUrl: string = "";
+// @type("string") social: string = "";
+// @type("string") privyId: string = "";
+
+export const fetchUsers = async () => {
+    const users = await privy.getUsers();
+
+    //return the userSocials as defined in schema
+    return users.map((user) => {
+        const newUser = new UserSocialSchema();
+        newUser.privyId = user.id;
+        newUser.address = user.wallet.address;
+
+        if (user.farcaster) {
+            newUser.social = user.farcaster.username;
+            newUser.pfpUrl = user.farcaster.pfp;
+        } else if (user.twitter) {
+            newUser.social = user.twitter.username;
+            newUser.pfpUrl = user.twitter.profilePictureUrl;
+        }
+
+        return newUser;
+    });
 };
