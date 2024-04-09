@@ -59,8 +59,13 @@ const initStateServer = (room) => {
 
         //UserSocials
         userSocials.forEach((userSocial) => {
-            const address = userSocial.address;
-            userSocialsState[address] = userSocial;
+            const address = userSocial.address.toLowerCase();
+            userSocialsState[address] = {
+                social: userSocial.social,
+                pfpUrl: userSocial.pfpUrl,
+                address: userSocial.address,
+                privyId: userSocial.privyId,
+            };
         });
 
         console.log(userSocialsState);

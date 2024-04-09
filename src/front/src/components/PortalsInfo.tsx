@@ -6,13 +6,19 @@ import { CustomText } from "./CustomText";
 import { ResourceType } from "../../../core/types/resource";
 import { C } from "../../../core/consts";
 import { useDisplayName } from "./GetDisplayName";
+import { useUserSocial } from "@/hooks/socials";
 
 export const PortalsInfo = ({ portalId }: { portalId: string }) => {
     const portal = currentState.portals.find(
         (portal) => portal.id === portalId,
     );
-    const displayName = useDisplayName(portal.owner);
+    //    const currentUserSocials = useUserSocial({ address: portal.owner });
+    //console.log("wasteyute", currentUserSocials);
+    const { social } = useUserSocial({ address: portal.owner });
+    console.log("flamingo ", social);
+
     if (!portal) return null;
+    const displayName = social ?? portal.owner;
     const radius = massToRadius(portal.mass);
     const textPosition = new THREE.Vector3(
         portal.position.x,
