@@ -14,7 +14,7 @@ import { defineChain } from "viem";
 import { RPC_URL } from "./consts";
 
 export const currentChain = defineChain({
-    id: 1_337,
+    id: 31337,
     name: "bubblewars_anvil",
     network: "bubblewars_anvil",
     nativeCurrency: {

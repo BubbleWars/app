@@ -16,7 +16,7 @@ import {
     setIsBubbleSelected,
     setSelectedEntityId,
 } from "../store/interpolation";
-import { burnerAddress } from "../config";
+
 import { LERP_SPEED } from "../consts";
 import { MathUtils } from "three";
 
@@ -96,8 +96,12 @@ const BubbleMovementParticles =(props: { count: number, radius: number, position
     </points>
   );
   };
+import { useWallets } from "@privy-io/react-auth";
 
 export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
+    const { wallets } = useWallets();
+
+    const connectedAddress = wallets[0]?.address ? `${wallets[0].address}` : "";
     const meshRef = useRef<any>();
     const [isHovered, setIsHovered] = useState<boolean>(false);
     const dispatch = useDispatch();
@@ -140,9 +144,8 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
         }
 
         if (!meshRef.current.position.x || !meshRef.current.position.y) {
-
             const startPosition = bubbleStartPositions[bubbleId];
-            console.log("fetching start position", startPosition)
+            console.log("fetching start position", startPosition);
             if (false) {
                 meshRef.current.position.set(
                     startPosition.x,
@@ -151,36 +154,41 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
                 );
             } else {
                 //Get start position from bubble.from
-                const fromBubble = currentState.bubbles.find((newBubble) => { 
-                    return newBubble.id.toLowerCase() == bubble.from.toLowerCase() 
+                const fromBubble = currentState.bubbles.find((newBubble) => {
+                    return (
+                        newBubble.id.toLowerCase() == bubble.from.toLowerCase()
+                    );
                 });
-                const fromPortal = currentState.portals.find((portal) => portal.id == bubble.from );
-                const fromNode = currentState.nodes.find((node) => node.id == bubble.from );
+                const fromPortal = currentState.portals.find(
+                    (portal) => portal.id == bubble.from,
+                );
+                const fromNode = currentState.nodes.find(
+                    (node) => node.id == bubble.from,
+                );
 
-                console.log("from node", bubble.from)
+                console.log("from node", bubble.from);
 
-                if(fromBubble) {
+                if (fromBubble) {
                     meshRef.current.position.set(
                         fromBubble.position.x,
                         fromBubble.position.y,
                         0,
                     );
-                } else if(fromPortal) {
+                } else if (fromPortal) {
                     meshRef.current.position.set(
                         fromPortal.position.x,
                         fromPortal.position.y,
                         0,
                     );
-                } else if(fromNode) {
+                } else if (fromNode) {
                     meshRef.current.position.set(
                         fromNode.position.x,
                         fromNode.position.y,
                         0,
                     );
                 } else {
-                    console.log("bubble.from not found")
+                    console.log("bubble.from not found");
                 }
-
             }
             //console.log("bubble not found")
         }
@@ -229,12 +237,12 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
                     if (!isSelected) setIsHovered(true);
                 }}
                 onPointerMissed={() => {
-                    setIsHovered(false)
-                    setIsBubbleSelected(false)
+                    setIsHovered(false);
+                    setIsBubbleSelected(false);
                 }}
                 onPointerLeave={() => setIsHovered(false)}
                 onClick={() => {
-                    if(burnerAddress.toLowerCase() == owner.toLowerCase()) {
+                    if (connectedAddress.toLowerCase() == owner.toLowerCase()) {
                         setIsSelected(!isSelected && isHovered);
                         setIsHovered(false);
                     }

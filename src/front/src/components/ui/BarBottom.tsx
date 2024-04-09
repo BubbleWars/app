@@ -1,14 +1,19 @@
-import { burnerAddress } from "@/config"
-import { UserView } from "./UserView"
+import { UserView } from "./UserView";
 import { currentState } from "../../../../core/world";
 import { MassView, PositionIcon, ResourcesIcon } from "./BarSide";
 import { useEffect, useMemo, useState } from "react";
 import { Resource, ResourceType } from "../../../../core/types/resource";
 import { ResourceState } from "../../../../core/types/state";
 import { useFrame } from "@react-three/fiber";
+import { useWallets } from "@privy-io/react-auth";
 
 export const BarBottom = () => {
-    const address = burnerAddress;
+    const { wallets } = useWallets();
+
+    const connectedAddress = wallets[0]?.address ? `${wallets[0].address}` : "";
+    const address = connectedAddress;
+
+
     const portal = currentState.portals.find(portal => portal.id.toLowerCase() == address.toLowerCase());
     const [ balance, setBalance ] = useState<number>(0);
     const [ position, setPosition ] = useState<{x: number, y: number}>({x: 0, y: 0});
@@ -25,9 +30,6 @@ export const BarBottom = () => {
         }, 1000)
         return () => clearInterval(intervalId);
     }, [])
-
-
-
     return (
         <div className="bg-white flex flex-row h-[10vh] w-full fixed bottom-0 right-0 space-x-6 p-4 items-center">
             <UserView address={address} />
@@ -44,5 +46,5 @@ export const BarBottom = () => {
                 <ResourcesIcon resources={resources} />
             </div>
         </div>
-    )
-}
+    );
+};

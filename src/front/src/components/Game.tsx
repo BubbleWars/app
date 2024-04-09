@@ -26,6 +26,7 @@ import { current } from "@reduxjs/toolkit";
 import { User } from "../../../core/types/user";
 import { Puncture, PuncturePoint } from "../../../core/types/bubble";
 import { ResourceType } from "../../../core/types/resource";
+import { userSocialsState } from "@/hooks/socials";
 
 const client = new Client(INDEXER_URL);
 let room = await client.joinOrCreate("world");
@@ -55,6 +56,14 @@ const initStateServer = (room) => {
 
         //Timestamp
         currentState.timestamp = timestamp
+
+        //UserSocials
+        userSocials.forEach((userSocial) => {
+            const address = userSocial.address;
+            userSocialsState[address] = userSocial;
+        });
+
+        console.log(userSocialsState);
 
         //Bubble start positions for interpolation
         syncBubbleStartPositions.forEach((value, key) => {

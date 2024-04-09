@@ -18,7 +18,8 @@ import {
     setSelectedEntityId,
 } from "../store/interpolation";
 import { MathUtils } from "three";
-import { burnerAddress } from "../config";
+
+import { useWallets } from "@privy-io/react-auth";
 
 import vertexShader from "../shaders/portalVertexShader.glsl?raw";
 import fragmentShader from "../shaders/portalFragmentShader.glsl?raw";
@@ -96,6 +97,9 @@ export const CustomGeometryParticles = (props: { count: number, radius: number, 
 
 
 export const Portal = ({ portalId }: { portalId: string }) => {
+    const { wallets } = useWallets();
+
+    const connectedAddress = wallets[0]?.address ? `${wallets[0].address}` : "";
     const meshRef = useRef<any>();
     const [isHovered, setIsHovered] = useState<boolean>(false);
     //const [ isSelected, setIsSelected ] = useState<boolean>(false)
@@ -153,7 +157,10 @@ export const Portal = ({ portalId }: { portalId: string }) => {
                 }}
                 onPointerLeave={() => setIsHovered(false)}
                 onClick={() => {
-                    if(burnerAddress.toLowerCase() === portalId.toLowerCase()) {
+                    if (
+                        connectedAddress.toLowerCase() ===
+                        portalId.toLowerCase()
+                    ) {
                         setIsSelected(!isSelected);
                         setIsHovered(false);
                     }

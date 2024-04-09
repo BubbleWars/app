@@ -24,12 +24,13 @@ import { BarSide } from "./components/ui/BarSide";
 import "../global.css"
 import { BarBottom } from "./components/ui/BarBottom";
 import { usePrivy } from "@privy-io/react-auth";
+import { ScreenLogin } from "./components/screens/ScreenLogin";
 
 function App() {
     //const { snapshot } = useInspect({ type: InspectType.State, value: 0 });
     //const { inputs } = useInputs();
 
-    const { logout } = usePrivy();
+    const { logout, authenticated } = usePrivy();
 
     return (
         <>
@@ -59,7 +60,8 @@ function App() {
             </Canvas>
             <BarSide />
             <BarBottom />
-            <ScreenTitle />
+            {!authenticated && <ScreenLogin />}
+            {authenticated && <ScreenTitle />}
             <ScreenSpawnPortal />
             <button onClick={logout}>Log out</button>
         </>

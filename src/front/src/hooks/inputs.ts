@@ -1,4 +1,4 @@
-import { useContractWrite } from "wagmi";
+import { useChainId, useContractWrite } from "wagmi";
 import {
     CartesiDAppAddress,
     EtherPortal,
@@ -10,51 +10,97 @@ import { parseEther, toHex, zeroAddress } from "viem";
 import { useEffect, useState } from "react";
 import * as THREE from "three";
 import { useThree } from "@react-three/fiber";
+import {
+    useWallets,
+    usePrivy,
+    UnsignedTransactionRequest,
+} from "@privy-io/react-auth";
 import { burnerAccount, burnerAddress } from "../config";
 import { publicClient } from "../main";
 import { currentState } from "../../../core/world";
+import { encodeFunctionData } from "viem";
+import { getChainId } from "node_modules/viem/_types/actions/public/getChainId";
 
 export const useCreateInput = (input: Input) => {
     //console.log("useCreateInput", input)
     //Check if deposit input
+
+    const { sendTransaction } = usePrivy();
     const [nonce, setNonce] = useState<number | undefined>(undefined);
+    const [isError, setIsError] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
     const isDeposit = input.type == InputType.Deposit;
     const functionName = isDeposit ? "depositEther" : "addInput";
     const args = isDeposit
         ? [CartesiDAppAddress, zeroAddress]
         : [CartesiDAppAddress, toHex(JSON.stringify(input))];
     const contract = isDeposit ? EtherPortal : InputBox;
-    const value = isDeposit ? parseEther((input.amount ?? 0).toString()) : undefined;
+    const { wallets } = useWallets();
 
-    useEffect(() => {
-        if (burnerAddress) {
-            const fetchNonce = async () => {
-                const transactionCount = await publicClient({
-                    chainId: currentChain.id,
-                }).getTransactionCount({
-                    address: burnerAddress,
-                });
-                setNonce(transactionCount);
-            };
+    const connectedAddress = wallets[0]?.address ? `${wallets[0].address}` : "";
+    const value = isDeposit
+        ? parseEther((input.amount ?? 0).toString())
+        : undefined;
 
-            fetchNonce();
-        }
-    }, [burnerAddress, publicClient]);
+    // useEffect(() => {
+    //     if (connectedAddress) {
+    //         const fetchNonce = async () => {
+    //             const transactionCount = await publicClient({
+    //                 chainId: currentChain.id,
+    //             }).getTransactionCount({
+    //                 address: connectedAddress,
+    //             });
+    //             setNonce(transactionCount);
+    //         };
 
-    const val = useContractWrite({
-        ...contract,
-        functionName,
-        args,
-        account: burnerAccount,
-        value,
-        nonce,
-    });
+    //         fetchNonce();
+    //     }
+    // }, [connectedAddress, publicClient]);
+
+    // const val = useContractWrite({
+    //     ...contract,
+    //     functionName,
+    //     args,
+
+    //     value,
+    //     nonce,
+    // });
+
+    // const unsignedTx: UnsignedTransactionRequest = {
+    //     to: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+    //     chainId: currentChain.id,
+    //     value: "0x3B9ACA00",
+    // };
 
     return {
-        ...val,
-        submitTransaction: () => {
-            val.write();
+        isError,
+        isSuccess,
+        isLoading,
+        submitTransaction: async () => {
+            // sendTransaction(unsignedTx);
+            setIsLoading(true);
+            const receipt = await sendTransaction({
+                chainId: currentChain.id,
+                data: encodeFunctionData({
+                    abi: contract.abi,
+                    functionName: functionName,
+                    args: args,
+                }),
+                // from: connectedAddress,
+                value: value,
+
+                to: contract.address,
+            });
             setNonce(nonce + 1);
+            setIsLoading(false);
+            if (receipt) {
+                setIsSuccess(true);
+                setIsError(false);
+            } else {
+                setIsSuccess(false);
+                setIsError(true);
+            }
         },
     };
 };
@@ -104,8 +150,13 @@ export const useMousePosition = (handler: (event: MouseEvent) => void) => {
     }, [handler]); // Re-run the effect only if the handler changes
 };
 
-export const waitForEmission = (id: string, initialMass:number, emissionMass:number, callback: () => void) => {
-    const bubble = currentState.bubbles.find((bubble) => bubble.id == id);  
+export const waitForEmission = (
+    id: string,
+    initialMass: number,
+    emissionMass: number,
+    callback: () => void,
+) => {
+    const bubble = currentState.bubbles.find((bubble) => bubble.id == id);
     const portal = currentState.portals.find((portal) => portal.id == id);
     console.log("wait for emission");
     let intervalId: NodeJS.Timeout;
@@ -119,24 +170,28 @@ export const waitForEmission = (id: string, initialMass:number, emissionMass:num
 
     // Function to check conditions and possibly clear interval
     const checkAndClear = (currentMass: number) => {
-        console.log("initialMass", initialMass, "currentMass", currentMass)
+        console.log("initialMass", initialMass, "currentMass", currentMass);
         if (currentMass <= initialMass - emissionMass) {
             clearTimers();
             callback();
         }
     };
 
-    if(bubble){
+    if (bubble) {
         // Check for mass to decrease by emissionMass
         intervalId = setInterval(() => {
-            const newBubble = currentState.bubbles.find((bubble) => bubble.id == id);
+            const newBubble = currentState.bubbles.find(
+                (bubble) => bubble.id == id,
+            );
             if (newBubble) {
                 checkAndClear(newBubble.mass);
             }
         }, 100);
-    }else if(portal){
+    } else if (portal) {
         intervalId = setInterval(() => {
-            const newPortal = currentState.portals.find((portal) => portal.id == id);
+            const newPortal = currentState.portals.find(
+                (portal) => portal.id == id,
+            );
             if (newPortal) {
                 checkAndClear(newPortal.mass);
             }
@@ -151,5 +206,4 @@ export const waitForEmission = (id: string, initialMass:number, emissionMass:num
 
     // Return a cleanup function to clear interval and timeout
     return clearTimers;
-}
-
+};

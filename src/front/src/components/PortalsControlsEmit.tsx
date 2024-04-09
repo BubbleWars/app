@@ -4,7 +4,12 @@ import { currentState, rollbackToState } from "../../../core/world";
 import { useEffect, useRef, useState } from "react";
 import { Line, Text, Text3D } from "@react-three/drei";
 import { extend, useFrame } from "@react-three/fiber";
-import { useCreateInput, useOnClick, useOnWheel, waitForEmission } from "../hooks/inputs";
+import {
+    useCreateInput,
+    useOnClick,
+    useOnWheel,
+    waitForEmission,
+} from "../hooks/inputs";
 import { Emit, InputType } from "../../../core/types/inputs";
 import { useAccount, useWaitForTransaction } from "wagmi";
 import { currentChain } from "../contracts";
@@ -21,7 +26,8 @@ import { Vec2 } from "planck-js";
 import { CustomText } from "./CustomText";
 import { ResourceType } from "../../../core/types/resource";
 import { setControlsActive, setIsBubbleSelected } from "../store/interpolation";
-import { burnerAddress } from "../config";
+
+import { useWallets } from "@privy-io/react-auth";
 
 export const PortalsControlsEmit = ({
     portalId,
@@ -31,6 +37,9 @@ export const PortalsControlsEmit = ({
     isHovered: boolean;
 }) => {
     const dispatch = useDispatch();
+    const { wallets } = useWallets();
+
+    const connectedAddress = wallets[0]?.address ? `${wallets[0].address}` : "";
     const portal = currentState.portals.find(
         (portal) => portal.id === portalId,
     );
@@ -48,7 +57,7 @@ export const PortalsControlsEmit = ({
     const [emitEp, setEmitEp] = useState<boolean>(false);
     const [isReady, setIsReady] = useState<boolean>(false);
     const lineRef = useRef<any>();
-    const address = burnerAddress;
+    const address = connectedAddress;
 
     //Input action
     const { write, isError, isLoading, isSuccess, data, submitTransaction } =
@@ -102,7 +111,7 @@ export const PortalsControlsEmit = ({
                 setHasProcessedTx(true);
                 setIsEmitting(false);
                 setIsReady(false);
-            })
+            });
         }
     });
 
@@ -248,9 +257,11 @@ export const PortalsControlsEmit = ({
                     >
                         <CustomText
                             size={emitEth ? 1.2 : 1.1}
-                            position={new THREE.Vector3(radius+2, radius+2, 0).add(
-                                position,
-                            )}
+                            position={new THREE.Vector3(
+                                radius + 2,
+                                radius + 2,
+                                0,
+                            ).add(position)}
                             anchorX="center"
                             anchorY="center"
                             color="white"
@@ -273,8 +284,8 @@ export const PortalsControlsEmit = ({
                         <CustomText
                             size={emitEp ? 1.2 : 1.1}
                             position={new THREE.Vector3(
-                                radius+2,
-                               (radius+2) - 2,
+                                radius + 2,
+                                radius + 2 - 2,
                                 0,
                             ).add(position)}
                             anchorX="center"
@@ -284,7 +295,6 @@ export const PortalsControlsEmit = ({
                             Emit EP
                         </CustomText>
                     </group>
-                    
                 </>
             )}
         </>

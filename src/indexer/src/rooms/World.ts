@@ -1,6 +1,6 @@
 import { Room, Client } from "@colyseus/core";
 import { MyRoomState } from "./schema/MyRoomState";
-import { fetchAllUsers } from "./privyApi";
+import { fetchAllUsers, fetchUsers } from "./privyApi";
 
 import {
     BubbleStateSchema,
@@ -10,6 +10,7 @@ import {
     ResourceNodeStateSchema,
     ResourceStateSchema,
     UserSchema,
+    UserSocialSchema,
     Vector2Schema,
     WorldState,
 } from "./schema/WorldState";
@@ -21,7 +22,7 @@ import {
     snapshotInit,
     snapshotCurrentState,
 } from "../../../core/snapshots";
-import { onBlock, onInput, onInspect } from "./indexer";
+import { onBlock, onInput, onInspect, onUser } from "./indexer";
 import { handleInput } from "../../../core/funcs/inputs";
 import { Snapshot } from "../../../core/types/state";
 import { ArraySchema } from "@colyseus/schema";
@@ -37,8 +38,6 @@ const updateState = (state: WorldState, snapshot: Snapshot): WorldState => {
         const newUser = new UserSchema();
         newUser.address = user.address;
         newUser.balance = user.balance;
-        newUser.social = user.social;
-        newUser.privyId = user.privyId;
         state.users.push(newUser);
     });
 
@@ -146,26 +145,6 @@ export class World extends Room<WorldState> {
 
         this.setSimulationInterval((deltaTime) => this.update(deltaTime));
 
-        try {
-            const users = await fetchAllUsers();
-            console.log("Fetched users:", users);
-            // Process the retrieved users and associate them with the user object
-            users.forEach((user: any) => {
-                const existingUser = this.state.users.find(
-                    (u) => u.address === user.address,
-                );
-                if (existingUser) {
-                } else {
-                    const newUser = new UserSchema();
-                    newUser.address = user.address;
-
-                    this.state.users.push(newUser);
-                }
-            });
-        } catch (error) {
-            console.error("Failed to fetch users:", error);
-        }
-
         onInspect((snapshot) => {
             console.log("recieved snapshot", snapshot);
             updateState(this.state, snapshot);
@@ -174,18 +153,13 @@ export class World extends Room<WorldState> {
             this.recievedStartupInspect = true;
         });
 
-    this.unwatchBlock = onBlock((blockTimestamp) => {
-      //console.log("recieved block", blockTimestamp);
-      //if (!this.recievedStartupInspect) return;
-      this.blockTimestamp = blockTimestamp
-      snapshotRun(this.blockTimestamp);
-      rollbackToState(snapshotCurrentState);
-      //max keep 10 snapshots
-      if (snapshots.size > 15) {
-        const oldestSnapshot = snapshots.keys().next().value;
-        snapshots.delete(oldestSnapshot);
-      }
-    });
+        onUser((users) => {
+            this.state.userSocials = new ArraySchema<UserSocialSchema>();
+            users.forEach((user) => {
+                this.state.userSocials.push(user);
+            });
+        });
+
         this.unwatchBlock = onBlock((blockTimestamp) => {
             console.log("recieved block", blockTimestamp);
             //if (!this.recievedStartupInspect) return;
