@@ -18,6 +18,7 @@
         "@apollo/client": "^3.8.8",
         "@cartesi/rollups": "^1.0.0",
         "@latticexyz/faucet": "2.0.0-next.17",
+        "@privy-io/react-auth": "^1.60.2",
         "@radix-ui/react-accordion": "^1.1.2",
         "@radix-ui/react-avatar": "^1.0.4",
         "@radix-ui/react-collapsible": "^1.0.3",

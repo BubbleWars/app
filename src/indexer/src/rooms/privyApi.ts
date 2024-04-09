@@ -2,10 +2,8 @@
 import { PrivyClient } from "@privy-io/server-auth";
 import { UserSocialSchema } from "./schema/WorldState";
 
-const PRIVY_APP_ID = "cltnxig1e024xevlx99u3d12d";
-const PRIVY_APP_SECRET =
-    "5dAcUvbKpvUxK1hhcTq5omd66oafc9PMcjCEES7ARAM47G1p5SZZ4hCmP4Gb9FTJkbvg7XxGwANoAjM546RV9p9x";
-
+const PRIVY_APP_ID = process.env.PRIVY_APP_ID;
+const PRIVY_APP_SECRET = process.env.PRIVY_APP_SECRET;
 const privy = new PrivyClient(PRIVY_APP_ID, PRIVY_APP_SECRET);
 
 // @type("string") address: string = "";

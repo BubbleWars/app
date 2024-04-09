@@ -39,7 +39,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             <WagmiConfig config={config}>
                 <React.StrictMode>
                     <PrivyProvider
-                        appId="cltnxig1e024xevlx99u3d12d"
+                        appId="clurbdmha00319vwnhsejx6pj"
                         config={{
                             // Display email and wallet as login methods
                             loginMethods: [
