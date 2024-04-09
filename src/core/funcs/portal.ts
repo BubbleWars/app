@@ -279,7 +279,7 @@ export const portalEmitBubble = (
 
     //Apply momentum conservation
     const emittedBubbleVelocityDirection = direction.clone();
-    const emittedBubbleVelocityMagnitude = calculateEmissionVelocity();
+    const emittedBubbleVelocityMagnitude = calculateEmissionVelocity(newPortalMass, mass) * 0.05;
     const emittedBubbleRelativeVelocity = emittedBubbleVelocityDirection.mul(
         emittedBubbleVelocityMagnitude,
     );
@@ -369,7 +369,7 @@ export const portalEmitResource = (
 
     //Apply momentum conservation
     const emittedResourceVelocityDirection = direction.clone();
-    const emittedResourceVelocityMagnitude = calculateEmissionVelocity()
+    const emittedResourceVelocityMagnitude = calculateEmissionVelocity(newPortalMass, mass);
     const emittedResourceRelativeVelocity =
         emittedResourceVelocityDirection.mul(emittedResourceVelocityMagnitude);
     const emittedResourceVelocity = portal.body

@@ -10,10 +10,13 @@ export const radiusToMass = (radius: number): number => {
     return Math.PI * radius * radius;
 };
 
-export const calculateEmissionVelocity = (): number => {
+export const calculateEmissionVelocity = (m1: number, m2: number): number => {
+    const alpha = 0.05; // Example scaling factor
+    const ejectFactor = Math.pow((m1/m2), alpha); // Non-linear scaling
     const vMax = C * Math.sqrt(2); // Maximum velocity from Total Energy = mc^2
-    return MASS_ENERGY_CONVERSION_EFFICIENCY * vMax; // By energy innefficiency
-}
+    console.log("emission velocity", MASS_ENERGY_CONVERSION_EFFICIENCY * vMax * ejectFactor)
+    return MASS_ENERGY_CONVERSION_EFFICIENCY * vMax * ejectFactor;
+};
 
 export const createBoundary = (
     world: World,

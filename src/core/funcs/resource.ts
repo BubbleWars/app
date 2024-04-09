@@ -230,7 +230,7 @@ export const nodeEmitResource = (
 
     //Apply momentum
     const emittedResourceVelocityDirection = direction.clone();
-    const emittedResourceVelocityMagnitude = calculateEmissionVelocity();
+    const emittedResourceVelocityMagnitude = calculateEmissionVelocity(newNodeMass, emittedMass) * 0.01;
     const emittedResourceRelativeVelocity =
         emittedResourceVelocityDirection.mul(emittedResourceVelocityMagnitude);
     const emittedResourceVelocity = node.body
@@ -277,7 +277,7 @@ export const nodeEmitBubble = (
 
     //Apply momentum
     const emittedBubbleVelocityDirection = direction.clone();
-    const emittedBubbleVelocityMagnitude = calculateEmissionVelocity()
+    const emittedBubbleVelocityMagnitude = calculateEmissionVelocity(newNodeMass, emittedMass);
     const emittedBubbleRelativeVelocity = emittedBubbleVelocityDirection.mul(
         emittedBubbleVelocityMagnitude,
     );

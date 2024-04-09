@@ -55,12 +55,12 @@ export const publicClient = createPublicClient({
 
 export const onInspect = async (callback: (snapshot: Snapshot) => void) => {
     const snapshot = await inspectState({ type: InspectType.State, value: 0 })
-    console.log("snapshot", snapshot)
+    //console.log("snapshot", snapshot)
     callback(snapshot)
 }
 
 export const onInput = (callback: (input: Input) => void) => {
-    console.log("setting onInput")
+    //console.log("setting onInput")
     let pendingTransaction: `0x{string}`[] = []
     const unwatch = publicClient.watchPendingTransactions({ 
         onTransactions: (hashes: `0x{string}`[]) => {
@@ -75,13 +75,13 @@ export const onInput = (callback: (input: Input) => void) => {
 
                 if(logs.length == 0) return
 
-                console.log("transaction", transaction)
-                console.log("topics", logs[0]?.topics)
+                //console.log("transaction", transaction)
+                //console.log("topics", logs[0]?.topics)
                 const blockNumber = Number(transaction.blockNumber)
                 let timestamp;
                 if(blockNumberToTimestamp[blockNumber]){
                     timestamp = blockNumberToTimestamp[blockNumber]
-                    console.log("timestamp from cache", timestamp)
+                    //console.log("timestamp from cache", timestamp)
                 }
                 else
                     timestamp = Number((await publicClient.getBlock({blockNumber: transaction.blockNumber})).timestamp)
@@ -90,13 +90,13 @@ export const onInput = (callback: (input: Input) => void) => {
                 if(transaction?.to?.toLowerCase() == ETH_PORTAL_ADDRESS.toLowerCase()) {
                     //Check if the transaction is a deposit
                     const data = '0x' + logs[0].data.substring(194, logs[0].data.length)
-                    console.log("data", data)
+                    //console.log("data", data)
 
                     const binary = decodePacked(["address", "uint256"], data)
-                    console.log("binary", binary)
+                    //console.log("binary", binary)
                     const address = binary[0]
                     const amount = binary[1]
-                    console.log("is input", address, amount)
+                    //console.log("is input", address, amount)
                     callback({
                         type: InputType.Deposit, 
                         timestamp,
@@ -109,13 +109,13 @@ export const onInput = (callback: (input: Input) => void) => {
                         const data = logs[0].data
                         //from hex to string
                         const json = hexToString(data)
-                        console.log("json", json)
+                        //console.log("json", json)
                         const input: Input = JSON.parse(json.substring(json.indexOf('{"'), json.lastIndexOf('}') + 1));
-                        console.log("input", input)
+                        //console.log("input", input)
                         callback({...input, timestamp, sender: transaction.from})
                     }
                     catch(e) {  
-                        console.log("error", e)
+                        //console.log("error", e)
                     }
                 }
 

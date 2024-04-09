@@ -24,7 +24,9 @@ export const CustomText = ({
         <Text
             font="fonts/AuxMono-Regular.ttf"
             color={color}
-            fontSize={size}
+            letterSpacing={-0.23}
+            fontWeight="bold"
+            fontSize={size*1.2}
             outlineColor={"black"}
             outlineWidth={0.01}
             anchorX={anchorX as any}

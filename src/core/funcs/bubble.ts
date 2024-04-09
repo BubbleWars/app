@@ -213,7 +213,7 @@ export const emitBubble = (
     //Apply momentum conservation
     const originalBubbleMomentum = totalMomentum.clone();
     const emittedBubbleVelocityDirection = emissionDirection ? emissionDirection.clone() : direction.clone();
-    const emittedBubbleVelocityMagnitude = calculateEmissionVelocity();
+    const emittedBubbleVelocityMagnitude = calculateEmissionVelocity(newBubbleMass, mass);
     const emittedBubbleRelativeVelocity = emittedBubbleVelocityDirection.mul(
         emittedBubbleVelocityMagnitude,
     );
@@ -282,7 +282,7 @@ export const emitResource = (
     //Apply momentum conservation
     const originalBubbleMomentum = totalMomentum.clone();
     const emittedResourceVelocityDirection = direction.clone()
-    const emittedResourceVelocityMagnitude = calculateEmissionVelocity()
+    const emittedResourceVelocityMagnitude = calculateEmissionVelocity(newBubbleMass, mass);
     const emittedResourceRelativeVelocity =
         emittedResourceVelocityDirection.mul(emittedResourceVelocityMagnitude);
     const emittedResourceVelocity = bubble.body

@@ -4,6 +4,7 @@ import { massToRadius, truncateAddress } from "../../../core/funcs/utils";
 import * as THREE from "three";
 import { CustomText } from "./CustomText";
 import { ResourceType } from "../../../core/types/resource";
+import { C } from "../../../core/consts";
 
 export const PortalsInfo = ({ portalId }: { portalId: string }) => {
     const portal = currentState.portals.find(
@@ -47,8 +48,10 @@ export const PortalsInfo = ({ portalId }: { portalId: string }) => {
                     color="white"
                     position={textPosition}
                 >
-                    {portal.mass.toFixed(2)} ETH
+                    {portal.mass.toFixed(2)}
+                    
                 </CustomText>
+                
             <group position={textPosition}>
             <CustomText 
                 size={radius / 8} 

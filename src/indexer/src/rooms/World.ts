@@ -141,7 +141,7 @@ export class World extends Room<WorldState> {
 
 
     this.unwatchBlock = onBlock((blockTimestamp) => {
-      console.log("recieved block", blockTimestamp);
+      //console.log("recieved block", blockTimestamp);
       //if (!this.recievedStartupInspect) return;
       this.blockTimestamp = blockTimestamp
       snapshotRun(this.blockTimestamp);

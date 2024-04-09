@@ -41,7 +41,7 @@ export const BubblesInfo = ({
     return (
         <>
             <CustomText size={radius / 3} position={textPosition}>
-                {truncateAddress(bubble.owner)}
+                {"@glockchain"}
             </CustomText>
             <group position={pos2}>
                 <CustomText
