@@ -56,6 +56,12 @@ describe("Event System Unit Tests", () => {
                 (_data: EventsTypes) => {},
             ),
         ).toStrictEqual(CALLBACK_NEWLENGTH_NULL);
+        expect(
+            e.unsubscribeAllCallback(
+                Events.GameStart,
+                (_data: EventsTypes) => {},
+            ),
+        ).toStrictEqual(CALLBACK_NEWLENGTH_NULL);
     });
 
     it("Subscribe", () => {
@@ -107,7 +113,7 @@ describe("Event System Unit Tests", () => {
         const l2 = "Game Started yayy";
         const l3 = "This is the final loading";
 
-        const c1 = async (data: GameStart) => {
+        const c1 = (data: GameStart) => {
             console.log(l1);
         };
         const c2 = (data: GameStart) => {
@@ -119,7 +125,7 @@ describe("Event System Unit Tests", () => {
 
         e.subscribe(Events.GameEnd, (data: GameEnd) => {});
         e.subscribe(Events.GameStart, c1);
-        e.subscribe(Events.GameStart, c2);
+        e.subscribe(Events.GameStart, c2, undefined);
         e.subscribe(Events.GameStart, c3);
 
         expect(e.hasCallback(Events.GameEnd)).toBe(true);
@@ -219,7 +225,7 @@ describe("Event System Unit Tests", () => {
         e.clear(Events.GameStart);
         expect(e.getNumberOfCallbacks(Events.GameStart)).toBe(0);
         e.subscribe(Events.GameStart, c1);
-        e.subscribe(Events.GameStart, c2, true);
+        e.subscribe(Events.GameStart, c2);
         e.subscribe(Events.GameStart, c3);
         expect(e.getNumberOfCallbacks(Events.GameStart)).toBe(3);
 
@@ -255,9 +261,9 @@ describe("Event System Unit Tests", () => {
         e.subscribe(Events.GameStart, c3);
 
         e.subscribeIndex(Events.GameStart, 10, c3);
-        e.subscribeIndex(Events.GameStart, 3, c2);
-        e.subscribeIndex(Events.GameStart, 4, c1);
-        e.subscribeIndex(Events.GameStart, 1, c1);
+        e.subscribeIndex(Events.GameStart, 3, c2, undefined);
+        e.subscribeIndex(Events.GameStart, 4, c1, false);
+        e.subscribeIndex(Events.GameStart, 1, c1, null);
 
         e.throw(Events.GameStart, {
             ether: 1234,
@@ -334,7 +340,56 @@ describe("Event System Unit Tests", () => {
         ).toStrictEqual(CALLBACK_NEWLENGTH_NULL);
     });
 
-    it("unsubscribeAllCallback", async () => {});
+    it("unsubscribeAllCallback", async () => {
+        const l1 = "First checkss...";
+        const l2 = "Game Started yayy";
+        const l3 = "This is the final loading";
+
+        const c1 = (data: GameStart) => {
+            console.log(l1);
+        };
+        const c2 = (data: GameStart) => {
+            console.log(l2);
+        };
+        const c3 = (data: GameStart) => {
+            console.log(l3);
+        };
+
+        e.subscribe(Events.GameStart, c1);
+        e.subscribe(Events.GameStart, c2);
+        e.subscribe(Events.GameStart, c3);
+        e.subscribe(Events.GameStart, c1);
+        e.subscribe(Events.GameStart, c2);
+        e.subscribe(Events.GameStart, c3);
+
+        e.throw(Events.GameStart, {
+            ether: 1234,
+            timestamp: 156790,
+            playerId: "sjdDRRRR",
+        });
+
+        expect(consoleSpy).toHaveBeenCalledTimes(6);
+        expect(consoleSpy).toHaveBeenNthCalledWith(1, l1);
+        expect(consoleSpy).toHaveBeenNthCalledWith(2, l2);
+        expect(consoleSpy).toHaveBeenNthCalledWith(3, l3);
+        expect(consoleSpy).toHaveBeenNthCalledWith(4, l1);
+        expect(consoleSpy).toHaveBeenNthCalledWith(5, l2);
+        expect(consoleSpy).toHaveBeenNthCalledWith(6, l3);
+
+        e.unsubscribeAllCallback(Events.GameStart, c3);
+
+        e.throw(Events.GameStart, {
+            ether: 1234,
+            timestamp: 156790,
+            playerId: "sjdDRRRR",
+        });
+
+        expect(consoleSpy).toHaveBeenCalledTimes(10);
+        expect(consoleSpy).toHaveBeenNthCalledWith(7, l1);
+        expect(consoleSpy).toHaveBeenNthCalledWith(8, l2);
+        expect(consoleSpy).toHaveBeenNthCalledWith(9, l1);
+        expect(consoleSpy).toHaveBeenNthCalledWith(10, l2);
+    });
 });
 
 function sleep(ms: number) {

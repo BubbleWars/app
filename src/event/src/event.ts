@@ -79,14 +79,14 @@ export class Event<Events, EventsTypes> {
         callback: (
             data: EventsTypes,
         ) => Promise<void> | ((data: EventsTypes) => void),
-        wait: Boolean = false,
+        wait: Boolean = true,
     ): number {
         let clb = {
             func: callback,
             wait: wait,
         };
 
-        if (clb.wait != true) {
+        if (clb.wait != true || clb.wait == undefined || clb.wait == null) {
             clb.wait = false;
         }
 
@@ -123,7 +123,7 @@ export class Event<Events, EventsTypes> {
         callback: (
             data: EventsTypes,
         ) => Promise<void> | ((data: EventsTypes) => void),
-        wait: Boolean = false,
+        wait: Boolean = true,
     ): number {
         if (
             !this.hasCallback(event) ||
@@ -137,7 +137,7 @@ export class Event<Events, EventsTypes> {
             wait: wait,
         };
 
-        if (clb.wait != true) {
+        if (clb.wait != true || clb.wait == undefined || clb.wait == null) {
             clb.wait = false;
         }
 
@@ -318,7 +318,7 @@ export class Event<Events, EventsTypes> {
      * unsubscribeAllCallback eliminates all callbacks that match the desired from
      * the Event
      * @param event Event Type
-     * @param callback Callback Function to eliminate
+     * @param callback Callback Function to unsubscribe
      * @returns the callback and the new callbacks length, if there are none it returns
      * both as null
      */
@@ -332,20 +332,39 @@ export class Event<Events, EventsTypes> {
             return { callback: null as null, newLength: null as null };
         }
 
-        let callbacks = this.eventsMap.get(event) as [
-            {
-                func: (
-                    data: EventsTypes,
-                ) => Promise<void> | ((data: EventsTypes) => void);
-                wait: Boolean;
-            },
-        ];
-
-        let counter: number = 0;
-        let tail: number = 0;
-        let head: number = 0;
-
-        // implement
+        // Can be improved
+        let elementeleminated:
+            | {
+                  callback: {
+                      func: (
+                          data: EventsTypes,
+                      ) => Promise<void> | ((data: EventsTypes) => void);
+                      wait: Boolean;
+                  };
+                  newLength: number;
+              }
+            | { callback: null; newLength: null }
+            | null = null;
+        while (
+            elementeleminated == null ||
+            elementeleminated.callback?.func == callback
+        ) {
+            elementeleminated = this.unsubscribeFirstCallback(
+                event,
+                callback,
+            ) as
+                | {
+                      callback: {
+                          func: (
+                              data: EventsTypes,
+                          ) => Promise<void> | ((data: EventsTypes) => void);
+                          wait: Boolean;
+                      };
+                      newLength: number;
+                  }
+                | { callback: null; newLength: null }
+                | null;
+        }
     }
 
     /**
