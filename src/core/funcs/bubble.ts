@@ -7,7 +7,7 @@ import { Resource, ResourceType } from "../types/resource";
 import { createResource, rotateVec2, updateResource } from "./resource";
 import { addEvent } from "./events";
 import { EventsType } from "../types/events";
-import { ZeroAddress } from "ethers";
+import { N, ZeroAddress } from "ethers";
 import { BubbleState } from "../types/state";
 import { pseudoRandom } from "./portal";
 
@@ -57,29 +57,20 @@ export const getBubbleResourceMass = (
  */
 export const getAllBubbleResourcesMass = (
     bubble: Bubble,
-): [{ type: ResourceType; mass: number }] | any[] => {
-    let resources = [];
-    for (const tl in ResourceType) {
-        const value = ResourceType[tl];
-
-        if (typeof value === "string") {
-            console.log(`Value: ${ResourceType[tl]}`);
-        }
-    }
+): { type: ResourceType; mass: number }[] | any[] => {
+    let resources: { type: ResourceType; mass: number }[] = [];
 
     for (const resource in ResourceType) {
-        if (
-            bubble.resources?.has(
+        let rs = ResourceType[resource] as unknown as ResourceType;
+        if (!bubble.resources?.has(rs)) continue;
+
+        resources.push({
+            type: rs,
+            mass: getBubbleResourceMass(
+                bubble,
                 ResourceType[resource] as unknown as ResourceType,
-            )
-        )
-            resources.push({
-                type: resource,
-                mass: getBubbleResourceMass(
-                    bubble,
-                    ResourceType[resource] as unknown as ResourceType,
-                ),
-            });
+            ),
+        });
     }
 
     return resources;
@@ -408,52 +399,59 @@ export const absorbBubble = (
 
     //console.log("potentialOverlap", potentialOverlap);
 
-    const amountAbsorbed = Math.min(
-        absorbedBubble.body.getMass(),
-        MASS_PER_SECOND * timeElapsed,
-    );
-    const percentageAbsorbed = amountAbsorbed / absorbedBubble.body.getMass();
-    // probably some transer of resources between bubbles
-    const amountResourceAbsorbed =
-        percentageAbsorbed *
-        getBubbleResourceMass(absorbedBubble, ResourceType.Energy);
-    const momentumAbsorbed = absorbedBubble.body
-        .getLinearVelocity()
-        .clone()
-        .mul(amountAbsorbed);
-    const newBubbleMass = bubble.body.getMass() + amountAbsorbed;
-    const newBubbleResourceMass =
-        getBubbleResourceMass(bubble, ResourceType.Energy) +
-        amountResourceAbsorbed;
-    const newBubbleMomentum = bubble.body
-        .getLinearVelocity()
-        .clone()
-        .mul(bubble.body.getMass())
-        .add(momentumAbsorbed);
-    const newAbsorbedBubbleMass =
-        absorbedBubble.body.getMass() - amountAbsorbed;
-    const newAbsorbedBubbleResourceMass =
-        getBubbleResourceMass(absorbedBubble, ResourceType.Energy) -
-        amountResourceAbsorbed;
-    const newAbsorbedBubbleMomentum = absorbedBubble.body
-        .getLinearVelocity()
-        .clone()
-        .mul(absorbedBubble.body.getMass())
-        .sub(momentumAbsorbed);
-    updateBubble(bubbles, bubble, newBubbleMass);
-    setBubbleResourceMass(bubble, ResourceType.Energy, newBubbleResourceMass);
-    updateBubble(bubbles, absorbedBubble, newAbsorbedBubbleMass);
-    setBubbleResourceMass(
-        absorbedBubble,
-        ResourceType.Energy,
-        newAbsorbedBubbleResourceMass,
-    );
-    //console.log("amountAbsorbed", amountAbsorbed, "newBubbleMass", newBubbleMass, "newAbsorbedBubbleMass", newAbsorbedBubbleMass);
-    if (bubble.body.isDynamic())
-        bubble.body.setLinearVelocity(newBubbleMomentum.mul(1 / newBubbleMass));
-    absorbedBubble.body.setLinearVelocity(
-        newAbsorbedBubbleMomentum.mul(1 / newAbsorbedBubbleMass),
-    );
+    for (const resource in ResourceType) {
+        let rt = ResourceType[resource] as unknown as ResourceType;
+        if (bubble.resources?.has(rt)) continue;
+
+        // add resources
+        const amountAbsorbed = Math.min(
+            absorbedBubble.body.getMass(),
+            MASS_PER_SECOND * timeElapsed,
+        );
+        const percentageAbsorbed =
+            amountAbsorbed / absorbedBubble.body.getMass();
+        // probably some transer of resources between bubbles
+        const amountResourceAbsorbed =
+            percentageAbsorbed * getBubbleResourceMass(absorbedBubble, rt);
+        const momentumAbsorbed = absorbedBubble.body
+            .getLinearVelocity()
+            .clone()
+            .mul(amountAbsorbed);
+        const newBubbleMass = bubble.body.getMass() + amountAbsorbed;
+        const newBubbleResourceMass =
+            getBubbleResourceMass(bubble, rt) + amountResourceAbsorbed;
+        const newBubbleMomentum = bubble.body
+            .getLinearVelocity()
+            .clone()
+            .mul(bubble.body.getMass())
+            .add(momentumAbsorbed);
+        const newAbsorbedBubbleMass =
+            absorbedBubble.body.getMass() - amountAbsorbed;
+        const newAbsorbedBubbleResourceMass =
+            getBubbleResourceMass(absorbedBubble, rt) - amountResourceAbsorbed;
+        const newAbsorbedBubbleMomentum = absorbedBubble.body
+            .getLinearVelocity()
+            .clone()
+            .mul(absorbedBubble.body.getMass())
+            .sub(momentumAbsorbed);
+        updateBubble(bubbles, bubble, newBubbleMass);
+        setBubbleResourceMass(bubble, rt, newBubbleResourceMass);
+        updateBubble(bubbles, absorbedBubble, newAbsorbedBubbleMass);
+        setBubbleResourceMass(
+            absorbedBubble,
+            rt,
+            newAbsorbedBubbleResourceMass,
+        );
+
+        //console.log("amountAbsorbed", amountAbsorbed, "newBubbleMass", newBubbleMass, "newAbsorbedBubbleMass", newAbsorbedBubbleMass);
+        if (bubble.body.isDynamic())
+            bubble.body.setLinearVelocity(
+                newBubbleMomentum.mul(1 / newBubbleMass),
+            );
+        absorbedBubble.body.setLinearVelocity(
+            newAbsorbedBubbleMomentum.mul(1 / newAbsorbedBubbleMass),
+        );
+    }
 };
 
 export const absorbResource = (
