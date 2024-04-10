@@ -73,8 +73,6 @@ export const ScreenSpawnPortal = () => {
     if (!authenticated) return null;
     if (isPortal) return null;
 
-    return null;
-
     return (
         <div className="screen-title">
             <Card className="w-[550px] h-[550px] flex flex-col justify-center">

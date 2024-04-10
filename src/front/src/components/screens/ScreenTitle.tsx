@@ -25,7 +25,7 @@ const faucetClient = createFaucetClient({
 });
 
 export const ScreenTitle = () => {
-    const { authenticated, ready } = usePrivy();
+    const { authenticated, ready, logout } = usePrivy();
     const { wallets } = useWallets();
     const connectedAddress = wallets[0]?.address ? `${wallets[0].address}` : "";
 
@@ -37,6 +37,7 @@ export const ScreenTitle = () => {
 
     const { data, isError, isLoading } = useBalance({
         address: connectedAddress,
+        chainId: currentChain.id,
     });
 
     const balance = useMemo(() => {
@@ -71,22 +72,23 @@ export const ScreenTitle = () => {
     }, [shouldFetchFunds]);
 
     useEffect(() => {
-        if (fetchingFunds) {
+        if (fetchingFunds && shouldFetchFunds) {
             setButtonText("Fetching funds for burner...");
         } else if (authenticated && ready) {
-            setButtonText("Connected to " + truncateAddress(connectedAddress));
-        } else if (!authenticated) {
+            setButtonText("Play " + truncateAddress(connectedAddress));
+        } else if (!authenticated || !ready) {
             setButtonText("Loading...");
         } else {
             setButtonText("Play");
         }
-    }, [authenticated, ready, fetchingFunds, balance]);
+    }, [authenticated, ready, fetchingFunds, balance, isLoading, data, shouldFetchFunds]);
     const { login } = usePrivy();
-    // const isFunded = useMemo(() => {
-    //     return balance > 0
-    // }, [balance])
+    const isFunded = useMemo(() => {
+        return balance > 0
+    }, [balance])
 
-    if (isButtonClicked) return null;
+    if (isButtonClicked && isFunded && ready) return null;
+
     return (
         <div className="screen-title">
             <Card className="w-[550px] h-[550px] flex flex-col justify-center">
@@ -100,6 +102,7 @@ export const ScreenTitle = () => {
             <div className="screen-title-buttons text-center">
                 <Button
                     className="text-center"
+                    disabled={isError || isLoading}
                 onClick={() => {
                     login();
                     setButtonClicked(true);

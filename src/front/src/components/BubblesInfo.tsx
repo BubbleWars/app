@@ -7,6 +7,7 @@ import { ResourceType } from "../../../core/types/resource";
 import { useDispatch, useSelector } from "react-redux";
 import { setLock } from "../store/interpolation";
 import { useDisplayName } from "./GetDisplayName";
+import { useUserSocial } from "@/hooks/socials";
 
 export const BubblesInfo = ({
     bubbleId,
@@ -20,10 +21,12 @@ export const BubblesInfo = ({
     const bubble = currentState.bubbles.find(
         (bubble) => bubble.id === bubbleId,
     );
-    const displayName = useDisplayName(bubble.owner);
+    const { social } = useUserSocial({ address: bubble.owner });
 
     if (!bubble) return null;
     if (!position) return null;
+
+    const displayName = social ?? truncateAddress(bubble.owner);
     const radius = massToRadius(bubble.mass);
     const textPosition = position;
 

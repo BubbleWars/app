@@ -11,7 +11,7 @@ import { Button } from "../ui/button";
 import { usePrivy } from "@privy-io/react-auth";
 
 export const ScreenLogin = () => {
-    const { login } = usePrivy();
+    const { login, ready } = usePrivy();
 
     return (
         <div className="screen-title">
@@ -28,12 +28,13 @@ export const ScreenLogin = () => {
                 <CardContent>
                     <div className="screen-title-buttons text-center">
                         <Button
+                        disabled={!ready}
                             className="w-[100px] text-center"
                             onClick={() => {
                                 login();
                             }}
                         >
-                            Login
+                            {ready ? "Login" : "Loading..."}
                         </Button>
                     </div>
                 </CardContent>
