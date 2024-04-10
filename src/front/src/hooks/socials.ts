@@ -11,7 +11,8 @@ export interface UserSocial {
 export const userSocialsState: { [address: string]: UserSocial } = {};
 
 export const useUserSocial = ({ address }: { address: string }) => {
+    console.log("useUserSocial", userSocialsState);
     return useMemo(() => {
-        return userSocialsState[address];
+        return userSocialsState[address.toLowerCase()];
     }, [address, userSocialsState]);
 };

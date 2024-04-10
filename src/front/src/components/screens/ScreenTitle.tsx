@@ -25,7 +25,7 @@ const faucetClient = createFaucetClient({
 });
 
 export const ScreenTitle = () => {
-    const { walletConnectors } = usePrivy();
+    const { authenticated, ready } = usePrivy();
     const { wallets } = useWallets();
     const connectedAddress = wallets[0]?.address ? `${wallets[0].address}` : "";
 
@@ -34,7 +34,6 @@ export const ScreenTitle = () => {
     const [buttonText, setButtonText] = React.useState("Connect");
     const [isButtonClicked, setButtonClicked] = React.useState(false);
     const [fetchingFunds, setFetchingFunds] = React.useState(false);
-    const { address, isConnected, isConnecting } = useAccount();
 
     const { data, isError, isLoading } = useBalance({
         address: connectedAddress,
@@ -43,6 +42,8 @@ export const ScreenTitle = () => {
     const balance = useMemo(() => {
         return parseFloat(data?.formatted ?? "0");
     }, [data]);
+
+    console.log("The balance is:   " + balance);
 
     const shouldFetchFunds = useMemo(() => {
         if (isError || isLoading) return false;
@@ -72,14 +73,14 @@ export const ScreenTitle = () => {
     useEffect(() => {
         if (fetchingFunds) {
             setButtonText("Fetching funds for burner...");
-        } else if (isConnected) {
+        } else if (authenticated && ready) {
             setButtonText("Connected to " + truncateAddress(connectedAddress));
-        } else if (isConnecting) {
+        } else if (!authenticated) {
             setButtonText("Loading...");
         } else {
             setButtonText("Play");
         }
-    }, [isConnected, isConnecting, address, fetchingFunds, balance]);
+    }, [authenticated, ready, fetchingFunds, balance]);
     const { login } = usePrivy();
     // const isFunded = useMemo(() => {
     //     return balance > 0
@@ -98,11 +99,10 @@ export const ScreenTitle = () => {
         <CardContent>
             <div className="screen-title-buttons text-center">
                 <Button
-                    className="w-[100px] text-center"
+                    className="text-center"
                 onClick={() => {
-                    connect();
                     login();
-
+                    setButtonClicked(true);
                 }}>
                 {buttonText}
                 </Button>

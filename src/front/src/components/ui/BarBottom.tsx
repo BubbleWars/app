@@ -6,12 +6,14 @@ import { Resource, ResourceType } from "../../../../core/types/resource";
 import { ResourceState } from "../../../../core/types/state";
 import { useFrame } from "@react-three/fiber";
 import { useWallets } from "@privy-io/react-auth";
+import { useUserSocial } from "@/hooks/socials";
 
 export const BarBottom = () => {
     const { wallets } = useWallets();
 
     const connectedAddress = wallets[0]?.address ? `${wallets[0].address}` : "";
     const address = connectedAddress;
+
 
 
     const portal = currentState.portals.find(portal => portal.id.toLowerCase() == address.toLowerCase());
@@ -21,7 +23,8 @@ export const BarBottom = () => {
 
     useEffect(() => {
         const intervalId = setInterval(() => {
-            const portal = currentState.portals.find(portal => portal.id.toLowerCase() == address.toLowerCase());
+            const portal = currentState.portals.find(portal => portal.owner.toLowerCase() == address.toLowerCase());
+            console.log("These are the current portals 69:  ", currentState.portals);
             if(portal) {
                 setBalance(portal.mass);
                 setPosition(portal.position);
@@ -29,7 +32,7 @@ export const BarBottom = () => {
             }
         }, 1000)
         return () => clearInterval(intervalId);
-    }, [])
+    }, [address])
     return (
         <div className="bg-white flex flex-row h-[10vh] w-full fixed bottom-0 right-0 space-x-6 p-4 items-center">
             <UserView address={address} />

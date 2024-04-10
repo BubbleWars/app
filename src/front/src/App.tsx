@@ -63,7 +63,7 @@ function App() {
             {!authenticated && <ScreenLogin />}
             {authenticated && <ScreenTitle />}
             <ScreenSpawnPortal />
-            <button onClick={logout}>Log out</button>
+            {/* <button onClick={logout}>Log out</button> */}
         </>
     );
 }
