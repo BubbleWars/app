@@ -50,6 +50,71 @@ export const getBubbleResourceMass = (
     return bubbleResource?.mass || 0;
 };
 
+/**
+ * getAllBubbleResourcesMass returns all Resources masses of a bubble
+ * @param bubble The bubble to fetch for all resources
+ * @returns masses of all the bubble resources or an empty array
+ */
+export const getAllBubbleResourcesMass = (
+    bubble: Bubble,
+): [{ type: ResourceType; mass: number }] | any[] => {
+    let resources = [];
+    for (const tl in ResourceType) {
+        const value = ResourceType[tl];
+
+        if (typeof value === "string") {
+            console.log(`Value: ${ResourceType[tl]}`);
+        }
+    }
+
+    for (const resource in ResourceType) {
+        if (
+            bubble.resources?.has(
+                ResourceType[resource] as unknown as ResourceType,
+            )
+        )
+            resources.push({
+                type: resource,
+                mass: getBubbleResourceMass(
+                    bubble,
+                    ResourceType[resource] as unknown as ResourceType,
+                ),
+            });
+    }
+
+    return resources;
+};
+
+/**
+ * getBubbleShield returns the mass of BLUE resource a bubble has, this resource
+ * represents its shield
+ * @param bubble The bubble
+ * @returns the mass of BLUE resources, if it has no mass it will return 0
+ */
+export const getBubbleMassBLUE = (bubble: Bubble): number => {
+    return getBubbleResourceMass(bubble, ResourceType.BLUE);
+};
+
+/**
+ * getBubbleShield returns the mass of RED resource a bubble has, this resource
+ * represents its shield
+ * @param bubble The bubble
+ * @returns the mass of RED resources, if it has no mass it will return 0
+ */
+export const getBubbleMassRED = (bubble: Bubble): number => {
+    return getBubbleResourceMass(bubble, ResourceType.RED);
+};
+
+/**
+ * getBubbleShield returns the mass of GREEN resource a bubble has, this resource
+ * represents its shield
+ * @param bubble The bubble
+ * @returns the mass of GREEN resources, if it has no mass it will return 0
+ */
+export const getBubbleMassGREEN = (bubble: Bubble): number => {
+    return getBubbleResourceMass(bubble, ResourceType.GREEN);
+};
+
 export const setBubbleResourceMass = (
     bubble: Bubble,
     resource: ResourceType,
@@ -73,7 +138,7 @@ export const createBubble = (
     controllable: boolean,
     id?: string,
     bubbleState?: BubbleState,
-    from?: string
+    from?: string,
 ): Bubble => {
     const radius = massToRadius(mass);
     if (owner == ZeroAddress)
@@ -90,7 +155,14 @@ export const createBubble = (
         restitution: 0,
         friction: 0,
     });
-    const bubble: Bubble = { owner, balance: 0, body, fixture, controllable, from: from ?? "" };
+    const bubble: Bubble = {
+        owner,
+        balance: 0,
+        body,
+        fixture,
+        controllable,
+        from: from ?? "",
+    };
     //set id
     if (id) bubble.body.setUserData(id);
     else bubble.body.setUserData(generateBubbleId(bubbles, owner));
@@ -175,7 +247,7 @@ export const emitBubble = (
     emissionDirection?: Vec2,
 ): Bubble => {
     //if(!bubble.controllable) throw new Error("Cannot emit from a non-controllable bubble");
-    if (mass > bubble.body.getMass()){
+    if (mass > bubble.body.getMass()) {
         console.log("Cannot emit more than of the bubble's mass");
         return;
     }
@@ -212,7 +284,9 @@ export const emitBubble = (
 
     //Apply momentum conservation
     const originalBubbleMomentum = totalMomentum.clone();
-    const emittedBubbleVelocityDirection = emissionDirection ? emissionDirection.clone() : direction.clone();
+    const emittedBubbleVelocityDirection = emissionDirection
+        ? emissionDirection.clone()
+        : direction.clone();
     const emittedBubbleVelocityMagnitude =
         (bubble.body.getMass() / emittedBubble.body.getMass()) * EMISSION_SPEED;
     const emittedBubbleRelativeVelocity = emittedBubbleVelocityDirection.mul(
@@ -245,7 +319,7 @@ export const emitResource = (
     mass: number,
     direction: Vec2,
 ): Resource => {
-    if (mass > getBubbleResourceMass(bubble, resourceType)){
+    if (mass > getBubbleResourceMass(bubble, resourceType)) {
         console.log("Cannot emit more than the bubble's resource mass");
         return;
     }
@@ -282,7 +356,7 @@ export const emitResource = (
 
     //Apply momentum conservation
     const originalBubbleMomentum = totalMomentum.clone();
-    const emittedResourceVelocityDirection = direction.clone()
+    const emittedResourceVelocityDirection = direction.clone();
     const emittedResourceVelocityMagnitude =
         (bubble.body.getMass() / emittedResource.body.getMass()) *
         EMISSION_SPEED;
@@ -339,6 +413,7 @@ export const absorbBubble = (
         MASS_PER_SECOND * timeElapsed,
     );
     const percentageAbsorbed = amountAbsorbed / absorbedBubble.body.getMass();
+    // probably some transer of resources between bubbles
     const amountResourceAbsorbed =
         percentageAbsorbed *
         getBubbleResourceMass(absorbedBubble, ResourceType.Energy);
@@ -435,7 +510,8 @@ export const absorbResource = (
         .mul(absorbedResource.body.getMass())
         .sub(momentumAbsorbed);
     //Get the relative momentum between the bubble and the resource
-    if (absorbedResource.resource == ResourceType.Energy) {
+
+    if (absorbedResource.resource == ResourceType.RED) {
         const resourceMass = absorbedResource.body.getMass();
         const resourceVelocity = absorbedResource.body.getLinearVelocity();
         const kineticEnergy =
@@ -443,6 +519,7 @@ export const absorbResource = (
         //the closer the relative momentum is to zero, the more the bubble is moving in the same direction as the resource
         const shouldClash = kineticEnergy > 5;
         //console.log("clash relativeMomentum", relativeMomentum.length(), shouldNotClash);
+
         if (shouldClash) {
             updateBubble(
                 bubbles,
@@ -459,8 +536,9 @@ export const absorbResource = (
             //if bubble energy negative add a puncture
             const bubbleResourceMass = getBubbleResourceMass(
                 bubble,
-                ResourceType.Energy,
+                ResourceType.RED,
             );
+
             if (bubbleResourceMass)
                 if (bubbleResourceMass < 0) {
                     const energyDeficit = bubbleResourceMass;
@@ -489,7 +567,7 @@ export const absorbResource = (
                     );
                     if (puncture) puncture.amount += -energyDeficit;
                     //now set resource to zero
-                    setBubbleResourceMass(bubble, ResourceType.Energy, 0);
+                    setBubbleResourceMass(bubble, ResourceType.GREEN, 0);
                 }
             return;
         } else {
@@ -515,6 +593,8 @@ export const absorbResource = (
         }
 
         //console.log("amountAbsorbed", amountAbsorbed, "newBubbleMass", newBubbleMass, "newAbsorbedResourceMass", newAbsorbedResourceMass);
+    } else if (absorbedResource.resource == ResourceType.BLUE) {
+    } else if (absorbedResource.resource == ResourceType.GREEN) {
     }
 };
 
@@ -548,7 +628,7 @@ export const handlePunctures = (
                     bubble,
                     amountEmitted,
                     puncturePointVec,
-                    emissionDirection
+                    emissionDirection,
                 );
                 puncture.amount = newPunctureAmount;
                 if (newPunctureAmount <= 0)
