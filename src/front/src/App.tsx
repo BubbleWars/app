@@ -61,8 +61,8 @@ function App() {
             <BarSide />
             <BarBottom />
             {!authenticated && <ScreenLogin />}
+            {authenticated && <ScreenSpawnPortal /> }
             {authenticated && <ScreenTitle />}
-            <ScreenSpawnPortal />
             {/* <button onClick={logout}>Log out</button> */}
         </>
     );

@@ -17,9 +17,9 @@ void main() {
         discard; // Outside of the point
     } else if (distanceFromCenter > innerRadius) {
         // On the outline, blend between outlineColor and uColor
-        gl_FragColor = vec4(mix(outlineColor, uColor, alpha), 0.2);
+        gl_FragColor = vec4(mix(outlineColor, uColor, alpha), 0.9);
     } else {
         // Inside the point
-        gl_FragColor = vec4(uColor, 0.2);
+        gl_FragColor = vec4(uColor, 0.9);
     }
 }

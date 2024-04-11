@@ -87,7 +87,7 @@ export const ScreenTitle = () => {
         return balance > 0
     }, [balance])
 
-    if (isButtonClicked && isFunded && ready) return null;
+    if (isButtonClicked) return null;
 
     return (
         <div className="screen-title">
@@ -104,7 +104,7 @@ export const ScreenTitle = () => {
                     className="text-center"
                     disabled={isError || isLoading}
                 onClick={() => {
-                    login();
+                    if(!authenticated) login();
                     setButtonClicked(true);
                 }}>
                 {buttonText}

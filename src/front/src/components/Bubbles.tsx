@@ -7,7 +7,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { currentState } from "../../../core/world";
 import { BubblesInfo } from "./BubblesInfo";
 import { BubblesControlsEmit } from "./BubblesControlsEmit";
-import { Outlines } from "@react-three/drei";
+import { Circle, Outlines, RoundedBox, useTexture } from "@react-three/drei";
 import { darkenColor } from "../utils";
 import * as THREE from "three";
 import { bubbleStartPositions } from "./Game";
@@ -97,11 +97,14 @@ const BubbleMovementParticles =(props: { count: number, radius: number, position
   );
   };
 import { useWallets } from "@privy-io/react-auth";
+import { useUserSocial } from "@/hooks/socials";
+import Outline from "./Outline";
 
 export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
     const { wallets } = useWallets();
 
     const connectedAddress = wallets[0]?.address ? `${wallets[0].address}` : "";
+    const user = useUserSocial({ address: connectedAddress });
     const meshRef = useRef<any>();
     const [isHovered, setIsHovered] = useState<boolean>(false);
     const dispatch = useDispatch();
@@ -120,7 +123,8 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
     const bubble = currentState.bubbles.find(
         (bubble) => bubble.id == bubbleId,
     );
-
+    const pfpUrl = user?.pfpUrl ?? "https://pbs.twimg.com/profile_banners/1754933089342537729/1709396486/1500x500"
+    const texture = useTexture(pfpUrl);
     const velocity = bubble.velocity;
     const normalizedVelocity = {
         x: velocity.x / Math.sqrt(velocity.x ** 2 + velocity.y ** 2),
@@ -214,7 +218,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
         currentState.bubbles.find((bubble) => bubble.id == bubbleId)?.owner ??
         "";
     const baseColor = ethereumAddressToColor(owner);
-    const outlineColor = darkenColor(baseColor, 0.25); // Darken by 20%
+    const outlineColor = darkenColor(baseColor, 0.65); // Darken by 20%
 
     // useEffect(() => {
     //     //console.log("setIsBubbleSelected: ui", isSelected)
@@ -231,7 +235,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
                 position={new THREE.Vector3(bubble.position.x, bubble.position.y, 0)}
                 color={baseColor}
             />
-            <mesh
+            <Circle
                 ref={meshRef}
                 onPointerEnter={() => {
                     if (!isSelected) setIsHovered(true);
@@ -249,10 +253,9 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
                 }}
                 onContextMenu={() => setIsSelected(false)}
             >
-                <sphereGeometry />
-                <Outlines thickness={0.1} color={outlineColor} />
-                <meshBasicMaterial toneMapped={false} color={baseColor} />
-            </mesh>
+                <circleGeometry />
+                <meshBasicMaterial toneMapped={false} map={texture} />
+            </Circle>
 
             {isSelected && (
                 <BubblesControlsEmit
