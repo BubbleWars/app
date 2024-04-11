@@ -76,36 +76,6 @@ export const getAllBubbleResourcesMass = (
     return resources;
 };
 
-/**
- * getBubbleShield returns the mass of BLUE resource a bubble has, this resource
- * represents its shield
- * @param bubble The bubble
- * @returns the mass of BLUE resources, if it has no mass it will return 0
- */
-export const getBubbleMassBLUE = (bubble: Bubble): number => {
-    return getBubbleResourceMass(bubble, ResourceType.BLUE);
-};
-
-/**
- * getBubbleShield returns the mass of RED resource a bubble has, this resource
- * represents its shield
- * @param bubble The bubble
- * @returns the mass of RED resources, if it has no mass it will return 0
- */
-export const getBubbleMassRED = (bubble: Bubble): number => {
-    return getBubbleResourceMass(bubble, ResourceType.RED);
-};
-
-/**
- * getBubbleShield returns the mass of GREEN resource a bubble has, this resource
- * represents its shield
- * @param bubble The bubble
- * @returns the mass of GREEN resources, if it has no mass it will return 0
- */
-export const getBubbleMassGREEN = (bubble: Bubble): number => {
-    return getBubbleResourceMass(bubble, ResourceType.GREEN);
-};
-
 export const setBubbleResourceMass = (
     bubble: Bubble,
     resource: ResourceType,
@@ -519,6 +489,7 @@ export const absorbResource = (
         //console.log("clash relativeMomentum", relativeMomentum.length(), shouldNotClash);
 
         if (shouldClash) {
+            // Update bubble mass
             updateBubble(
                 bubbles,
                 bubble,
@@ -526,48 +497,71 @@ export const absorbResource = (
                 -amountAbsorbed,
                 absorbedResource,
             );
+            // Update resource mass
             updateResource(
                 resources,
                 absorbedResource,
                 newAbsorbedResourceMass,
             );
-            //if bubble energy negative add a puncture
-            const bubbleResourceMass = getBubbleResourceMass(
-                bubble,
-                ResourceType.RED,
-            );
+            // If bubble energy negative add a puncture
+            const punctureResourceMass = resourceMass;
 
-            if (bubbleResourceMass)
-                if (bubbleResourceMass < 0) {
-                    const energyDeficit = bubbleResourceMass;
-                    if (!bubble.punctures) bubble.punctures = new Map();
-                    //puncture point is normalized vector from bubble to resource
-                    const puncturePoint = absorbedResource.body
-                        .getPosition()
-                        .clone()
-                        .sub(bubble.body.getPosition());
-                    const puncturePointNormalized: PuncturePoint = {
-                        x:
-                            puncturePoint.clone().x /
-                            puncturePoint.clone().length(),
-                        y:
-                            puncturePoint.clone().y /
-                            puncturePoint.clone().length(),
-                    };
+            // Check if mass of resource is enough to puncture
+            if (punctureResourceMass < 0) {
+                // Createdd puncture if not already existing
+                if (!bubble.punctures) bubble.punctures = new Map();
+                const puncturePoint = absorbedResource.body
+                    .getPosition()
+                    .clone()
+                    .sub(bubble.body.getPosition());
 
+                // Normalize puncture coordinates
+                const puncturePointNormalized: PuncturePoint = {
+                    x: puncturePoint.clone().x / puncturePoint.clone().length(),
+                    y: puncturePoint.clone().y / puncturePoint.clone().length(),
+                };
+
+                // Get shield mass
+                const shieldResourceMass = getBubbleResourceMass(
+                    bubble,
+                    ResourceType.BLUE,
+                );
+                // Calculate resources to be emitted
+                const massToBeEmitted =
+                    shieldResourceMass + punctureResourceMass;
+
+                // Puncture will emit resources
+                if (massToBeEmitted < 0) {
+                    // Add mass
                     if (!bubble.punctures.has(puncturePointNormalized)) {
                         bubble.punctures.set(puncturePointNormalized, {
-                            amount: 0,
+                            amount: massToBeEmitted, // Aomount of resources to be emitted
                         });
                     }
                     const puncture = bubble.punctures.get(
                         puncturePointNormalized,
                     );
-                    if (puncture) puncture.amount += -energyDeficit;
-                    //now set resource to zero
-                    setBubbleResourceMass(bubble, ResourceType.GREEN, 0);
+                    if (puncture) puncture.amount += -massToBeEmitted;
+
+                    // Reset shield
+                    setBubbleResourceMass(bubble, ResourceType.BLUE, 0);
+                } else {
+                    setBubbleResourceMass(
+                        bubble,
+                        ResourceType.BLUE,
+                        massToBeEmitted,
+                    );
                 }
-            return;
+            }
+
+            // Linear velocity updated only if cinetik energy is enough??????
+            if (bubble.body.isDynamic())
+                bubble.body.setLinearVelocity(
+                    newBubbleMomentum.mul(1 / newBubbleMass),
+                );
+            absorbedResource.body.setLinearVelocity(
+                newAbsorbedResourceMomentum.mul(1 / newAbsorbedResourceMass),
+            );
         } else {
             updateBubble(
                 bubbles,
@@ -581,6 +575,46 @@ export const absorbResource = (
                 absorbedResource,
                 newAbsorbedResourceMass,
             );
+
+            setBubbleResourceMass(
+                bubble,
+                ResourceType.RED,
+                getBubbleResourceMass(bubble, ResourceType.RED) + resourceMass,
+            );
+        }
+
+        //console.log("amountAbsorbed", amountAbsorbed, "newBubbleMass", newBubbleMass, "newAbsorbedResourceMass", newAbsorbedResourceMass);
+    } else if (absorbedResource.resource == ResourceType.GREEN) {
+        const resourceMass = absorbedResource.body.getMass();
+        const resourceVelocity = absorbedResource.body.getLinearVelocity();
+        const kineticEnergy =
+            resourceVelocity.clone().lengthSquared() * resourceMass;
+        //the closer the relative momentum is to zero, the more the bubble is moving in the same direction as the resource
+        const shouldClash = kineticEnergy > 5;
+
+        if (shouldClash) {
+            updateBubble(
+                bubbles,
+                bubble,
+                newBubbleMass - amountAbsorbed,
+                -amountAbsorbed,
+                absorbedResource,
+            );
+            updateResource(
+                resources,
+                absorbedResource,
+                newAbsorbedResourceMass,
+            );
+
+            // Reduce from already owned green
+            setBubbleResourceMass(
+                bubble,
+                ResourceType.GREEN,
+                getBubbleResourceMass(bubble, ResourceType.GREEN) +
+                    resourceMass,
+            );
+
+            // Linear velocity updated only if cinetik energy is enough??????
             if (bubble.body.isDynamic())
                 bubble.body.setLinearVelocity(
                     newBubbleMomentum.mul(1 / newBubbleMass),
@@ -588,11 +622,47 @@ export const absorbResource = (
             absorbedResource.body.setLinearVelocity(
                 newAbsorbedResourceMomentum.mul(1 / newAbsorbedResourceMass),
             );
-        }
+        } else {
+            updateBubble(
+                bubbles,
+                bubble,
+                newBubbleMass,
+                amountAbsorbed,
+                absorbedResource,
+            );
+            updateResource(
+                resources,
+                absorbedResource,
+                newAbsorbedResourceMass,
+            );
 
-        //console.log("amountAbsorbed", amountAbsorbed, "newBubbleMass", newBubbleMass, "newAbsorbedResourceMass", newAbsorbedResourceMass);
+            // Add to already owned green
+            setBubbleResourceMass(
+                bubble,
+                ResourceType.GREEN,
+                getBubbleResourceMass(bubble, ResourceType.GREEN) +
+                    -resourceMass,
+            );
+        }
     } else if (absorbedResource.resource == ResourceType.BLUE) {
-    } else if (absorbedResource.resource == ResourceType.GREEN) {
+        const resourceMass = absorbedResource.body.getMass();
+        // We dont care about BLUE resource velocity
+
+        // Add to already owned shield
+        setBubbleResourceMass(
+            bubble,
+            ResourceType.BLUE,
+            getBubbleResourceMass(bubble, ResourceType.BLUE) + -resourceMass,
+        );
+
+        updateBubble(
+            bubbles,
+            bubble,
+            newBubbleMass,
+            amountAbsorbed,
+            absorbedResource,
+        );
+        updateResource(resources, absorbedResource, newAbsorbedResourceMass);
     }
 };
 
