@@ -7,7 +7,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { currentState } from "../../../core/world";
 import { BubblesInfo } from "./BubblesInfo";
 import { BubblesControlsEmit } from "./BubblesControlsEmit";
-import { Circle, Outlines, RoundedBox, useTexture } from "@react-three/drei";
+import { Circle, Edges, Outlines, RoundedBox, useTexture } from "@react-three/drei";
 import { darkenColor } from "../utils";
 import * as THREE from "three";
 import { bubbleStartPositions } from "./Game";
@@ -99,6 +99,7 @@ const BubbleMovementParticles =(props: { count: number, radius: number, position
 import { useWallets } from "@privy-io/react-auth";
 import { useUserSocial } from "@/hooks/socials";
 import Outline from "./Outline";
+import { text } from "stream/consumers";
 
 export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
     const { wallets } = useWallets();
@@ -123,8 +124,10 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
     const bubble = currentState.bubbles.find(
         (bubble) => bubble.id == bubbleId,
     );
-    const pfpUrl = user?.pfpUrl ?? "https://pbs.twimg.com/profile_banners/1754933089342537729/1709396486/1500x500"
+    const pfpUrl = user?.social ?  `https://unavatar.io/twitter/${user?.social}` : "https://unavatar.io/jessepollak";
+    console.log("pfpUrl", pfpUrl)
     const texture = useTexture(pfpUrl);
+    texture.anisotropy = 16;
     const velocity = bubble.velocity;
     const normalizedVelocity = {
         x: velocity.x / Math.sqrt(velocity.x ** 2 + velocity.y ** 2),
@@ -255,6 +258,13 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
             >
                 <circleGeometry />
                 <meshBasicMaterial toneMapped={false} map={texture} />
+                <Edges 
+                    linewidth={10}
+                    scale={1}
+                    threshold={15} // Display edges only when the angle between two faces exceeds this value (default=15 degrees)
+                    color="black"
+                />
+
             </Circle>
 
             {isSelected && (
