@@ -49,7 +49,7 @@ export const BubblesInfo = ({
     return (
         <>
             <CustomText size={radius / 3} position={textPosition}>
-                {displayName}
+                @{displayName}
             </CustomText>
             <group position={pos2}>
                 <CustomText
@@ -70,7 +70,7 @@ export const BubblesInfo = ({
                 </CustomText>
             </group>
 
-            <group
+            {/* <group
                 position={pos3}
                 onClick={() => {
                     if (lock == bubbleId) dispatch(setLock(null));
@@ -86,7 +86,7 @@ export const BubblesInfo = ({
                 >
                     {lock == bubbleId ? "X" : "🔓"}
                 </CustomText>
-            </group>
+            </group> */}
         </>
     );
 };

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SlidingPanel from "react-sliding-side-panel";
 import {
     ChevronRightIcon,
@@ -81,9 +81,10 @@ export const ResourcesIcon = ({
     resources: { resource: ResourceType; mass: number }[];
 }) => {
     const defaultResources = [{}];
+    const blue = resources.find((resource) => resource.resource === ResourceType.Energy);
     return (
         <div className="flex items-center space-x-2">
-            {resources.map((resource) => (
+            {/* {resources.map((resource) => (
                 <div
                     key={resource.resource}
                     className="flex items-center space-x-2"
@@ -95,12 +96,12 @@ export const ResourcesIcon = ({
                         style={{ fill: RESOURCE_TO_COLOR[resource.resource] }}
                     />
                 </div>
-            ))}
+            ))} */}
                 <div 
                     key="blue" 
                     className="flex items-center color-blue space-x-0"
                 >
-                    <p className="text-xs text-blue-500">0.00</p>
+                    <p className="text-xs text-blue-500">{blue?.mass?.toFixed(2) ?? 0}</p>
                     <Cross1Icon color="blue-500" className="item-center p-0 m-0 fill-blue-500 stroke-fill-blue-500 h-2 w-2" />
                     <ShadowIcon  color="blue-500" className="item-center h-2 w-2 p-0 m-0 fill-blue-500 stroke-fill-blue-500" />
                 </div>
@@ -298,6 +299,11 @@ export const TabYours = () => {
     const portalMass = portal?.mass ?? 0;
     const portalPosition = portal?.position ?? { x: 0, y: 0 };
     console.log(portal);
+
+    useEffect(() => {
+
+    }, [address])
+
     return (
         <Accordion
             type="multiple"
@@ -305,7 +311,7 @@ export const TabYours = () => {
             defaultValue={["portal", "bubbles", "liquidity"]}
         >
             <AccordionItem value="portal">
-                <AccordionTrigger>Portal</AccordionTrigger>
+                <AccordionTrigger className="font-semibold">Portal</AccordionTrigger>
                 <AccordionContent>
                     <div className="w-full flex flex-row items-center space-evenly space-x-3">
                         <p>{truncatedAddress}</p>
@@ -316,13 +322,13 @@ export const TabYours = () => {
                 </AccordionContent>
             </AccordionItem>
             <AccordionItem value="bubbles">
-                <AccordionTrigger>Bubbles</AccordionTrigger>
+                <AccordionTrigger className="font-semibold">Bubbles</AccordionTrigger>
                 <AccordionContent className="w-full">
                     <ListBubbles bubbles={yourBubbles} />
                 </AccordionContent>
             </AccordionItem>
             <AccordionItem value="liquidity">
-                <AccordionTrigger>Liquidity</AccordionTrigger>
+                <AccordionTrigger className="font-semibold">Liquidity</AccordionTrigger>
                 <AccordionContent>
                     You are not providing liquidity to any nodes.
                 </AccordionContent>
@@ -332,7 +338,8 @@ export const TabYours = () => {
 };
 
 export const TabAll = () => {
-    const players = currentState.users;
+    const players: User[] = Object.values(currentState.users.reduce((acc, user) => (acc[user.address] = user, acc), {}));
+        
     return (
         <Accordion
             type="multiple"
@@ -340,13 +347,13 @@ export const TabAll = () => {
             defaultValue={["players", "liquidity"]}
         >
             <AccordionItem value="players">
-                <AccordionTrigger>Players</AccordionTrigger>
+                <AccordionTrigger className="font-semibold">Players</AccordionTrigger>
                 <AccordionContent>
                     <ListPlayers players={players} />
                 </AccordionContent>
             </AccordionItem>
             <AccordionItem value="liquidity">
-                <AccordionTrigger>Nodes</AccordionTrigger>
+                <AccordionTrigger className="font-semibold">Nodes</AccordionTrigger>
                 <AccordionContent>
                     Node liquidity is not being provided by any players.
                 </AccordionContent>
@@ -373,31 +380,34 @@ export const BarSide = () => {
             <Drawer.Portal>
                 <Drawer.Overlay className="fixed inset-0 bg-black/40" />
                 <Drawer.Content className="bg-white flex flex-col rounded-t-[10px] h-full w-[500px] mt-24 fixed bottom-0 right-0">
-                    <div className="p-4 bg-white flex-1 h-full">
-                        <div className="max-w-md mx-auto">
-                            <Drawer.Title className="font-medium font-bold mb-4">
-                                <h1>World stats</h1>
-                            </Drawer.Title>
-                            <Tabs defaultValue="yours">
-                                <TabsList defaultValue={"yours"}>
-                                    <TabsTrigger value="yours">
-                                        Yours
-                                    </TabsTrigger>
-                                    <TabsTrigger value="all">All</TabsTrigger>
-                                    <TabsTrigger value="leaderboard">
-                                        Leaderboard
-                                    </TabsTrigger>
-                                </TabsList>
-                                <TabsContent value="yours">
-                                    <TabYours />
-                                </TabsContent>
-                                <TabsContent value="all">
-                                    <TabAll />
-                                </TabsContent>
-                                <TabsContent value="leaderboard"></TabsContent>
-                            </Tabs>
-                        </div>
+                    <ScrollArea>
+                        <div className="p-4 bg-white flex-1 h-full">
+                            <div className="max-w-md mx-auto">
+                                <Drawer.Title className="font-medium font-bold mb-4">
+                                    <h1 className="font-bold">World stats</h1>
+                                </Drawer.Title>
+                                <Tabs defaultValue="yours">
+                                    <TabsList defaultValue={"yours"}>
+                                        <TabsTrigger value="yours">
+                                            Yours
+                                        </TabsTrigger>
+                                        <TabsTrigger value="all">All</TabsTrigger>
+                                        <TabsTrigger value="leaderboard">
+                                            Leaderboard
+                                        </TabsTrigger>
+                                    </TabsList>
+                                    <TabsContent value="yours">
+                                        <TabYours />
+                                    </TabsContent>
+                                    <TabsContent value="all">
+                                        <TabAll />
+                                    </TabsContent>
+                                    <TabsContent value="leaderboard"></TabsContent>
+                                </Tabs>
+                            </div>
                     </div>
+                    </ScrollArea>
+                    
                 </Drawer.Content>
             </Drawer.Portal>
         </Drawer.Root>

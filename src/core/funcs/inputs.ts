@@ -310,6 +310,11 @@ const handleEmit = (input: Emit, client: boolean): boolean => {
     }
     if (!input?.executionTime) input.executionTime = input.timestamp;
     if (input?.executionTime < input?.timestamp) return false;
+
+    if(input?.mass <= 0){ 
+        console.log("Input mass is less than or equal to 0");
+        return false;
+    }
     const user = getUser(input.sender, client);
 
     if (isPortal) {

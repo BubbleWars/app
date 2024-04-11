@@ -28,6 +28,7 @@ import { ResourceType } from "../../../core/types/resource";
 import { setControlsActive, setIsBubbleSelected } from "../store/interpolation";
 
 import { useWallets } from "@privy-io/react-auth";
+import { getPortalMass } from "../../../core/funcs/portal";
 
 export const PortalsControlsEmit = ({
     portalId,
@@ -52,12 +53,14 @@ export const PortalsControlsEmit = ({
     );
     const [hasProcessedTx, setHasProcessedTx] = useState(false);
     const [isEmitting, setIsEmitting] = useState<boolean>(false);
-    const [mass, setMass] = useState<number>(portal.mass / 10);
+    const [mass, setMass] = useState<number>(0.05);
     const [emitEth, setEmitEth] = useState<boolean>(true);
     const [emitEp, setEmitEp] = useState<boolean>(false);
     const [isReady, setIsReady] = useState<boolean>(false);
     const lineRef = useRef<any>();
     const address = connectedAddress;
+    const blueMass = portal.resources.find( (resource) => resource.resource == ResourceType.Energy)?.mass ?? 0
+    const ethMass = portal.mass - blueMass
 
     //Input action
     const { write, isError, isLoading, isSuccess, data, submitTransaction } =
@@ -168,9 +171,13 @@ export const PortalsControlsEmit = ({
     //Scroll action
     useOnWheel((event) => {
         if (isError || isLoading || isSuccess) return;
-        const newMass = Math.max(
-            Math.min(mass + event.deltaY / 100, portal.mass),
-            0,
+              
+        const maxMass = emitEth ? ethMass : blueMass;
+        const minMass = 0.05;
+        const step = 0.01;
+        const newMass = Math.min(
+            Math.max(mass + (event.deltaY > 0 ? -step : step), minMass),
+            maxMass,
         );
         setMass(newMass);
     });
@@ -246,6 +253,7 @@ export const PortalsControlsEmit = ({
                     <group
                         onPointerEnter={() => {
                             setEmitEth(true);
+                            setMass(ethMass/10);
                             setEmitEp(false);
                         }}
                         onPointerDown={() => {
@@ -272,6 +280,7 @@ export const PortalsControlsEmit = ({
                     <group
                         onPointerEnter={() => {
                             setEmitEp(true);
+                            setMass(Math.min(blueMass, mass));
                             setEmitEth(false);
                         }}
                         onPointerDown={() => {

@@ -56,6 +56,8 @@ export const BubblesControlsEmit = ({
     const [isReady, setIsReady] = useState<boolean>(false);
     const lineRef = useRef<any>();
     const address = connectedAddress;
+    const blueMass = bubble.resources.find( (resource) => resource.resource == ResourceType.Energy)?.mass ?? 0;
+    const ethMass = bubble.mass - blueMass;
 
     //Input action
     const { write, isError, isLoading, isSuccess, data, submitTransaction } =
@@ -165,9 +167,12 @@ export const BubblesControlsEmit = ({
     //Scroll action
     useOnWheel((event) => {
         if (isError || isLoading || isSuccess) return;
-        const newMass = Math.max(
-            Math.min(mass + event.deltaY / 100, bubble.mass),
-            0,
+        const maxMass = emitEth ? ethMass : blueMass;
+        const minMass = 0.05;
+        const step = 0.01;
+        const newMass = Math.min(
+            Math.max(mass + (event.deltaY > 0 ? -step : step), minMass),
+            maxMass,
         );
         setMass(newMass);
     });
@@ -243,6 +248,7 @@ export const BubblesControlsEmit = ({
                     <group
                         onPointerEnter={() => {
                             setEmitEth(true);
+                            setMass(ethMass / 10);
                             setEmitEp(false);
                         }}
                         onPointerDown={() => {
@@ -269,6 +275,7 @@ export const BubblesControlsEmit = ({
                     <group
                         onPointerEnter={() => {
                             setEmitEp(true);
+                            setMass(Math.min(blueMass, mass));
                             setEmitEth(false);
                         }}
                         onPointerDown={() => {
