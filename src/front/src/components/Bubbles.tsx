@@ -105,7 +105,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
     const { wallets } = useWallets();
 
     const connectedAddress = wallets[0]?.address ? `${wallets[0].address}` : "";
-    const user = useUserSocial({ address: connectedAddress });
+
     const meshRef = useRef<any>();
     const [isHovered, setIsHovered] = useState<boolean>(false);
     const dispatch = useDispatch();
@@ -124,6 +124,9 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
     const bubble = currentState.bubbles.find(
         (bubble) => bubble.id == bubbleId,
     );
+
+    const user = useUserSocial({ address:  bubble.owner });
+
     const pfpUrl = user?.social ?  `https://unavatar.io/twitter/${user?.social}` : "https://unavatar.io/jessepollak";
     console.log("pfpUrl", pfpUrl)
     const texture = useTexture(pfpUrl);

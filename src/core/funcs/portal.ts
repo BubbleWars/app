@@ -32,9 +32,9 @@ export const generateSpawnPoint = (
     bubbles: Map<string, Bubble>,
     nodes: Map<string, ResourceNode>,
     mass: number,
-    maxDistanceFromLastPortal: number = 300 // Maximum distance from the last portal
+    maxDistanceFromLastPortal: number = 70 // Maximum distance from the last portal
 ): Vec2 => {
-    const minimumSafeDistance = 100; // Minimum safe distance from other objects
+    const minimumSafeDistance = 50; // Minimum safe distance from other objects
     let safeSpawnFound = false;
     let attempt = 0;
     let spawnPoint = new Vec2(0, 0);

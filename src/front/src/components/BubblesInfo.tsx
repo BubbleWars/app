@@ -21,7 +21,8 @@ export const BubblesInfo = ({
     const bubble = currentState.bubbles.find(
         (bubble) => bubble.id === bubbleId,
     );
-    const { social } = useUserSocial({ address: bubble.owner });
+    const userSocial = useUserSocial({ address: bubble.owner });
+    const social = userSocial?.social ?? null;
 
     if (!bubble) return null;
     if (!position) return null;

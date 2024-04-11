@@ -27,17 +27,19 @@ export const generateNodes = (
     const noise = createNoise2D(prng);
     let count = 0;
 
-    for (let y = -WORLD_WIDTH / 2; y < WORLD_WIDTH / 2; y += 100) {
-        for (let x = -WORLD_HEIGHT / 2; x < WORLD_HEIGHT / 2; x += 100) {
-            const value = noise(x / 100, y / 100);
-            //console.log("noise value", value);
-            if (value > 0.9) {
-                createNode(world, nodes, ResourceType.Energy, x, y, 0);
-                count++;
-            }
-            //if(count >= 50) return;
-        }
-    }
+    // for (let y = -WORLD_WIDTH / 2; y < WORLD_WIDTH / 2; y += 100) {
+    //     for (let x = -WORLD_HEIGHT / 2; x < WORLD_HEIGHT / 2; x += 100) {
+    //         const value = noise(x / 100, y / 100);
+    //         //console.log("noise value", value);
+    //         if (value > 0.9) {
+    //             createNode(world, nodes, ResourceType.Energy, x, y, 0);
+    //             count++;
+    //         }
+    //         //if(count >= 50) return;
+    //     }
+    // }
+
+    createNode(world, nodes, ResourceType.Energy, 0, 0, 0);
 
     //console.log("spawned nodes", count);
 };

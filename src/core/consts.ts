@@ -11,5 +11,6 @@ export const ENERGY_NODE_COUNT = 100;
 
 //The amount of energy in each bubble is calculated according to E=mc^2 * MASS_ENERGY_CONVERSION_EFFICIENCY
 //This refers to the efficiency of converting the Total possible energy within the bubble to the energy that can be used by the user
-export const MASS_ENERGY_CONVERSION_EFFICIENCY  =  6.969 * Math.pow(10, -9); //4.6e-11
+export const MASS_ENERGY_CONVERSION_EFFICIENCY  =  13.969 * Math.pow(10, -9); //4.6e-11
 export const C = 3 * Math.pow(10, 8); //Speed of light in m/s
+export const MAX_VELOCITY = 3;

@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import { Edge, Vec2, World } from "planck-js";
-import { C, MASS_ENERGY_CONVERSION_EFFICIENCY } from "../consts";
+import { C, MASS_ENERGY_CONVERSION_EFFICIENCY, MAX_VELOCITY } from "../consts";
 
 export const massToRadius = (mass: number): number => {
     return Math.sqrt(mass / Math.PI);
@@ -15,7 +15,8 @@ export const calculateEmissionVelocity = (m1: number, m2: number): number => {
     const ejectFactor = Math.pow((m1/m2), alpha); // Non-linear scaling
     const vMax = C * Math.sqrt(2); // Maximum velocity from Total Energy = mc^2
     console.log("emission velocity", MASS_ENERGY_CONVERSION_EFFICIENCY * vMax * ejectFactor)
-    return MASS_ENERGY_CONVERSION_EFFICIENCY * vMax * ejectFactor;
+    const emissionVelocity = MASS_ENERGY_CONVERSION_EFFICIENCY * vMax * ejectFactor;
+    return Math.min(emissionVelocity, MAX_VELOCITY);
 };
 
 export const createBoundary = (
