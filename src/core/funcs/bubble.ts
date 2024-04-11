@@ -2,7 +2,7 @@ import { Circle, Vec2, World } from "planck-js";
 import { Bubble, PuncturePoint } from "../types/bubble";
 import { calculateEmissionVelocity, massToRadius } from "./utils";
 import { Address } from "../types/address";
-import { CLASH_KE, DAMPENING, EMISSION_SPEED, MASS_PER_SECOND } from "../consts";
+import { CLASH_KE, CLASH_VELOCITY, DAMPENING, EMISSION_SPEED, MASS_PER_SECOND } from "../consts";
 import { Resource, ResourceType } from "../types/resource";
 import { createResource, rotateVec2, updateResource } from "./resource";
 import { addEvent } from "./events";
@@ -435,10 +435,11 @@ export const absorbResource = (
     if (absorbedResource.resource == ResourceType.Energy) {
         const resourceMass = absorbedResource.body.getMass();
         const resourceVelocity = absorbedResource.body.getLinearVelocity();
+        const magnitudeVelocity =resourceVelocity.clone().length();
         const kineticEnergy =
             resourceVelocity.clone().lengthSquared() * resourceMass;
         //the closer the relative momentum is to zero, the more the bubble is moving in the same direction as the resource
-        const shouldClash = kineticEnergy > CLASH_KE;
+        const shouldClash = magnitudeVelocity > CLASH_VELOCITY;
         //console.log("clash relativeMomentum", relativeMomentum.length(), shouldNotClash);
         if (shouldClash) {
             updateBubble(
