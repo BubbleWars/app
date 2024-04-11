@@ -9,6 +9,7 @@ import { resourceStartPositions } from "./Game";
 import { MathUtils } from "three";
 import { CustomText } from "./CustomText";
 import { LERP_SPEED } from "../consts";
+import { CLASH_KE } from "../../../core/consts";
 
 export const Resource = ({ resourceId }: { resourceId: string }) => {
     const meshRef = useRef<any>();
@@ -23,11 +24,13 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
     );
     const mass = resource?.mass.toFixed(2) ?? "0";
     const radius = massToRadius(parseInt(mass ?? "0")) + 0.1;
-    const velocity = resources.get(resourceId)?.body.getLinearVelocity();
+    const velocity = resource?.velocity
+    const magnitude = Math.sqrt(velocity?.x ** 2 + velocity?.y ** 2)
     const kineticEnergy =
         velocity && resource
-            ? velocity?.clone().lengthSquared() * resource?.mass
+            ? magnitude * resource?.mass
             : 0;
+    console.log("kinetic energy", kineticEnergy);
 
     useFrame(() => {
         const resource = currentState.resources.find(
@@ -133,7 +136,7 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
                 <Outlines thickness={0.1} color={outlineColor} />
                 <meshBasicMaterial
                     toneMapped={false}
-                    color={kineticEnergy > 5 ? "#ff0000" : baseColor}
+                    color={kineticEnergy > CLASH_KE ? "#ff0000" : baseColor}
                 />
             </mesh>
         </>

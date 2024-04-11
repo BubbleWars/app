@@ -115,6 +115,8 @@ export const createPortal = (
     const portal = { owner, balance: 0, body, fixture, mass };
     portal.body.setUserData(owner);
     portals.set(portal.body.getUserData() as string, portal);
+    setPortalResourceMass(portal, ResourceType.Energy, 50);
+    updatePortal(portal, mass);
     return portal;
 };
 
