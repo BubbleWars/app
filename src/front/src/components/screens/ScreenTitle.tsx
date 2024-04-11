@@ -102,7 +102,7 @@ export const ScreenTitle = () => {
             <div className="screen-title-buttons text-center">
                 <Button
                     className="text-center"
-                    disabled={isError || isLoading}
+                    disabled={ shouldFetchFunds || isLoading || !ready }
                 onClick={() => {
                     if(!authenticated) login();
                     setButtonClicked(true);
