@@ -95,9 +95,9 @@
 @font-face {
   font-family: 'Aux Mono';
   src: local('Aux Mono Regular'), local('Aux-Mono-Regular'),
-      url('fonts/AuxMono-Regular.woff2') format('woff2'),
-      url('fonts/AuxMono-Regular.woff') format('woff'),
-      url('fonts/AuxMono-Regular.ttf') format('truetype');
+      url('/AuxMono-Regular.woff2') format('woff2'),
+      url('/AuxMono-Regular.woff') format('woff'),
+      url('/AuxMono-Regular.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
 }

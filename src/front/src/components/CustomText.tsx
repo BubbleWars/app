@@ -22,7 +22,7 @@ export const CustomText = ({
     | any) => {
     return (
         <Text
-            font="fonts/AuxMono-Regular.ttf"
+            font="AuxMono-Regular.ttf"
             color={color}
             letterSpacing={-0.23}
             fontWeight="bold"
