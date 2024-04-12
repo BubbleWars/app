@@ -49,7 +49,7 @@ export const ScreenTitle = () => {
     const shouldFetchFunds = useMemo(() => {
         if (isError || isLoading) return false;
         return balance <= 0.5;
-    }, [balance, isError, isLoading]);
+    }, [balance, isError, isLoading, data]);
 
     const fetchFunds = useCallback(() => {
         const _ = async () => {
@@ -72,7 +72,7 @@ export const ScreenTitle = () => {
     }, [shouldFetchFunds]);
 
     useEffect(() => {
-        if (fetchingFunds && shouldFetchFunds) {
+        if (shouldFetchFunds) {
             setButtonText("Fetching funds for burner...");
         } else if (authenticated && ready) {
             setButtonText("Play " + truncateAddress(connectedAddress));
