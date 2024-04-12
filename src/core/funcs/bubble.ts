@@ -4,14 +4,54 @@ import { massToRadius } from "./utils";
 import { Address } from "../types/address";
 import { DAMPENING, EMISSION_SPEED, MASS_PER_SECOND } from "../consts";
 import { Resource, ResourceType } from "../types/resource";
-import { createResource, rotateVec2, updateResource } from "./resource";
+import {
+    createResource,
+    getBubbleEmission,
+    rotateVec2,
+    updateResource,
+} from "./resource";
 import { addEvent } from "./events";
 import { EventsType } from "../types/events";
 import { N, ZeroAddress } from "ethers";
 import { BubbleState } from "../types/state";
 import { pseudoRandom } from "./portal";
+import { ResourceNode } from "../types/resource";
 
 //const PUNCTURE_EMIT_PER_SECOND = 100;
+
+/**
+ * setLinearVelocityBuff takes a ResourceNode element and a Vec2 and changes the
+ * velocity vector based on the node GREEN buff
+ * @param emittedFrom The Node that emits the new bubble
+ * @param vel The Vec2 velocity
+ * @returns the updated velocity
+ */
+export const handleLinearVelocityBuff = (
+    emittedFrom: ResourceNode,
+    vel: Vec2,
+): Vec2 => {
+    if (!emittedFrom.resources?.has(ResourceType.GREEN)) return vel;
+
+    // Notice, buffMass negative for speed up, psitive for speed down
+    const buffMass = getBubbleResourceMass(
+        emittedFrom as unknown as Bubble,
+        ResourceType.GREEN,
+    );
+
+    if (buffMass == 0) return vel;
+
+    const fromMass = emittedFrom.mass;
+
+    if (buffMass > 0) {
+        // debuff
+        const decimalRatio = buffMass / fromMass;
+        return vel.mul(decimalRatio);
+    } else {
+        // buff
+        const decimalRatio = -buffMass / fromMass;
+        return vel.mul(1 + decimalRatio);
+    }
+};
 
 export const generateBubbleId = (
     bubbles: Map<string, Bubble>,
@@ -330,7 +370,12 @@ export const emitResource = (
     const emittedResourceMomentum = emittedResourceVelocity
         .clone()
         .mul(emittedResource.body.getMass());
-    emittedResource.body.setLinearVelocity(emittedResourceVelocity);
+    emittedResource.body.setLinearVelocity(
+        handleLinearVelocityBuff(
+            bubble as unknown as ResourceNode,
+            emittedResourceVelocity,
+        ),
+    );
     bubble.body.setLinearVelocity(
         originalBubbleMomentum
             .sub(emittedResourceMomentum)
@@ -613,6 +658,8 @@ export const absorbResource = (
                 getBubbleResourceMass(bubble, ResourceType.GREEN) +
                     resourceMass,
             );
+
+            // getBubbleEmission
 
             // Linear velocity updated only if cinetik energy is enough??????
             if (bubble.body.isDynamic())

@@ -9,7 +9,7 @@ import {
     WORLD_HEIGHT,
     WORLD_WIDTH,
 } from "../consts";
-import { createBubble, updateBubble } from "./bubble";
+import { createBubble, handleLinearVelocityBuff, updateBubble } from "./bubble";
 import { Bubble } from "../types/bubble";
 import { addEvent } from "./events";
 import { EventsType } from "../types/events";
@@ -248,7 +248,9 @@ export const nodeEmitResource = (
         .getLinearVelocity()
         .clone()
         .add(emittedResourceRelativeVelocity);
-    emittedResource.body.setLinearVelocity(emittedResourceVelocity);
+    emittedResource.body.setLinearVelocity(
+        handleLinearVelocityBuff(node, emittedResourceVelocity),
+    );
 
     console.log("11emitted resource", emittedResourcePosition);
     return emittedResource;
@@ -297,7 +299,9 @@ export const nodeEmitBubble = (
         .getLinearVelocity()
         .clone()
         .add(emittedBubbleRelativeVelocity);
-    emittedBubble.body.setLinearVelocity(emittedBubbleVelocity);
+    emittedBubble.body.setLinearVelocity(
+        handleLinearVelocityBuff(node, emittedBubbleVelocity),
+    );
 
     return emittedBubble;
 };
@@ -400,6 +404,7 @@ export const handleEmission = (
     const newMass = node.mass;
     const emission = Math.abs(mass);
     //console.log("emission", newMass, emission);
+
     if (mass > 0) {
         for (let i = 0; i < 16; i++) {
             const massToEmit = emission / 16;
@@ -415,6 +420,7 @@ export const handleEmission = (
             );
         }
     }
+
     if (mass < 0) {
         for (let i = 0; i < 16; i++) {
             const massToEmit = emission / 16;
