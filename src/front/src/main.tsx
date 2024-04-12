@@ -43,10 +43,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                         config={{
                             // Display email and wallet as login methods
                             loginMethods: [
-                                "wallet",
                                 "twitter",
-                                "discord",
-                                "farcaster",
                             ],
                             supportedChains: [currentChain],
                             defaultChain: currentChain,
