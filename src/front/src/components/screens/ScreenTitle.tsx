@@ -47,7 +47,7 @@ export const ScreenTitle = () => {
     console.log("The balance is:   " + balance);
 
     const shouldFetchFunds = useMemo(() => {
-        if (isError || isLoading) return false;
+        if (isError || isLoading || !data) return false;
         return balance <= 0.5;
     }, [balance, isError, isLoading, data]);
 
@@ -72,7 +72,7 @@ export const ScreenTitle = () => {
     }, [shouldFetchFunds]);
 
     useEffect(() => {
-        if (shouldFetchFunds) {
+        if (fetchingFunds) {
             setButtonText("Fetching funds for burner...");
         } else if (authenticated && ready) {
             setButtonText("Play " + truncateAddress(connectedAddress));
