@@ -48,8 +48,9 @@ export const ScreenTitle = () => {
 
     const shouldFetchFunds = useMemo(() => {
         if (isError || isLoading || !data) return false;
+        if(connectedAddress === "") return false;
         return balance <= 0.5;
-    }, [balance, isError, isLoading, data]);
+    }, [balance, isError, isLoading, data, connectedAddress]);
 
     const fetchFunds = useCallback(() => {
         const _ = async () => {
@@ -102,7 +103,7 @@ export const ScreenTitle = () => {
             <div className="screen-title-buttons text-center">
                 <Button
                     className="text-center"
-                    disabled={ shouldFetchFunds || isLoading || !ready }
+                    disabled={ shouldFetchFunds || fetchingFunds || isLoading || !ready }
                 onClick={() => {
                     if(!authenticated) login();
                     setButtonClicked(true);
