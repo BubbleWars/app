@@ -11,12 +11,12 @@ export const radiusToMass = (radius: number): number => {
 };
 
 export const calculateEmissionVelocity = (m1: number, m2: number): number => {
-    const alpha = 0.05; // Example scaling factor
-    const ejectFactor = Math.pow((m1/m2), alpha); // Non-linear scaling
-    const vMax = C * Math.sqrt(2); // Maximum velocity from Total Energy = mc^2
-    console.log("emission velocity", MASS_ENERGY_CONVERSION_EFFICIENCY * vMax * ejectFactor)
-    const emissionVelocity = MASS_ENERGY_CONVERSION_EFFICIENCY * vMax * ejectFactor;
-    return Math.min(emissionVelocity, MAX_VELOCITY);
+    // const alpha = 0.05; // Example scaling factor
+    // const ejectFactor = Math.pow((m1/m2), alpha); // Non-linear scaling
+    // const vMax = C * Math.sqrt(2); // Maximum velocity from Total Energy = mc^2
+    // console.log("emission velocity", MASS_ENERGY_CONVERSION_EFFICIENCY * vMax)
+    // const emissionVelocity = MASS_ENERGY_CONVERSION_EFFICIENCY * vMax;
+    return 5;
 };
 
 export const createBoundary = (
@@ -38,6 +38,17 @@ export const createBoundary = (
         friction: 0.5,
     });
 };
+
+export const createEdges = (
+    world: World,
+    width: number,
+    height: number,
+) => {
+    createBoundary(world, Vec2(0, -height / 2), Vec2(width, 0)); // Bottom
+    createBoundary(world, Vec2(0, height / 2), Vec2(width, 0)); // Top
+    createBoundary(world, Vec2(-width / 2, 0), Vec2(0, height)); // Left
+    createBoundary(world, Vec2(width / 2, 0), Vec2(0, height)); // Right
+}
 
 export const decodePacked = (types: string[], data: string) => {
     let offset = 2;

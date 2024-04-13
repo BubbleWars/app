@@ -7,7 +7,7 @@ import { Address } from "./types/address";
 import { User } from "./types/user";
 import { InputWithExecutionTime } from "./types/inputs";
 import { Snapshot } from "./types/state";
-import { STEP_DELTA } from "./consts";
+import { STEP_DELTA, WORLD_HEIGHT, WORLD_WIDTH } from "./consts";
 import { handlePendingInputs } from "./funcs/inputs";
 import { updateState, handleContact } from "./funcs/state";
 import {
@@ -26,6 +26,7 @@ import {
     generateNodes,
     handleNodeUpdates,
 } from "./funcs/resource";
+import { createBoundary, createEdges } from "./funcs/utils";
 
 export const users = new Map<Address, User>();
 export const bubbles = new Map<string, Bubble>();
@@ -73,6 +74,7 @@ export const init = (initialState?: Snapshot) => {
     if (!initialState?.nodes || initialState.nodes.length == 0) {
         console.log("generating nodes");
         generateNodes(world, nodes, 1);
+        createEdges(world, WORLD_WIDTH, WORLD_HEIGHT);
     }
     if (initialState) {
         //reset all state

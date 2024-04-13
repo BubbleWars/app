@@ -6,7 +6,7 @@ import { Address } from "./types/address";
 import { User } from "./types/user";
 import { Input, InputWithExecutionTime } from "./types/inputs";
 import { Snapshot } from "./types/state";
-import { MAX_ADVANCE_STATE_TIME, STEP_DELTA } from "./consts";
+import { MAX_ADVANCE_STATE_TIME, STEP_DELTA, WORLD_WIDTH } from "./consts";
 import { handleInput, handlePendingInputs } from "./funcs/inputs";
 import { updateState, handleSnapshotContact } from "./funcs/state";
 import {
@@ -27,6 +27,7 @@ import {
     handleNodeUpdates,
 } from "./funcs/resource";
 import { tempTimestamp } from "./world";
+import { createBoundary, createEdges } from "./funcs/utils";
 
 export const snapshotUsers = new Map<Address, User>();
 export const snapshotBubbles = new Map<string, Bubble>();
@@ -77,6 +78,7 @@ export const snapshotInit = (initialState?: Snapshot) => {
     if (!initialState?.nodes || initialState.nodes.length == 0) {
         console.log("generating snapshot nodes");
         generateNodes(snapshotWorld, snapshotNodes, 1);
+        createEdges(snapshotWorld, WORLD_WIDTH, WORLD_WIDTH);
     }
     if (initialState) {
         //reset all state
