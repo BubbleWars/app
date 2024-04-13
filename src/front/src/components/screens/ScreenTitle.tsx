@@ -40,6 +40,10 @@ export const ScreenTitle = () => {
         chainId: currentChain.id,
     });
 
+    const accountDefined = useMemo(() => {
+        return connectedAddress !== "";
+    }, [connectedAddress]);
+
     const balance = useMemo(() => {
         return parseFloat(data?.formatted ?? "0");
     }, [data]);
@@ -103,7 +107,7 @@ export const ScreenTitle = () => {
             <div className="screen-title-buttons text-center">
                 <Button
                     className="text-center"
-                    disabled={ shouldFetchFunds || fetchingFunds || isLoading || !ready }
+                    disabled={ !accountDefined || shouldFetchFunds || fetchingFunds || isLoading || !ready }
                 onClick={() => {
                     if(!authenticated) login();
                     setButtonClicked(true);
