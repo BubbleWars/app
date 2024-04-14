@@ -77,12 +77,12 @@ export const ScreenTitle = () => {
     }, [shouldFetchFunds]);
 
     useEffect(() => {
-        if (fetchingFunds) {
+        if (!authenticated || !ready || !accountDefined) {
+            setButtonText("Logging in...");
+        } else if (fetchingFunds) {
             setButtonText("Fetching funds for burner...");
         } else if (authenticated && ready) {
             setButtonText("Play " + truncateAddress(connectedAddress));
-        } else if (!authenticated || !ready) {
-            setButtonText("Loading...");
         } else {
             setButtonText("Play");
         }
@@ -107,7 +107,7 @@ export const ScreenTitle = () => {
             <div className="screen-title-buttons text-center">
                 <Button
                     className="text-center"
-                    disabled={ !accountDefined || fetchingFunds || isLoading || !ready }
+                    disabled={authenticated && ready && !fetchingFunds && accountDefined}
                 onClick={() => {
                     if(!authenticated) login();
                     setButtonClicked(true);
