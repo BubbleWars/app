@@ -34,6 +34,7 @@ export const ScreenTitle = () => {
     const [buttonText, setButtonText] = React.useState("Connect");
     const [isButtonClicked, setButtonClicked] = React.useState(false);
     const [fetchingFunds, setFetchingFunds] = React.useState(false);
+    const [buttonDisabled, setButtonDisabled] = React.useState(true);
 
     const { data, isError, isLoading } = useBalance({
         address: connectedAddress,
@@ -79,12 +80,16 @@ export const ScreenTitle = () => {
     useEffect(() => {
         if (!authenticated || !ready || !accountDefined) {
             setButtonText("Logging in...");
+            setButtonDisabled(true);
         } else if (fetchingFunds) {
             setButtonText("Fetching funds for burner...");
+            setButtonDisabled(true);
         } else if (authenticated && ready) {
             setButtonText("Play " + truncateAddress(connectedAddress));
+            setButtonDisabled(false);
         } else {
             setButtonText("Play");
+            setButtonDisabled(false);
         }
     }, [authenticated, ready, fetchingFunds, balance, isLoading, data, shouldFetchFunds]);
     const { login } = usePrivy();
@@ -107,7 +112,7 @@ export const ScreenTitle = () => {
             <div className="screen-title-buttons text-center">
                 <Button
                     className="text-center"
-                    disabled={authenticated && ready && !fetchingFunds && accountDefined}
+                    disabled={buttonDisabled}
                 onClick={() => {
                     if(!authenticated) login();
                     setButtonClicked(true);
