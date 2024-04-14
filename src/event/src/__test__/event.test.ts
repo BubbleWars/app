@@ -8,6 +8,7 @@ import {
 } from "../types/events.example";
 
 const CALLBACK_NEWLENGTH_NULL = { callback: null, newLength: null };
+const DEF_DELAY = 1000;
 
 describe("Event System Unit Tests", () => {
     // Console spy
@@ -17,12 +18,12 @@ describe("Event System Unit Tests", () => {
     var e = new Event<Events, EventsTypes>();
 
     afterEach(() => {
-        //consoleSpy.mockReset();
-        // NOTE: Has to be caster for each component with their Events and EventsTypes
+        consoleSpy.mockReset();
+        // NOTE: Has to be casted for each component with their Events and EventsTypes
         e = new Event<Events, EventsTypes>();
     });
 
-    it("Constructor", () => {
+    it("Constructor", async () => {
         // Check state
         expect(e.hasCallback(Events.GameEnd)).toBe(false);
         expect(e.getNumberOfCallbacks(Events.PlayerConnection)).toBe(0);
@@ -36,12 +37,31 @@ describe("Event System Unit Tests", () => {
                 byPlayerId: "",
             }),
         ).toBe(null);
-        expect(e.unsubscribe(Events.PlayerConnection, 0)).toStrictEqual(
+        expect(
+            await e.throwAsync(Events.PlayerDeath, {
+                timestamp: 1234,
+                playerId: "",
+                byPlayerId: "",
+            }),
+        ).toBe(null);
+        expect(e.unsubscribeIndex(Events.PlayerConnection, 0)).toStrictEqual(
             CALLBACK_NEWLENGTH_NULL,
         );
-        expect(e.popUnsubscribe(Events.PlayerConnection)).toStrictEqual(
+        expect(e.unsubscribe(Events.PlayerConnection)).toStrictEqual(
             CALLBACK_NEWLENGTH_NULL,
         );
+        expect(
+            e.unsubscribeFirstCallback(
+                Events.GameStart,
+                (_data: EventsTypes) => {},
+            ),
+        ).toStrictEqual(CALLBACK_NEWLENGTH_NULL);
+        expect(
+            e.unsubscribeAllCallback(
+                Events.GameStart,
+                (_data: EventsTypes) => {},
+            ),
+        ).toStrictEqual(CALLBACK_NEWLENGTH_NULL);
     });
 
     it("Subscribe", () => {
@@ -54,10 +74,15 @@ describe("Event System Unit Tests", () => {
         var totalEtherLobby = 0;
 
         expect(
-            e.subscribe(Events.PlayerConnection, (data: PlayerConnection) => {
-                playersCounter += 1;
-                totalEtherLobby += data.ether;
-            }),
+            e.subscribe(
+                Events.PlayerConnection,
+                async (data: PlayerConnection) => {
+                    playersCounter += 1;
+                    totalEtherLobby += data.ether;
+
+                    return Promise.resolve();
+                },
+            ),
         ).toBe(0);
 
         expect(
@@ -67,7 +92,7 @@ describe("Event System Unit Tests", () => {
             }),
         ).toBe(1);
 
-        expect(e.throw(Events.PlayerConnection, p)).toBe(undefined);
+        e.throw(Events.PlayerConnection, p);
 
         expect(consoleSpy).toHaveBeenCalledTimes(2);
         expect(consoleSpy).toHaveBeenNthCalledWith(
@@ -83,7 +108,7 @@ describe("Event System Unit Tests", () => {
         expect(totalEtherLobby).toBe(1234);
     });
 
-    it("Unsubscribe", () => {
+    it("Throw, Unsubscribe", () => {
         const l1 = "First checkss...";
         const l2 = "Game Started yayy";
         const l3 = "This is the final loading";
@@ -100,7 +125,7 @@ describe("Event System Unit Tests", () => {
 
         e.subscribe(Events.GameEnd, (data: GameEnd) => {});
         e.subscribe(Events.GameStart, c1);
-        e.subscribe(Events.GameStart, c2);
+        e.subscribe(Events.GameStart, c2, undefined);
         e.subscribe(Events.GameStart, c3);
 
         expect(e.hasCallback(Events.GameEnd)).toBe(true);
@@ -109,28 +134,25 @@ describe("Event System Unit Tests", () => {
 
         expect(e.getCallback(Events.GameStart, 2)).toEqual(c3);
 
-        expect(e.popUnsubscribe(Events.GameStart)).toEqual({
+        expect(e.unsubscribe(Events.GameStart)).toEqual({
             callback: c3,
             newLength: 2,
         });
 
-        expect(e.unsubscribe(Events.GameStart, 3)).toStrictEqual(
+        expect(e.unsubscribeIndex(Events.GameStart, 3)).toStrictEqual(
             CALLBACK_NEWLENGTH_NULL,
         );
-        expect(e.unsubscribe(Events.GameStart, 0)).toStrictEqual({
+        expect(e.unsubscribeIndex(Events.GameStart, 0)).toStrictEqual({
             callback: c1,
             newLength: 1,
         });
 
-        expect(
-            e.throw(Events.GameStart, {
-                ether: 1234,
-                timestamp: 156790,
-                playerId: "sjdDRRRR",
-            }),
-        ).toBe(undefined);
-
-        expect(consoleSpy).toHaveBeenCalled();
+        e.throw(Events.GameStart, {
+            ether: 1234,
+            timestamp: 156790,
+            playerId: "sjdDRRRR",
+        });
+        expect(consoleSpy).toHaveBeenCalledTimes(1);
         expect(consoleSpy).toHaveBeenCalledWith(l2);
 
         expect(
@@ -148,4 +170,228 @@ describe("Event System Unit Tests", () => {
         expect(e.hasCallback(Events.GameStart)).toBe(false);
         expect(e.getNumberOfCallbacks(Events.GameStart)).toBe(0);
     });
+
+    it("Async", async () => {
+        const l1 = "First checkss...";
+        const l2 = "Game Started yayy";
+        const l3 = "This is the final loading";
+
+        const c0 = (data: GameEnd) => {};
+        const c1 = async (data: GameStart) => {
+            console.log(l1);
+        };
+        const c2 = async (data: GameStart) => {
+            await sleep(400); // 0.4s
+            console.log(l2);
+        };
+        const c3 = (data: GameStart) => {
+            console.log(l3);
+        };
+
+        e.subscribe(Events.GameEnd, c0);
+        e.subscribe(Events.GameStart, c1);
+        e.subscribe(Events.GameStart, c2, false);
+        e.subscribe(Events.GameStart, c3);
+
+        expect(e.hasCallback(Events.GameEnd)).toBe(true);
+        expect(e.hasCallback(Events.GameStart)).toBe(true);
+        expect(e.getNumberOfCallbacks(Events.GameStart)).toBe(3);
+
+        expect(e.getCallback(Events.GameStart, 2)).toEqual(c3);
+
+        expect(e.unsubscribeIndex(Events.GameStart, 4)).toStrictEqual(
+            CALLBACK_NEWLENGTH_NULL,
+        );
+        expect(e.unsubscribeIndex(Events.GameEnd, 0)).toStrictEqual({
+            callback: c0,
+            newLength: 0,
+        });
+
+        expect(consoleSpy).toHaveBeenCalledTimes(0);
+
+        await e.throwAsync(Events.GameStart, {
+            ether: 1234,
+            timestamp: 156790,
+            playerId: "sjdDRRRR",
+        });
+
+        expect(consoleSpy).toHaveBeenCalledTimes(2);
+        expect(consoleSpy).toHaveBeenNthCalledWith(1, l1);
+        expect(consoleSpy).toHaveBeenNthCalledWith(2, l3);
+        await sleep(700);
+        expect(consoleSpy).toHaveBeenCalledTimes(3);
+        expect(consoleSpy).toHaveBeenNthCalledWith(3, l2);
+
+        e.clear(Events.GameStart);
+        expect(e.getNumberOfCallbacks(Events.GameStart)).toBe(0);
+        e.subscribe(Events.GameStart, c1);
+        e.subscribe(Events.GameStart, c2);
+        e.subscribe(Events.GameStart, c3);
+        expect(e.getNumberOfCallbacks(Events.GameStart)).toBe(3);
+
+        await e.throwAsync(Events.GameStart, {
+            ether: 1234,
+            timestamp: 156790,
+            playerId: "sjdDRRRR",
+        });
+
+        expect(consoleSpy).toHaveBeenCalledTimes(6);
+        expect(consoleSpy).toHaveBeenNthCalledWith(4, l1);
+        expect(consoleSpy).toHaveBeenNthCalledWith(5, l2);
+        expect(consoleSpy).toHaveBeenNthCalledWith(6, l3);
+    });
+
+    it("subscribeIndex", async () => {
+        const l1 = "First checkss...";
+        const l2 = "Game Started yayy";
+        const l3 = "This is the final loading";
+
+        const c1 = async (data: GameStart) => {
+            console.log(l1);
+        };
+        const c2 = async (data: GameStart) => {
+            console.log(l2);
+        };
+        const c3 = (data: GameStart) => {
+            console.log(l3);
+        };
+
+        e.subscribe(Events.GameStart, c1);
+        e.subscribe(Events.GameStart, c2);
+        e.subscribe(Events.GameStart, c3);
+
+        e.subscribeIndex(Events.GameStart, 10, c3);
+        e.subscribeIndex(Events.GameStart, 3, c2, undefined);
+        e.subscribeIndex(Events.GameStart, 4, c1, false);
+        e.subscribeIndex(Events.GameStart, 1, c1, null);
+
+        e.throw(Events.GameStart, {
+            ether: 1234,
+            timestamp: 156790,
+            playerId: "sjdDRRRR",
+        });
+
+        expect(consoleSpy).toHaveBeenCalledTimes(7);
+        expect(consoleSpy).toHaveBeenNthCalledWith(1, l1);
+        expect(consoleSpy).toHaveBeenNthCalledWith(2, l1);
+        expect(consoleSpy).toHaveBeenNthCalledWith(3, l2);
+        expect(consoleSpy).toHaveBeenNthCalledWith(4, l3);
+        expect(consoleSpy).toHaveBeenNthCalledWith(5, l2);
+        expect(consoleSpy).toHaveBeenNthCalledWith(6, l1);
+        expect(consoleSpy).toHaveBeenNthCalledWith(7, l3);
+    });
+
+    it("unsubscribeCallback", async () => {
+        const l1 = "First checkss...";
+        const l2 = "Game Started yayy";
+        const l3 = "This is the final loading";
+
+        const c1 = (data: GameStart) => {
+            console.log(l1);
+        };
+        const c2 = (data: GameStart) => {
+            console.log(l2);
+        };
+        const c3 = (data: GameStart) => {
+            console.log(l3);
+        };
+
+        e.subscribe(Events.GameStart, c1);
+        e.subscribe(Events.GameStart, c2);
+        e.subscribe(Events.GameStart, c3);
+        e.subscribe(Events.GameStart, c1);
+        e.subscribe(Events.GameStart, c2);
+        e.subscribe(Events.GameStart, c3);
+
+        e.throw(Events.GameStart, {
+            ether: 1234,
+            timestamp: 156790,
+            playerId: "sjdDRRRR",
+        });
+
+        expect(consoleSpy).toHaveBeenCalledTimes(6);
+        expect(consoleSpy).toHaveBeenNthCalledWith(1, l1);
+        expect(consoleSpy).toHaveBeenNthCalledWith(2, l2);
+        expect(consoleSpy).toHaveBeenNthCalledWith(3, l3);
+        expect(consoleSpy).toHaveBeenNthCalledWith(4, l1);
+        expect(consoleSpy).toHaveBeenNthCalledWith(5, l2);
+        expect(consoleSpy).toHaveBeenNthCalledWith(6, l3);
+
+        e.unsubscribeFirstCallback(Events.GameStart, c3);
+
+        e.throw(Events.GameStart, {
+            ether: 1234,
+            timestamp: 156790,
+            playerId: "sjdDRRRR",
+        });
+
+        expect(consoleSpy).toHaveBeenCalledTimes(11);
+        expect(consoleSpy).toHaveBeenNthCalledWith(7, l1);
+        expect(consoleSpy).toHaveBeenNthCalledWith(8, l2);
+        expect(consoleSpy).toHaveBeenNthCalledWith(9, l1);
+        expect(consoleSpy).toHaveBeenNthCalledWith(10, l2);
+        expect(consoleSpy).toHaveBeenNthCalledWith(11, l3);
+
+        expect(
+            e.unsubscribeFirstCallback(
+                Events.GameStart,
+                (_data: EventsTypes) => {},
+            ),
+        ).toStrictEqual(CALLBACK_NEWLENGTH_NULL);
+    });
+
+    it("unsubscribeAllCallback", async () => {
+        const l1 = "First checkss...";
+        const l2 = "Game Started yayy";
+        const l3 = "This is the final loading";
+
+        const c1 = (data: GameStart) => {
+            console.log(l1);
+        };
+        const c2 = (data: GameStart) => {
+            console.log(l2);
+        };
+        const c3 = (data: GameStart) => {
+            console.log(l3);
+        };
+
+        e.subscribe(Events.GameStart, c1);
+        e.subscribe(Events.GameStart, c2);
+        e.subscribe(Events.GameStart, c3);
+        e.subscribe(Events.GameStart, c1);
+        e.subscribe(Events.GameStart, c2);
+        e.subscribe(Events.GameStart, c3);
+
+        e.throw(Events.GameStart, {
+            ether: 1234,
+            timestamp: 156790,
+            playerId: "sjdDRRRR",
+        });
+
+        expect(consoleSpy).toHaveBeenCalledTimes(6);
+        expect(consoleSpy).toHaveBeenNthCalledWith(1, l1);
+        expect(consoleSpy).toHaveBeenNthCalledWith(2, l2);
+        expect(consoleSpy).toHaveBeenNthCalledWith(3, l3);
+        expect(consoleSpy).toHaveBeenNthCalledWith(4, l1);
+        expect(consoleSpy).toHaveBeenNthCalledWith(5, l2);
+        expect(consoleSpy).toHaveBeenNthCalledWith(6, l3);
+
+        e.unsubscribeAllCallback(Events.GameStart, c3);
+
+        e.throw(Events.GameStart, {
+            ether: 1234,
+            timestamp: 156790,
+            playerId: "sjdDRRRR",
+        });
+
+        expect(consoleSpy).toHaveBeenCalledTimes(10);
+        expect(consoleSpy).toHaveBeenNthCalledWith(7, l1);
+        expect(consoleSpy).toHaveBeenNthCalledWith(8, l2);
+        expect(consoleSpy).toHaveBeenNthCalledWith(9, l1);
+        expect(consoleSpy).toHaveBeenNthCalledWith(10, l2);
+    });
 });
+
+function sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms || DEF_DELAY));
+}
