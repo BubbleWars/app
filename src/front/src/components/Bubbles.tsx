@@ -125,7 +125,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
         (bubble) => bubble.id == bubbleId,
     );
 
-    const user = useUserSocial({ address:  bubble.owner });
+    const user = useUserSocial({ address: bubble?.owner });
 
     const pfpUrl = user?.social ?  `https://unavatar.io/twitter/${user?.social}` : "https://unavatar.io/jessepollak";
     console.log("pfpUrl", pfpUrl)
