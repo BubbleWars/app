@@ -24,19 +24,19 @@ export const createBoundary = (
     position: Vec2,
     dimensions: Vec2,
 ) => {
-    let boundary = world.createBody({
-        position: position,
-        type: "static",
-    });
+    // let boundary = world.createBody({
+    //     position: position,
+    //     type: "static",
+    // });
 
-    boundary.createFixture({
-        shape: Edge(
-            Vec2(-dimensions.x / 2, -dimensions.y / 2),
-            Vec2(dimensions.x / 2, dimensions.y / 2),
-        ),
-        density: 0,
-        friction: 0.5,
-    });
+    // boundary.createFixture({
+    //     shape: Edge(
+    //         Vec2(-dimensions.x / 2, -dimensions.y / 2),
+    //         Vec2(dimensions.x / 2, dimensions.y / 2),
+    //     ),
+    //     density: 0,
+    //     friction: 0.5,
+    // });
 };
 
 export const createEdges = (
