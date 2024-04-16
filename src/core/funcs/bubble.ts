@@ -117,6 +117,7 @@ export const createBubble = (
         timestamp,
         position: { x, y },
     });
+    //console.log("bubble created", bubble.body.getUserData() as string)
     return bubble;
 };
 

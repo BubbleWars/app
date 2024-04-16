@@ -151,6 +151,12 @@ export const Portal = ({ portalId }: { portalId: string }) => {
             position={new THREE.Vector3(portal.position.x, portal.position.y, 0)} 
             color={baseColor}
           />
+          {isSelected && (
+                <PortalsControlsEmit
+                    isHovered={isHovered}
+                    portalId={portalId}
+                />
+            )}
             <mesh
                 onPointerEnter={() => {
                     if (!isSelected) setIsHovered(true);
@@ -174,12 +180,7 @@ export const Portal = ({ portalId }: { portalId: string }) => {
                   color={baseColor} 
                 />
             </mesh>
-            {isSelected && (
-                <PortalsControlsEmit
-                    isHovered={isHovered}
-                    portalId={portalId}
-                />
-            )}
+            
             
             <PortalsInfo portalId={portalId} />
         </>

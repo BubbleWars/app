@@ -78,7 +78,6 @@ export const onUser = async (callback: (users: UserSocialSchema[]) => void) => {
 };
 
 export const onInput = (callback: (input: Input) => void) => {
-    console.log("setting onInput");
     let pendingTransaction: `0x{string}`[] = [];
     const unwatch = publicClient.watchPendingTransactions({
         onTransactions: (hashes: `0x{string}`[]) => {
@@ -94,8 +93,8 @@ export const onInput = (callback: (input: Input) => void) => {
 
                 if (logs.length == 0) return;
 
-                console.log("transaction", transaction);
-                console.log("topics", logs[0]?.topics);
+                //console.log("transaction", transaction);
+                //console.log("topics", logs[0]?.topics);
                 const blockNumber = Number(transaction.blockNumber);
                 let timestamp;
                 if (blockNumberToTimestamp[blockNumber]) {
@@ -123,7 +122,7 @@ export const onInput = (callback: (input: Input) => void) => {
                     console.log("binary", binary);
                     const address = binary[0];
                     const amount = binary[1];
-                    console.log("is input", address, amount);
+                    console.log("Recieved transaction indexer.ts:", address, timestamp);
                     callback({
                         type: InputType.Deposit,
                         timestamp,
@@ -142,7 +141,7 @@ export const onInput = (callback: (input: Input) => void) => {
                                 json.lastIndexOf("}") + 1,
                             ),
                         );
-                        console.log("input", input);
+                        console.log("Recieved transaction indexer.ts:", transaction.from, timestamp);
                         callback({
                             ...input,
                             timestamp,

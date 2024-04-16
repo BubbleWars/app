@@ -171,7 +171,7 @@ export const handleInput = async (
             break;
     }
     if (!client) {
-        sendNotice(input);
+        //sendNotice(input);
         run(input.timestamp);
     } else snapshotRun(input.timestamp);
 
@@ -452,7 +452,7 @@ export const handlePendingInputs = (
     input: Input,
     client: boolean = false,
 ): void => {
-    //console.log("Handling pending inputs with input:", JSON.stringify(input));
+    console.log("Handling pending input:", input);
     const { type } = input;
     switch (type) {
         case InputType.Emit:

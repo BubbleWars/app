@@ -13,9 +13,11 @@ const privy = new PrivyClient(PRIVY_APP_ID, PRIVY_APP_SECRET);
 
 export const fetchUsers = async () => {
     try {
+        console.log("Fetching users")
         const users = await privy.getUsers();
 
         //return the userSocials as defined in schema
+        console.log("fetched users", users.length)
         return users.map((user) => {
             const newUser = new UserSocialSchema();
             newUser.privyId = user.id;

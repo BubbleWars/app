@@ -165,7 +165,7 @@ export class World extends Room<WorldState> {
             //if (!this.recievedStartupInspect) return;
             this.blockTimestamp = blockTimestamp;
             snapshotRun(this.blockTimestamp);
-            rollbackToState(snapshotCurrentState);
+            //rollbackToState(snapshotCurrentState);
             //max keep 10 snapshots
             if (snapshots.size > 15) {
                 const oldestSnapshot = snapshots.keys().next().value;
@@ -174,15 +174,22 @@ export class World extends Room<WorldState> {
         });
 
         this.unwatchInputs = onInput((input) => {
+          console.log("current timestamp", this.state.timestamp)
+          console.log("Recieved input World.ts", input);
+          const startTime = Date.now();
+
             setOnEvent((event: Event | any) => {
                 //only if event.id does not exist within bubbleIds
                 if (event.type == EventsType.CreateBubble) {
                     //if (!bubbleIds.includes(event.id)) {
-                    //console.log("new event 11", event)
                     const pos = new Vector2Schema();
                     pos.x = event.position.x;
                     pos.y = event.position.y;
                     this.state.syncBubbleStartPositions.set(event.id, pos);
+                    console.log("CreateBubble", event);
+                    const processTime = Date.now() - startTime;
+                    console.log("Processed input in:" + processTime + "ms");
+                    console.log("Current timestamp", this.state.timestamp);
                     setOnEvent(() => {});
                     //}
                 } else if (event.type == EventsType.DestroyBubble) {
@@ -205,17 +212,23 @@ export class World extends Room<WorldState> {
                 }
             });
 
-            console.log("recieved input", input);
             //if (!this.recievedStartupInspect) return;
-            const isBehind = input.timestamp < this.blockTimestamp;
-            if (isBehind) {
-                snapshotRollback(input.timestamp);
-                const stateOfInput = snapshots.get(input.timestamp);
-                rollbackToState(stateOfInput as Snapshot);
-            }
-            handleInput(input, true);
+            // const isBehind = input.timestamp < this.blockTimestamp;
+            // if (isBehind) {
+            //     snapshotRollback(input.timestamp);
+            //     const stateOfInput = snapshots.get(input.timestamp);
+            //     rollbackToState(stateOfInput as Snapshot);
+            // }
 
-            if (isBehind) snapshotRun(this.blockTimestamp, () => {}, true);
+            handleInput(input);
+            run(Date.now() / 1000, ()=>{
+              console.log("Finished input processing");
+        
+            });
+
+            //if (isBehind) snapshotRun(this.blockTimestamp, () => {}, true);
+            console.log("timestamp of world", currentState.timestamp);
+            
         });
 
         // this.onMessage("type", (client, message) => {
@@ -247,7 +260,6 @@ export class World extends Room<WorldState> {
         //
         // handle game loop
         //
-        //console.log("update", time);
         const now = Date.now() / 1000;
         run(now);
         updateState(this.state, currentState);

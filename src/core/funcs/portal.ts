@@ -117,6 +117,7 @@ export const createPortal = (
     portals.set(portal.body.getUserData() as string, portal);
     // setPortalResourceMass(portal, ResourceType.Energy, 50);
     // updatePortal(portal, mass);
+    //console.log("portal created", portal.body.getUserData());
     return portal;
 };
 

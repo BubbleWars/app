@@ -241,6 +241,12 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
                 position={new THREE.Vector3(bubble.position.x, bubble.position.y, 0)}
                 color={baseColor}
             />
+            {isSelected && (
+                <BubblesControlsEmit
+                    isHovered={isHovered}
+                    bubbleId={bubbleId}
+                />
+            )}
             <Circle
                 ref={meshRef}
                 onPointerEnter={() => {
@@ -270,12 +276,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
 
             </Circle>
 
-            {isSelected && (
-                <BubblesControlsEmit
-                    isHovered={isHovered}
-                    bubbleId={bubbleId}
-                />
-            )}
+            
             <BubblesInfo
                 bubbleId={bubbleId}
                 position={meshRef.current?.position}
