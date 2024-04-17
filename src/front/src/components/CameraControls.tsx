@@ -15,7 +15,7 @@ export class CustomControls extends OrbitControls {
         // Swap the mouse buttons: left (orbit) becomes right, and right (pan) becomes left
         this.mouseButtons = {
             LEFT: THREE.MOUSE.RIGHT,
-            RIGHT: THREE.MOUSE.RIGHT,
+            RIGHT: undefined,
         };
         this.enableRotate = false;
         this.rotateSpeed = 0;
