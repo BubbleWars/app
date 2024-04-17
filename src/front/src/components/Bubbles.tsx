@@ -131,13 +131,14 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
     console.log("pfpUrl", pfpUrl)
     const texture = useTexture(pfpUrl);
     texture.anisotropy = 16;
-    const velocity = bubble.velocity;
+    if(!bubble) return null;
+    const velocity = bubble?.velocity;
     const normalizedVelocity = {
         x: velocity.x / Math.sqrt(velocity.x ** 2 + velocity.y ** 2),
         y: velocity.y / Math.sqrt(velocity.x ** 2 + velocity.y ** 2),
     }
     const inverseVelocity = { x: -velocity.x, y: -velocity.y };
-    const radius = massToRadius(bubble.mass);
+    const radius = massToRadius(bubble?.mass);
 
     useFrame(() => {
         const bubble = currentState.bubbles.find(

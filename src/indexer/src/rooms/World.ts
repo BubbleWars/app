@@ -161,7 +161,7 @@ export class World extends Room<WorldState> {
         });
 
         this.unwatchBlock = onBlock((blockTimestamp) => {
-            console.log("recieved block", blockTimestamp);
+            //console.log("recieved block", blockTimestamp);
             //if (!this.recievedStartupInspect) return;
             this.blockTimestamp = blockTimestamp;
             snapshotRun(this.blockTimestamp);
@@ -212,21 +212,28 @@ export class World extends Room<WorldState> {
                 }
             });
 
-            //if (!this.recievedStartupInspect) return;
-            // const isBehind = input.timestamp < this.blockTimestamp;
-            // if (isBehind) {
-            //     snapshotRollback(input.timestamp);
-            //     const stateOfInput = snapshots.get(input.timestamp);
-            //     rollbackToState(stateOfInput as Snapshot);
-            // }
+
+            //If current block is ahead of input, rollback and append input
+            const isBlockAhead = input.timestamp < this.blockTimestamp;
+            if (isBlockAhead) {
+              console.log("Block is ahead. Input timestamp:", input.timestamp, "Block timestamp:", this.blockTimestamp)
+              //Rollback snapshot to timestamp and append input, and append snapshot
+                snapshotRollback(input.timestamp);
+                snapshotRun(this.blockTimestamp, () => {}, true);
+            }
+
+            //If the server's timestamp is ahead rollback to input timestamp, and add input
+            const isServerAhead = input.timestamp < this.state.timestamp;
+            if(isServerAhead){
+              //Rollback real time state to input timestamp
+              console.log("Server is ahead. Input timestamp:", input.timestamp, "Server timestamp:", this.state.timestamp)
+              const stateOfInput = snapshots.get(input.timestamp);
+              rollbackToState(stateOfInput as Snapshot);
+            }
 
             handleInput(input);
-            run(Date.now() / 1000, ()=>{
-              console.log("Finished input processing");
-        
-            });
+            run(Date.now() / 1000);
 
-            //if (isBehind) snapshotRun(this.blockTimestamp, () => {}, true);
             console.log("timestamp of world", currentState.timestamp);
             
         });

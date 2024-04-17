@@ -298,6 +298,8 @@ const handleEmit = (input: Emit, client: boolean): boolean => {
 
     if (!isPortal && !isBubble) {
         console.log("Input from is not a portal or bubble");
+        console.log("Bubbles", JSON.stringify(bubbles));
+        console.log("Portals", JSON.stringify(portals));
         return false;
     }
     if (!input?.timestamp) {
