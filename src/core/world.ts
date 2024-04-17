@@ -186,7 +186,10 @@ export const init = (initialState?: Snapshot) => {
 };
 
 export const rollbackToState = (snapshot: Snapshot) => {
-    if (!snapshot) return;
+    if (!snapshot) {
+        console.log("Snapshot is empty")
+        return
+    };
     currentState = Object.assign({}, snapshot);
     //reset
     world = new World({

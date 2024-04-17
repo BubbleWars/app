@@ -213,11 +213,14 @@ export class World extends Room<WorldState> {
 
             //If current block is ahead of input, rollback and append input
             const isBlockAhead = input.timestamp < this.blockTimestamp;
+            const mainSnapshots = snapshots;
             if (isBlockAhead) {
               console.log("Block is ahead. Input timestamp:", input.timestamp, "Block timestamp:", this.blockTimestamp)
               //Rollback snapshot to timestamp and append input, and append snapshot
                 snapshotRollback(input.timestamp);
+                handleInput(input, true);
                 snapshotRun(this.blockTimestamp, () => {}, true);
+                //console.log("Snapshots", JSON.stringify(mainSnapshots));
             }
 
             //If the server's timestamp is ahead rollback to input timestamp, and add input
