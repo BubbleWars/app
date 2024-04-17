@@ -186,10 +186,8 @@ export class World extends Room<WorldState> {
                     pos.x = event.position.x;
                     pos.y = event.position.y;
                     this.state.syncBubbleStartPositions.set(event.id, pos);
-                    console.log("CreateBubble", event);
                     const processTime = Date.now() - startTime;
-                    console.log("Processed input in:" + processTime + "ms");
-                    console.log("Current timestamp", this.state.timestamp);
+                    console.log("Processed input in:" + processTime + "ms", "current timestamp", this.state.timestamp);
                     setOnEvent(() => {});
                     //}
                 } else if (event.type == EventsType.DestroyBubble) {
