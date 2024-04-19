@@ -37,7 +37,7 @@ export const generateSpawnPoint = (
 
     const startingPoint = new Vec2(2, 0);
     const portalCount = Array.from(portals.values()).length;
-    startingPoint.x += portalCount;
+    startingPoint.x += (portalCount+1) * 30;
     return startingPoint;
     // const minimumSafeDistance = 50; // Minimum safe distance from other objects
     // let safeSpawnFound = false;
