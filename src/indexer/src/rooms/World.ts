@@ -14,7 +14,7 @@ import {
     Vector2Schema,
     WorldState,
 } from "./schema/WorldState";
-import { currentState, init, rollbackToState, run } from "../../../core/world";
+import { currentState, currentState, init, rollbackToState, run } from "../../../core/world";
 import {
     snapshotRollback,
     snapshotRun,
@@ -29,6 +29,7 @@ import { ArraySchema } from "@colyseus/schema";
 import { setOnEvent } from "../../../core/funcs/events";
 import { EventsType } from "../../../core/types/events";
 import { User } from "../../../core/types/user";
+import { snapshot } from "viem/_types/actions/test/snapshot";
 
 const updateState = (state: WorldState, snapshot: Snapshot): WorldState => {
     state.timestamp = snapshot.timestamp;
@@ -213,25 +214,27 @@ export class World extends Room<WorldState> {
 
             //If current block is ahead of input, rollback and append input
             const isBlockAhead = input.timestamp < this.blockTimestamp;
-            const mainSnapshots = snapshots;
+            const isBlockBehind = input.timestamp > this.blockTimestamp;
             if (isBlockAhead) {
-              console.log("Block is ahead. Input timestamp:", input.timestamp, "Block timestamp:", this.blockTimestamp)
-              //Rollback snapshot to timestamp and append input, and append snapshot
-                snapshotRollback(input.timestamp);
-                handleInput(input, true);
-                snapshotRun(this.blockTimestamp, () => {}, true);
-                //console.log("Snapshots", JSON.stringify(mainSnapshots));
+              console.log("Local Block is ahead. Input timestamp:", input.timestamp, "Block timestamp:", this.blockTimestamp)
+              snapshotRollback(input.timestamp);
+            } else if (isBlockBehind) {
+              console.log("Local Block is behind. Input timestamp:", input.timestamp, "Block timestamp:", this.blockTimestamp)
+              snapshotRun(input.timestamp, () => {}, true);
             }
+            handleInput(input, true);
+            snapshotRun(input.timestamp);
 
-            //If the server's timestamp is ahead rollback to input timestamp, and add input
+            //If the server's timestamp is ahead,  rollback to input timestamp, and add input
             const isServerAhead = input.timestamp < this.state.timestamp;
+            //const mainSnapshots = snapshots;
+            //const mainCurrentState = currentState;
             if(isServerAhead){
-              //Rollback real time state to input timestamp
               console.log("Server is ahead. Input timestamp:", input.timestamp, "Server timestamp:", this.state.timestamp)
               const stateOfInput = snapshots.get(input.timestamp);
+              console.log("pending inputs of snapshot state", JSON.stringify(stateOfInput?.pendingInputs), "to be set to server")
               rollbackToState(stateOfInput as Snapshot);
             }
-
             handleInput(input);
             run(Date.now() / 1000);
 
