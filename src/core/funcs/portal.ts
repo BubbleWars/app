@@ -34,66 +34,71 @@ export const generateSpawnPoint = (
     mass: number,
     maxDistanceFromLastPortal: number = 70 // Maximum distance from the last portal
 ): Vec2 => {
-    const minimumSafeDistance = 50; // Minimum safe distance from other objects
-    let safeSpawnFound = false;
-    let attempt = 0;
-    let spawnPoint = new Vec2(0, 0);
-    const entityRadius = massToRadius(mass);
 
-    // Retrieve the last portal's position
-    const lastPortal = Array.from(portals.values()).pop(); 
-    let lastPortalPosition = new Vec2(0, 0);
-    if (lastPortal) {
-        lastPortalPosition = lastPortal.body.getPosition();
-    }
+    const startingPoint = new Vec2(2, 0);
+    const portalCount = Array.from(portals.values()).length;
+    startingPoint.x += portalCount;
+    return startingPoint;
+    // const minimumSafeDistance = 50; // Minimum safe distance from other objects
+    // let safeSpawnFound = false;
+    // let attempt = 0;
+    // let spawnPoint = new Vec2(0, 0);
+    // const entityRadius = massToRadius(mass);
 
-    while (!safeSpawnFound && attempt < 1000) {
-        const seed = timestamp + attempt;
-        const angle = pseudoRandom(seed) * 2 * Math.PI; // Generate a random angle
-        const distance = pseudoRandom(seed + 1) * maxDistanceFromLastPortal; // Generate a random distance within the max range
-        const x = lastPortalPosition.x + distance * Math.cos(angle);
-        const y = lastPortalPosition.y + distance * Math.sin(angle);
+    // // Retrieve the last portal's position
+    // const lastPortal = Array.from(portals.values()).pop(); 
+    // let lastPortalPosition = new Vec2(0, 0);
+    // if (lastPortal) {
+    //     lastPortalPosition = lastPortal.body.getPosition();
+    // }
 
-        spawnPoint = new Vec2(x, y);
+    // while (!safeSpawnFound && attempt < 1000) {
+    //     const seed = timestamp + attempt;
+    //     const angle = pseudoRandom(seed) * 2 * Math.PI; // Generate a random angle
+    //     const distance = pseudoRandom(seed + 1) * maxDistanceFromLastPortal; // Generate a random distance within the max range
+    //     const x = lastPortalPosition.x + distance * Math.cos(angle);
+    //     const y = lastPortalPosition.y + distance * Math.sin(angle);
 
-        let isSafe = true;
+    //     spawnPoint = new Vec2(x, y);
 
-        // Check distance from portals
-        portals.forEach((portal) => {
-            const portalRadius = portal.fixture.getShape().getRadius();
-            if (Vec2.distance(spawnPoint, portal.body.getPosition()) < entityRadius + portalRadius + minimumSafeDistance) {
-                isSafe = false;
-            }
-        });
+    //     let isSafe = true;
 
-        // Check distance from bubbles
-        bubbles.forEach((bubble) => {
-            const bubbleRadius = bubble.fixture.getShape().getRadius();
-            if (Vec2.distance(spawnPoint, bubble.body.getPosition()) < entityRadius + bubbleRadius + minimumSafeDistance) {
-                isSafe = false;
-            }
-        });
+    //     // Check distance from portals
+    //     portals.forEach((portal) => {
+    //         const portalRadius = portal.fixture.getShape().getRadius();
+    //         if (Vec2.distance(spawnPoint, portal.body.getPosition()) < entityRadius + portalRadius + minimumSafeDistance) {
+    //             isSafe = false;
+    //         }
+    //     });
 
-        // Check distance from nodes
-        nodes.forEach((node) => {
-            const nodeRadius = node.fixture.getShape().getRadius();
-            if (Vec2.distance(spawnPoint, node.body.getPosition()) < entityRadius + nodeRadius + minimumSafeDistance) {
-                isSafe = false;
-            }
-        });
+    //     // Check distance from bubbles
+    //     bubbles.forEach((bubble) => {
+    //         const bubbleRadius = bubble.fixture.getShape().getRadius();
+    //         if (Vec2.distance(spawnPoint, bubble.body.getPosition()) < entityRadius + bubbleRadius + minimumSafeDistance) {
+    //             isSafe = false;
+    //         }
+    //     });
 
-        if (isSafe) {
-            safeSpawnFound = true;
-        } else {
-            attempt++;
-        }
-    }
+    //     // Check distance from nodes
+    //     nodes.forEach((node) => {
+    //         const nodeRadius = node.fixture.getShape().getRadius();
+    //         if (Vec2.distance(spawnPoint, node.body.getPosition()) < entityRadius + nodeRadius + minimumSafeDistance) {
+    //             isSafe = false;
+    //         }
+    //     });
 
-    if (!safeSpawnFound) {
-        throw new Error("Failed to find a safe spawn point after " + attempt + " attempts");
-    }
+    //     if (isSafe) {
+    //         safeSpawnFound = true;
+    //     } else {
+    //         attempt++;
+    //     }
+    // }
 
-    return spawnPoint;
+    // if (!safeSpawnFound) {
+    //     throw new Error("Failed to find a safe spawn point after " + attempt + " attempts");
+    // }
+
+    // return spawnPoint;
 };
 
 export const createPortal = (
