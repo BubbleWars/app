@@ -454,7 +454,7 @@ export const handlePendingInputs = (
     input: Input,
     client: boolean = false,
 ): void => {
-    console.log("Handling pending input:", input);
+    //console.log("Handling pending input:", input);
     const { type } = input;
     switch (type) {
         case InputType.Emit:

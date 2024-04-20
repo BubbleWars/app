@@ -175,8 +175,8 @@ export class World extends Room<WorldState> {
         });
 
         this.unwatchInputs = onInput((input) => {
-          console.log("current timestamp", this.state.timestamp)
-          console.log("Recieved input World.ts", input);
+          //console.log("current timestamp", this.state.timestamp)
+          //console.log("Recieved input World.ts", input);
           const startTime = Date.now();
 
             setOnEvent((event: Event | any) => {
@@ -216,10 +216,10 @@ export class World extends Room<WorldState> {
             const isBlockAhead = input.timestamp < this.blockTimestamp;
             const isBlockBehind = input.timestamp > this.blockTimestamp;
             if (isBlockAhead) {
-              console.log("Local Block is ahead. Input timestamp:", input.timestamp, "Block timestamp:", this.blockTimestamp)
+              //console.log("Local Block is ahead. Input timestamp:", input.timestamp, "Block timestamp:", this.blockTimestamp)
               snapshotRollback(input.timestamp);
             } else if (isBlockBehind) {
-              console.log("Local Block is behind. Input timestamp:", input.timestamp, "Block timestamp:", this.blockTimestamp)
+              //console.log("Local Block is behind. Input timestamp:", input.timestamp, "Block timestamp:", this.blockTimestamp)
               snapshotRun(input.timestamp, () => {}, true);
             }
             handleInput(input, true);
@@ -230,15 +230,15 @@ export class World extends Room<WorldState> {
             //const mainSnapshots = snapshots;
             //const mainCurrentState = currentState;
             if(isServerAhead){
-              console.log("Server is ahead. Input timestamp:", input.timestamp, "Server timestamp:", this.state.timestamp)
+              //console.log("Server is ahead. Input timestamp:", input.timestamp, "Server timestamp:", this.state.timestamp)
               const stateOfInput = snapshots.get(input.timestamp);
-              console.log("pending inputs of snapshot state", JSON.stringify(stateOfInput?.pendingInputs), "to be set to server")
+              //console.log("pending inputs of snapshot state", JSON.stringify(stateOfInput?.pendingInputs), "to be set to server")
               rollbackToState(stateOfInput as Snapshot);
             }
             handleInput(input);
             run(Date.now() / 1000);
 
-            console.log("timestamp of world", currentState.timestamp);
+            //console.log("timestamp of world", currentState.timestamp);
             
         });
 

@@ -116,10 +116,10 @@ export const onInput = (callback: (input: Input) => void) => {
                     //Check if the transaction is a deposit
                     const data =
                         "0x" + logs[0].data.substring(194, logs[0].data.length);
-                    console.log("data", data);
+                    //console.log("data", data);
 
                     const binary = decodePacked(["address", "uint256"], data);
-                    console.log("binary", binary);
+                    //console.log("binary", binary);
                     const address = binary[0];
                     const amount = binary[1];
                     console.log("Recieved transaction indexer.ts:", address, timestamp);
