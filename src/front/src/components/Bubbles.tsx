@@ -10,7 +10,7 @@ import { BubblesControlsEmit } from "./BubblesControlsEmit";
 import { Circle, Edges, Outlines, RoundedBox, useTexture } from "@react-three/drei";
 import { darkenColor } from "../utils";
 import * as THREE from "three";
-import { bubbleStartPositions } from "./Game";
+import { bubbleStartPositions, dynamicLerp, timestampDiff } from "./Game";
 import { useDispatch, useSelector } from "react-redux";
 import {
     setIsBubbleSelected,
@@ -130,7 +130,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
     const pfpUrl = user?.pfpUrl;
     console.log("pfpUrl", pfpUrl)
     const texture = useTexture(pfpUrl);
-    texture.anisotropy = 16;
+    //texture.anisotropy = 16;
     if(!bubble) return null;
     const velocity = bubble?.velocity;
     const normalizedVelocity = {
@@ -140,7 +140,12 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
     const inverseVelocity = { x: -velocity.x, y: -velocity.y };
     const radius = massToRadius(bubble?.mass);
 
-    useFrame(() => {
+    useFrame((state, delta) => {
+        const elapsedTime = delta;
+        const timeSinceLastUpdate = timestampDiff;
+
+        const lerpFactor = LERP_SPEED * (elapsedTime / timeSinceLastUpdate);
+        console.log("lerpFactor", lerpFactor)
         const bubble = currentState.bubbles.find(
             (bubble) => bubble.id === bubbleId,
         );
@@ -210,12 +215,12 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
         const newX = MathUtils.lerp(
             meshRef.current.position.x,
             bubble.position.x,
-            LERP_SPEED,
+            lerpFactor,
         );
         const newY = MathUtils.lerp(
             meshRef.current.position.y,
             bubble.position.y,
-            LERP_SPEED,
+            lerpFactor,
         );
         meshRef.current.position.set(newX, newY, 0);
         meshRef.current.updateMatrix();

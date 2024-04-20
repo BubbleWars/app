@@ -21,7 +21,7 @@ import { Resources } from "./Resources";
 import { clearEvents, setOnEvent } from "../../../core/funcs/events";
 import { EventsType } from "../../../core/types/events";
 import { Client } from "colyseus.js";
-import { INDEXER_URL } from "../consts";
+import { INDEXER_URL, LERP_SPEED } from "../consts";
 import { current } from "@reduxjs/toolkit";
 import { User } from "../../../core/types/user";
 import { Puncture, PuncturePoint } from "../../../core/types/bubble";
@@ -31,6 +31,25 @@ import { userSocialsState } from "@/hooks/socials";
 const client = new Client(INDEXER_URL);
 let room = await client.joinOrCreate("world");
 const reconnectionToken = room.reconnectionToken;
+
+let lastTimestampReceived = 0;
+export let timestampDiff = 0;
+
+export let dynamicLerp = LERP_SPEED;
+
+function calculateLerpSpeed(timestampDifference) {
+    // Avoid division by zero and ensure a positive value for timestampDifference
+    const safeTimeDiff = Math.max(1, Math.abs(timestampDifference));
+    
+    // Calculate LERP_SPEED as the inverse square of the timestamp difference
+    // Adjust the base or factor as necessary to scale the effect appropriately
+    const lerpSpeed = 1 / (safeTimeDiff * safeTimeDiff);
+    
+    // Optionally, normalize the lerp speed to ensure it's within a practical range
+    const normalizedSpeed = Math.min(0.1, lerpSpeed); // Ensure speed doesn't exceed 0.1
+    return normalizedSpeed;
+}
+
 
 
 const schemaToSnapshot = () => {
@@ -56,6 +75,12 @@ const initStateServer = (room) => {
 
         //Timestamp
         currentState.timestamp = timestamp
+        if(lastTimestampReceived >= timestamp) {
+            console.log("Timestamp out of order", lastTimestampReceived, timestamp)
+        }
+        console.log("Timestamp diff", (timestamp - lastTimestampReceived).toFixed(2))
+        timestampDiff = timestamp - lastTimestampReceived;
+        lastTimestampReceived = timestamp
 
         //UserSocials
         userSocials.forEach((userSocial) => {

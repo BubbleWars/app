@@ -7,4 +7,4 @@ export const RPC_URL =  isProd ? `${BASE_URL}/node` :`${BASE_URL}:8545`;
 export const FAUCET_URL = isProd ? `${BASE_URL}/faucet` :`${BASE_URL}:2001/trpc`;
 export const INDEXER_URL = isProd ? `${BASE_URL}/indexer`:`${BASE_URL}:2567`;
 
-export const LERP_SPEED = 0.03;
+export const LERP_SPEED = 0.07;
