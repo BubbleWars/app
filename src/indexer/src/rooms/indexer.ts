@@ -64,6 +64,7 @@ export const currentChain = defineChain({
 export const publicClient = createPublicClient({
     chain: currentChain,
     transport: http(),
+    pollingInterval: 1000,
 });
 
 export const onInspect = async (callback: (snapshot: Snapshot) => void) => {
@@ -182,6 +183,7 @@ export const onBlock = (callback: (block: number) => void) => {
                 }
             }
         },
+        emitMissed: true,
     });
     return unwatch;
     blockSet = true;

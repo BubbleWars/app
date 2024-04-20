@@ -191,7 +191,10 @@ export const snapshotInit = (initialState?: Snapshot) => {
 
 export const snapshotRollback = (timestamp: number) => {
     const snapshot = snapshots.get(timestamp);
-    if (!snapshot) return;
+    if (!snapshot) {
+        console.log("Snapshot not found", timestamp, "in", JSON.stringify(snapshots));
+         return;
+    }
     snapshotCurrentState = Object.assign({}, snapshot);
     //reset
     snapshotWorld = new World({
@@ -213,6 +216,15 @@ export const snapshotRun = (
     snapshotPendingInputs
         .sort((a, b) => a.executionTime - b.executionTime)
         .filter((input) => input.executionTime < current);
+
+        //set the initial snapshot
+    //ONLY CLIENT: For reconciliation
+    snapshots.set(
+        snapshotLastTimestamp,
+        Object.assign({}, snapshotCurrentState),
+    );
+    //console.log("assigning snapshot", snapshotLastTimestamp, JSON.stringify(snapshots));
+
 
     //console.log("Pending inputs in run", snapshotPendingInputs)
 
@@ -300,6 +312,8 @@ export const snapshotRun = (
         snapshotLastTimestamp,
         Object.assign({}, snapshotCurrentState),
     );
+    //console.log("assigning snapshot", snapshotLastTimestamp, JSON.stringify(snapshots));
+
 
     //console.log("snapshot", snapshots)
     //console.log(snapshots);

@@ -31,6 +31,12 @@ import { EventsType } from "../../../core/types/events";
 import { User } from "../../../core/types/user";
 import { snapshot } from "viem/_types/actions/test/snapshot";
 
+let timeOffset = 0;
+const getNow = () => {
+    return (Date.now() / 1000) + timeOffset;
+
+}
+
 const updateState = (state: WorldState, snapshot: Snapshot): WorldState => {
     state.timestamp = snapshot.timestamp;
     //set users
@@ -166,6 +172,7 @@ export class World extends Room<WorldState> {
             //if (!this.recievedStartupInspect) return;
             this.blockTimestamp = blockTimestamp;
             snapshotRun(this.blockTimestamp);
+            
             //rollbackToState(snapshotCurrentState);
             //max keep 10 snapshots
             if (snapshots.size > 15) {
@@ -218,17 +225,20 @@ export class World extends Room<WorldState> {
             if (isBlockAhead) {
               //console.log("Local Block is ahead. Input timestamp:", input.timestamp, "Block timestamp:", this.blockTimestamp)
               snapshotRollback(input.timestamp);
+              handleInput(input, true);
+              snapshotRun(this.blockTimestamp);
+
             } else if (isBlockBehind) {
               //console.log("Local Block is behind. Input timestamp:", input.timestamp, "Block timestamp:", this.blockTimestamp)
+              handleInput(input, true);
               snapshotRun(input.timestamp, () => {}, true);
             }
-            handleInput(input, true);
-            snapshotRun(input.timestamp);
 
             //If the server's timestamp is ahead,  rollback to input timestamp, and add input
-            const isServerAhead = input.timestamp < this.state.timestamp;
-            //const mainSnapshots = snapshots;
-            //const mainCurrentState = currentState;
+            const serverTimestamp = this.state.timestamp;
+            const isServerAhead = input.timestamp < serverTimestamp;
+            const mainSnapshots = snapshots;
+            const mainCurrentState = currentState;
             if(isServerAhead){
               //console.log("Server is ahead. Input timestamp:", input.timestamp, "Server timestamp:", this.state.timestamp)
               const stateOfInput = snapshots.get(input.timestamp);
@@ -236,7 +246,19 @@ export class World extends Room<WorldState> {
               rollbackToState(stateOfInput as Snapshot);
             }
             handleInput(input);
-            run(Date.now() / 1000);
+            // run(serverTimestamp, () => {
+            //     console.log("microstep", currentState.timestamp, "current timestamp", this.state.timestamp)
+            //     updateState(this.state, currentState);
+            // });
+            // const endTime = getNow();
+            // let processTime = input.timestamp;
+            // console.log("input timestamp", input.timestamp, "end time", endTime)
+            // while(processTime < endTime){
+            //     console.log("microstep", processTime, "current timestamp", this.state.timestamp)
+            //     updateState(this.state, currentState);
+            //     processTime += 1/60;
+            //     run(processTime);
+            // }
 
             //console.log("timestamp of world", currentState.timestamp);
             
@@ -271,8 +293,11 @@ export class World extends Room<WorldState> {
         //
         // handle game loop
         //
-        const now = Date.now() / 1000;
-        run(now);
+        if(getNow() < this.state.timestamp) {
+            console.log("timestamp jumping", getNow(), this.state.timestamp)
+            timeOffset = this.state.timestamp - getNow();
+        }
+        run(getNow());
         updateState(this.state, currentState);
     }
 }

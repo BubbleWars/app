@@ -264,7 +264,10 @@ export const run = (
             nextInput = pendingInputs.shift();
         }
 
-        callback?.();
+        if(callback) {
+            console.log("Executing callback");
+            callback();
+        }
     }
 
     //console.log("ran world for", current - lastTimestamp, "seconds")

@@ -289,6 +289,10 @@ const handleEmit = (input: Emit, client: boolean): boolean => {
     //console.log(bubbles)
     //console.log(pendingInputs)
     //console.log(currentState)
+    const mainSnapshotPortal = snapshotPortals;
+    const mainSnapshotBubble = snapshotBubbles;
+    const mainPortals = portals;
+    const mainBubbles = bubbles;
     const isPortal = client
         ? snapshotPortals.has(input.from.toLowerCase())
         : portals.has(input.from.toLowerCase());

@@ -144,7 +144,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
         const elapsedTime = delta;
         const timeSinceLastUpdate = timestampDiff;
 
-        const lerpFactor = LERP_SPEED * (elapsedTime / timeSinceLastUpdate);
+        const lerpFactor = LERP_SPEED * Math.pow(elapsedTime / timeSinceLastUpdate, 2.5);
         console.log("lerpFactor", lerpFactor)
         const bubble = currentState.bubbles.find(
             (bubble) => bubble.id === bubbleId,
@@ -215,12 +215,12 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
         const newX = MathUtils.lerp(
             meshRef.current.position.x,
             bubble.position.x,
-            lerpFactor,
+            LERP_SPEED,
         );
         const newY = MathUtils.lerp(
             meshRef.current.position.y,
             bubble.position.y,
-            lerpFactor,
+            LERP_SPEED,
         );
         meshRef.current.position.set(newX, newY, 0);
         meshRef.current.updateMatrix();
