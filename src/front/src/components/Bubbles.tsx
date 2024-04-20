@@ -127,7 +127,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
 
     const user = useUserSocial({ address: bubble?.owner });
 
-    const pfpUrl = user?.social ?  `https://unavatar.io/twitter/${user?.social}` : "https://unavatar.io/jessepollak";
+    const pfpUrl = user?.pfpUrl;
     console.log("pfpUrl", pfpUrl)
     const texture = useTexture(pfpUrl);
     texture.anisotropy = 16;
