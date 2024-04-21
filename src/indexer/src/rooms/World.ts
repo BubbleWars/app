@@ -172,6 +172,7 @@ export class World extends Room<WorldState> {
             //if (!this.recievedStartupInspect) return;
             this.blockTimestamp = blockTimestamp;
             snapshotRun(this.blockTimestamp);
+            //console.log("block timestamp", this.blockTimestamp, "current snapshot state", snapshotCurrentState.timestamp, "current timestamp", snapshotCurrentState)
             
             //rollbackToState(snapshotCurrentState);
             //max keep 10 snapshots
@@ -220,7 +221,7 @@ export class World extends Room<WorldState> {
 
 
             //If current block is ahead of input, rollback and append input
-            const isBlockAhead = input.timestamp < this.blockTimestamp;
+            const isBlockAhead = input.timestamp <= this.blockTimestamp;
             const isBlockBehind = input.timestamp > this.blockTimestamp;
             if (isBlockAhead) {
               //console.log("Local Block is ahead. Input timestamp:", input.timestamp, "Block timestamp:", this.blockTimestamp)
@@ -229,7 +230,7 @@ export class World extends Room<WorldState> {
               snapshotRun(this.blockTimestamp);
 
             } else if (isBlockBehind) {
-              //console.log("Local Block is behind. Input timestamp:", input.timestamp, "Block timestamp:", this.blockTimestamp)
+              console.log("Local Block is behind. Input timestamp:", input.timestamp, "Block timestamp:", this.blockTimestamp)
               handleInput(input, true);
               snapshotRun(input.timestamp, () => {}, true);
             }
