@@ -86,6 +86,7 @@ export const snapshotInit = (initialState?: Snapshot) => {
         snapshotBubbles.clear();
         snapshotPortals.clear();
         snapshotObstacles.clear();
+        snapshotNodes.clear();
         snapshotPendingInputs.length = 0;
         snapshotDeferredUpdates.length = 0;
 
