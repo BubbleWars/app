@@ -3,7 +3,7 @@ import { massToRadius } from "../../../core/funcs/utils";
 import { currentState, rollbackToState } from "../../../core/world";
 import { useEffect, useRef, useState } from "react";
 import { Line, Text, Text3D } from "@react-three/drei";
-import { extend, useFrame } from "@react-three/fiber";
+import { extend, useFrame, useThree } from "@react-three/fiber";
 import {
     useCreateInput,
     useOnClick,
@@ -62,6 +62,8 @@ export const PortalsControlsEmit = ({
     const blueMass = portal.resources.find( (resource) => resource.resource == ResourceType.Energy)?.mass ?? 0
     const ethMass = portal.mass - blueMass
 
+    const { viewport } = useThree();
+
     //Input action
     const { write, isError, isLoading, isSuccess, data, submitTransaction } =
         useCreateInput({
@@ -73,21 +75,14 @@ export const PortalsControlsEmit = ({
         });
 
     //Now get mouse position
-    useFrame(({ pointer, camera }) => {
+    useFrame(({ pointer, camera, mouse }) => {
         if (isError || isLoading || isSuccess) return;
+        camera.updateProjectionMatrix();
+        const x = ((pointer.x * viewport.getCurrentViewport().width) / 2) + camera.position.x;
+        const y = (pointer.y * viewport.getCurrentViewport().height) / 2 + camera.position.y;
+        const worldMouse = new THREE.Vector3(x, y, 0);
 
-        // Raycaster for converting pointer coordinates
-        const raycaster = new THREE.Raycaster();
-        raycaster.setFromCamera(
-            new THREE.Vector2(pointer.x, pointer.y),
-            camera,
-        );
-
-        // Assuming your 2D plane is at z = 0
-        const planeZ = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
-        const worldMouse = new THREE.Vector3();
-        raycaster.ray.intersectPlane(planeZ, worldMouse);
-
+        console.log("bb x:", x, " y:", y, "viewport width:", viewport.width, "viewport height:", viewport.height)
         // Calculate the direction vector
         const directionVector = worldMouse.sub(position).normalize();
 
