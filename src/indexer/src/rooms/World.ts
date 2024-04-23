@@ -246,7 +246,7 @@ export class World extends Room<WorldState> {
               //console.log("pending inputs of snapshot state", JSON.stringify(stateOfInput?.pendingInputs), "to be set to server")
               rollbackToState(stateOfInput as Snapshot);
             }
-            handleInput(input);
+            //handleInput(input);
             // run(serverTimestamp, () => {
             //     console.log("microstep", currentState.timestamp, "current timestamp", this.state.timestamp)
             //     updateState(this.state, currentState);
