@@ -15,7 +15,7 @@ export const useUserSocial = ({ address }: { address: string }) => {
     return useMemo(() => {
         if (!address) return {
             social: "not found",
-            pfpUrl: "",
+            pfpUrl: "https://www.shutterstock.com/image-vector/default-avatar-profile-icon-social-600nw-1677509740.jpg",
             privyId: "",
         }
         return userSocialsState[address.toLowerCase()];
