@@ -20,6 +20,7 @@ import { publicClient } from "../main";
 import { currentState } from "../../../core/world";
 import { encodeFunctionData } from "viem";
 import { getChainId } from "node_modules/viem/_types/actions/public/getChainId";
+import { call } from "node_modules/viem/_types/actions/public/call";
 
 export const useCreateInput = (input: Input) => {
     //console.log("useCreateInput", input)
@@ -170,8 +171,8 @@ export const waitForEmission = (
 
     // Function to check conditions and possibly clear interval
     const checkAndClear = (currentMass: number) => {
-        console.log("initialMass", initialMass, "currentMass", currentMass);
-        if (currentMass <= initialMass - emissionMass) {
+        console.log("8899 initialMass", initialMass, "currentMass", currentMass, "emissionMass", emissionMass);
+        if (currentMass <= initialMass) {
             clearTimers();
             callback();
         }
@@ -181,28 +182,38 @@ export const waitForEmission = (
         // Check for mass to decrease by emissionMass
         intervalId = setInterval(() => {
             const newBubble = currentState.bubbles.find(
-                (bubble) => bubble.id == id,
+                (bubble) => bubble.id.toLowerCase() == id.toLowerCase(),
             );
             if (newBubble) {
+                console.log("8899 Checking bubble mass. emission:", newBubble.mass, "initialMass:", initialMass)
                 checkAndClear(newBubble.mass);
+            }else {
+                console.log("8899 Bubble not found");
+                clearTimers();
+                callback();
             }
-        }, 100);
+        }, 1000);
     } else if (portal) {
         intervalId = setInterval(() => {
             const newPortal = currentState.portals.find(
                 (portal) => portal.id == id,
             );
             if (newPortal) {
+                console.log("8899 Checking portal mass. emission:", newPortal.mass, "initialMass:", initialMass )
                 checkAndClear(newPortal.mass);
+            }else {
+                console.log("8899 Portal not found");
+                clearTimers();
+                callback();
             }
-        }, 100);
+        }, 1000);
     }
 
     // Set a timeout to force callback execution after 10 seconds
-    timeoutId = setTimeout(() => {
-        clearTimers(); // Ensure to clear the interval as well
-        callback(); // Force the callback execution
-    }, 10000);
+    // timeoutId = setTimeout(() => {
+    //     clearTimers(); // Ensure to clear the interval as well
+    //     callback(); // Force the callback execution
+    // }, 10000);
 
     // Return a cleanup function to clear interval and timeout
     return clearTimers;
