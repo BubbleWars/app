@@ -245,6 +245,8 @@ export class World extends Room<WorldState> {
               const stateOfInput = snapshots.get(input.timestamp);
               //console.log("pending inputs of snapshot state", JSON.stringify(stateOfInput?.pendingInputs), "to be set to server")
               rollbackToState(stateOfInput as Snapshot);
+            }else {
+                handleInput(input);
             }
             //handleInput(input);
             // run(serverTimestamp, () => {
