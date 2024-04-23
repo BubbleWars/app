@@ -204,7 +204,7 @@ export const BubblesControlsEmit = ({
                             .add(direction.clone().multiplyScalar(length))}
                     >
                         {`Emit \n`}
-                        {mass.toFixed(3)} {emitEth ? "ETH" : "EP"}
+                        {mass.toFixed(3)} {emitEth ? "ETH" : emitEp ? "EP" : "blanks"}
                     </CustomText>
                 </>
             )}
@@ -242,25 +242,30 @@ export const BubblesControlsEmit = ({
             {!isReady && (
                 <>
                     <group
-                        onPointerEnter={() => {
-                            setEmitEth(true);
-                            setMass(ethMass / 10);
-                            setEmitEp(false);
-                        }}
-                        onPointerDown={() => {
-                            setTimeout(() => {
-                                setIsReady(true);
-                                dispatch(setControlsActive(true));
-                            }, 250);
-                        }}
+                        position={new THREE.Vector3(
+                            radius + 2,
+                            radius + 2,
+                            0,
+                        ).add(position)}
+                            onPointerEnter={() => {
+                                setEmitEth(true);
+                                setMass(ethMass/10);
+                                setEmitEp(false);
+                            }}
+                            onPointerDown={() => {
+                                setTimeout(() => {
+                                    setIsReady(true);
+                                    dispatch(setControlsActive(true));
+                                }, 250);
+                            }}
                     >
                         <CustomText
                             size={emitEth ? 1.2 : 1.1}
                             position={new THREE.Vector3(
-                                radius + 2,
-                                radius + 2,
                                 0,
-                            ).add(position)}
+                                0,
+                                0,
+                            )}
                             anchorX="center"
                             anchorY="center"
                             color="white"
@@ -268,33 +273,40 @@ export const BubblesControlsEmit = ({
                             Emit ETH
                         </CustomText>
                     </group>
-                    <group
-                        onPointerEnter={() => {
-                            setEmitEp(true);
-                            setMass(Math.min(blueMass, mass));
-                            setEmitEth(false);
-                        }}
-                        onPointerDown={() => {
-                            setTimeout(() => {
-                                setIsReady(true);
-                                dispatch(setControlsActive(true));
-                            }, 250);
-                        }}
+                    {/* <group
+                        position={new THREE.Vector3(
+                            radius + 2,
+                            radius + 2 - 2,
+                            0,
+                        ).add(position)}
+                            onPointerEnter={() => {
+                                setEmitEp(true);
+                                setMass(Math.min(blueMass, mass));
+                                setEmitEth(false);
+                            }}
+                            onPointerDown={() => {
+                                setTimeout(() => {
+                                    setEmitEp(true);
+                                    setEmitEth(false);
+                                    setIsReady(true);
+                                    dispatch(setControlsActive(true));
+                                }, 250);
+                            }}
                     >
                         <CustomText
                             size={emitEp ? 1.2 : 1.1}
                             position={new THREE.Vector3(
-                                radius + 2,
-                                radius + 2 - 2,
                                 0,
-                            ).add(position)}
+                                0,
+                                0,
+                            )}
                             anchorX="center"
                             anchorY="center"
                             color="white"
                         >
                             Emit EP
                         </CustomText>
-                    </group>
+                    </group> */}
                 </>
             )}
         </>
