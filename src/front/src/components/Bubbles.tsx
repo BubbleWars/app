@@ -100,6 +100,7 @@ import { useWallets } from "@privy-io/react-auth";
 import { useUserSocial } from "@/hooks/socials";
 import Outline from "./Outline";
 import { text } from "stream/consumers";
+import { usePfpTexture, useTextureWithFallback } from "@/hooks/state";
 
 export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
     const { wallets } = useWallets();
@@ -129,7 +130,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
 
     const pfpUrl = user?.pfpUrl;
     console.log("pfpUrl", pfpUrl)
-    const texture = useTexture(pfpUrl);
+    const texture = usePfpTexture(pfpUrl, "/bubblewars.png");
     //texture.anisotropy = 16;
     if(!bubble) return null;
     const velocity = bubble?.velocity;

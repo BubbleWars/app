@@ -74,8 +74,10 @@ export const onInspect = async (callback: (snapshot: Snapshot) => void) => {
 };
 
 export const onUser = async (callback: (users: UserSocialSchema[]) => void) => {
-    const users = await fetchUsers();
-    callback(users);
+    setInterval(async () => {
+        const users = await fetchUsers();
+        callback(users);
+    }, 10000);
 };
 
 export const onInput = (callback: (input: Input) => void) => {

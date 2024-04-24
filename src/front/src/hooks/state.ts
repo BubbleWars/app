@@ -14,6 +14,8 @@ import { currentChain } from "../contracts";
 import { getPublicClient } from "wagmi/actions";
 import { useDispatch, useSelector } from "react-redux";
 import { setInputs } from "../store/inputs";
+import { TextureLoader } from 'three';
+import { useTexture } from '@react-three/drei';
 
 const DefaultSnapshot = {
     timestamp: 0,
@@ -184,3 +186,32 @@ export const useInputs = (): {
     //console.log("inputs main2", storeInputs);
     return { loading, error, inputs: storeInputs, cursor };
 };
+
+
+export const usePfpTexture = (imageUrl, fallbackImage) => {
+    const [validatedUrl, setValidatedUrl] = useState(null);
+
+    useEffect(() => {
+      // Function to check image availability
+      const validateImage = async (url) => {
+        try {
+          const response = await fetch(url, { method: 'HEAD' });
+          if (response.ok) {
+            setValidatedUrl(url);
+          } else {
+            setValidatedUrl(fallbackImage);
+          }
+        } catch (error) {
+          console.error('Error fetching image:', error);
+          setValidatedUrl(fallbackImage);
+        }
+      };
+  
+      validateImage(imageUrl);
+    }, [imageUrl, fallbackImage]);
+  
+    // Load the texture from the validated URL
+    const texture = useTexture(validatedUrl || fallbackImage);
+  
+    return texture;
+  };
