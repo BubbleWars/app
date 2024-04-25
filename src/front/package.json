@@ -6,7 +6,7 @@
     "scripts": {
         "dev": "vite --host",
         "host": "vite --host --port 80 --mode production",
-        "build": "vite build --minify false",
+        "build": "vite build --minify false --mode development",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
         "preview": "vite preview",
         "codegen": "graphql-codegen",
