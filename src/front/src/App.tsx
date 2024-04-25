@@ -25,6 +25,7 @@ import "../global.css"
 import { BarBottom } from "./components/ui/BarBottom";
 import { usePrivy } from "@privy-io/react-auth";
 import { ScreenLogin } from "./components/screens/ScreenLogin";
+import { WORLD_WIDTH } from "../../core/consts";
 
 function App() {
     //const { snapshot } = useInspect({ type: InspectType.State, value: 0 });
@@ -55,7 +56,7 @@ function App() {
                 <gridHelper
                     position={[0, 0, -10]}
                     rotation={[Math.PI / 2, 0, 0]}
-                    args={[10000, 10000, 0xeee8d5, 0xeee8d5]}
+                    args={[WORLD_WIDTH, 100, 0xeee8d5, 0xeee8d5]}
                 />
             </Canvas>
             <BarSide />

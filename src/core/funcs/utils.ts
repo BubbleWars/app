@@ -21,22 +21,12 @@ export const calculateEmissionVelocity = (m1: number, m2: number): number => {
 
 export const createBoundary = (
     world: World,
-    position: Vec2,
-    dimensions: Vec2,
+    a: Vec2,
+    b: Vec2,
 ) => {
-    // let boundary = world.createBody({
-    //     position: position,
-    //     type: "static",
-    // });
-
-    // boundary.createFixture({
-    //     shape: Edge(
-    //         Vec2(-dimensions.x / 2, -dimensions.y / 2),
-    //         Vec2(dimensions.x / 2, dimensions.y / 2),
-    //     ),
-    //     density: 0,
-    //     friction: 0.5,
-    // });
+    world.createBody().createFixture(Edge(a, b), {
+        restitution: 1,
+    });
 };
 
 export const createEdges = (
@@ -44,10 +34,13 @@ export const createEdges = (
     width: number,
     height: number,
 ) => {
-    createBoundary(world, Vec2(0, -height / 2), Vec2(width, 0)); // Bottom
-    createBoundary(world, Vec2(0, height / 2), Vec2(width, 0)); // Top
-    createBoundary(world, Vec2(-width / 2, 0), Vec2(0, height)); // Left
-    createBoundary(world, Vec2(width / 2, 0), Vec2(0, height)); // Right
+    const halfWidth = width / 2;
+    const halfHeight = height / 2;
+
+    createBoundary(world, Vec2(-halfWidth, -halfHeight), Vec2(halfWidth, -halfHeight));
+    createBoundary(world, Vec2(halfWidth, -halfHeight), Vec2(halfWidth, halfHeight));
+    createBoundary(world, Vec2(halfWidth, halfHeight), Vec2(-halfWidth, halfHeight));
+    createBoundary(world, Vec2(-halfWidth, halfHeight), Vec2(-halfWidth, -halfHeight));
 }
 
 export const decodePacked = (types: string[], data: string) => {
