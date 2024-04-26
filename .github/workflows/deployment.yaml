@@ -100,8 +100,6 @@ jobs:
               run: |
                   cd src/front
                   npm i
-                  npm run build
-                  cd dist
                   pm2 start --name front-end "npm run host"
 
             # - name: Wait for Front-End Setup
