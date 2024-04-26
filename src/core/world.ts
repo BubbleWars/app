@@ -13,6 +13,7 @@ import { updateState, handleContact } from "./funcs/state";
 import {
     applyPortalGravity,
     createPortal,
+    generateSpawnPoint,
     setPortalResourceMass,
 } from "./funcs/portal";
 import {
@@ -71,11 +72,7 @@ export const applyDeferredUpdates = () => {
 //console.log("world init", world)
 
 export const init = (initialState?: Snapshot) => {
-    if (!initialState?.nodes || initialState.nodes.length == 0) {
-        console.log("generating nodes");
-        generateNodes(world, nodes, 1);
-        createEdges(world, WORLD_WIDTH, WORLD_HEIGHT);
-    }
+    
     if (initialState) {
         //reset all state
         users.clear();
@@ -86,6 +83,22 @@ export const init = (initialState?: Snapshot) => {
         resources.clear();
         pendingInputs.length = 0;
         deferredUpdates.length = 0;
+
+        if (!initialState?.nodes || initialState.nodes.length == 0) {
+            console.log("generating nodes");
+            // generateNodes(world, nodes, 1);
+            // for (let index = 0; index < 100; index++) {
+            //     const { x, y } = generateSpawnPoint(
+            //         0,
+            //         world,
+            //         portals,
+            //         bubbles,
+            //         nodes,
+            //         100,
+            //     );
+            //     createPortal(portals, world, "0x00000" + index, x, y, 100); 
+            // }
+        }
 
         currentState = Object.assign({}, initialState);
         lastTimestamp = initialState.timestamp;
@@ -172,6 +185,8 @@ export const init = (initialState?: Snapshot) => {
             pendingInputs.push(input);
         });
     }
+    createEdges(world, WORLD_WIDTH, WORLD_HEIGHT);
+
     //Create initial portal
     //const portal = createPortal(portals, world, "0x0", 0, 0, 10);
 

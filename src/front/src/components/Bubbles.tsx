@@ -124,22 +124,22 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
 
     const bubble = currentState.bubbles.find(
         (bubble) => bubble.id == bubbleId,
-    );
+    ) ?? { position: { x: 0, y: 0 }, mass: 0, owner: "", velocity: { x: 0, y: 0 } };
 
-    const user = useUserSocial({ address: bubble?.owner });
+    const user = useUserSocial({ address: bubble?.owner ?? ""});
 
     const pfpUrl = user?.pfpUrl;
     console.log("pfpUrl", pfpUrl)
     const texture = usePfpTexture(pfpUrl, "/bubblewars.png");
     //texture.anisotropy = 16;
-    if(!bubble) return null;
-    const velocity = bubble?.velocity;
+    //if(!bubble) return null;
+    const velocity = bubble?.velocity ?? { x: 0, y: 0 };
     const normalizedVelocity = {
         x: velocity.x / Math.sqrt(velocity.x ** 2 + velocity.y ** 2),
         y: velocity.y / Math.sqrt(velocity.x ** 2 + velocity.y ** 2),
     }
     const inverseVelocity = { x: -velocity.x, y: -velocity.y };
-    const radius = massToRadius(bubble?.mass);
+    const radius = massToRadius(bubble?.mass ?? 0);
 
     useFrame((state, delta) => {
         const elapsedTime = delta;

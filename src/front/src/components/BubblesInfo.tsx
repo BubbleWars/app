@@ -20,7 +20,7 @@ export const BubblesInfo = ({
     const lock = useSelector((state: any) => state.interpolation.lock);
     const bubble = currentState.bubbles.find(
         (bubble) => bubble.id === bubbleId,
-    );
+    ) ?? { position: { x: 0, y: 0 }, mass: 0, owner: "", velocity: { x: 0, y: 0 } };
     const userSocial = useUserSocial({ address: bubble.owner });
     const social = userSocial?.social ?? null;
 
@@ -41,9 +41,9 @@ export const BubblesInfo = ({
         .clone()
         .add(new THREE.Vector3(radius, -radius, 0))
         .clone();
-    const energy = bubble.resources.find(
+    const energy = bubble?.resources ? bubble?.resources?.find(
         (resource) => resource.resource == ResourceType.Energy,
-    );
+    ): null;
     const energyAmount = energy ? energy.mass : 0;
 
     //console.log("resources main", bubble.resources)

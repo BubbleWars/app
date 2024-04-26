@@ -12,6 +12,7 @@ import { updateState, handleSnapshotContact } from "./funcs/state";
 import {
     applyPortalGravity,
     createPortal,
+    generateSpawnPoint,
     setPortalResourceMass,
 } from "./funcs/portal";
 import {
@@ -75,11 +76,6 @@ export const applyDeferredUpdates = () => {
 //console.log("world init", world)
 
 export const snapshotInit = (initialState?: Snapshot) => {
-    if (!initialState?.nodes || initialState.nodes.length == 0) {
-        console.log("generating snapshot nodes");
-        generateNodes(snapshotWorld, snapshotNodes, 1);
-        createEdges(snapshotWorld, WORLD_WIDTH, WORLD_WIDTH);
-    }
     if (initialState) {
         //reset all state
         snapshotUsers.clear();
@@ -89,6 +85,22 @@ export const snapshotInit = (initialState?: Snapshot) => {
         snapshotNodes.clear();
         snapshotPendingInputs.length = 0;
         snapshotDeferredUpdates.length = 0;
+
+        if (!initialState?.nodes || initialState.nodes.length == 0) {
+            console.log("generating snapshot nodes");
+            // generateNodes(snapshotWorld, snapshotNodes, 1);
+            // for (let index = 0; index < 100; index++) {
+            //     const { x, y } = generateSpawnPoint(
+            //         0,
+            //         snapshotWorld,
+            //         snapshotPortals,
+            //         snapshotBubbles,
+            //         snapshotNodes,
+            //         100,
+            //     );
+            //     createPortal(snapshotPortals, snapshotWorld, "0x00000" + index, x, y, 100); 
+            // }
+        }
 
         //Set snapshot state
         snapshotCurrentState = Object.assign({}, initialState);
@@ -176,6 +188,8 @@ export const snapshotInit = (initialState?: Snapshot) => {
             snapshotPendingInputs.push(input);
         });
     }
+    createEdges(snapshotWorld, WORLD_WIDTH, WORLD_WIDTH);
+
     //Create initial portal
     //const portal = createPortal(portals, snapshotWorld, "0x0", 0, 0, 10);
 

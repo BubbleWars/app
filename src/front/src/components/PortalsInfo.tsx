@@ -11,8 +11,8 @@ import { useUserSocial } from "@/hooks/socials";
 export const PortalsInfo = ({ portalId }: { portalId: string }) => {
     const portal = currentState.portals.find(
         (portal) => portal.id === portalId,
-    );
-    //    const currentUserSocials = useUserSocial({ address: portal.owner });
+        ) ?? { position: { x: 0, y: 0 }, mass: 0, owner: "", velocity: { x: 0, y: 0 }, resources: [], id: "" };
+        //    const currentUserSocials = useUserSocial({ address: portal.owner });
     //console.log("wasteyute", currentUserSocials);
     const userSocial = useUserSocial({ address: portal.owner });
     const social = userSocial?.social ?? "not found"

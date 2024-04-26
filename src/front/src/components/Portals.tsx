@@ -118,7 +118,7 @@ export const Portal = ({ portalId }: { portalId: string }) => {
     
     const portal = currentState.portals.find(
         (portal) => portal.id === portalId,
-    );
+    ) ?? { position: { x: 0, y: 0 }, mass: 0, owner: "", velocity: { x: 0, y: 0 }, resources: [], id: "" };
     const radius = massToRadius(portal.mass);
 
     useFrame(() => {
