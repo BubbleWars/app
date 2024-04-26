@@ -100,8 +100,9 @@ jobs:
               run: |
                   cd src/front
                   npm i
-                  npm i vite@latest -D
-                  pm2 start --name front-end "npm run host"
+                  npm run build
+                  cd dist
+                  pm2 start --name front-end "npx serve -l 80 -d "
 
             # - name: Wait for Front-End Setup
             #   run: sleep 20 # Adjust the sleep duration as needed
