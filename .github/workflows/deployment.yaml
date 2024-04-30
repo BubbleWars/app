@@ -74,6 +74,8 @@ jobs:
                   docker volume prune -f || true
                   docker rmi $(docker images -q) || true
                   docker volume prune -f || true
+                  sudo systemctl stop docker || true
+                  sudo systemctl start docker || true
 
             - name: Set up Local Blockchain and Smart Contracts
               run: pm2 start --name blockchain "sunodo run --no-backend --block-time 1"
