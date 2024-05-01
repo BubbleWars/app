@@ -27,6 +27,7 @@ import { ResourceType } from "../../../core/types/resource";
 import { setControlsActive, setIsBubbleSelected } from "../store/interpolation";
 import { setOnEvent } from "../../../core/funcs/events";
 import { useWallets } from "@privy-io/react-auth";
+import { PLANCK_MASS } from "../../../core/consts";
 
 export const BubblesControlsEmit = ({
     bubbleId,
@@ -44,13 +45,13 @@ export const BubblesControlsEmit = ({
     if (!bubble) return null;
     const radius = massToRadius(bubble.mass);
     const position = new THREE.Vector3(bubble.position.x, bubble.position.y, 0);
-    const length = 10;
+    const length = radius * 3;
     const [direction, setDirection] = useState<THREE.Vector3>(
         new THREE.Vector3(1, 0, 0),
     );
     const [hasProcessedTx, setHasProcessedTx] = useState(false);
     const [isEmitting, setIsEmitting] = useState<boolean>(false);
-    const [mass, setMass] = useState<number>(bubble.mass / 10);
+    const [mass, setMass] = useState<number>(PLANCK_MASS);
     const [emitEth, setEmitEth] = useState<boolean>(true);
     const [emitEp, setEmitEp] = useState<boolean>(false);
     const [isReady, setIsReady] = useState<boolean>(false);
@@ -164,10 +165,10 @@ export const BubblesControlsEmit = ({
     useOnWheel((event) => {
         if (isError || isLoading || isSuccess) return;
         const maxMass = emitEth ? ethMass : blueMass;
-        const minMass = 0.05;
-        const step = 0.01;
+        const minMass = PLANCK_MASS;
+        const step = PLANCK_MASS;
         const newMass = Math.min(
-            Math.max(mass + (event.deltaY * step), minMass),
+            Math.max(mass + (Math.sign(event.deltaY) * step), minMass),
             maxMass,
         );
         setMass(newMass);
@@ -181,8 +182,8 @@ export const BubblesControlsEmit = ({
                 <>
                     <Line
                         ref={lineRef}
-                        color={"white"}
-                        lineWidth={2}
+                        color={"grey"}
+                        lineWidth={3}
                         dashed={true}
                         points={[
                             position,
@@ -197,14 +198,14 @@ export const BubblesControlsEmit = ({
                 {mass.toFixed(6)} ETH
             </text> */}
                     <CustomText
-                        size={0.8}
+                        size={0.5}
                         color="white"
                         position={position
                             .clone()
                             .add(direction.clone().multiplyScalar(length))}
                     >
                         {`Emit \n`}
-                        {mass.toFixed(3)} {emitEth ? "ETH" : emitEp ? "EP" : "blanks"}
+                        {mass.toFixed(4)} {emitEth ? "ETH" : emitEp ? "EP" : "blanks"}
                     </CustomText>
                 </>
             )}
@@ -212,7 +213,7 @@ export const BubblesControlsEmit = ({
                 <>
                     <Line
                         ref={lineRef}
-                        color={"white"}
+                        color={"grey"}
                         lineWidth={2}
                         dashed={true}
                         points={[
@@ -228,7 +229,7 @@ export const BubblesControlsEmit = ({
                 {mass.toFixed(6)} ETH
             </text> */}
                     <CustomText
-                        size={0.8}
+                        size={0.5}
                         color="white"
                         position={position
                             .clone()
@@ -249,7 +250,7 @@ export const BubblesControlsEmit = ({
                         ).add(position)}
                             onPointerEnter={() => {
                                 setEmitEth(true);
-                                setMass(ethMass/10);
+                                setMass(PLANCK_MASS);
                                 setEmitEp(false);
                             }}
                             onPointerDown={() => {
@@ -260,7 +261,7 @@ export const BubblesControlsEmit = ({
                             }}
                     >
                         <CustomText
-                            size={emitEth ? 1.2 : 1.1}
+                            size={emitEth ? 0.6 : 0.6}
                             position={new THREE.Vector3(
                                 0,
                                 0,

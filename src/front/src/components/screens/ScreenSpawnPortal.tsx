@@ -24,7 +24,7 @@ export const ScreenSpawnPortal = () => {
 
     const [buttonText, setButtonText] = React.useState("Spawn");
     //const [ dripText, setDripText ] = React.useState('Drip')
-    const [amount, setAmount] = useState(100);
+    const [amount, setAmount] = useState(10);
     const dispatch = useDispatch();
 
     const {

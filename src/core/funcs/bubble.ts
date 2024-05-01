@@ -1,6 +1,6 @@
 import { Circle, Vec2, World } from "planck-js";
 import { Bubble, PuncturePoint } from "../types/bubble";
-import { calculateEmissionVelocity, massToRadius } from "./utils";
+import { calculateDeltaVelocity, calculateEjectionVelocity, calculateEmissionVelocity, massToRadius } from "./utils";
 import { Address } from "../types/address";
 import { CLASH_KE, CLASH_VELOCITY, DAMPENING, EMISSION_SPEED, MASS_PER_SECOND } from "../consts";
 import { Resource, ResourceType } from "../types/resource";
@@ -213,11 +213,9 @@ export const emitBubble = (
 
     //Apply momentum conservation
     const originalBubbleMomentum = totalMomentum.clone();
-    const emittedBubbleVelocityDirection = emissionDirection ? emissionDirection.clone() : direction.clone();
-    const emittedBubbleVelocityMagnitude = calculateEmissionVelocity(newBubbleMass, mass);
-    const emittedBubbleRelativeVelocity = emittedBubbleVelocityDirection.mul(
-        emittedBubbleVelocityMagnitude,
-    );
+    //const emittedBubbleVelocityDirection = emissionDirection ? emissionDirection.clone() : direction.clone();
+    //const emittedBubbleVelocityMagnitude = calculateEmissionVelocity(newBubbleMass, mass);
+    const emittedBubbleRelativeVelocity = calculateEjectionVelocity(direction);
     const emittedBubbleVelocity = bubble.body
         .getLinearVelocity()
         .clone()
@@ -226,10 +224,11 @@ export const emitBubble = (
         .clone()
         .mul(emittedBubble.body.getMass());
     emittedBubble.body.setLinearVelocity(emittedBubbleVelocity);
+    const m = bubble.body.getMass();
+    const me = emittedBubble.body.getMass();
+    const deltaVelocity = calculateDeltaVelocity(emittedBubbleRelativeVelocity, m, me);
     bubble.body.setLinearVelocity(
-        originalBubbleMomentum
-            .sub(emittedBubbleMomentum)
-            .mul(1 / bubble.body.getMass()),
+        bubble.body.getLinearVelocity().clone().add(deltaVelocity),
     );
 
     return emittedBubble;

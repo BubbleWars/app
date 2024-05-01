@@ -51,7 +51,7 @@ void main() {
   gl_Position = projectedPosition;
 
   // Adjust point size based on the zoom level
-  gl_PointSize = 0.5 * uZoom; // Use a base size and adjust based on zoom level
+  gl_PointSize = 0.3 * uRadius * uZoom; // Use a base size and adjust based on zoom level
 
   // Optionally, apply a further size attenuation factor here if necessary
   // gl_PointSize *= attenuationFactor;

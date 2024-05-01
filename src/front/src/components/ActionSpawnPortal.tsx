@@ -4,7 +4,7 @@ import { useCreateInput } from "../hooks/inputs";
 export const ActionSpawnPortal = () => {
     const { write, isError, isLoading, isSuccess } = useCreateInput({
         type: InputType.SpawnPortal,
-        mass: 100,
+        mass: 1,
     });
 
     return (

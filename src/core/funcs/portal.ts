@@ -137,7 +137,7 @@ export const createPortal = (
     // setPortalResourceMass(portal, ResourceType.Energy, 50);
     // updatePortal(portal, mass);
     //console.log("portal created", portal.body.getUserData());
-    console.log("portal created", { owner, balance: 0, mass, x, y });
+    //console.log("portal created", { owner, balance: 0, mass, x, y });
     return portal;
 };
 

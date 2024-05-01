@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import { Edge, Vec2, World } from "planck-js";
-import { C, MASS_ENERGY_CONVERSION_EFFICIENCY, MAX_VELOCITY } from "../consts";
+import { C, MASS_ENERGY_CONVERSION_EFFICIENCY, MAX_VELOCITY, MIN_DELTA_VELOCITY, PLANCK_MASS } from "../consts";
 
 export const massToRadius = (mass: number): number => {
     return Math.sqrt(mass / Math.PI);
@@ -16,8 +16,32 @@ export const calculateEmissionVelocity = (m1: number, m2: number): number => {
     // const vMax = C * Math.sqrt(2); // Maximum velocity from Total Energy = mc^2
     // console.log("emission velocity", MASS_ENERGY_CONVERSION_EFFICIENCY * vMax)
     // const emissionVelocity = MASS_ENERGY_CONVERSION_EFFICIENCY * vMax;
-    return 5;
+    return 2;
 };
+
+export const calculateEjectionVelocity = (direction: Vec2): Vec2 => {
+    const ejectionVelocity = direction.clone();
+    ejectionVelocity.normalize();
+    ejectionVelocity.mul(calculateEmissionVelocity(1, 1));
+    return ejectionVelocity;
+}
+
+export const calculateDeltaVelocity = (ve: Vec2, m:number, me: number): Vec2 => {
+    const deltaVelocity = ve.clone().neg();
+
+    const minDeltaVeclocity = deltaVelocity.clone();
+    minDeltaVeclocity.normalize();
+    minDeltaVeclocity.mul(MIN_DELTA_VELOCITY);
+    
+    deltaVelocity
+        .sub(minDeltaVeclocity)
+        .mul(Math.sqrt((me - PLANCK_MASS)/((m/PLANCK_MASS)-PLANCK_MASS)))
+        .add(minDeltaVeclocity);
+
+    //console.log("delta velocity", deltaVelocity.length());
+
+    return deltaVelocity;
+}
 
 export const createBoundary = (
     world: World,
