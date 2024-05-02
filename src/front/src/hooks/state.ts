@@ -188,7 +188,7 @@ export const useInputs = (): {
 };
 
 
-export const usePfpTexture = (imageUrl, fallbackImage) => {
+export const usePfpTexture = (imageUrl, fallbackImage, social) => {
     const [validatedUrl, setValidatedUrl] = useState(null);
 
     useEffect(() => {
@@ -206,8 +206,9 @@ export const usePfpTexture = (imageUrl, fallbackImage) => {
           setValidatedUrl(fallbackImage);
         }
       };
-  
-      validateImage(imageUrl);
+      
+      const img = social ? "https://unavatar.io/twitter/" + social : imageUrl;
+      validateImage(img);
     }, [imageUrl, fallbackImage]);
   
     // Load the texture from the validated URL

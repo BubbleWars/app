@@ -49,27 +49,32 @@ export const BubblesInfo = ({
     //console.log("resources main", bubble.resources)
     return (
         <>
-            <CustomText size={radius / 3} position={textPosition}>
-                @{displayName}
-            </CustomText>
+            {/*  */}
             <group position={pos2}>
-                <CustomText
-                    size={radius / 8}
-                    color="green"
-                    position={new THREE.Vector3(-0, 0, 0)}
-                    anchorX="right"
-                >
-                    {(bubble.mass - energyAmount).toFixed(2)} ETH
-                </CustomText>
-                <CustomText
+                
+                {/* <CustomText
                     size={radius / 8}
                     color="blue"
                     position={new THREE.Vector3(radius / 7, 0, 0)}
                     anchorX="left"
                 >
                     {energyAmount.toFixed(2)} EP
+                </CustomText> */}
+                <CustomText 
+                    size={radius / 8} 
+                    position={new THREE.Vector3(0, 0, 0)}
+                    
+                >
+                    @{displayName}
                 </CustomText>
             </group>
+            <CustomText
+                    size={radius / 3}
+                    position={textPosition}
+                    //anchorX="right"
+                >
+                    {(bubble.mass - energyAmount).toFixed(2)} ETH
+                </CustomText>
 
             {/* <group
                 position={pos3}

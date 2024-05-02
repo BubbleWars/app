@@ -130,7 +130,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
 
     const pfpUrl = user?.pfpUrl;
     console.log("pfpUrl", pfpUrl)
-    const texture = usePfpTexture(pfpUrl, "/bubblewars.png");
+    const texture = usePfpTexture(pfpUrl, "/bubblewars.png", user?.social);
     //texture.anisotropy = 16;
     //if(!bubble) return null;
     const velocity = bubble?.velocity ?? { x: 0, y: 0 };
@@ -206,6 +206,9 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
                 } else {
                     console.log("bubble.from not found");
                 }
+                meshRef.current.scale.set(0, 0, 0);
+                meshRef.current.material.depthTest = false;
+                meshRef.current.renderOrder = 10;
             }
             //console.log("bubble not found")
         }
@@ -255,6 +258,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
                 />
             )}
             <Circle
+            args={[undefined, 60]}
                 ref={meshRef}
                 onPointerEnter={() => {
                     if (!isSelected) setIsHovered(true);
@@ -272,14 +276,16 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
                 }}
                 onContextMenu={() => setIsSelected(false)}
             >
-                <circleGeometry />
                 <meshBasicMaterial toneMapped={false} map={texture} />
                 <Edges 
-                    linewidth={10}
-                    scale={1}
+                
+                    scale={1.05}
+                    isLineSegments={true}
                     threshold={15} // Display edges only when the angle between two faces exceeds this value (default=15 degrees)
-                    color="black"
-                />
+                    color="grey"
+                    lineWidth={10}
+                >
+                </Edges>
 
             </Circle>
 

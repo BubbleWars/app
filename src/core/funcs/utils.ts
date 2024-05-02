@@ -16,7 +16,7 @@ export const calculateEmissionVelocity = (m1: number, m2: number): number => {
     // const vMax = C * Math.sqrt(2); // Maximum velocity from Total Energy = mc^2
     // console.log("emission velocity", MASS_ENERGY_CONVERSION_EFFICIENCY * vMax)
     // const emissionVelocity = MASS_ENERGY_CONVERSION_EFFICIENCY * vMax;
-    return 2;
+    return MAX_VELOCITY;
 };
 
 export const calculateEjectionVelocity = (direction: Vec2): Vec2 => {
