@@ -9,7 +9,7 @@ import { resourceStartPositions } from "./Game";
 import { MathUtils } from "three";
 import { CustomText } from "./CustomText";
 import { LERP_SPEED } from "../consts";
-import { CLASH_VELOCITY } from "../../../core/consts";
+import { CLASH_KE } from "../../../core/consts";
 
 export const Resource = ({ resourceId }: { resourceId: string }) => {
     const meshRef = useRef<any>();
@@ -136,7 +136,7 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
                 <Outlines thickness={0.1} color={outlineColor} />
                 <meshBasicMaterial
                     toneMapped={false}
-                    color={magnitude > CLASH_VELOCITY ? "#0000ff" : baseColor}
+                    color={kineticEnergy > CLASH_KE ? "#0000ff" : baseColor}
                 />
             </mesh>
         </>

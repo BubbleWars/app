@@ -2,7 +2,7 @@ import { Circle, Vec2, World } from "planck-js";
 import { Bubble, PuncturePoint } from "../types/bubble";
 import { calculateDeltaVelocity, calculateEjectionVelocity, calculateEmissionVelocity, massToRadius } from "./utils";
 import { Address } from "../types/address";
-import { CLASH_KE, CLASH_VELOCITY, DAMPENING, EMISSION_SPEED, MASS_PER_SECOND } from "../consts";
+import { CLASH_KE, DAMPENING, EMISSION_SPEED, MASS_PER_SECOND } from "../consts";
 import { Resource, ResourceType } from "../types/resource";
 import { createResource, rotateVec2, updateResource } from "./resource";
 import { addEvent } from "./events";
@@ -10,6 +10,7 @@ import { EventsType } from "../types/events";
 import { ZeroAddress } from "ethers";
 import { BubbleState } from "../types/state";
 import { pseudoRandom } from "./portal";
+import { bubbles } from "../world";
 
 //const PUNCTURE_EMIT_PER_SECOND = 100;
 
@@ -60,7 +61,18 @@ export const setBubbleResourceMass = (
     const bubbleResource = bubble.resources?.get(resource);
     if (!bubbleResource) bubble.resources.set(resource, { resource, mass });
     bubble.resources.set(resource, { resource, mass });
+    updateBubble(bubbles, bubble, getBubbleMass(bubble));
 };
+
+export const addBubbleResourceMass = (
+    bubble: Bubble,
+    resource: ResourceType,
+    mass: number,
+): void => {
+    const currentMass = getBubbleResourceMass(bubble, resource);
+    setBubbleResourceMass(bubble, resource, currentMass + mass);
+}
+
 
 export const createBubble = (
     timestamp: number,
@@ -125,10 +137,10 @@ export const updateBubble = (
     bubbles: Map<string, Bubble>,
     bubble: Bubble,
     newMass: number,
-    resourceAbsorbed: number = 0,
-    resourceType?: Resource,
     timestamp?: number,
 ): void => {
+
+    //Check if should DESTROY bubble
     if (newMass <= 0) {
         addEvent({
             type: EventsType.DestroyBubble,
@@ -144,7 +156,11 @@ export const updateBubble = (
         bubble = null as any;
         return;
     }
+
+    //Set bubble MASS
     bubble.body.setMassData({ mass: newMass, center: Vec2(0, 0), I: 0 });
+
+    //Set bubble RADIUS
     const radius = massToRadius(bubble.body.getMass());
     bubble.body.destroyFixture(bubble.fixture);
     bubble.fixture = bubble.body.createFixture({
@@ -153,17 +169,6 @@ export const updateBubble = (
         restitution: 0,
         friction: 0,
     });
-    if (resourceType) {
-        if (!bubble.resources) bubble.resources = new Map();
-        if (!bubble.resources.has(resourceType.resource))
-            bubble.resources.set(resourceType.resource, {
-                resource: resourceType.resource,
-                mass: 0,
-            });
-        const resource = bubble.resources.get(resourceType.resource);
-        if (resource) resource.mass += resourceAbsorbed;
-        //console.log("updateBubble resource", bubble.resources);
-    }
 };
 
 //This emits a bubble from a bubble
@@ -271,13 +276,14 @@ export const emitResource = (
         .clone()
         .mul(bubble.body.getMass());
 
-    const newBubbleMass = bubble.body.getMass() - mass;
-    updateBubble(bubbles, bubble, newBubbleMass);
     setBubbleResourceMass(
         bubble,
         resourceType,
         getBubbleResourceMass(bubble, resourceType) - mass,
     );
+
+    const newBubbleMass = getBubbleMass(bubble);
+    updateBubble(bubbles, bubble, newBubbleMass);
 
     //Apply momentum conservation
     const originalBubbleMomentum = totalMomentum.clone();
@@ -299,6 +305,7 @@ export const emitResource = (
             .mul(1 / bubble.body.getMass()),
     );
 
+    
     return emittedResource;
 };
 
@@ -308,75 +315,79 @@ export const absorbBubble = (
     absorbedBubble: Bubble,
     timeElapsed: number,
 ): void => {
-    // Predict future positions based on current velocities
-    const futurePositionBubble = bubble.body
-        .getPosition()
-        .clone()
-        .add(bubble.body.getLinearVelocity().clone().mul(timeElapsed));
-    const futurePositionAbsorbedBubble = absorbedBubble.body
-        .getPosition()
-        .clone()
-        .add(absorbedBubble.body.getLinearVelocity().clone().mul(timeElapsed));
+    const absorbedMass = getBubbleMass(absorbedBubble);
+    const newBubbleMass = getBubbleMass(bubble) + absorbedMass;
 
-    // Calculate future distance between bubble centers
-    const futureDistance = futurePositionBubble
-        .sub(futurePositionAbsorbedBubble)
-        .length();
-    const totalRadii =
-        bubble.fixture.getShape().getRadius() +
-        absorbedBubble.fixture.getShape().getRadius();
+    //Transfer resources to bubble
+    if (absorbedBubble.resources) {
+        absorbedBubble.resources.forEach((resource) => {
+            addBubbleResourceMass(bubble, resource.resource, resource.mass);
+        });
+    }
 
-    // Determine the overlap if the bubbles were to continue their paths
-    const potentialOverlap = totalRadii - futureDistance;
-
-    //console.log("potentialOverlap", potentialOverlap);
-
-    const amountAbsorbed = Math.min(
-        absorbedBubble.body.getMass(),
-        MASS_PER_SECOND * timeElapsed,
-    );
-    const percentageAbsorbed = amountAbsorbed / absorbedBubble.body.getMass();
-    const amountResourceAbsorbed =
-        percentageAbsorbed *
-        getBubbleResourceMass(absorbedBubble, ResourceType.Energy);
-    const momentumAbsorbed = absorbedBubble.body
-        .getLinearVelocity()
-        .clone()
-        .mul(amountAbsorbed);
-    const newBubbleMass = bubble.body.getMass() + amountAbsorbed;
-    const newBubbleResourceMass =
-        getBubbleResourceMass(bubble, ResourceType.Energy) +
-        amountResourceAbsorbed;
-    const newBubbleMomentum = bubble.body
-        .getLinearVelocity()
-        .clone()
-        .mul(bubble.body.getMass())
-        .add(momentumAbsorbed);
-    const newAbsorbedBubbleMass =
-        absorbedBubble.body.getMass() - amountAbsorbed;
-    const newAbsorbedBubbleResourceMass =
-        getBubbleResourceMass(absorbedBubble, ResourceType.Energy) -
-        amountResourceAbsorbed;
-    const newAbsorbedBubbleMomentum = absorbedBubble.body
-        .getLinearVelocity()
-        .clone()
-        .mul(absorbedBubble.body.getMass())
-        .sub(momentumAbsorbed);
+    //Update bubble
     updateBubble(bubbles, bubble, newBubbleMass);
-    setBubbleResourceMass(bubble, ResourceType.Energy, newBubbleResourceMass);
-    updateBubble(bubbles, absorbedBubble, newAbsorbedBubbleMass);
-    setBubbleResourceMass(
-        absorbedBubble,
-        ResourceType.Energy,
-        newAbsorbedBubbleResourceMass,
-    );
-    //console.log("amountAbsorbed", amountAbsorbed, "newBubbleMass", newBubbleMass, "newAbsorbedBubbleMass", newAbsorbedBubbleMass);
-    if (bubble.body.isDynamic())
+
+    //Destory absorbed bubble
+    updateBubble(bubbles, absorbedBubble, 0);
+
+    //Transfer momentum to bubble
+    if (bubble.body.isDynamic()){
+        const momentumAbsorbed = absorbedBubble.body.getLinearVelocity().clone().mul(absorbedMass);
+        const newBubbleMomentum = bubble.body.getLinearVelocity().clone().mul(bubble.body.getMass()).add(momentumAbsorbed);
         bubble.body.setLinearVelocity(newBubbleMomentum.mul(1 / newBubbleMass));
-    absorbedBubble.body.setLinearVelocity(
-        newAbsorbedBubbleMomentum.mul(1 / newAbsorbedBubbleMass),
-    );
+    }
 };
+
+
+export const transferResourceToBubble = (
+    bubbles: Map<string, Bubble>,
+    resources: Map<string, Resource>,
+    bubble: Bubble,
+    absorbedResource: Resource,
+) => {
+    const amount = absorbedResource.body.getMass();
+    const type = absorbedResource.resource;
+
+    const prev = getBubbleResourceMass(bubble, type);
+    const now = prev + amount;
+    setBubbleResourceMass(bubble, type, now);
+    updateResource(resources, absorbedResource, 0);
+}
+
+export const addPuncturePoint = (
+    bubble: Bubble,
+    puncturePoint: PuncturePoint,
+    amount: number,
+) => {
+    if (!bubble.punctures) bubble.punctures = new Map();
+    if (!bubble.punctures.has(puncturePoint)) {
+        bubble.punctures.set(puncturePoint, { amount });
+    } else {
+        const puncture = bubble.punctures.get(puncturePoint);
+        if (puncture) puncture.amount += amount;
+    }
+}
+
+export const subtractPuncturePoint = (
+    bubble: Bubble,
+    puncturePoint: PuncturePoint,
+    amount: number,
+) => {
+    if (!bubble.punctures) return;
+    if (!bubble.punctures.has(puncturePoint)) return;
+    const puncture = bubble.punctures.get(puncturePoint);
+    if (puncture) puncture.amount -= amount;
+}
+
+
+
+export const isResourceActivated = (resource: Resource) => {
+    const v = resource.body.getLinearVelocity().clone().length();
+    const ke = 0.5 * resource.body.getMass() * v * v;
+    return ke > CLASH_KE;
+}
+
 
 export const absorbResource = (
     bubbles: Map<string, Bubble>,
@@ -385,136 +396,72 @@ export const absorbResource = (
     absorbedResource: Resource,
     timeElapsed: number,
 ): void => {
-    // Predict future positions based on current velocities
-    const futurePositionBubble = bubble.body
-        .getPosition()
-        .clone()
-        .add(bubble.body.getLinearVelocity().clone().mul(timeElapsed));
-    const futurePositionAbsorbedResource = absorbedResource.body
-        .getPosition()
-        .clone()
-        .add(
-            absorbedResource.body.getLinearVelocity().clone().mul(timeElapsed),
-        );
-
-    // Calculate future distance between bubble centers
-    const futureDistance = futurePositionBubble
-        .sub(futurePositionAbsorbedResource)
-        .length();
-    const totalRadii =
-        bubble.fixture.getShape().getRadius() +
-        absorbedResource.fixture.getShape().getRadius();
-
-    // Determine the overlap if the bubbles were to continue their paths
-    const potentialOverlap = totalRadii - futureDistance;
-
-    //console.log("potentialOverlap", potentialOverlap);
-
-    const amountAbsorbed = Math.min(
-        absorbedResource.body.getMass(),
-        MASS_PER_SECOND * timeElapsed,
-    );
-    const momentumAbsorbed = absorbedResource.body
-        .getLinearVelocity()
-        .clone()
-        .mul(amountAbsorbed);
-    const newBubbleMass = bubble.body.getMass() + amountAbsorbed;
-    const newBubbleMomentum = bubble.body
-        .getLinearVelocity()
-        .clone()
-        .mul(bubble.body.getMass())
-        .add(momentumAbsorbed);
-    const newAbsorbedResourceMass =
-        absorbedResource.body.getMass() - amountAbsorbed;
-    const newAbsorbedResourceMomentum = absorbedResource.body
-        .getLinearVelocity()
-        .clone()
-        .mul(absorbedResource.body.getMass())
-        .sub(momentumAbsorbed);
-    //Get the relative momentum between the bubble and the resource
-    if (absorbedResource.resource == ResourceType.Energy) {
-        const resourceMass = absorbedResource.body.getMass();
-        const resourceVelocity = absorbedResource.body.getLinearVelocity();
-        const magnitudeVelocity =resourceVelocity.clone().length();
-        const kineticEnergy =
-            resourceVelocity.clone().lengthSquared() * resourceMass;
-        //the closer the relative momentum is to zero, the more the bubble is moving in the same direction as the resource
-        const shouldClash = magnitudeVelocity > CLASH_VELOCITY;
-        //console.log("clash relativeMomentum", relativeMomentum.length(), shouldNotClash);
-        if (shouldClash) {
-            updateBubble(
-                bubbles,
-                bubble,
-                newBubbleMass - amountAbsorbed,
-                -amountAbsorbed,
-                absorbedResource,
-            );
-            updateResource(
-                resources,
-                absorbedResource,
-                newAbsorbedResourceMass,
-            );
-            //Getting the sheild
-            const bubbleResourceMass = getBubbleResourceMass(
-                bubble,
-                ResourceType.Energy,
-            );
-            if (bubbleResourceMass)
-                if (bubbleResourceMass < 0) {
-                    const energyDeficit = bubbleResourceMass;
-                    if (!bubble.punctures) bubble.punctures = new Map();
-                    //puncture point is normalized vector from bubble to resource
-                    const puncturePoint = absorbedResource.body
-                        .getPosition()
-                        .clone()
-                        .sub(bubble.body.getPosition());
-                    const puncturePointNormalized: PuncturePoint = {
-                        x:
-                            puncturePoint.clone().x /
-                            puncturePoint.clone().length(),
-                        y:
-                            puncturePoint.clone().y /
-                            puncturePoint.clone().length(),
-                    };
-
-                    if (!bubble.punctures.has(puncturePointNormalized)) {
-                        bubble.punctures.set(puncturePointNormalized, {
-                            amount: 0,
-                        });
-                    }
-                    const puncture = bubble.punctures.get(
-                        puncturePointNormalized,
-                    );
-                    if (puncture) puncture.amount += -energyDeficit;
-                    //now set resource to zero
-                    setBubbleResourceMass(bubble, ResourceType.Energy, 0);
-                }
-            return;
-        } else {
-            updateBubble(
-                bubbles,
-                bubble,
-                newBubbleMass,
-                amountAbsorbed,
-                absorbedResource,
-            );
-            updateResource(
-                resources,
-                absorbedResource,
-                newAbsorbedResourceMass,
-            );
-            if (bubble.body.isDynamic())
-                bubble.body.setLinearVelocity(
-                    newBubbleMomentum.mul(1 / newBubbleMass),
-                );
-            absorbedResource.body.setLinearVelocity(
-                newAbsorbedResourceMomentum.mul(1 / newAbsorbedResourceMass),
-            );
-        }
-
-        //console.log("amountAbsorbed", amountAbsorbed, "newBubbleMass", newBubbleMass, "newAbsorbedResourceMass", newAbsorbedResourceMass);
+    //Transfer resource to bubble
+    const resourceType = absorbedResource.resource;
+    switch (resourceType) {
+        case ResourceType.BLUE:
+            //Transfer BLUE to bubble
+            transferResourceToBubble(bubbles, resources, bubble, absorbedResource);
+            break;
+    
+        case ResourceType.RED:
+            //Check kinetic energy for PUNCTURE
+            if(isResourceActivated(absorbedResource)){
+                punctureBubble(bubbles, resources, bubble, absorbedResource);
+                break;
+            }
+            //Transfer RED to bubble
+            transferResourceToBubble(bubbles, resources, bubble, absorbedResource);
+            break;
+        
+        case ResourceType.GREEN:
+            transferResourceToBubble(bubbles, resources, bubble, absorbedResource);
+            break;
+        
+        case ResourceType.VIOLET:
+            transferResourceToBubble(bubbles, resources, bubble, absorbedResource);
+            break;
     }
+
+    //Transfer momentum to bubble
+    if (bubble.body.isDynamic()){
+        const resourceMomentum = absorbedResource.body.getLinearVelocity().clone().mul(absorbedResource.body.getMass());
+        const totalMomentum = bubble.body.getLinearVelocity().clone().mul(bubble.body.getMass());
+        const newBubbleMomentum = totalMomentum.add(resourceMomentum);
+        bubble.body.setLinearVelocity(newBubbleMomentum.mul(1 / bubble.body.getMass()));
+    }   
 };
+
+export const punctureBubble = (
+    bubbles: Map<string, Bubble>,
+    resources: Map<string, Resource>,
+    bubble: Bubble,
+    incoming: Resource,
+): void => {
+    //Make sure the incoming resource is RED
+    if(incoming.resource != ResourceType.RED) return;
+
+    //Get the defense and attack values
+    const defense = getBubbleResourceMass(bubble, ResourceType.BLUE);
+    const attack = incoming.body.getMass();
+
+    //Calculate the damage
+    const remaining = defense - attack;
+    if(remaining >= 0){
+        //Transfer the remaining defense to the bubble and destroy the incoming resource
+        setBubbleResourceMass(bubble, ResourceType.BLUE, remaining);
+    } else {
+        //Puncture the bubble
+        const puncturePoint = incoming.body
+            .getPosition().clone()
+            .sub(bubble.body.getPosition())
+        puncturePoint.normalize();
+        addPuncturePoint(bubble, {x: puncturePoint.x, y:puncturePoint.y}, attack - defense);
+    }
+
+    //Destroy the incoming resource
+    updateResource(resources, incoming, 0);        
+}
 
 export const handlePunctures = (
     timestamp: number,

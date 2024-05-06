@@ -14,6 +14,6 @@ export const ENERGY_NODE_COUNT = 100;
 export const MASS_ENERGY_CONVERSION_EFFICIENCY  =  13.969 * Math.pow(10, -9); //4.6e-11
 export const C = 3 * Math.pow(10, 8); //Speed of light in m/s
 export const MAX_VELOCITY = 1;
-export const CLASH_VELOCITY = 2;
+export const CLASH_KE = 2;
 export const PLANCK_MASS = 0.001; 
 export const MIN_DELTA_VELOCITY = 0.1;

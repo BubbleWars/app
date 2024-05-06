@@ -9,6 +9,69 @@ import { setLock } from "../store/interpolation";
 import { useDisplayName } from "./GetDisplayName";
 import { useUserSocial } from "@/hooks/socials";
 
+
+export const Inventory = ({
+    radius,
+    position,
+    resources
+}: {
+    radius: number,
+    position: THREE.Vector3,
+    resources: { resource: ResourceType; mass: number }[] | null
+}) => {
+    //3 degrees
+    const pos = position.clone()
+    const angleDelta = 15 * Math.PI / 180;
+    const dir = new THREE.Vector3(-1,0,0).multiplyScalar(radius*1.3);
+    const redPos = pos.clone().add(dir.clone())
+    const greenPos = pos.clone().add(dir.clone().applyAxisAngle(new THREE.Vector3(0,0,1), angleDelta))
+    const bluePos = pos.clone().add(dir.clone().applyAxisAngle(new THREE.Vector3(0,0,1), angleDelta * 2))
+    const violet = pos.clone().add(dir.clone().applyAxisAngle(new THREE.Vector3(0,0,1), angleDelta * 3))
+
+    const redAmount = resources && resources.length > 0 ? resources
+        .find((resource) => resource.resource == ResourceType.RED).mass: 0;
+    const greenAmount = resources && resources.length > 0 ? resources
+        .find((resource) => resource.resource == ResourceType.GREEN).mass: 0;
+    const blueAmount = resources && resources.length > 0 ? resources
+        .find((resource) => resource.resource == ResourceType.BLUE).mass: 0;
+    const violetAmount = resources && resources.length > 0 ? resources
+        .find((resource) => resource.resource == ResourceType.VIOLET).mass: 0;
+    
+
+    return (
+        <>
+            <CustomText
+                color="red"
+                size={radius / 7}
+                position={redPos}
+            >
+                {redAmount.toFixed(2)}
+            </CustomText>
+            <CustomText
+                color="green"
+                size={radius / 7}
+                position={greenPos}
+            >
+                {greenAmount.toFixed(2)}
+            </CustomText>
+            <CustomText
+                color="blue"
+                size={radius / 7}
+                position={bluePos}
+            >
+                {blueAmount.toFixed(2)}
+            </CustomText>
+            <CustomText
+                color="violet"
+                size={radius / 7}
+                position={violet}
+            >
+                {violetAmount.toFixed(2)}
+            </CustomText>
+        </>
+    )
+}
+
 export const BubblesInfo = ({
     bubbleId,
     position,
@@ -93,6 +156,8 @@ export const BubblesInfo = ({
                     {lock == bubbleId ? "X" : "🔓"}
                 </CustomText>
             </group> */}
+                        <Inventory radius={radius} position={position} resources={bubble?.resources} />
+
         </>
     );
 };

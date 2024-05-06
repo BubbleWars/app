@@ -3,7 +3,10 @@ import { Entity } from "./entity";
 export const RESOURCE_INFLATION_RATE = 1 / (60 * 60 * 24); // 1 per day
 
 export enum ResourceType {
-    Energy,
+    RED, // Attack resource for puncturing bubbles
+    BLUE, // Defense resource
+    GREEN, // Stun weapon
+    VIOLET, // Gravity resource for portals
 }
 
 export interface Resource extends Entity {
