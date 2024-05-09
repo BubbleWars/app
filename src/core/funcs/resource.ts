@@ -1,5 +1,5 @@
 import { Circle, Vec2, World } from "planck-js";
-import { Resource, ResourceNode, ResourceType } from "../types/resource";
+import { RESOURCE_MASS, Resource, ResourceNode, ResourceType } from "../types/resource";
 import { calculateEmissionVelocity, massToRadius } from "./utils";
 import { ZeroAddress } from "ethers";
 import {
@@ -15,6 +15,14 @@ import { addEvent } from "./events";
 import { EventsType } from "../types/events";
 import { createNoise2D } from "simplex-noise";
 import Alea from "alea";
+
+export const resourceMassToAmount = (type: ResourceType, mass: number): number => {
+    return mass / RESOURCE_MASS[type];
+}
+
+export const resourceMassToRadius = (type: ResourceType, amount: number): number => {
+    return massToRadius(amount * RESOURCE_MASS[type]);
+}
 
 //Generates random initial starting point for resource nodes
 export const generateNodes = (
@@ -117,7 +125,7 @@ export const createResource = (
     owner: string = ZeroAddress,
     id?: string,
 ): Resource => {
-    const radius = massToRadius(mass);
+    const radius = resourceMassToRadius(type, mass);
     const body = world.createBody({
         position: Vec2(x, y),
         type: "dynamic",
@@ -166,7 +174,7 @@ export const updateNode = (
 ): void => {
     node.mass = newMass;
     if (newEmitted) node.emitted = newEmitted;
-    const radius = massToRadius(Math.max(node.mass, 1));
+    const radius = resourceMassToRadius(node.resource, Math.max(node.mass, 1));
     node.body.destroyFixture(node.fixture);
     node.fixture = node.body.createFixture({
         shape: Circle(radius),
@@ -189,7 +197,8 @@ export const updateResource = (
         return;
     }
     resource.body.setMassData({ mass: newMass, center: Vec2(0, 0), I: 0 });
-    const radius = massToRadius(resource.body.getMass());
+    const mass = resource.body.getMass();
+    const radius = resourceMassToRadius(resource.resource, mass);
     resource.body.destroyFixture(resource.fixture);
     resource.fixture = resource.body.createFixture({
         shape: Circle(radius),
@@ -209,7 +218,7 @@ export const nodeEmitResource = (
     direction: Vec2,
 ): Resource => {
     const radius = massToRadius(newNodeMass) + 0.2;
-    const emittedResourceRadius = massToRadius(emittedMass);
+    const emittedResourceRadius = resourceMassToRadius(type, emittedMass);
     const centerDelta = direction.clone().mul(radius + emittedResourceRadius);
     const emittedResourcePosition = node.body
         .getPosition()

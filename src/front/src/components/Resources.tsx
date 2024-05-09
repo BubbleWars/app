@@ -12,6 +12,7 @@ import { LERP_SPEED } from "../consts";
 import { CLASH_KE } from "../../../core/consts";
 import { ResourceType } from "../../../core/types/resource";
 import { ResourceTypeToName } from "./BubblesInfo";
+import { resourceMassToAmount } from "../../../core/funcs/resource";
 
 export const RESOURCE_TO_COLOR = {
     [ResourceType.BLUE]: "#0000ff",
@@ -32,6 +33,7 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
         (resource) => resource.id === resourceId,
     );
     const mass = resource?.mass.toFixed(2) ?? "0";
+    const amount = resourceMassToAmount(resource?.type, resource?.mass ?? 0);
     const radius = massToRadius(parseInt(mass ?? "0")) + 0.1;
     const velocity = resource?.velocity
     const magnitude = Math.sqrt(velocity?.x ** 2 + velocity?.y ** 2)
@@ -127,7 +129,8 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
                 color={baseColor}
                 noOutline={true}
             >
-                {mass} {ResourceTypeToName[resource.type]?.toUpperCase()}
+                {amount} {ResourceTypeToName[resource.type]?.toUpperCase()}
+                {kineticEnergy}
             </CustomText>
             <mesh
                 ref={meshRef}

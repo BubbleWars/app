@@ -3,8 +3,8 @@ import { Bubble, PuncturePoint } from "../types/bubble";
 import { calculateDeltaVelocity, calculateEjectionVelocity, calculateEmissionVelocity, massToRadius } from "./utils";
 import { Address } from "../types/address";
 import { CLASH_KE, DAMPENING, EMISSION_SPEED, MASS_PER_SECOND, PLANCK_MASS } from "../consts";
-import { Resource, ResourceType } from "../types/resource";
-import { createResource, rotateVec2, updateResource } from "./resource";
+import { RESOURCE_MASS, Resource, ResourceType } from "../types/resource";
+import { createResource, resourceMassToAmount, resourceMassToRadius, rotateVec2, updateResource } from "./resource";
 import { addEvent } from "./events";
 import { EventsType } from "../types/events";
 import { ZeroAddress } from "ethers";
@@ -14,6 +14,7 @@ import { bubbles } from "../world";
 import { get } from "http";
 
 //const PUNCTURE_EMIT_PER_SECOND = 100;
+
 
 export const generateBubbleId = (
     bubbles: Map<string, Bubble>,
@@ -295,7 +296,7 @@ export const emitResource = (
     }
     //console.log("emitting resource", resourceType, mass, getBubbleResourceMass(bubble, resourceType));
     const radius = bubble.fixture.getShape().getRadius();
-    const emittedResourceRadius = massToRadius(mass);
+    const emittedResourceRadius = resourceMassToRadius(resourceType, mass);
     const centerDelta = direction.clone().mul(radius + emittedResourceRadius);
     const emittedResourcePosition = bubble.body
         .getPosition()
@@ -388,7 +389,7 @@ export const transferResourceToBubble = (
     bubble: Bubble,
     absorbedResource: Resource,
 ) => {
-    const amount = absorbedResource.body.getMass();
+    const amount = resourceMassToAmount(absorbedResource.resource, absorbedResource.body.getMass());
     const type = absorbedResource.resource;
 
     const prev = getBubbleResourceMass(bubble, type);
@@ -485,7 +486,7 @@ export const punctureBubble = (
 
     //Get the defense and attack values
     const defense = getBubbleResourceMass(bubble, ResourceType.BLUE);
-    const attack = incoming.body.getMass();
+    const attack = resourceMassToAmount(incoming.resource, incoming.body.getMass());
 
     //Calculate the damage
     const remaining = defense - attack;

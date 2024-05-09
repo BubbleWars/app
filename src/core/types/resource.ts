@@ -1,3 +1,4 @@
+import { PLANCK_MASS } from "../consts";
 import { Entity } from "./entity";
 
 export const RESOURCE_INFLATION_RATE = 1 / (60 * 60 * 24); // 1 per day
@@ -8,6 +9,13 @@ export enum ResourceType {
     GREEN, // Stun weapon
     VIOLET, // Gravity resource for portals
     BUBBLE,
+}
+
+export const RESOURCE_MASS = {
+    [ResourceType.RED]: PLANCK_MASS,
+    [ResourceType.BLUE]: PLANCK_MASS,
+    [ResourceType.GREEN]: PLANCK_MASS,
+    [ResourceType.VIOLET]: PLANCK_MASS,
 }
 
 export interface Resource extends Entity {
