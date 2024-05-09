@@ -31,7 +31,7 @@ export const CustomText = ({
             outlineWidth={size * 0.05}
             anchorX={anchorX as any}
             anchorY={anchorY as any}
-            position={position.clone().add(new THREE.Vector3(0, 0, 6))}
+            position={position?.clone().add(new THREE.Vector3(0, 0, 6)) ?? new THREE.Vector3(0, 0, 0)}
         >
             <meshBasicMaterial toneMapped={false} />
             {children}

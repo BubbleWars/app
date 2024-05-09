@@ -118,6 +118,18 @@ export const useOnClick = (handler: (event: MouseEvent) => void) => {
     }, [handler]); // Re-run the effect only if the handler changes
 };
 
+export const useOnRightClick = (handler: (event: MouseEvent) => void) => {
+    useEffect(() => {
+        // Add event listener
+        document.addEventListener("contextmenu", handler);
+
+        // Clean up the event listener on component unmount
+        return () => {
+            document.removeEventListener("contextmenu", handler);
+        };
+    }, [handler]); // Re-run the effect only if the handler changes
+}
+
 export const useOnWheel = (onWheel: (event: WheelEvent) => void) => {
     useEffect(() => {
         // Handler to call on mouse wheel event

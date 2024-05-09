@@ -9,7 +9,7 @@ import {
     WORLD_WIDTH,
 } from "../consts";
 import { Bubble } from "../types/bubble";
-import { createBubble, setBubbleResourceMass, updateBubble } from "./bubble";
+import { createBubble, destroyBubble, getBubbleEthMass, getTotalBubbleMass, setBubbleEthMass, setBubbleResourceMass, updateBubble } from "./bubble";
 import { Obstacle } from "../types/obstacle";
 import { Resource, ResourceNode, ResourceType } from "../types/resource";
 import { createResource, updateResource } from "./resource";
@@ -227,36 +227,26 @@ export const portalAbsorbBubble = (
     timeElapsed: number,
 ): void => {
     if (!portal || !absorbedBubble) return;
-    const amountAbsorbed = Math.min(
-        absorbedBubble.body.getMass(),
-        MASS_PER_SECOND * timeElapsed,
-    );
-    const percentageAbsorbed = amountAbsorbed / absorbedBubble.body.getMass();
-    const amountResourceAbsorbed =
-        (absorbedBubble.resources?.get(ResourceType.Energy)?.mass ?? 0) *
-        percentageAbsorbed;
-    const newPortalMass = portal.mass + amountAbsorbed;
-    const newPortalResourceMass =
-        (portal.resources?.get(ResourceType.Energy)?.mass ?? 0) +
-        amountResourceAbsorbed;
-    const newBubbleMass = absorbedBubble.body.getMass() - amountAbsorbed;
-    const newBubbleResourceMass =
-        (absorbedBubble.resources?.get(ResourceType.Energy)?.mass ?? 0) -
-        amountResourceAbsorbed;
-    //console.log("portalAbsorbBubble", amountAbsorbed, newPortalMass, newBubbleMass);
-    updatePortal(portal, newPortalMass);
-    setPortalResourceMass(portal, ResourceType.Energy, newPortalResourceMass);
-    updateBubble(
-        bubbles,
-        absorbedBubble,
-        newBubbleMass,
-        (timestamp = timestamp),
-    );
-    setBubbleResourceMass(
-        absorbedBubble,
-        ResourceType.Energy,
-        newBubbleResourceMass,
-    );
+    const absorbedEthMass = getBubbleEthMass(absorbedBubble);
+    const absorbedTotalMass = getTotalBubbleMass(absorbedBubble);
+    const newPortalEthMass = getPortalMass(portal) + absorbedEthMass; 
+    const newTotalMass = portal.mass + absorbedTotalMass;
+
+    //Transfer resources to portal
+    if(absorbedBubble.resources){
+        absorbedBubble.resources.forEach((resource) => {
+            setPortalResourceMass(
+                portal,
+                resource.resource,
+                getPortalResourceMass(portal, resource.resource) +
+                    resource.mass,
+            );
+        });
+    }
+    
+    //Transfer ETH to portal
+    updatePortal(portal, newTotalMass);
+    destroyBubble(bubbles, absorbedBubble) 
 };
 
 export const portalEmitBubble = (
@@ -267,7 +257,7 @@ export const portalEmitBubble = (
     direction: Vec2 = new Vec2(1, 1),
 ): Bubble => {
     if (mass > getPortalMass(portal)){
-        console.log("Cannot emit more than the portal's mass");
+        console.log("Cannot emit more than the portal's mass. Portals mass:", getPortalMass(portal), "emitting:", mass);
         return;
     }
     const portalRadius = portal.fixture.getShape().getRadius();
@@ -302,7 +292,7 @@ export const portalEmitBubble = (
 
     //Apply momentum conservation
     const emittedBubbleVelocityDirection = direction.clone();
-    const emittedBubbleVelocityMagnitude = calculateEmissionVelocity(newPortalMass, mass) * 0.01;
+    const emittedBubbleVelocityMagnitude = calculateEmissionVelocity(newPortalMass, mass) * 0.05;
     const emittedBubbleRelativeVelocity = emittedBubbleVelocityDirection.mul(
         emittedBubbleVelocityMagnitude,
     );
@@ -312,8 +302,9 @@ export const portalEmitBubble = (
         .add(emittedBubbleRelativeVelocity);
     emittedBubble.body.setLinearVelocity(emittedBubbleVelocity);
     //console.log("emittedBubblePosition after velocity", JSON.stringify(emittedBubble.body.getPosition()));
-    // setBubbleResourceMass(emittedBubble, ResourceType.BLUE, 10);
-    // setBubbleResourceMass(emittedBubble, ResourceType.RED, 10);
+    setBubbleResourceMass(emittedBubble, ResourceType.BLUE, 10);
+    setBubbleResourceMass(emittedBubble, ResourceType.RED, 10);
+    //console.log("bubble emitted", emittedBubble.resources);
     // setBubbleResourceMass(emittedBubble, ResourceType.GREEN, 10);
     // setBubbleResourceMass(emittedBubble, ResourceType.VIOLET, 10);
 
@@ -328,12 +319,8 @@ export const portalAbsorbResource = (
     timeElapsed: number,
 ): void => {
     if (!portal || !absorbedResource) return;
-    const amountAbsorbed = Math.min(
-        absorbedResource.body.getMass(),
-        MASS_PER_SECOND * timeElapsed,
-    );
+    const amountAbsorbed = absorbedResource.body.getMass();
     const newPortalMass = portal.mass + amountAbsorbed;
-    const newResourceMass = absorbedResource.body.getMass() - amountAbsorbed;
     //console.log("portalAbsorbBubble", amountAbsorbed, newPortalMass);
     updatePortal(portal, newPortalMass);
 
@@ -345,7 +332,7 @@ export const portalAbsorbResource = (
             amountAbsorbed,
     );
 
-    updateResource(resources, absorbedResource, newResourceMass);
+    updateResource(resources, absorbedResource, 0);
 };
 
 export const portalEmitResource = (

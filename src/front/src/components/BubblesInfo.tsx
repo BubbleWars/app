@@ -8,13 +8,63 @@ import { useDispatch, useSelector } from "react-redux";
 import { setLock } from "../store/interpolation";
 import { useDisplayName } from "./GetDisplayName";
 import { useUserSocial } from "@/hooks/socials";
+import { useState } from "react";
+import { setAiming } from "@/store/controls";
+
+export const ResourceTypeToName = {
+    [ResourceType.BUBBLE]: "ETH",
+    [ResourceType.BLUE]: "blue",
+    [ResourceType.RED]: "red",
+    [ResourceType.GREEN]: "green",
+    [ResourceType.VIOLET]: "violet",
+};
+
+
+export const ResourceButton = ({
+    id,
+    type,
+    position,
+    size,
+    amount,
+} : {
+    id: string,
+    type: ResourceType,
+    position: THREE.Vector3,
+    size: number,
+    amount: number,
+}) => {
+    const dispatch = useDispatch();
+    const colorName = ResourceTypeToName[type];
+    const [text, setText] = useState<string>(amount.toFixed(2));
+    const mass = Math.max(amount/10, 1); // 10% of the resource but at least 1
+    return (
+        <group
+            position={position}
+            onPointerEnter={() => setText("Emit " + colorName)}
+            onPointerLeave={() => setText(amount.toFixed(2))}
+            onClick={() => dispatch(setAiming({ id, type, mass}))}
+        >
+            <CustomText
+                color={colorName}
+                size={size}
+            >
+                {text}
+            </CustomText>
+        </group>
+        
+    )
+}
+
+
 
 
 export const Inventory = ({
+    bubbleId,
     radius,
     position,
     resources
 }: {
+    bubbleId: string,
     radius: number,
     position: THREE.Vector3,
     resources: { resource: ResourceType; mass: number }[] | null
@@ -28,46 +78,45 @@ export const Inventory = ({
     const bluePos = pos.clone().add(dir.clone().applyAxisAngle(new THREE.Vector3(0,0,1), angleDelta * 2))
     const violet = pos.clone().add(dir.clone().applyAxisAngle(new THREE.Vector3(0,0,1), angleDelta * 3))
 
-    const redAmount = resources && resources.length > 0 ? resources
-        .find((resource) => resource.resource == ResourceType.RED).mass: 0;
-    const greenAmount = resources && resources.length > 0 ? resources
-        .find((resource) => resource.resource == ResourceType.GREEN).mass: 0;
-    const blueAmount = resources && resources.length > 0 ? resources
-        .find((resource) => resource.resource == ResourceType.BLUE).mass: 0;
-    const violetAmount = resources && resources.length > 0 ? resources
-        .find((resource) => resource.resource == ResourceType.VIOLET).mass: 0;
+    const redAmount = resources?.find((resource) => resource.resource == ResourceType.RED)?.mass ?? 0;
+    const greenAmount = resources?.find((resource) => resource.resource == ResourceType.GREEN)?.mass ?? 0;
+    const blueAmount = resources?.find((resource) => resource.resource == ResourceType.BLUE)?.mass ?? 0;
+    const violetAmount = resources?.find((resource) => resource.resource == ResourceType.VIOLET)?.mass ?? 0;
     
 
     return (
         <>
-            <CustomText
-                color="red"
-                size={radius / 7}
+            <ResourceButton
+                id={bubbleId}
+                type={ResourceType.RED}
                 position={redPos}
-            >
-                {redAmount.toFixed(2)}
-            </CustomText>
-            <CustomText
-                color="green"
                 size={radius / 7}
+                amount={redAmount}
+            />
+
+            <ResourceButton
+                id={bubbleId}
+                type={ResourceType.GREEN}
                 position={greenPos}
-            >
-                {greenAmount.toFixed(2)}
-            </CustomText>
-            <CustomText
-                color="blue"
                 size={radius / 7}
+                amount={greenAmount}
+            />
+
+            <ResourceButton
+                id={bubbleId}
+                type={ResourceType.BLUE}
                 position={bluePos}
-            >
-                {blueAmount.toFixed(2)}
-            </CustomText>
-            <CustomText
-                color="violet"
                 size={radius / 7}
+                amount={blueAmount}
+            />
+
+            <ResourceButton
+                id={bubbleId}
+                type={ResourceType.VIOLET}
                 position={violet}
-            >
-                {violetAmount.toFixed(2)}
-            </CustomText>
+                size={radius / 7}
+                amount={violetAmount}
+            />
         </>
     )
 }
@@ -156,7 +205,7 @@ export const BubblesInfo = ({
                     {lock == bubbleId ? "X" : "🔓"}
                 </CustomText>
             </group> */}
-                        <Inventory radius={radius} position={position} resources={bubble?.resources} />
+                        <Inventory bubbleId={bubbleId} radius={radius} position={position} resources={bubble?.resources} />
 
         </>
     );

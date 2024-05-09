@@ -2,7 +2,7 @@ import { Circle, Vec2, World } from "planck-js";
 import { Bubble, PuncturePoint } from "../types/bubble";
 import { calculateDeltaVelocity, calculateEjectionVelocity, calculateEmissionVelocity, massToRadius } from "./utils";
 import { Address } from "../types/address";
-import { CLASH_KE, DAMPENING, EMISSION_SPEED, MASS_PER_SECOND } from "../consts";
+import { CLASH_KE, DAMPENING, EMISSION_SPEED, MASS_PER_SECOND, PLANCK_MASS } from "../consts";
 import { Resource, ResourceType } from "../types/resource";
 import { createResource, rotateVec2, updateResource } from "./resource";
 import { addEvent } from "./events";
@@ -11,6 +11,7 @@ import { ZeroAddress } from "ethers";
 import { BubbleState } from "../types/state";
 import { pseudoRandom } from "./portal";
 import { bubbles } from "../world";
+import { get } from "http";
 
 //const PUNCTURE_EMIT_PER_SECOND = 100;
 
@@ -31,15 +32,35 @@ export const generateBubbleId = (
     return `${owner.toLowerCase()}-${max + 1}`;
 };
 
-export const getBubbleMass = (bubble: Bubble): number => {
-    const totalMass = bubble.body.getMass();
-    if (!bubble.resources) return totalMass;
-    let resourceMass = 0;
-    bubble.resources.forEach((resource) => {
-        resourceMass += resource.mass;
-    });
+//Get mass of the bubble, ETH + resources
+export const getTotalBubbleMass = (bubble: Bubble): number => {
+    return bubble.body.getMass();
+}
+
+//Set mass in ETH of the bubble
+export const setBubbleEthMass = (bubble: Bubble, mass: number): void => {
+    if(mass <= 0) {
+        console.log("Setting mass to <= 0");
+    }
+    bubble.balance = mass;
+    updateBubble(bubbles, bubble);
+}
+
+//Get mass in ETH of the bubble
+export const getBubbleEthMass = (bubble: Bubble): number => {
+    const totalMass = getTotalBubbleMass(bubble);
+    const resourceMass = getTotalResourceMass(bubble);
     return totalMass - resourceMass;
 };
+
+export const getTotalResourceMass = (bubble: Bubble): number => {
+    if (!bubble.resources) return 0;
+    let total = 0;
+    bubble.resources.forEach((resource) => {
+        total += resource.mass * PLANCK_MASS;
+    });
+    return total;
+}
 
 export const getBubbleResourceMass = (
     bubble: Bubble,
@@ -61,7 +82,8 @@ export const setBubbleResourceMass = (
     const bubbleResource = bubble.resources?.get(resource);
     if (!bubbleResource) bubble.resources.set(resource, { resource, mass });
     bubble.resources.set(resource, { resource, mass });
-    updateBubble(bubbles, bubble, getBubbleMass(bubble));
+    //console.log("setting resource mass", mass)
+    updateBubble(bubbles, bubble);
 };
 
 export const addBubbleResourceMass = (
@@ -87,6 +109,10 @@ export const createBubble = (
     bubbleState?: BubbleState,
     from?: string
 ): Bubble => {
+    if (mass <= 0) {
+        console.log("Cannot create bubble with mass <= 0");
+        return;
+    }
     const radius = massToRadius(mass);
     if (owner == ZeroAddress)
         throw new Error("Cannot create bubble with zero address");
@@ -95,14 +121,13 @@ export const createBubble = (
         type: "dynamic",
         linearDamping: DAMPENING,
     });
-    body.setMassData({ mass, center: Vec2(0, 0), I: 0 });
     const fixture = body.createFixture({
         shape: Circle(radius),
         density: 1,
         restitution: 0,
         friction: 0,
     });
-    const bubble: Bubble = { owner, balance: 0, body, fixture, controllable, from: from ?? "" };
+    const bubble: Bubble = { owner, balance: mass, body, fixture, controllable, from: from ?? "" };
     //set id
     if (id) bubble.body.setUserData(id);
     else bubble.body.setUserData(generateBubbleId(bubbles, owner));
@@ -129,32 +154,44 @@ export const createBubble = (
         timestamp,
         position: { x, y },
     });
+    setBubbleEthMass(bubble, mass);
     //console.log("bubble created", bubble.body.getUserData() as string)
+    console.log("bubble created with mass:", mass)
     return bubble;
 };
+
+export const destroyBubble = (
+    bubbles: Map<string, Bubble>,
+    bubble: Bubble,
+    timestamp?: number,
+): void => {
+    addEvent({
+        type: EventsType.DestroyBubble,
+        id: bubble.body.getUserData() as string,
+        timestamp: timestamp ?? 0,
+        position: {
+            x: bubble.body.getPosition().x,
+            y: bubble.body.getPosition().y,
+        },
+    });
+    console.log("destroying bubble ");
+    bubbles.delete(bubble.body.getUserData() as string);
+    bubble.body.getWorld().destroyBody(bubble.body);
+    bubble = null as any;
+}
 
 export const updateBubble = (
     bubbles: Map<string, Bubble>,
     bubble: Bubble,
-    newMass: number,
     timestamp?: number,
 ): void => {
+    const newEthMass = bubble.balance;
+    const newResourceMass = getTotalResourceMass(bubble);
+    const newMass = newEthMass + newResourceMass;
 
     //Check if should DESTROY bubble
-    if (newMass <= 0) {
-        addEvent({
-            type: EventsType.DestroyBubble,
-            id: bubble.body.getUserData() as string,
-            timestamp: timestamp ?? 0,
-            position: {
-                x: bubble.body.getPosition().x,
-                y: bubble.body.getPosition().y,
-            },
-        });
-        bubbles.delete(bubble.body.getUserData() as string);
-        bubble.body.getWorld().destroyBody(bubble.body);
-        bubble = null as any;
-        return;
+    if (newMass <= 0 || newEthMass <= 0) {
+        destroyBubble(bubbles, bubble, timestamp);
     }
 
     //Set bubble MASS
@@ -181,7 +218,8 @@ export const emitBubble = (
     emissionDirection?: Vec2,
 ): Bubble => {
     //if(!bubble.controllable) throw new Error("Cannot emit from a non-controllable bubble");
-    if (mass > bubble.body.getMass()){
+    const bubbleEthMass = getBubbleEthMass(bubble);
+    if (mass > bubbleEthMass){
         console.log("Cannot emit more than of the bubble's mass");
         return;
     }
@@ -213,8 +251,9 @@ export const emitBubble = (
 
     //console.log("emittedBubble", emittedBubble);
     //Apply mass conservation
-    const newBubbleMass = bubble.body.getMass() - mass;
-    updateBubble(bubbles, bubble, newBubbleMass);
+    const newBubbleEthMass = bubbleEthMass - mass;
+    setBubbleEthMass(bubble, newBubbleEthMass);
+    //updateBubble(bubbles, bubble, newBubbleMass);
 
     //Apply momentum conservation
     const originalBubbleMomentum = totalMomentum.clone();
@@ -229,7 +268,7 @@ export const emitBubble = (
         .clone()
         .mul(emittedBubble.body.getMass());
     emittedBubble.body.setLinearVelocity(emittedBubbleVelocity);
-    const m = bubble.body.getMass();
+    const m = getTotalBubbleMass(bubble);
     const me = emittedBubble.body.getMass();
     const deltaVelocity = calculateDeltaVelocity(emittedBubbleRelativeVelocity, m, me);
     bubble.body.setLinearVelocity(
@@ -249,6 +288,7 @@ export const emitResource = (
     mass: number,
     direction: Vec2,
 ): Resource => {
+    console.log("emitting resource")
     if (mass > getBubbleResourceMass(bubble, resourceType)){
         console.log("Cannot emit more than the bubble's resource mass");
         return;
@@ -282,13 +322,13 @@ export const emitResource = (
         getBubbleResourceMass(bubble, resourceType) - mass,
     );
 
-    const newBubbleMass = getBubbleMass(bubble);
-    updateBubble(bubbles, bubble, newBubbleMass);
+    //const newBubbleMass = getBubbleMass(bubble);
+    //updateBubble(bubbles, bubble, newBubbleMass);
 
     //Apply momentum conservation
     const originalBubbleMomentum = totalMomentum.clone();
     const emittedResourceVelocityDirection = direction.clone()
-    const emittedResourceVelocityMagnitude = calculateEmissionVelocity(newBubbleMass, mass);
+    const emittedResourceVelocityMagnitude = calculateEmissionVelocity(getTotalBubbleMass(bubble), mass);
     const emittedResourceRelativeVelocity =
         emittedResourceVelocityDirection.mul(emittedResourceVelocityMagnitude);
     const emittedResourceVelocity = bubble.body
@@ -315,8 +355,10 @@ export const absorbBubble = (
     absorbedBubble: Bubble,
     timeElapsed: number,
 ): void => {
-    const absorbedMass = getBubbleMass(absorbedBubble);
-    const newBubbleMass = getBubbleMass(bubble) + absorbedMass;
+    const absorbedEthMass = getBubbleEthMass(absorbedBubble);
+    const absorbedTotalMass = getTotalBubbleMass(absorbedBubble);
+    const newBubbleEthMass = getBubbleEthMass(bubble) + absorbedEthMass;
+    const newTotalMass = getTotalBubbleMass(bubble) + absorbedTotalMass;
 
     //Transfer resources to bubble
     if (absorbedBubble.resources) {
@@ -325,17 +367,17 @@ export const absorbBubble = (
         });
     }
 
-    //Update bubble
-    updateBubble(bubbles, bubble, newBubbleMass);
+    //Transfer ETH to bubble
+    setBubbleEthMass(bubble, newBubbleEthMass);
+    destroyBubble(bubbles, absorbedBubble);
 
-    //Destory absorbed bubble
-    updateBubble(bubbles, absorbedBubble, 0);
+    
 
     //Transfer momentum to bubble
     if (bubble.body.isDynamic()){
-        const momentumAbsorbed = absorbedBubble.body.getLinearVelocity().clone().mul(absorbedMass);
+        const momentumAbsorbed = absorbedBubble.body.getLinearVelocity().clone().mul(absorbedTotalMass);
         const newBubbleMomentum = bubble.body.getLinearVelocity().clone().mul(bubble.body.getMass()).add(momentumAbsorbed);
-        bubble.body.setLinearVelocity(newBubbleMomentum.mul(1 / newBubbleMass));
+        bubble.body.setLinearVelocity(newBubbleMomentum.mul(1 / newTotalMass));
     }
 };
 
@@ -478,7 +520,7 @@ export const handlePunctures = (
         if (timeSinceLast > 0.5) {
             const amountEmitted = Math.min(
                 Math.min(puncture.amount, 0.1),
-                getBubbleMass(bubble),
+                getBubbleEthMass(bubble),
             );
             //Create puncture direction vector as random direction within 40 degrees of puncture vector
             const randomAngle = pseudoRandom(timestamp) * 70 - 35;

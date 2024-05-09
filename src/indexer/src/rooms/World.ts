@@ -64,6 +64,7 @@ const updateState = (state: WorldState, snapshot: Snapshot): WorldState => {
         bubble.resources.forEach((resource) => {
             const newEntityResource = new EntityResourceStateSchema();
             newEntityResource.mass = resource.mass;
+            newEntityResource.resource = resource.resource;
             newBubble.resources.push(newEntityResource);
         });
         state.bubbles.push(newBubble);
@@ -248,6 +249,8 @@ export class World extends Room<WorldState> {
             }else {
                 handleInput(input);
             }
+            //console.log("snapshot bubbles", snapshotCurrentState.bubbles)
+            //console.log("current bubbles", currentState.bubbles)
             //handleInput(input);
             // run(serverTimestamp, () => {
             //     console.log("microstep", currentState.timestamp, "current timestamp", this.state.timestamp)

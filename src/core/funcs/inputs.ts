@@ -29,11 +29,13 @@ import { User } from "../types/user";
 import {
     createPortal,
     generateSpawnPoint,
+    getPortalMass,
+    getPortalResourceMass,
     portalEmitBubble,
     portalEmitResource,
 } from "./portal";
 import { decodePacked } from "./utils";
-import { emitBubble, emitResource } from "./bubble";
+import { emitBubble, emitResource, getBubbleEthMass, getBubbleResourceMass } from "./bubble";
 import { Vec2 } from "planck-js";
 import {
     snapshotBubbles,
@@ -327,6 +329,11 @@ const handleEmit = (input: Emit, client: boolean): boolean => {
         const portal = client
             ? snapshotPortals.get(input.from.toLowerCase())
             : portals.get(input.from.toLowerCase());
+        
+        const totalMass = input.emissionType == "bubble" ? 
+            getPortalMass(portal) : 
+            getPortalResourceMass(portal, input.emissionType);
+
         if (!portal) {
             //console.log("Portal not found");
             return false;
@@ -336,7 +343,7 @@ const handleEmit = (input: Emit, client: boolean): boolean => {
             //console.log("Portal owner is not user");
             return false;
         }
-        if (portal.mass <= input.mass) {
+        if (totalMass <= input.mass) {
             //console.log("Portal mass is less than input mass");
             return false;
         }
@@ -344,6 +351,11 @@ const handleEmit = (input: Emit, client: boolean): boolean => {
         const bubble = client
             ? snapshotBubbles.get(input.from.toLowerCase())
             : bubbles.get(input.from.toLowerCase());
+        
+        const totalMass = input.emissionType == "bubble" ?
+            getBubbleEthMass(bubble) :
+            getBubbleResourceMass(bubble, input.emissionType);
+        
         if (!bubble) {
             //console.log("Bubble not found");
             return false;
@@ -352,7 +364,7 @@ const handleEmit = (input: Emit, client: boolean): boolean => {
             //console.log("Bubble owner is not user");
             return false;
         }
-        if (bubble.body.getMass() <= input.mass) {
+        if (totalMass <= input.mass) {
             //console.log("Bubble mass is less than input mass");
             return false;
         }
@@ -486,7 +498,7 @@ export const handlePendingEmit = (input: Emit): void => {
                 input.mass,
                 Vec2(input.direction.x, input.direction.y),
             );
-        else if (emissionType == ResourceType.Energy)
+        else
             portalEmitResource(
                 timestamp,
                 portals,
@@ -508,7 +520,7 @@ export const handlePendingEmit = (input: Emit): void => {
                 input.mass,
                 Vec2(input.direction.x, input.direction.y),
             );
-        else if (emissionType == ResourceType.Energy)
+        else
             emitResource(
                 timestamp,
                 world,
@@ -540,7 +552,7 @@ export const handlePendingClientEmit = (input: Emit): void => {
                 input.mass,
                 Vec2(input.direction.x, input.direction.y),
             );
-        else if (emissionType == ResourceType.Energy)
+        else
             portalEmitResource(
                 timestamp,
                 snapshotPortals,
@@ -562,7 +574,7 @@ export const handlePendingClientEmit = (input: Emit): void => {
                 input.mass,
                 Vec2(input.direction.x, input.direction.y),
             );
-        else if (emissionType == ResourceType.Energy)
+        else
             emitResource(
                 timestamp,
                 snapshotWorld,

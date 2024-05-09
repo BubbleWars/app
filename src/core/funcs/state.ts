@@ -16,7 +16,7 @@ import {
     tempTimestamp,
 } from "../world";
 import { portalAbsorbBubble, portalAbsorbResource } from "./portal";
-import { absorbBubble, absorbResource } from "./bubble";
+import { absorbBubble, absorbResource, getBubbleEthMass } from "./bubble";
 import {
     snapshotBubbles,
     snapshotDeferredUpdates,
@@ -49,12 +49,15 @@ export const updateState = (
         const puncturesMap = bubble.punctures ?? new Map();
         const punctures = Array.from(puncturesMap?.values());
         const puncturePoints = Array.from(puncturesMap?.keys());
+        if(bubble.balance <= 0){
+            console.log("Updating state with zero balance, real mass is: ", bubble.body.getMass());
+        }
         return {
             id: bubble.body.getUserData() as string,
             owner: bubble.owner,
             position: bubble.body.getPosition().clone(),
             velocity: bubble.body.getLinearVelocity().clone(),
-            mass: bubble.body.getMass(),
+            mass: getBubbleEthMass(bubble),
             resources: Array.from((bubble.resources ?? []).values()),
             lastPunctureEmit: bubble.lastPunctureEmit,
             punctures: puncturePoints.map((value, index) => {

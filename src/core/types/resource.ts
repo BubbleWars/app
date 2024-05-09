@@ -7,6 +7,7 @@ export enum ResourceType {
     BLUE, // Defense resource
     GREEN, // Stun weapon
     VIOLET, // Gravity resource for portals
+    BUBBLE,
 }
 
 export interface Resource extends Entity {

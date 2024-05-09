@@ -1,12 +1,12 @@
 import { useQuery } from "@apollo/client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
     GetNoticesDocument,
     GetNoticesQuery,
     Notice,
 } from "../generated-src/graphql";
 import { Snapshot } from "../../../core/types/state";
-import { Input, Inspect } from "../../../core/types/inputs";
+import { Input, InputType, Inspect } from "../../../core/types/inputs";
 import { INSPECTOR_URL } from "../consts";
 import { hexToString } from "viem";
 import { useBlockNumber } from "wagmi";
@@ -16,6 +16,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { setInputs } from "../store/inputs";
 import { TextureLoader } from 'three';
 import { useTexture } from '@react-three/drei';
+import { ResourceType } from "../../../core/types/resource";
+import { currentState } from "../../../core/world";
+import * as THREE from "three";
+import { massToRadius } from "../../../core/funcs/utils";
+import { useFrame, useThree } from "@react-three/fiber";
+import { getBubbleResourceMass } from "../../../core/funcs/bubble";
+import { useCreateInput, useOnClick, useOnWheel, waitForEmission } from "./inputs";
+import { clearAiming, clearEmitting, setAiming, setEmitting } from "@/store/controls";
+
+
+export const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
 const DefaultSnapshot = {
     timestamp: 0,
@@ -216,3 +227,145 @@ export const usePfpTexture = (imageUrl, fallbackImage, social) => {
   
     return texture;
   };
+
+
+//Controls
+
+export const useAiming = (): {mass: number, type: ResourceType, id: string} => {
+    const aiming = useSelector((state: any) => state.controls.aiming)
+    return aiming ?? {mass: null, type: null, id: null};
+}
+
+export const useClearAiming = (): () => void => {
+    const dispatch = useDispatch();
+    return useCallback(() => {
+        dispatch(clearAiming());
+    }, [])
+}
+
+export const useIsAiming = (): boolean => {
+    const aiming = useAiming();
+    return aiming.id != null;
+}
+
+export const useAimingResource = (): ResourceType => {
+    const { type } = useAiming();
+    return type;
+}
+
+export const useAimingLine = (): [THREE.Vector3, THREE.Vector3, THREE.Vector3] => {
+    const { viewport } = useThree();
+    const { id } = useAiming();
+    
+    const [p1, setP1] = useState<THREE.Vector3>(new THREE.Vector3(0, 0, 0));
+    const [p2, setP2] = useState<THREE.Vector3>(new THREE.Vector3(0, 0, 0));
+    const [direction, setDirection] = useState<THREE.Vector3>(new THREE.Vector3(0, 0, 0));
+
+    //Calculate direction
+    useFrame(({ pointer, camera }) => {
+        if(!id) return;
+        const bubble = currentState?.bubbles?.find((bubble) => bubble.id = id) ?? {position: {x: 0, y: 0}, mass: 0};
+        const position = new THREE.Vector3(bubble.position.x, bubble.position.y, 0)
+        const radius = massToRadius(bubble.mass)
+        const length = radius * 3;
+
+        camera.updateProjectionMatrix();
+        const x = ((pointer.x * viewport.getCurrentViewport().width) / 2) + camera.position.x;
+        const y = (pointer.y * viewport.getCurrentViewport().height) / 2 + camera.position.y;
+        const worldMouse = new THREE.Vector3(x, y, 0);
+
+        // Calculate the direction vector
+        const directionVector = worldMouse.sub(position).normalize();
+        setDirection(directionVector);
+        setP1(position);
+        setP2(position.clone().add(directionVector.clone().multiplyScalar(length)));
+    });
+
+    return [
+        p1,
+        p2,
+        direction,
+    ]
+}
+
+export const useAimingMass = (): number => {
+    const { id, type } = useAiming();
+    const [mass, setMass] = useState<number>(1);
+
+    //Handle scrolling to change mass
+    useOnWheel((event) => {
+        if(id){
+            const bubble = currentState?.bubbles?.find((bubble) => bubble.id = id)
+            const max = bubble?.resources?.find((resource) => resource.resource == type)?.mass ?? 0;
+            const minMass = 1;
+            const step = 1;
+            const newMass = Math.min(
+                Math.max(mass + (Math.sign(event.deltaY) * step), minMass),
+                max,
+            );
+            setMass(newMass);
+        }
+        
+    });
+
+    return mass;
+}
+
+export const getEntityMass = (id: string): number => {
+    const bubble = currentState?.bubbles?.find((bubble) => bubble.id = id)
+    const portal = currentState?.portals?.find((portal) => portal.id = id)
+    return bubble?.mass ?? portal?.mass ?? 0;
+}
+
+export const useAimingFire = (
+    mass: number,
+    direction: THREE.Vector3,
+): () => void => {
+    const { id, type } = useAiming();
+    const dispatch = useDispatch()
+    const { isError, isLoading, isSuccess, submitTransaction } =
+        useCreateInput({
+            type: InputType.Emit,
+            mass,
+            from: id,
+            direction,
+            emissionType: type,
+        });
+    
+
+    return useCallback(async () => {
+        console.log("is firing")
+        //if (isError || isLoading || isSuccess) return;
+        dispatch(clearAiming());
+        dispatch(setEmitting({mass, type, id, x: direction.x, y: direction.y}))
+        await submitTransaction();
+        await delay(1000)
+        dispatch(clearEmitting(id))
+        // waitForEmission(id, getEntityMass(id),
+        //     mass, () => dispatch(clearEmitting(id)))
+    }, [mass, direction, id, type]);
+    
+}
+
+export const useEmissions = (): {mass: number, type: ResourceType, id: string, p1: THREE.Vector3, p2: THREE.Vector3}[] => {
+    const emitting:{[id: string]: {id:string, mass: number, type: ResourceType, x: number, y: number}}
+        = useSelector((state: any) => state.controls.emitting);
+    return Object.values(emitting).map((emission) => {
+        return {
+            mass: emission.mass,
+            type: emission.type,
+            id: emission.id,
+            p1: new THREE.Vector3(emission.x, emission.y, 0),
+            p2: new THREE.Vector3(emission.x, emission.y, 0)
+                .add(new THREE.Vector3(emission.x, emission.y, 0)
+                .multiplyScalar(3))
+        }
+    })
+}
+
+// export const useClearEmission = (id: string): () => void => {
+//     const dispatch = useDispatch();
+//     return useCallback(() => {
+//         dispatch(clearEmitting(id));
+//     }, [id])
+// }

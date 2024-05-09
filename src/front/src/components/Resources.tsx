@@ -10,6 +10,15 @@ import { MathUtils } from "three";
 import { CustomText } from "./CustomText";
 import { LERP_SPEED } from "../consts";
 import { CLASH_KE } from "../../../core/consts";
+import { ResourceType } from "../../../core/types/resource";
+import { ResourceTypeToName } from "./BubblesInfo";
+
+export const RESOURCE_TO_COLOR = {
+    [ResourceType.BLUE]: "#0000ff",
+    [ResourceType.RED]: "#ff0000",
+    [ResourceType.GREEN]: "#00ff00",
+    [ResourceType.VIOLET]: "#ee82ee",
+}
 
 export const Resource = ({ resourceId }: { resourceId: string }) => {
     const meshRef = useRef<any>();
@@ -84,7 +93,7 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
             }
             //console.log("resource not found")
         }
-        const radius = massToRadius(resource.mass) + 0.1;
+        const radius = massToRadius(resource.mass);
         const newRadius = MathUtils.lerp(meshRef.current.scale.x, radius, 0.1);
         meshRef.current.scale.set(newRadius, newRadius, newRadius);
         //console.log("resource position:", resource.position)
@@ -104,7 +113,7 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
     });
 
     //blue in hex
-    const baseColor = "#87CEEB";
+    const baseColor = RESOURCE_TO_COLOR[resource.type]
     const outlineColor = darkenColor(baseColor, 0.2); // Darken by 20%
 
     return (
@@ -118,7 +127,7 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
                 color={baseColor}
                 noOutline={true}
             >
-                {mass} EP
+                {mass} {ResourceTypeToName[resource.type]?.toUpperCase()}
             </CustomText>
             <mesh
                 ref={meshRef}

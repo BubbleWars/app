@@ -6,15 +6,16 @@ import { ResourceType } from "../../../core/types/resource";
 interface ControlsState {
     hovered: string | null; //hovered entity id
     selected: string | null; //selected entity id
-    aiming: {[id: string]: {mass: number, type: ResourceType}}, //list of aiming entities and their mass
-    emitting: {[id: string]: {mass: number, type: ResourceType, x: number, y: number}}; //list of emitting entities and their directions
+    aiming: {id: string, mass: number, type: ResourceType} | null, //list of aiming entities and their mass
+    emitting: {[id: string]: {id:string, mass: number, type: ResourceType, x: number, y: number}}; //list of emitting entities and their directions
 }
 
-export const controlsState = createSlice({
+export const controlsSlice = createSlice({
     name: "controls",
     initialState: { 
         hovered: null,
         selected: null,
+        aiming: null,
         emitting: {}
      } as ControlsState,
     reducers: {
@@ -25,11 +26,20 @@ export const controlsState = createSlice({
             state.selected = action.payload;
         },
         setAiming: (state, action: PayloadAction<{id: string, mass: number, type: ResourceType}>) => {
-            state.aiming[action.payload.id] = {mass: action.payload.mass, type: action.payload.type};
+            state.aiming= {mass: action.payload.mass, type: action.payload.type, id: action.payload.id};
         },
         setEmitting: (state, action: PayloadAction<{id: string, mass: number, type: ResourceType, x: number, y: number}>) => {
-            state.emitting[action.payload.id] = {mass: action.payload.mass, type: action.payload.type, x: action.payload.x, y: action.payload.y};
-        }
+            state.emitting[action.payload.id] = {id:action.payload.id, mass: action.payload.mass, type: action.payload.type, x: action.payload.x, y: action.payload.y};
+        },
+        clearAiming: (state) => {
+            state.aiming = null
+        },
+        clearEmitting: (state, action: PayloadAction<string>) => {
+            delete state.emitting[action.payload];
+        },
+        clearAllEmitting: (state) => {
+            state.emitting = {};
+        },
     },
 });
 
@@ -37,7 +47,11 @@ export const controlsState = createSlice({
 export const {
     setHovered,
     setSelected,
-    setEmitting
-} = controlsState.actions;
+    setEmitting,
+    setAiming,
+    clearAiming,
+    clearEmitting,
+    clearAllEmitting,
+} = controlsSlice.actions;
 
-export default controlsState.reducer;
+export default controlsSlice.reducer;

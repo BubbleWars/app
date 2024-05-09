@@ -27,6 +27,8 @@ import { User } from "../../../core/types/user";
 import { Puncture, PuncturePoint } from "../../../core/types/bubble";
 import { ResourceType } from "../../../core/types/resource";
 import { userSocialsState } from "@/hooks/socials";
+import { Aiming } from "./controls/Aiming";
+import { Emitting } from "./controls/Emitting";
 
 const client = new Client(INDEXER_URL);
 let room = await client.joinOrCreate("world");
@@ -440,6 +442,7 @@ export const Game = () => {
             <Bubbles bubbles={bubbleIds ?? []} />
             <Nodes nodes={nodeIds ?? []} />
             <Resources resources={resourceIds ?? []} />
+            <Aiming />
         </>
     );
 };
