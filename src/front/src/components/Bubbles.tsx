@@ -101,6 +101,7 @@ import { useUserSocial } from "@/hooks/socials";
 import Outline from "./Outline";
 import { text } from "stream/consumers";
 import { usePfpTexture, useTextureWithFallback } from "@/hooks/state";
+import { BubbleState } from "../../../core/types/state";
 
 export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
     const { wallets } = useWallets();
@@ -124,7 +125,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
 
     const bubble = currentState.bubbles.find(
         (bubble) => bubble.id == bubbleId,
-    ) ?? { position: { x: 0, y: 0 }, mass: 0, owner: "", velocity: { x: 0, y: 0 } };
+    ) ?? { position: { x: 0, y: 0 }, mass: 0, owner: "", velocity: { x: 0, y: 0 }, from: "" };
 
     const user = useUserSocial({ address: bubble?.owner ?? ""});
 
@@ -140,6 +141,8 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
     }
     const inverseVelocity = { x: -velocity.x, y: -velocity.y };
     const radius = massToRadius(bubble?.mass ?? 0);
+
+    const [mainBubble, setMainBubble] = useState<BubbleState>(null);
 
     useFrame((state, delta) => {
         const elapsedTime = delta;
@@ -228,6 +231,8 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
         );
         meshRef.current.position.set(newX, newY, 0);
         meshRef.current.updateMatrix();
+
+        setMainBubble(currentState.bubbles.find((bubble) => bubble.id == bubbleId));
     });
 
     const owner =
@@ -291,14 +296,15 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
 
             
             <BubblesInfo
-                bubbleId={bubbleId}
-                position={meshRef.current?.position}
+                key={bubbleId}
+                bubble={mainBubble}
             />
         </>
     );
 };
 
 export const Bubbles = ({ bubbles }: { bubbles: string[] }) => {
+    console.log("bubbles2", bubbles);
     return bubbles.map((bubble, index) => (
         <Bubble key={bubble} bubbleId={bubble} />
     ));

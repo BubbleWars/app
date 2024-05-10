@@ -26,6 +26,7 @@ import {
     createResource,
     generateNodes,
     handleNodeUpdates,
+    resourceMassToAmount,
 } from "./funcs/resource";
 import { tempTimestamp } from "./world";
 import { createBoundary, createEdges } from "./funcs/utils";
@@ -163,7 +164,7 @@ export const snapshotInit = (initialState?: Snapshot) => {
                 resource.type,
                 resource.position.x,
                 resource.position.y,
-                resource.mass,
+                resourceMassToAmount(resource.type, resource.mass),
                 resource.owner,
                 resource.id,
             );

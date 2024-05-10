@@ -9,10 +9,10 @@ export const Emitting = () => {
     console.log("emits", emits)
     return (
         <>
-            {emits.map(({id, mass, type, p1, p2}) => {
+            {emits.map(({id, mass, type, p1, p2}, index) => {
                 if(!id) return null
                 return(
-                    <>
+                    <group key={index}>
                         <Line
                             color={"grey"}
                             lineWidth={2}
@@ -27,7 +27,7 @@ export const Emitting = () => {
                         >
                             {`Emitting `}  {mass} {" "} {ResourceTypeToName[type]}
                         </CustomText>
-                    </>
+                    </group>
                 )
             
             })}

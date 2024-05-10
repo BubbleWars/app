@@ -31,10 +31,10 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
     const [disableLerp, setDisableLerp] = useState<boolean>(false);
     const resource = currentState.resources.find(
         (resource) => resource.id === resourceId,
-    );
+    ) ?? {id:"", position: {x: 0, y: 0}, mass: 0, velocity: {x: 0, y: 0}, type: ResourceType.BLUE, owner: ""};
     const mass = resource?.mass.toFixed(2) ?? "0";
     const amount = resourceMassToAmount(resource?.type, resource?.mass ?? 0);
-    const radius = massToRadius(parseInt(mass ?? "0")) + 0.1;
+    const radius = massToRadius(parseInt(mass ?? "0")) + 0.5;
     const velocity = resource?.velocity
     const magnitude = Math.sqrt(velocity?.x ** 2 + velocity?.y ** 2)
     const kineticEnergy =
@@ -130,7 +130,6 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
                 noOutline={true}
             >
                 {amount} {ResourceTypeToName[resource.type]?.toUpperCase()}
-                {kineticEnergy}
             </CustomText>
             <mesh
                 ref={meshRef}
@@ -145,7 +144,7 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
                 onContextMenu={() => setIsSelected(false)}
             >
                 <sphereGeometry />
-                <Outlines thickness={0.1} color={outlineColor} />
+                <Outlines thickness={2} color={outlineColor} />
                 <meshBasicMaterial
                     toneMapped={false}
                     color={kineticEnergy > CLASH_KE ? "#0000ff" : baseColor}

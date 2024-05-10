@@ -443,6 +443,7 @@ export const Game = () => {
             <Nodes nodes={nodeIds ?? []} />
             <Resources resources={resourceIds ?? []} />
             <Aiming />
+            <Emitting />
         </>
     );
 };

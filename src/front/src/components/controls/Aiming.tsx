@@ -3,6 +3,7 @@ import { useAiming, useAimingFire, useAimingLine, useAimingMass, useAimingResour
 import { Line } from "@react-three/drei";
 import { CustomText } from "../CustomText";
 import { ResourceTypeToName } from "../BubblesInfo";
+import * as THREE from "three";
 
 export const Aiming = () => {
     const show = useIsAiming();

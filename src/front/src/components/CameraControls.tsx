@@ -7,6 +7,7 @@ import { CameraControls } from "@react-three/drei";
 import { is } from "@react-three/fiber/dist/declarations/src/core/utils";
 import { setPan } from "../store/interpolation";
 import { currentState } from "../../../core/world";
+import { useIsAiming } from "@/hooks/state";
 
 // export class CustomControls extends OrbitControls {
 //     constructor(camera: any, domElement: any) {
@@ -46,6 +47,7 @@ export const CustomCameraControls = () => {
     const isBubbleSelected = useSelector(
         (state: any) => state.interpolation.isBubbleSelected,
     );
+    const isAiming = useIsAiming();
 
     const pan = useSelector((state: any) => state.interpolation.pan);
     const lock = useSelector((state: any) => state.interpolation.lock);
@@ -129,7 +131,7 @@ export const CustomCameraControls = () => {
             left: 4, // 4 is offset
             middle: 0, // 0 is none
             right: 0, // 0 is none
-            wheel: controlsActive ? 0 : 16,
+            wheel: controlsActive || isAiming ? 0 : 16,
         }}
     />;
 };

@@ -26,6 +26,7 @@ import {
     createResource,
     generateNodes,
     handleNodeUpdates,
+    resourceMassToAmount,
 } from "./funcs/resource";
 import { createBoundary, createEdges } from "./funcs/utils";
 
@@ -160,7 +161,7 @@ export const init = (initialState?: Snapshot) => {
                 resource.type,
                 resource.position.x,
                 resource.position.y,
-                resource.mass,
+                resourceMassToAmount(resource.type, resource.mass),
                 resource.owner,
                 resource.id,
             );

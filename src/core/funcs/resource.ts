@@ -20,6 +20,10 @@ export const resourceMassToAmount = (type: ResourceType, mass: number): number =
     return mass / RESOURCE_MASS[type];
 }
 
+export const resourceAmountToMass = (type: ResourceType, amount: number): number => {
+    return amount * RESOURCE_MASS[type];
+}
+
 export const resourceMassToRadius = (type: ResourceType, amount: number): number => {
     return massToRadius(amount * RESOURCE_MASS[type]);
 }
@@ -118,13 +122,14 @@ export const createResource = (
     timestamp: number,
     world: World,
     resources: Map<string, Resource>,
-    type: ResourceType = ResourceType.Energy,
+    type: ResourceType,
     x: number,
     y: number,
     mass: number,
     owner: string = ZeroAddress,
     id?: string,
 ): Resource => {
+    console.log("creating resource", type, mass, x, y, owner, id);
     const radius = resourceMassToRadius(type, mass);
     const body = world.createBody({
         position: Vec2(x, y),

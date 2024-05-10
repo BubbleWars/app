@@ -10,6 +10,8 @@ import { useDisplayName } from "./GetDisplayName";
 import { useUserSocial } from "@/hooks/socials";
 import { useState } from "react";
 import { setAiming } from "@/store/controls";
+import { BubbleState } from "../../../core/types/state";
+import { useFrame } from "@react-three/fiber";
 
 export const ResourceTypeToName = {
     [ResourceType.BUBBLE]: "ETH",
@@ -36,12 +38,19 @@ export const ResourceButton = ({
     const dispatch = useDispatch();
     const colorName = ResourceTypeToName[type];
     const [text, setText] = useState<string>(amount.toFixed(2));
+    const [isHovered, setIsHovered] = useState<boolean>(false);
     const mass = Math.max(amount/10, 1); // 10% of the resource but at least 1
+
+    useFrame(() => {
+        if(isHovered) setText("Emit " + colorName);
+        else setText(amount.toFixed(2));
+    })
+
     return (
         <group
             position={position}
-            onPointerEnter={() => setText("Emit " + colorName)}
-            onPointerLeave={() => setText(amount.toFixed(2))}
+            onPointerEnter={() => setIsHovered(true)}
+            onPointerLeave={() => setIsHovered(false)}
             onClick={() => dispatch(setAiming({ id, type, mass}))}
         >
             <CustomText
@@ -54,9 +63,6 @@ export const ResourceButton = ({
         
     )
 }
-
-
-
 
 export const Inventory = ({
     bubbleId,
@@ -121,91 +127,46 @@ export const Inventory = ({
     )
 }
 
-export const BubblesInfo = ({
-    bubbleId,
-    position,
-}: {
-    bubbleId: string | null;
-    position: THREE.Vector3;
-}) => {
-    const dispatch = useDispatch();
-    const lock = useSelector((state: any) => state.interpolation.lock);
-    const bubble = currentState.bubbles.find(
-        (bubble) => bubble.id === bubbleId,
-    ) ?? { position: { x: 0, y: 0 }, mass: 0, owner: "", velocity: { x: 0, y: 0 } };
-    const userSocial = useUserSocial({ address: bubble.owner });
+export const BubblesInfo = ({bubble}: {bubble: BubbleState}) => {
+    const userSocial = useUserSocial({ address: bubble?.owner });
     const social = userSocial?.social ?? null;
 
     if (!bubble) return null;
-    if (!position) return null;
 
     const displayName = social ?? truncateAddress(bubble.owner);
     const radius = massToRadius(bubble.mass);
-    const textPosition = position;
+    const pos = new THREE.Vector3(bubble.position.x, bubble.position.y, 0);
+    const mass = bubble?.mass;
 
-    const zeroPosition = new THREE.Vector3(0, 0, 0);
     const lineHeightVector = new THREE.Vector3(0, -radius / 3, 0);
-    const pos2 = textPosition
+    const pos2 = pos
         .clone()
         .add(lineHeightVector.clone().multiplyScalar(1))
         .clone();
-    const pos3 = textPosition
-        .clone()
-        .add(new THREE.Vector3(radius, -radius, 0))
-        .clone();
-    const energy = bubble?.resources ? bubble?.resources?.find(
-        (resource) => resource.resource == ResourceType.Energy,
-    ): null;
-    const energyAmount = energy ? energy.mass : 0;
+    
 
-    //console.log("resources main", bubble.resources)
     return (
         <>
-            {/*  */}
-            <group position={pos2}>
-                
-                {/* <CustomText
-                    size={radius / 8}
-                    color="blue"
-                    position={new THREE.Vector3(radius / 7, 0, 0)}
-                    anchorX="left"
-                >
-                    {energyAmount.toFixed(2)} EP
-                </CustomText> */}
-                <CustomText 
-                    size={radius / 8} 
-                    position={new THREE.Vector3(0, 0, 0)}
-                    
-                >
-                    @{displayName}
-                </CustomText>
-            </group>
-            <CustomText
-                    size={radius / 3}
-                    position={textPosition}
-                    //anchorX="right"
-                >
-                    {(bubble.mass - energyAmount).toFixed(2)} ETH
-                </CustomText>
-
-            {/* <group
-                position={pos3}
-                onClick={() => {
-                    if (lock == bubbleId) dispatch(setLock(null));
-                    else dispatch(setLock(bubbleId));
-                }}
+            <CustomText 
+                size={radius / 8} 
+                position={pos2} 
             >
-                <CustomText
-                    size={radius / 3}
-                    color="black"
-                    position={zeroPosition}
-                    anchorX="center"
-                    noOutline={true}
-                >
-                    {lock == bubbleId ? "X" : "🔓"}
-                </CustomText>
-            </group> */}
-                        <Inventory bubbleId={bubbleId} radius={radius} position={position} resources={bubble?.resources} />
+                @{displayName}
+            </CustomText>
+            <CustomText
+                size={radius / 3}
+                position={pos}
+            >
+                {(mass).toFixed(2)} ETH
+            </CustomText>
+
+            <Inventory 
+                key={bubble.id}
+                bubbleId={bubble.id} 
+                radius={radius} 
+                position={pos} 
+                resources={bubble?.resources} 
+            />
 
         </>
     );
