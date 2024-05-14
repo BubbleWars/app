@@ -596,9 +596,9 @@ export const handlePunctures = (
 
         const timeSinceLast = timestamp - bubble.lastPunctureEmit;
 
-        if (timeSinceLast > 0.05) {
+        if (timeSinceLast > 0.01) {
             const amountEmitted = Math.min(
-                PLANCK_MASS*10,
+                PLANCK_MASS*5,
                 puncture.amount
             )
 

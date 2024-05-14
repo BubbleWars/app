@@ -66,7 +66,7 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
         if (!meshRef.current.position.x || !meshRef.current.position.y) {
             const startPosition = resourceStartPositions[resourceId];
             //console.log("meshRef posision", meshRef.current.position)
-            if (startPosition) {
+            if (false) {
                 meshRef.current.position.set(
                     startPosition.x,
                     startPosition.y,
@@ -78,19 +78,23 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
                 const node = currentState.nodes.find(
                     (node) => node.id === resource.owner,
                 );
-                if (node) {
+                const bubble = currentState.bubbles.find(
+                    (bubble) => bubble.id === resource.owner,
+                );
+                const portal = currentState.portals.find(
+                    (portal) => portal.id === resource.owner,
+                );
+
+                const from = node ?? bubble ?? portal;
+                if (from) {
                     meshRef.current.position.set(
-                        node.position.x,
-                        node.position.y,
+                        from.position.x,
+                        from.position.y,
                         0,
                     );
-                } else {
-                    meshRef.current.position.set(
-                        resource.position.x,
-                        resource.position.y,
-                        0,
-                    );
-                }
+                } 
+                meshRef.current.scale.set(0, 0, 0);
+
                 //console.log("resource start position not found")
             }
             //console.log("resource not found")
