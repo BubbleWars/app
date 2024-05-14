@@ -167,9 +167,6 @@ export const createResource = (
         id: resource.id,
         position: { x, y },
     });
-    const n = resource.resource == ResourceType.BLUE ? "BLUE" : resource.resource == ResourceType.RED ? "RED" : resource.resource == ResourceType.GREEN ? "GREEN" : "VIOLET";
-    console.log("creating resource",resource.id,n, " isRollback", id, " at ", timestamp);
-
 
     return resource;
 };
@@ -198,8 +195,6 @@ export const updateResource = (
     timestamp: number = 0,
 ): void => {
     if (newMass <= 0) {
-        const n = resource.resource == ResourceType.BLUE ? "BLUE" : resource.resource == ResourceType.RED ? "RED" : resource.resource == ResourceType.GREEN ? "GREEN" : "VIOLET";
-        console.log("destroying resource", resource.id,n, " at", timestamp);
         resources.delete(resource.body.getUserData() as string);
         resource.body.getWorld().destroyBody(resource.body);
         resource = null;

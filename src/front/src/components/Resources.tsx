@@ -15,10 +15,7 @@ import { ResourceTypeToName } from "./BubblesInfo";
 import { resourceMassToAmount } from "../../../core/funcs/resource";
 
 export const RESOURCE_TO_COLOR = {
-    [ResourceType.BLUE]: "#0000ff",
-    [ResourceType.RED]: "#ff0000",
-    [ResourceType.GREEN]: "#00ff00",
-    [ResourceType.VIOLET]: "#ee82ee",
+    [ResourceType.ENERGY]: "#0000ff",
 }
 
 export const Resource = ({ resourceId }: { resourceId: string }) => {
@@ -135,7 +132,7 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
             >
                 {amount} {ResourceTypeToName[resource.type]?.toUpperCase()}
             </CustomText>
-            {kineticEnergy > CLASH_KE && resource.type == ResourceType.RED && (
+            {kineticEnergy > CLASH_KE && resource.type == ResourceType.ENERGY && (
                 <CustomText
                     position={new THREE.Vector3(radius + 1, 0, 0).add(
                         textPosition,

@@ -15,10 +15,7 @@ import { useFrame } from "@react-three/fiber";
 
 export const ResourceTypeToName = {
     [ResourceType.BUBBLE]: "ETH",
-    [ResourceType.BLUE]: "blue",
-    [ResourceType.RED]: "red",
-    [ResourceType.GREEN]: "green",
-    [ResourceType.VIOLET]: "violet",
+    [ResourceType.ENERGY]: "blue",
 };
 
 
@@ -79,50 +76,21 @@ export const Inventory = ({
     const pos = position.clone()
     const angleDelta = 15 * Math.PI / 180;
     const dir = new THREE.Vector3(-1,0,0).multiplyScalar(radius*1.3);
-    const redPos = pos.clone().add(dir.clone())
-    const greenPos = pos.clone().add(dir.clone().applyAxisAngle(new THREE.Vector3(0,0,1), angleDelta))
-    const bluePos = pos.clone().add(dir.clone().applyAxisAngle(new THREE.Vector3(0,0,1), angleDelta * 2))
-    const violet = pos.clone().add(dir.clone().applyAxisAngle(new THREE.Vector3(0,0,1), angleDelta * 3))
+    const energyPos = pos.clone().add(dir.clone())
 
-    const redAmount = resources?.find((resource) => resource.resource == ResourceType.RED)?.mass ?? 0;
-    const greenAmount = resources?.find((resource) => resource.resource == ResourceType.GREEN)?.mass ?? 0;
-    const blueAmount = resources?.find((resource) => resource.resource == ResourceType.BLUE)?.mass ?? 0;
-    const violetAmount = resources?.find((resource) => resource.resource == ResourceType.VIOLET)?.mass ?? 0;
-    
+    const energyAmount = resources?.find((resource) => resource.resource == ResourceType.ENERGY)?.mass ?? 0;
+ 
 
     return (
         <>
             <ResourceButton
                 id={bubbleId}
-                type={ResourceType.RED}
-                position={redPos}
+                type={ResourceType.ENERGY}
+                position={energyPos}
                 size={radius / 7}
-                amount={redAmount}
+                amount={energyAmount}
             />
 
-            <ResourceButton
-                id={bubbleId}
-                type={ResourceType.GREEN}
-                position={greenPos}
-                size={radius / 7}
-                amount={greenAmount}
-            />
-
-            <ResourceButton
-                id={bubbleId}
-                type={ResourceType.BLUE}
-                position={bluePos}
-                size={radius / 7}
-                amount={blueAmount}
-            />
-
-            <ResourceButton
-                id={bubbleId}
-                type={ResourceType.VIOLET}
-                position={violet}
-                size={radius / 7}
-                amount={violetAmount}
-            />
         </>
     )
 }

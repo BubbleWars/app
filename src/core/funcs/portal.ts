@@ -302,8 +302,7 @@ export const portalEmitBubble = (
         .add(emittedBubbleRelativeVelocity);
     emittedBubble.body.setLinearVelocity(emittedBubbleVelocity);
     //console.log("emittedBubblePosition after velocity", JSON.stringify(emittedBubble.body.getPosition()));
-    setBubbleResourceMass(emittedBubble, ResourceType.BLUE, 10);
-    setBubbleResourceMass(emittedBubble, ResourceType.RED, 10);
+    setBubbleResourceMass(emittedBubble, ResourceType.ENERGY, 10);
     //console.log("bubble emitted", emittedBubble.resources);
     // setBubbleResourceMass(emittedBubble, ResourceType.GREEN, 10);
     // setBubbleResourceMass(emittedBubble, ResourceType.VIOLET, 10);

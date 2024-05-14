@@ -441,27 +441,14 @@ export const absorbResource = (
 ): void => {
     //Transfer resource to bubble
     const resourceType = absorbedResource.resource;
-    switch (resourceType) {
-        case ResourceType.BLUE:
-            //Transfer BLUE to bubble
-            transferResourceToBubble(bubbles, resources, bubble, absorbedResource, timestamp);
-            break;
-    
-        case ResourceType.RED:
+    switch (resourceType) {    
+        case ResourceType.ENERGY:
             //Check kinetic energy for PUNCTURE
             if(isResourceActivated(absorbedResource)){
                 punctureBubble(bubbles, resources, bubble, absorbedResource, timestamp, isSnapshot);
                 break;
             }
             //Transfer RED to bubble
-            transferResourceToBubble(bubbles, resources, bubble, absorbedResource, timestamp);
-            break;
-        
-        case ResourceType.GREEN:
-            transferResourceToBubble(bubbles, resources, bubble, absorbedResource, timestamp);
-            break;
-        
-        case ResourceType.VIOLET:
             transferResourceToBubble(bubbles, resources, bubble, absorbedResource, timestamp);
             break;
     }
@@ -504,10 +491,10 @@ export const punctureBubble = (
     isSnapshot: boolean = false,
 ): void => {
     //Make sure the incoming resource is RED
-    if(incoming.resource != ResourceType.RED) return;
+    if(incoming.resource != ResourceType.ENERGY) return;
 
     //Get the defense and attack values
-    const defense = getBubbleResourceMass(bubble, ResourceType.BLUE);
+    const defense = getBubbleResourceMass(bubble, ResourceType.ENERGY);
     const attack = resourceMassToAmount(incoming.resource, incoming.body.getMass());
 
     //Puncture the bubble
@@ -526,7 +513,7 @@ export const punctureBubble = (
     //Calculate the damage
     const remaining = defense - attack;
     if(remaining >= 0){
-        setBubbleResourceMass(bubble, ResourceType.BLUE, remaining);
+        setBubbleResourceMass(bubble, ResourceType.ENERGY, remaining);
      }else {
         if(isSnapshot) {
             snapshotPendingInputs.push({
@@ -554,7 +541,7 @@ export const punctureBubble = (
             //console.log(timestamp, " Adding puncture to pendingInputs:", pendingInputs)
             
         } 
-        setBubbleResourceMass(bubble, ResourceType.BLUE, 0);
+        setBubbleResourceMass(bubble, ResourceType.ENERGY, 0);
         
     }
     //Destroy the incoming resource
