@@ -20,7 +20,7 @@ export const ScreenSpawnPortal = () => {
     const { authenticated } = usePrivy();
     const connectedAddress = wallets[0]?.address ? `${wallets[0].address}` : "";
     const address = connectedAddress;
-    console.log("This is the current address: 420 ", address);
+   //console.log("This is the current address: 420 ", address);
 
     const [buttonText, setButtonText] = React.useState("Spawn");
     //const [ dripText, setDripText ] = React.useState('Drip')
@@ -52,11 +52,11 @@ export const ScreenSpawnPortal = () => {
                 (portal) =>
                     portal.owner.toLowerCase() === address?.toLowerCase(),
             );
-            console.log(
-                "These are the current portals 69:  ",
-                currentState.portals,
-            );
-            console.log("this is the current address 69: ", address);
+        //    console.log(
+        //         "These are the current portals 69:  ",
+        //         currentState.portals,
+        //     );
+           //console.log("this is the current address 69: ", address);
             if (portal) {
                 setIsPortal(true);
                 dispatch(

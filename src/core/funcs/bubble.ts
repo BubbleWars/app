@@ -10,8 +10,11 @@ import { EventsType } from "../types/events";
 import { ZeroAddress } from "ethers";
 import { BubbleState } from "../types/state";
 import { pseudoRandom } from "./portal";
-import { bubbles } from "../world";
+import { bubbles, pendingInputs } from "../world";
 import { get } from "http";
+import { snapshotPendingInputs } from "../snapshots";
+import { InputType } from "../types/inputs";
+import { timeStamp } from "console";
 
 //const PUNCTURE_EMIT_PER_SECOND = 100;
 
@@ -41,7 +44,7 @@ export const getTotalBubbleMass = (bubble: Bubble): number => {
 //Set mass in ETH of the bubble
 export const setBubbleEthMass = (bubble: Bubble, mass: number): void => {
     if(mass <= 0) {
-        console.log("Setting mass to <= 0");
+       //console.log("Setting mass to <= 0");
     }
     bubble.balance = mass;
     updateBubble(bubbles, bubble);
@@ -111,7 +114,7 @@ export const createBubble = (
     from?: string
 ): Bubble => {
     if (mass <= 0) {
-        console.log("Cannot create bubble with mass <= 0");
+       //console.log("Cannot create bubble with mass <= 0");
         return;
     }
     const radius = massToRadius(mass);
@@ -157,7 +160,7 @@ export const createBubble = (
     });
     setBubbleEthMass(bubble, mass);
     //console.log("bubble created", bubble.body.getUserData() as string)
-    console.log("bubble created with mass:", mass)
+   //console.log("bubble created with mass:", mass)
     return bubble;
 };
 
@@ -175,7 +178,7 @@ export const destroyBubble = (
             y: bubble.body.getPosition().y,
         },
     });
-    console.log("destroying bubble ");
+   //console.log("destroying bubble ");
     bubbles.delete(bubble.body.getUserData() as string);
     bubble.body.getWorld().destroyBody(bubble.body);
     bubble = null as any;
@@ -221,7 +224,7 @@ export const emitBubble = (
     //if(!bubble.controllable) throw new Error("Cannot emit from a non-controllable bubble");
     const bubbleEthMass = getBubbleEthMass(bubble);
     if (mass > bubbleEthMass){
-        console.log("Cannot emit more than of the bubble's mass");
+       //console.log("Cannot emit more than of the bubble's mass");
         return;
     }
     //console.log("emitting bubble", mass, bubble.body.getMass() );
@@ -245,10 +248,6 @@ export const emitBubble = (
         undefined,
         bubble.body.getUserData() as string,
     );
-    const totalMomentum = bubble.body
-        .getLinearVelocity()
-        .clone()
-        .mul(bubble.body.getMass());
 
     //console.log("emittedBubble", emittedBubble);
     //Apply mass conservation
@@ -257,17 +256,14 @@ export const emitBubble = (
     //updateBubble(bubbles, bubble, newBubbleMass);
 
     //Apply momentum conservation
-    const originalBubbleMomentum = totalMomentum.clone();
     //const emittedBubbleVelocityDirection = emissionDirection ? emissionDirection.clone() : direction.clone();
     //const emittedBubbleVelocityMagnitude = calculateEmissionVelocity(newBubbleMass, mass);
-    const emittedBubbleRelativeVelocity = calculateEjectionVelocity(direction);
+    const emittedBubbleRelativeVelocity = calculateEjectionVelocity(emissionDirection ? emissionDirection.add(direction) : direction);
     const emittedBubbleVelocity = bubble.body
         .getLinearVelocity()
         .clone()
         .add(emittedBubbleRelativeVelocity);
-    const emittedBubbleMomentum = emittedBubbleVelocity
-        .clone()
-        .mul(emittedBubble.body.getMass());
+
     emittedBubble.body.setLinearVelocity(emittedBubbleVelocity);
     const m = getTotalBubbleMass(bubble);
     const me = emittedBubble.body.getMass();
@@ -289,9 +285,9 @@ export const emitResource = (
     mass: number,
     direction: Vec2,
 ): Resource => {
-    console.log("emitting resource")
+   //console.log("emitting resource")
     if (mass > getBubbleResourceMass(bubble, resourceType)){
-        console.log("Cannot emit more than the bubble's resource mass");
+       //console.log("Cannot emit more than the bubble's resource mass");
         return;
     }
     //console.log("emitting resource", resourceType, mass, getBubbleResourceMass(bubble, resourceType));
@@ -388,6 +384,7 @@ export const transferResourceToBubble = (
     resources: Map<string, Resource>,
     bubble: Bubble,
     absorbedResource: Resource,
+    timestamp: number = 0,
 ) => {
     const amount = resourceMassToAmount(absorbedResource.resource, absorbedResource.body.getMass());
     const type = absorbedResource.resource;
@@ -395,17 +392,18 @@ export const transferResourceToBubble = (
     const prev = getBubbleResourceMass(bubble, type);
     const now = prev + amount;
     setBubbleResourceMass(bubble, type, now);
-    updateResource(resources, absorbedResource, 0);
+    updateResource(resources, absorbedResource, 0, timestamp);
 }
 
 export const addPuncturePoint = (
     bubble: Bubble,
     puncturePoint: PuncturePoint,
     amount: number,
+    start: number,
 ) => {
     if (!bubble.punctures) bubble.punctures = new Map();
     if (!bubble.punctures.has(puncturePoint)) {
-        bubble.punctures.set(puncturePoint, { amount });
+        bubble.punctures.set(puncturePoint, { amount, start });
     } else {
         const puncture = bubble.punctures.get(puncturePoint);
         if (puncture) puncture.amount += amount;
@@ -438,31 +436,33 @@ export const absorbResource = (
     bubble: Bubble,
     absorbedResource: Resource,
     timeElapsed: number,
+    timestamp: number,
+    isSnapshot: boolean = false,
 ): void => {
     //Transfer resource to bubble
     const resourceType = absorbedResource.resource;
     switch (resourceType) {
         case ResourceType.BLUE:
             //Transfer BLUE to bubble
-            transferResourceToBubble(bubbles, resources, bubble, absorbedResource);
+            transferResourceToBubble(bubbles, resources, bubble, absorbedResource, timestamp);
             break;
     
         case ResourceType.RED:
             //Check kinetic energy for PUNCTURE
             if(isResourceActivated(absorbedResource)){
-                punctureBubble(bubbles, resources, bubble, absorbedResource);
+                punctureBubble(bubbles, resources, bubble, absorbedResource, timestamp, isSnapshot);
                 break;
             }
             //Transfer RED to bubble
-            transferResourceToBubble(bubbles, resources, bubble, absorbedResource);
+            transferResourceToBubble(bubbles, resources, bubble, absorbedResource, timestamp);
             break;
         
         case ResourceType.GREEN:
-            transferResourceToBubble(bubbles, resources, bubble, absorbedResource);
+            transferResourceToBubble(bubbles, resources, bubble, absorbedResource, timestamp);
             break;
         
         case ResourceType.VIOLET:
-            transferResourceToBubble(bubbles, resources, bubble, absorbedResource);
+            transferResourceToBubble(bubbles, resources, bubble, absorbedResource, timestamp);
             break;
     }
 
@@ -475,11 +475,33 @@ export const absorbResource = (
     }   
 };
 
+/**
+* Logistic Function Growth
+ * Asymptotically approaches MAX as x increases.
+ * Ignores values of x less than 0 by returning 0.
+ */
+export const  calculatePunctureEthAmount = (
+    mass: number, //ETH mass of the bubble
+    attack: number, //Incoming attack resoiiiiikioop'urce mass
+    defense: number, //Bubble defense resource mass
+) => {
+    const x = attack - defense;
+    if (x <= 0) return 0;
+    const max = mass / 10;
+
+    const k = 1;
+    const x0 = 5;
+
+    return max / (1 + Math.exp(-k * (x - x0)));
+}
+
 export const punctureBubble = (
     bubbles: Map<string, Bubble>,
     resources: Map<string, Resource>,
     bubble: Bubble,
     incoming: Resource,
+    timestamp: number,
+    isSnapshot: boolean = false,
 ): void => {
     //Make sure the incoming resource is RED
     if(incoming.resource != ResourceType.RED) return;
@@ -488,22 +510,74 @@ export const punctureBubble = (
     const defense = getBubbleResourceMass(bubble, ResourceType.BLUE);
     const attack = resourceMassToAmount(incoming.resource, incoming.body.getMass());
 
+    //Puncture the bubble
+    const puncturePoint = incoming.body
+        .getPosition().clone()
+        .sub(bubble.body.getPosition())
+    puncturePoint.normalize();
+
+    //Calculate puncture amount
+    const amount = calculatePunctureEthAmount(
+        getBubbleEthMass(bubble), 
+        attack, 
+        defense
+    );
+
     //Calculate the damage
     const remaining = defense - attack;
     if(remaining >= 0){
-        //Transfer the remaining defense to the bubble and destroy the incoming resource
         setBubbleResourceMass(bubble, ResourceType.BLUE, remaining);
-    } else {
-        //Puncture the bubble
-        const puncturePoint = incoming.body
-            .getPosition().clone()
-            .sub(bubble.body.getPosition())
-        puncturePoint.normalize();
-        addPuncturePoint(bubble, {x: puncturePoint.x, y:puncturePoint.y}, attack - defense);
+     }else {
+        if(isSnapshot) {
+            snapshotPendingInputs.push({
+                executionTime: timestamp,
+                timestamp,
+                type: InputType.Puncture,
+                bubbleId: bubble.body.getUserData() as string,
+                resourceId: incoming.id,
+                puncturePoint: {x: puncturePoint.x, y: puncturePoint.y},
+                amount,
+            })
+            snapshotPendingInputs.sort((a, b) => a?.executionTime - b?.executionTime);
+            //console.log(timestamp, " Adding puncture to snapshot:", snapshotPendingInputs)
+        }else {
+            pendingInputs.push({
+                executionTime: timestamp,
+                timestamp,
+                type: InputType.Puncture,
+                bubbleId: bubble.body.getUserData() as string,
+                resourceId: incoming.id,
+                puncturePoint: {x: puncturePoint.x, y: puncturePoint.y},
+                amount,
+            })
+            pendingInputs.sort((a, b) => a?.executionTime - b?.executionTime);
+            //console.log(timestamp, " Adding puncture to pendingInputs:", pendingInputs)
+            
+        } 
+        setBubbleResourceMass(bubble, ResourceType.BLUE, 0);
+        
     }
-
     //Destroy the incoming resource
-    updateResource(resources, incoming, 0);        
+    updateResource(resources, incoming, 0, timestamp);  
+    
+    // if(remaining >= 0){
+    //     //Transfer the remaining defense to the bubble and destroy the incoming resource
+    //     setBubbleResourceMass(bubble, ResourceType.BLUE, remaining);
+    // } else {
+        
+        
+    //    //console.log("CREATING PUNCTURE AMOUNT: ", punctureAmount);
+    //     addPuncturePoint(
+    //         bubble, 
+    //         {x: puncturePoint.x, y:puncturePoint.y}, 
+    //         punctureAmount,
+    //         timestamp
+    //     );
+    //     setBubbleResourceMass(bubble, ResourceType.BLUE, 0);
+    // }
+
+    // //Destroy the incoming resource
+    // updateResource(resources, incoming, 0);   
 }
 
 export const handlePunctures = (
@@ -511,26 +585,38 @@ export const handlePunctures = (
     bubbles: Map<string, Bubble>,
     bubble: Bubble,
     timeElapsed: number,
+    isSnapshot: boolean = false,
 ): void => {
-    if (!bubble.punctures) return;
+    if (!bubble.punctures || bubble.punctures.size == 0) return;
+    //console.log("bubble updated timestamp: ", timestamp, "isSnapshot: ", isSnapshot);
+
     bubble.punctures.forEach((puncture, puncturePoint) => {
+        if(timestamp < puncture.start) return;
         if (!bubble.lastPunctureEmit) bubble.lastPunctureEmit = timestamp;
 
         const timeSinceLast = timestamp - bubble.lastPunctureEmit;
 
-        if (timeSinceLast > 0.5) {
+        if (timeSinceLast > 0.05) {
             const amountEmitted = Math.min(
-                Math.min(puncture.amount, 0.1),
-                getBubbleEthMass(bubble),
-            );
+                PLANCK_MASS*10,
+                puncture.amount
+            )
+
+            if(amountEmitted < PLANCK_MASS){
+               //console.log("Amount emitted is greater than puncture amount, omitting");
+                puncture.amount = 0;
+                return;
+            }
             //Create puncture direction vector as random direction within 40 degrees of puncture vector
-            const randomAngle = pseudoRandom(timestamp) * 70 - 35;
+            const coneDegree = 5;
+            const randomAngle = pseudoRandom(timestamp) *  coneDegree + (coneDegree/2)
             const puncturePointVec = Vec2(puncturePoint.x, puncturePoint.y);
             const emissionDirection = rotateVec2(puncturePointVec, randomAngle);
+            emissionDirection.normalize();
 
             if (amountEmitted > 0) {
                 const newPunctureAmount = puncture.amount - amountEmitted;
-                emitBubble(
+                const punctureEmittedBubble = emitBubble(
                     timestamp,
                     bubbles,
                     bubble,
@@ -542,6 +628,9 @@ export const handlePunctures = (
                 if (newPunctureAmount <= 0)
                     bubble?.punctures?.delete(puncturePoint);
                 bubble.lastPunctureEmit = timestamp;
+
+                //console.log("Angle:(", randomAngle, ")  id: (", punctureEmittedBubble.body.getUserData() as string, ") at (", timestamp, ") isSnapshot: ", isSnapshot);
+
             }
         }
     });
@@ -551,8 +640,9 @@ export const handleBubbleUpdates = (
     timestamp: number,
     bubbles: Map<string, Bubble>,
     timeElapsed: number,
+    isSnapshot: boolean = false,
 ): void => {
     bubbles.forEach((bubble) => {
-        handlePunctures(timestamp, bubbles, bubble, timeElapsed);
+        handlePunctures(timestamp, bubbles, bubble, timeElapsed, isSnapshot);
     });
 };

@@ -24,7 +24,7 @@ export const BarBottom = () => {
     useEffect(() => {
         const intervalId = setInterval(() => {
             const portal = currentState.portals.find(portal => portal.owner.toLowerCase() == address.toLowerCase());
-            console.log("These are the current portals 69:  ", currentState.portals);
+           //console.log("These are the current portals 69:  ", currentState.portals);
             if(portal) {
                 setBalance(portal.mass);
                 setPosition(portal.position);

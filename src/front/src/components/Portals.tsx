@@ -29,7 +29,7 @@ export const CustomGeometryParticles = (props: { count: number, radius: number, 
   const { count, radius, position, color } = props;
   const { camera } = useThree()
   const zoom = camera.zoom
-  console.log("zoom:", zoom)
+ //console.log("zoom:", zoom)
 
   // This reference gives us direct access to our points
   const points = useRef();

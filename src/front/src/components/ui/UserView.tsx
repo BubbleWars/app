@@ -5,7 +5,7 @@ import { useUserSocial } from "@/hooks/socials";
 
 export const UserView = ({ address }: { address: string }) => {
     const user = useUserSocial({ address });
-    console.log("UserView", user);
+   //console.log("UserView", user);
     return (
         <div className="flex flex-row items-center">
             <Avatar>

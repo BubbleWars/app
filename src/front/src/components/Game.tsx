@@ -78,9 +78,9 @@ const initStateServer = (room) => {
         //Timestamp
         currentState.timestamp = timestamp
         if(lastTimestampReceived >= timestamp) {
-            console.log("Timestamp out of order", lastTimestampReceived, timestamp)
+           //console.log("Timestamp out of order", lastTimestampReceived, timestamp)
         }
-        console.log("Timestamp diff", (timestamp - lastTimestampReceived).toFixed(2))
+       //console.log("Timestamp diff", (timestamp - lastTimestampReceived).toFixed(2))
         timestampDiff = timestamp - lastTimestampReceived;
         lastTimestampReceived = timestamp
 
@@ -95,7 +95,7 @@ const initStateServer = (room) => {
             };
         });
 
-        console.log(userSocialsState);
+       //console.log(userSocialsState);
 
         //Bubble start positions for interpolation
         syncBubbleStartPositions.forEach((value, key) => {
@@ -233,14 +233,14 @@ const initStateServer = (room) => {
     });
 
     room.connection.events.onclose = (e) => {
-        console.log("connection closed", e)
+       //console.log("connection closed", e)
     }
     room.connection.events.onopen = (e) => {
-        console.log("connection opened", e)
+       //console.log("connection opened", e)
     }
 
     room.connection.events.onerror = (e) => {
-        console.log("connection error", e)
+       //console.log("connection error", e)
     }
 }
 
@@ -248,14 +248,14 @@ const initStateServer = (room) => {
 initStateServer(room)
 setInterval(() => {
     const isOpen = room.connection.isOpen
-    console.log("room state", room.connection.isOpen)
+   //console.log("room state", room.connection.isOpen)
     if(!isOpen){
-        console.log("reconnecting")
+       //console.log("reconnecting")
         client.joinOrCreate("world")
             .then((newRoom) => {
                 room = newRoom;
                 initStateServer(room)
-                console.log("reconnected")
+               //console.log("reconnected")
             })
     }
 }, 1000)

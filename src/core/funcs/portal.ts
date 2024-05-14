@@ -67,7 +67,7 @@ export const generateSpawnPoint = (
         const x = (rngX.next() * WORLD_WIDTH - WORLD_WIDTH/2) * 0.5;
         const y = (rngY.next() * WORLD_HEIGHT - WORLD_HEIGHT/2) * 0.5;
 
-        console.log("generateSpawnPoint", x, y);
+       //console.log("generateSpawnPoint", x, y);
 
         spawnPoint = new Vec2(x, y);
 
@@ -257,7 +257,7 @@ export const portalEmitBubble = (
     direction: Vec2 = new Vec2(1, 1),
 ): Bubble => {
     if (mass > getPortalMass(portal)){
-        console.log("Cannot emit more than the portal's mass. Portals mass:", getPortalMass(portal), "emitting:", mass);
+       //console.log("Cannot emit more than the portal's mass. Portals mass:", getPortalMass(portal), "emitting:", mass);
         return;
     }
     const portalRadius = portal.fixture.getShape().getRadius();
@@ -346,7 +346,7 @@ export const portalEmitResource = (
     direction: Vec2 = new Vec2(1, 1),
 ): Resource => {
     if (mass > getPortalResourceMass(portal, resource)){
-        console.log("Cannot emit more than the portal's resource mass");
+       //console.log("Cannot emit more than the portal's resource mass");
         return;
     }
     const portalRadius = portal.fixture.getShape().getRadius();

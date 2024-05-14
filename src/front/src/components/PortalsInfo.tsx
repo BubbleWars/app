@@ -16,7 +16,7 @@ export const PortalsInfo = ({ portalId }: { portalId: string }) => {
     //console.log("wasteyute", currentUserSocials);
     const userSocial = useUserSocial({ address: portal.owner });
     const social = userSocial?.social ?? "not found"
-    console.log("flamingo ", social);
+   //console.log("flamingo ", social);
 
     if (!portal) return null;
     const displayName = social ?? portal.owner;

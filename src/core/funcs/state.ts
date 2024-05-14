@@ -50,7 +50,7 @@ export const updateState = (
         const punctures = Array.from(puncturesMap?.values());
         const puncturePoints = Array.from(puncturesMap?.keys());
         if(bubble.balance <= 0){
-            console.log("Updating state with zero balance, real mass is: ", bubble.body.getMass());
+           //console.log("Updating state with zero balance, real mass is: ", bubble.body.getMass());
         }
         return {
             id: bubble.body.getUserData() as string,
@@ -196,11 +196,11 @@ export const handleContact = (contact: Contact) => {
     //Bubble-Resource collision
     else if (b1 && r2) {
         deferredUpdates.push(() => {
-            absorbResource(bubbles, resources, b1, r2, STEP_DELTA);
+            absorbResource(bubbles, resources, b1, r2, STEP_DELTA, tempTimestamp);
         });
     } else if (b2 && r1) {
         deferredUpdates.push(() => {
-            absorbResource(bubbles, resources, b2, r1, STEP_DELTA);
+            absorbResource(bubbles, resources, b2, r1, STEP_DELTA, tempTimestamp);
         });
     }
 
@@ -327,6 +327,8 @@ export const handleSnapshotContact = (contact: Contact) => {
                 b1,
                 r2,
                 STEP_DELTA,
+                snapshotTempTimestamp,
+                true
             );
         });
     } else if (b2 && r1) {
@@ -337,6 +339,8 @@ export const handleSnapshotContact = (contact: Contact) => {
                 b2,
                 r1,
                 STEP_DELTA,
+                snapshotTempTimestamp,
+                true
             );
         });
     }

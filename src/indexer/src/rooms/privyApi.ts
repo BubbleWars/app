@@ -38,7 +38,7 @@ export const fetchUsers = async () => {
             return newUser;
         });
     } catch (e) {
-        console.error("fetchUsers", e);
+        console.log("error fetching users")
         return [];
     }
 };

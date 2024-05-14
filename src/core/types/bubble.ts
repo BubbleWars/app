@@ -6,6 +6,7 @@ export interface PuncturePoint {
 }
 
 export interface Puncture {
+    start: number; // timestamp of puncture start
     amount: number; // amount of resource to be emitted
 }
 

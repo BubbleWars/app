@@ -29,7 +29,7 @@ export const ScreenTitle = () => {
     const { wallets } = useWallets();
     const connectedAddress = wallets[0]?.address ? `${wallets[0].address}` : "";
 
-    console.log("The connected address is:   " + connectedAddress);
+   //console.log("The connected address is:   " + connectedAddress);
 
     const [buttonText, setButtonText] = React.useState("Connect");
     const [isButtonClicked, setButtonClicked] = React.useState(false);
@@ -49,7 +49,7 @@ export const ScreenTitle = () => {
         return parseFloat(data?.formatted ?? "0");
     }, [data]);
 
-    console.log("The balance is:   " + balance);
+   //console.log("The balance is:   " + balance);
 
     const shouldFetchFunds = useMemo(() => {
         if (isError || isLoading || !data) return false;

@@ -87,8 +87,8 @@ describe("Event System Unit Tests", () => {
 
         expect(
             e.subscribe(Events.PlayerConnection, (data: PlayerConnection) => {
-                console.log(`Player just joined, id: ${data.playerId}`);
-                console.log(`At timestamp: ${data.timestamp.toString()}`);
+               //console.log(`Player just joined, id: ${data.playerId}`);
+               //console.log(`At timestamp: ${data.timestamp.toString()}`);
             }),
         ).toBe(1);
 
@@ -114,13 +114,13 @@ describe("Event System Unit Tests", () => {
         const l3 = "This is the final loading";
 
         const c1 = (data: GameStart) => {
-            console.log(l1);
+           //console.log(l1);
         };
         const c2 = (data: GameStart) => {
-            console.log(l2);
+           //console.log(l2);
         };
         const c3 = (data: GameStart) => {
-            console.log(l3);
+           //console.log(l3);
         };
 
         e.subscribe(Events.GameEnd, (data: GameEnd) => {});
@@ -178,14 +178,14 @@ describe("Event System Unit Tests", () => {
 
         const c0 = (data: GameEnd) => {};
         const c1 = async (data: GameStart) => {
-            console.log(l1);
+           //console.log(l1);
         };
         const c2 = async (data: GameStart) => {
             await sleep(400); // 0.4s
-            console.log(l2);
+           //console.log(l2);
         };
         const c3 = (data: GameStart) => {
-            console.log(l3);
+           //console.log(l3);
         };
 
         e.subscribe(Events.GameEnd, c0);
@@ -247,13 +247,13 @@ describe("Event System Unit Tests", () => {
         const l3 = "This is the final loading";
 
         const c1 = async (data: GameStart) => {
-            console.log(l1);
+           //console.log(l1);
         };
         const c2 = async (data: GameStart) => {
-            console.log(l2);
+           //console.log(l2);
         };
         const c3 = (data: GameStart) => {
-            console.log(l3);
+           //console.log(l3);
         };
 
         e.subscribe(Events.GameStart, c1);
@@ -287,13 +287,13 @@ describe("Event System Unit Tests", () => {
         const l3 = "This is the final loading";
 
         const c1 = (data: GameStart) => {
-            console.log(l1);
+           //console.log(l1);
         };
         const c2 = (data: GameStart) => {
-            console.log(l2);
+           //console.log(l2);
         };
         const c3 = (data: GameStart) => {
-            console.log(l3);
+           //console.log(l3);
         };
 
         e.subscribe(Events.GameStart, c1);
@@ -346,13 +346,13 @@ describe("Event System Unit Tests", () => {
         const l3 = "This is the final loading";
 
         const c1 = (data: GameStart) => {
-            console.log(l1);
+           //console.log(l1);
         };
         const c2 = (data: GameStart) => {
-            console.log(l2);
+           //console.log(l2);
         };
         const c3 = (data: GameStart) => {
-            console.log(l3);
+           //console.log(l3);
         };
 
         e.subscribe(Events.GameStart, c1);

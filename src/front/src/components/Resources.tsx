@@ -41,7 +41,7 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
         velocity && resource
             ? magnitude * resource?.mass
             : 0;
-    console.log("kinetic energy", kineticEnergy);
+   //console.log("kinetic energy", kineticEnergy);
 
     useFrame(() => {
         const resource = currentState.resources.find(
@@ -125,12 +125,25 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
                     textPosition,
                 )}
                 //position={textPosition}
-                size={radius * 2}
+                size={radius * 0.5}
                 color={baseColor}
                 noOutline={true}
             >
                 {amount} {ResourceTypeToName[resource.type]?.toUpperCase()}
             </CustomText>
+            {kineticEnergy > CLASH_KE && resource.type == ResourceType.RED && (
+                <CustomText
+                    position={new THREE.Vector3(radius + 1, 0, 0).add(
+                        textPosition,
+                    )}
+                    //position={textPosition}
+                    size={radius * 0.2}
+                    color={baseColor}
+                    noOutline={true}
+                    >
+                        WILL HURT!
+                    </CustomText>
+            )}
             <mesh
                 ref={meshRef}
                 onPointerEnter={() => {
@@ -147,7 +160,7 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
                 <Outlines thickness={2} color={outlineColor} />
                 <meshBasicMaterial
                     toneMapped={false}
-                    color={kineticEnergy > CLASH_KE ? "#0000ff" : baseColor}
+                    color={baseColor}
                 />
             </mesh>
         </>

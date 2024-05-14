@@ -6,7 +6,7 @@ import { ResourceTypeToName } from "../BubblesInfo";
 
 export const Emitting = () => {
     const emits = useEmissions();
-    console.log("emits", emits)
+   //console.log("emits", emits)
     return (
         <>
             {emits.map(({id, mass, type, p1, p2}, index) => {

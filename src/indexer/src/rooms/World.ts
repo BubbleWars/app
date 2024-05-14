@@ -30,10 +30,11 @@ import { setOnEvent } from "../../../core/funcs/events";
 import { EventsType } from "../../../core/types/events";
 import { User } from "../../../core/types/user";
 import { snapshot } from "viem/_types/actions/test/snapshot";
+import { preciseRound } from "../../../core/funcs/utils";
 
 let timeOffset = 0;
 const getNow = () => {
-    return (Date.now() / 1000) + timeOffset;
+    return preciseRound((Date.now() / 1000) + timeOffset, 2);
 
 }
 
@@ -148,13 +149,13 @@ export class World extends Room<WorldState> {
         //this.unwatchInputs();
 
         //if(this.recievedStartupInspect) return;
-        console.log("World room created!", options);
+       //console.log("World room created!", options);
         this.setState(new WorldState());
 
         this.setSimulationInterval((deltaTime) => this.update(deltaTime));
 
         onInspect((snapshot) => {
-            console.log("recieved snapshot", snapshot);
+           //console.log("recieved snapshot", snapshot);
             updateState(this.state, snapshot);
             init(snapshot);
             snapshotInit(snapshot);
@@ -197,7 +198,7 @@ export class World extends Room<WorldState> {
                     pos.y = event.position.y;
                     this.state.syncBubbleStartPositions.set(event.id, pos);
                     const processTime = Date.now() - startTime;
-                    console.log("Processed input in:" + processTime + "ms", "current timestamp", this.state.timestamp);
+                   //console.log("Processed input in:" + processTime + "ms", "current timestamp", this.state.timestamp);
                     setOnEvent(() => {});
                     //}
                 } else if (event.type == EventsType.DestroyBubble) {
@@ -231,7 +232,7 @@ export class World extends Room<WorldState> {
               snapshotRun(this.blockTimestamp);
 
             } else if (isBlockBehind) {
-              console.log("Local Block is behind. Input timestamp:", input.timestamp, "Block timestamp:", this.blockTimestamp)
+             //console.log("Local Block is behind. Input timestamp:", input.timestamp, "Block timestamp:", this.blockTimestamp)
               handleInput(input, true);
               snapshotRun(input.timestamp, () => {}, true);
             }
@@ -253,14 +254,14 @@ export class World extends Room<WorldState> {
             //console.log("current bubbles", currentState.bubbles)
             //handleInput(input);
             // run(serverTimestamp, () => {
-            //     console.log("microstep", currentState.timestamp, "current timestamp", this.state.timestamp)
+            //    //console.log("microstep", currentState.timestamp, "current timestamp", this.state.timestamp)
             //     updateState(this.state, currentState);
             // });
             // const endTime = getNow();
             // let processTime = input.timestamp;
-            // console.log("input timestamp", input.timestamp, "end time", endTime)
+            ////console.log("input timestamp", input.timestamp, "end time", endTime)
             // while(processTime < endTime){
-            //     console.log("microstep", processTime, "current timestamp", this.state.timestamp)
+            //    //console.log("microstep", processTime, "current timestamp", this.state.timestamp)
             //     updateState(this.state, currentState);
             //     processTime += 1/60;
             //     run(processTime);
@@ -278,15 +279,15 @@ export class World extends Room<WorldState> {
     }
 
     onJoin(client: Client, options: any) {
-        console.log(client.sessionId, "joined!");
+       //console.log(client.sessionId, "joined!");
     }
 
     onLeave(client: Client, consented: boolean) {
-        console.log(client.sessionId, "left!");
+       //console.log(client.sessionId, "left!");
     }
 
     onDispose() {
-        console.log("is disposing");
+       //console.log("is disposing");
         this.unwatchBlock();
         this.unwatchInputs();
         this.recievedStartupInspect = false;
@@ -300,7 +301,7 @@ export class World extends Room<WorldState> {
         // handle game loop
         //
         if(getNow() < this.state.timestamp) {
-            console.log("timestamp jumping", getNow(), this.state.timestamp)
+           //console.log("timestamp jumping", getNow(), this.state.timestamp)
             timeOffset = this.state.timestamp - getNow();
         }
         run(getNow());

@@ -14,7 +14,7 @@ export const calculateEmissionVelocity = (m1: number, m2: number): number => {
     // const alpha = 0.05; // Example scaling factor
     // const ejectFactor = Math.pow((m1/m2), alpha); // Non-linear scaling
     // const vMax = C * Math.sqrt(2); // Maximum velocity from Total Energy = mc^2
-    // console.log("emission velocity", MASS_ENERGY_CONVERSION_EFFICIENCY * vMax)
+    ////console.log("emission velocity", MASS_ENERGY_CONVERSION_EFFICIENCY * vMax)
     // const emissionVelocity = MASS_ENERGY_CONVERSION_EFFICIENCY * vMax;
     return MAX_VELOCITY;
 };
@@ -123,3 +123,8 @@ export const ethereumAddressToColor = (ethAddress: string) => {
 
     return `#${colorCode}`;
 };
+
+export const  preciseRound = (num: number, decimalPlaces: number): number => {
+    const factor = Math.pow(10, decimalPlaces);
+    return Math.round((num + Number.EPSILON) * factor) / factor;
+}

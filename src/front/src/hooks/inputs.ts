@@ -171,7 +171,7 @@ export const waitForEmission = (
 ) => {
     const bubble = currentState.bubbles.find((bubble) => bubble.id == id);
     const portal = currentState.portals.find((portal) => portal.id == id);
-    console.log("wait for emission");
+   //console.log("wait for emission");
     let intervalId: NodeJS.Timeout;
     let timeoutId: NodeJS.Timeout;
 
@@ -183,7 +183,7 @@ export const waitForEmission = (
 
     // Function to check conditions and possibly clear interval
     const checkAndClear = (currentMass: number) => {
-        console.log("8899 initialMass", initialMass, "currentMass", currentMass, "emissionMass", emissionMass);
+       //console.log("8899 initialMass", initialMass, "currentMass", currentMass, "emissionMass", emissionMass);
         if (currentMass <= initialMass) {
             clearTimers();
             callback();
@@ -197,10 +197,10 @@ export const waitForEmission = (
                 (bubble) => bubble.id.toLowerCase() == id.toLowerCase(),
             );
             if (newBubble) {
-                console.log("8899 Checking bubble mass. emission:", newBubble.mass, "initialMass:", initialMass)
+               //console.log("8899 Checking bubble mass. emission:", newBubble.mass, "initialMass:", initialMass)
                 checkAndClear(newBubble.mass);
             }else {
-                console.log("8899 Bubble not found");
+               //console.log("8899 Bubble not found");
                 clearTimers();
                 callback();
             }
@@ -211,10 +211,10 @@ export const waitForEmission = (
                 (portal) => portal.id == id,
             );
             if (newPortal) {
-                console.log("8899 Checking portal mass. emission:", newPortal.mass, "initialMass:", initialMass )
+               //console.log("8899 Checking portal mass. emission:", newPortal.mass, "initialMass:", initialMass )
                 checkAndClear(newPortal.mass);
             }else {
-                console.log("8899 Portal not found");
+               //console.log("8899 Portal not found");
                 clearTimers();
                 callback();
             }

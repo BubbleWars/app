@@ -11,7 +11,7 @@ export interface UserSocial {
 export const userSocialsState: { [address: string]: UserSocial } = {};
 
 export const useUserSocial = ({ address }: { address: string }) => {
-    console.log("useUserSocial", userSocialsState);
+   //console.log("useUserSocial", userSocialsState);
     return useMemo(() => {
         if (!address) return {
             social: "not found",

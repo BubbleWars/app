@@ -53,7 +53,7 @@ export function getBurnerWallet(
             ? new BehaviorSubject(cachedPrivateKey)
             : (() => {
                   const privateKey = generatePrivateKey();
-                  console.log(
+                 //console.log(
                       "New burner wallet created:",
                       privateKeyToAccount(privateKey),
                   );

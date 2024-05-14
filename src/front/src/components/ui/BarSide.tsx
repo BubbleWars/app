@@ -298,7 +298,7 @@ export const TabYours = () => {
         : "No portal";
     const portalMass = portal?.mass ?? 0;
     const portalPosition = portal?.position ?? { x: 0, y: 0 };
-    console.log(portal);
+   //console.log(portal);
 
     useEffect(() => {
 

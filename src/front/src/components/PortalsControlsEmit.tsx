@@ -82,7 +82,7 @@ export const PortalsControlsEmit = ({
         const y = (pointer.y * viewport.getCurrentViewport().height) / 2 + camera.position.y;
         const worldMouse = new THREE.Vector3(x, y, 0);
 
-        console.log("bb x:", x, " y:", y, "viewport width:", viewport.width, "viewport height:", viewport.height)
+       //console.log("bb x:", x, " y:", y, "viewport width:", viewport.width, "viewport height:", viewport.height)
         // Calculate the direction vector
         const directionVector = worldMouse.sub(position).normalize();
 

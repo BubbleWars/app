@@ -129,7 +129,6 @@ export const createResource = (
     owner: string = ZeroAddress,
     id?: string,
 ): Resource => {
-    console.log("creating resource", type, mass, x, y, owner, id);
     const radius = resourceMassToRadius(type, mass);
     const body = world.createBody({
         position: Vec2(x, y),
@@ -168,6 +167,9 @@ export const createResource = (
         id: resource.id,
         position: { x, y },
     });
+    const n = resource.resource == ResourceType.BLUE ? "BLUE" : resource.resource == ResourceType.RED ? "RED" : resource.resource == ResourceType.GREEN ? "GREEN" : "VIOLET";
+    console.log("creating resource",resource.id,n, " isRollback", id, " at ", timestamp);
+
 
     return resource;
 };
@@ -193,9 +195,11 @@ export const updateResource = (
     resources: Map<string, Resource>,
     resource: Resource,
     newMass: number,
+    timestamp: number = 0,
 ): void => {
     if (newMass <= 0) {
-        //console.log("destroying resource", resource);
+        const n = resource.resource == ResourceType.BLUE ? "BLUE" : resource.resource == ResourceType.RED ? "RED" : resource.resource == ResourceType.GREEN ? "GREEN" : "VIOLET";
+        console.log("destroying resource", resource.id,n, " at", timestamp);
         resources.delete(resource.body.getUserData() as string);
         resource.body.getWorld().destroyBody(resource.body);
         resource = null;
@@ -255,7 +259,7 @@ export const nodeEmitResource = (
         .add(emittedResourceRelativeVelocity);
     emittedResource.body.setLinearVelocity(emittedResourceVelocity);
 
-    console.log("11emitted resource", emittedResourcePosition);
+   //console.log("11emitted resource", emittedResourcePosition);
     return emittedResource;
 };
 
@@ -397,9 +401,9 @@ export const handleEmission = (
     mass: number,
     startDir: Vec2,
 ): Resource | Bubble | undefined | any => {
-    console.log("handling emission", mass);
+   //console.log("handling emission", mass);
     //console.log("node", node);
-    console.log("emission", mass, startDir);
+   //console.log("emission", mass, startDir);
     //const { newMass, emission } = getEmission(node, mass);
     const newMass = node.mass;
     const emission = Math.abs(mass);

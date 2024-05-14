@@ -26,7 +26,7 @@ export const controlsSlice = createSlice({
             state.selected = action.payload;
         },
         setAiming: (state, action: PayloadAction<{id: string, mass: number, type: ResourceType}>) => {
-            console.log("setAiming", action.payload);
+           //console.log("setAiming", action.payload);
             state.aiming= {mass: action.payload.mass, type: action.payload.type, id: action.payload.id};
         },
         setEmitting: (state, action: PayloadAction<{id: string, mass: number, type: ResourceType, x: number, y: number}>) => {

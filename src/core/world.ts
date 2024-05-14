@@ -28,7 +28,7 @@ import {
     handleNodeUpdates,
     resourceMassToAmount,
 } from "./funcs/resource";
-import { createBoundary, createEdges } from "./funcs/utils";
+import { createBoundary, createEdges, preciseRound } from "./funcs/utils";
 
 export const users = new Map<Address, User>();
 export const bubbles = new Map<string, Bubble>();
@@ -86,7 +86,7 @@ export const init = (initialState?: Snapshot) => {
         deferredUpdates.length = 0;
 
         if (!initialState?.nodes || initialState.nodes.length == 0) {
-            console.log("generating nodes");
+           //console.log("generating nodes");
             // generateNodes(world, nodes, 1);
             // for (let index = 0; index < 100; index++) {
             //     const { x, y } = generateSpawnPoint(
@@ -203,7 +203,7 @@ export const init = (initialState?: Snapshot) => {
 
 export const rollbackToState = (snapshot: Snapshot) => {
     if (!snapshot) {
-        console.log("Snapshot is empty")
+       //console.log("Snapshot is empty")
         return
     };
     currentState = Object.assign({}, snapshot);
@@ -219,17 +219,18 @@ export const run = (
     callback?: () => void,
     client: boolean = false,
 ) => {
-    client;
     // Set the current time to the last timestamp
     if (lastTimestamp == 0) lastTimestamp = end;
-    tempTimestamp = lastTimestamp;
-    let current = lastTimestamp;
+    tempTimestamp = preciseRound(lastTimestamp, 2);
+    let current = preciseRound(lastTimestamp, 2);
     // Sort the pending inputs by execution time and remove any scheduled before the current time
     pendingInputs
         .sort((a, b) => a.executionTime - b.executionTime)
         .filter((input) => input.executionTime < current);
 
     //console.log("Pending inputs in run", pendingInputs)
+
+    //console.log("running to", end, "from", lastTimestamp, "with", pendingInputs.length, "inputs")
 
     // Run the simulation
     while (current < end) {
@@ -258,7 +259,10 @@ export const run = (
             current + STEP_DELTA,
             end,
         );
-        const stepDelta = next - current;
+        //console.log("current:", current, "next:", next, "pre-round delta:", next - current);
+        const stepDelta = preciseRound(next - current, 2);
+        //console.log("step delta", stepDelta);
+
 
         // Handle entity updates
         handleBubbleUpdates(current, bubbles, stepDelta);
@@ -266,7 +270,7 @@ export const run = (
 
         // Step the world
         world.step(stepDelta);
-        current += stepDelta;
+        current = preciseRound(current + stepDelta, 2);
         tempTimestamp = current;
 
         // Run inputs again
@@ -275,13 +279,12 @@ export const run = (
         //console.log("next input execution", nextInput?.executionTime)
         while (nextInput?.executionTime == current) {
             pendingInputs.shift();
-            //console.log("running input", nextInput)
             handlePendingInputs(nextInput);
             nextInput = pendingInputs.shift();
         }
 
         if(callback) {
-            console.log("Executing callback");
+           //console.log("Executing callback");
             callback();
         }
     }
@@ -289,7 +292,7 @@ export const run = (
     //console.log("ran world for", current - lastTimestamp, "seconds")
 
     // Update the last timestamp
-    lastTimestamp = current;
+    lastTimestamp = preciseRound(current, 2);
 
     // Update world state
     updateState(

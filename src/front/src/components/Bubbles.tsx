@@ -30,7 +30,7 @@ const BubbleMovementParticles =(props: { count: number, radius: number, position
     const { count, radius, color, height, direction } = props;
   const { camera } = useThree()
   const zoom = camera.zoom
-  console.log("zoom:", zoom)
+ //console.log("zoom:", zoom)
 
   // This reference gives us direct access to our points
   const points = useRef();
@@ -130,7 +130,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
     const user = useUserSocial({ address: bubble?.owner ?? ""});
 
     const pfpUrl = user?.pfpUrl;
-    console.log("pfpUrl", pfpUrl)
+   //console.log("pfpUrl", pfpUrl)
     const texture = usePfpTexture(pfpUrl, "/bubblewars.png", user?.social);
     //texture.anisotropy = 16;
     //if(!bubble) return null;
@@ -149,7 +149,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
         const timeSinceLastUpdate = timestampDiff;
 
         const lerpFactor = LERP_SPEED * Math.pow(elapsedTime / timeSinceLastUpdate, 2.5);
-        console.log("lerpFactor", lerpFactor)
+       //console.log("lerpFactor", lerpFactor)
         const bubble = currentState.bubbles.find(
             (bubble) => bubble.id === bubbleId,
         );
@@ -165,7 +165,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
 
         if (!meshRef.current.position.x || !meshRef.current.position.y) {
             const startPosition = bubbleStartPositions[bubbleId];
-            console.log("fetching start position", startPosition);
+           //console.log("fetching start position", startPosition);
             if (false) {
                 meshRef.current.position.set(
                     startPosition.x,
@@ -186,7 +186,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
                     (node) => node.id == bubble.from,
                 );
 
-                console.log("from node", bubble.from);
+               //console.log("from node", bubble.from);
 
                 if (fromBubble) {
                     meshRef.current.position.set(
@@ -207,7 +207,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
                         0,
                     );
                 } else {
-                    console.log("bubble.from not found");
+                   //console.log("bubble.from not found");
                 }
                 meshRef.current.scale.set(0, 0, 0);
                 meshRef.current.material.depthTest = false;
@@ -304,7 +304,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
 };
 
 export const Bubbles = ({ bubbles }: { bubbles: string[] }) => {
-    console.log("bubbles2", bubbles);
+   //console.log("bubbles2", bubbles);
     return bubbles.map((bubble, index) => (
         <Bubble key={bubble} bubbleId={bubble} />
     ));

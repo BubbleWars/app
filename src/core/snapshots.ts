@@ -29,7 +29,7 @@ import {
     resourceMassToAmount,
 } from "./funcs/resource";
 import { tempTimestamp } from "./world";
-import { createBoundary, createEdges } from "./funcs/utils";
+import { createBoundary, createEdges, preciseRound } from "./funcs/utils";
 
 export const snapshotUsers = new Map<Address, User>();
 export const snapshotBubbles = new Map<string, Bubble>();
@@ -88,7 +88,7 @@ export const snapshotInit = (initialState?: Snapshot) => {
         snapshotDeferredUpdates.length = 0;
 
         if (!initialState?.nodes || initialState.nodes.length == 0) {
-            console.log("generating snapshot nodes");
+           //console.log("generating snapshot nodes");
             // generateNodes(snapshotWorld, snapshotNodes, 1);
             // for (let index = 0; index < 100; index++) {
             //     const { x, y } = generateSpawnPoint(
@@ -208,7 +208,7 @@ export const snapshotInit = (initialState?: Snapshot) => {
 export const snapshotRollback = (timestamp: number) => {
     const snapshot = snapshots.get(timestamp);
     if (!snapshot) {
-        console.log("Snapshot not found", timestamp, "in", JSON.stringify(snapshots));
+       //console.log("Snapshot not found", timestamp, "in", JSON.stringify(snapshots));
          return;
     }
     snapshotCurrentState = Object.assign({}, snapshot);
@@ -226,8 +226,8 @@ export const snapshotRun = (
 ) => {
     // Set the current time to the last timestamp
     if (snapshotLastTimestamp == 0) snapshotLastTimestamp = end;
-    snapshotTempTimestamp = snapshotLastTimestamp;
-    let current = snapshotLastTimestamp;
+    snapshotTempTimestamp = preciseRound(snapshotLastTimestamp, 2);
+    let current = preciseRound(snapshotLastTimestamp, 2);
     // Sort the pending inputs by execution time and remove any scheduled before the current time
     snapshotPendingInputs
         .sort((a, b) => a.executionTime - b.executionTime)
@@ -273,10 +273,11 @@ export const snapshotRun = (
             current + STEP_DELTA,
             end,
         );
-        const stepDelta = next - current;
+        const stepDelta = preciseRound(next - current, 2);
+        //console.log("snapshot delta", stepDelta, "next", next)
 
         // Handle entity updates
-        handleBubbleUpdates(current, snapshotBubbles, stepDelta);
+        handleBubbleUpdates(current, snapshotBubbles, stepDelta, true);
         handleNodeUpdates(
             current,
             snapshotWorld,
@@ -288,7 +289,7 @@ export const snapshotRun = (
 
         // Step the snapshotWorld
         snapshotWorld.step(stepDelta);
-        current += stepDelta;
+        current = preciseRound(current + stepDelta, 2);
         snapshotTempTimestamp = current;
 
         // Run inputs again
@@ -308,7 +309,7 @@ export const snapshotRun = (
     //console.log("ran snapshotWorld for", current - snapshotLastTimestamp, "seconds")
 
     // Update the last timestamp
-    snapshotLastTimestamp = current;
+    snapshotLastTimestamp = preciseRound(current, 2);
 
     // Update world state
     updateState(

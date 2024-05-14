@@ -9,6 +9,7 @@ import {
     InspectData,
     Inspect,
     InspectType,
+    PunctureInput,
 } from "../types/inputs";
 import { ethers } from "ethers";
 import {
@@ -35,10 +36,11 @@ import {
     portalEmitResource,
 } from "./portal";
 import { decodePacked } from "./utils";
-import { emitBubble, emitResource, getBubbleEthMass, getBubbleResourceMass } from "./bubble";
+import { addPuncturePoint, emitBubble, emitResource, getBubbleEthMass, getBubbleResourceMass, setBubbleResourceMass } from "./bubble";
 import { Vec2 } from "planck-js";
 import {
     snapshotBubbles,
+    snapshotCurrentState,
     snapshotNodes,
     snapshotPendingInputs,
     snapshotPortals,
@@ -49,6 +51,7 @@ import {
     snapshotWorld,
 } from "../snapshots";
 import { ResourceType } from "../types/resource";
+import { resourceMassToAmount, updateResource } from "./resource";
 
 const isNode =
     typeof process !== "undefined" &&
@@ -72,7 +75,7 @@ export const parseInput = (data: AdvanceData): Input | false => {
     const inputIndex = metadata?.input_index;
     const epochIndex = metadata?.epoch_index;
 
-    console.log("Recieved payload: ", payload);
+   //console.log("Recieved payload: ", payload);
 
     if (sender.toLowerCase() == ETH_PORTAL_ADDRESS.toLowerCase()) {
         const binary = decodePacked(["address", "uint256"], payload);
@@ -303,13 +306,13 @@ const handleEmit = (input: Emit, client: boolean): boolean => {
         : bubbles.has(input.from.toLowerCase());
 
     if (!isPortal && !isBubble) {
-        console.log("Input from is not a portal or bubble");
-        console.log("Bubbles", JSON.stringify(bubbles));
-        console.log("Portals", JSON.stringify(portals));
+       //console.log("Input from is not a portal or bubble");
+       //console.log("Bubbles", JSON.stringify(bubbles));
+       //console.log("Portals", JSON.stringify(portals));
         return false;
     }
     if (!input?.timestamp) {
-        console.log("Input timestamp is undefined");
+       //console.log("Input timestamp is undefined");
         return false;
     }
     if (!input?.sender) {
@@ -320,7 +323,7 @@ const handleEmit = (input: Emit, client: boolean): boolean => {
     if (input?.executionTime < input?.timestamp) return false;
 
     if(input?.mass <= 0){ 
-        console.log("Input mass is less than or equal to 0");
+       //console.log("Input mass is less than or equal to 0");
         return false;
     }
     const user = getUser(input.sender, client);
@@ -470,13 +473,16 @@ export const handlePendingInputs = (
     input: Input,
     client: boolean = false,
 ): void => {
-    //console.log("Handling pending input:", input);
+    //console.log("Handling pending input:", input, "snapshot:", client);
     const { type } = input;
     switch (type) {
         case InputType.Emit:
             if (client) handlePendingClientEmit(input);
             else handlePendingEmit(input);
             break;
+        case InputType.Puncture:
+            if(client) handlePendingClientPuncture(input);
+            else handlePendingPuncture(input);
     }
 };
 
@@ -587,3 +593,38 @@ export const handlePendingClientEmit = (input: Emit): void => {
             );
     }
 };
+
+export const handlePendingPuncture = (input: PunctureInput): void => {
+    const bubble = bubbles.get(input.bubbleId.toLowerCase());
+    if (!bubble ) return;
+    const puncturePoint = { x: input.puncturePoint.x, y: input.puncturePoint.y };
+    const amount = input.amount;
+    const timestamp = tempTimestamp;
+  
+    //console.log("CREATING PUNCTURE AMOUNT: ", punctureAmount);
+    addPuncturePoint(
+        bubble, 
+        {x: puncturePoint.x, y:puncturePoint.y}, 
+        amount,
+        timestamp
+    );
+
+}
+
+export const handlePendingClientPuncture = (input: PunctureInput): void => {
+    const bubble = snapshotBubbles.get(input.bubbleId.toLowerCase());
+    if (!bubble) return;
+    const puncturePoint = { x: input.puncturePoint.x, y: input.puncturePoint.y };
+    const amount = input.amount;
+    const timestamp = snapshotTempTimestamp;
+
+    //console.log("CREATING PUNCTURE AMOUNT: ", punctureAmount);
+    addPuncturePoint(
+        bubble, 
+        {x: puncturePoint.x, y:puncturePoint.y}, 
+        amount,
+        timestamp
+    );
+
+    
+}

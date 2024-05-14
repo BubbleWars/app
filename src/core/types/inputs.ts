@@ -6,6 +6,7 @@ export enum InputType {
     Deposit = "deposit",
     Withdraw = "withdraw",
     Invalid = "invalid",
+    Puncture = "puncture", //puncture bubble
 }
 
 export interface BaseInput {
@@ -45,8 +46,17 @@ export interface Emit extends BaseInput {
     direction: { x: number; y: number }; //direction to emit bubble
 }
 
-export type Input = SpawnPortal | Emit | Deposit | Withdraw;
-export type InputWithExecutionTime = Emit;
+export interface PunctureInput extends BaseInput {
+    type: InputType.Puncture;
+    bubbleId: string;
+    resourceId: string;
+    puncturePoint: { x: number; y: number };
+    amount: number;
+    executionTime?: number;
+}
+
+export type Input = SpawnPortal | Emit | Deposit | Withdraw | Invalid | PunctureInput;
+export type InputWithExecutionTime = Emit | PunctureInput;
 
 export interface AdvanceData {
     metadata: {

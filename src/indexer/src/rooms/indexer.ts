@@ -69,7 +69,7 @@ export const publicClient = createPublicClient({
 
 export const onInspect = async (callback: (snapshot: Snapshot) => void) => {
     const snapshot = await inspectState({ type: InspectType.State, value: 0 });
-    console.log("snapshot", snapshot);
+   //console.log("snapshot", snapshot);
     callback(snapshot);
 };
 
@@ -102,7 +102,7 @@ export const onInput = (callback: (input: Input) => void) => {
                 let timestamp;
                 if (blockNumberToTimestamp[blockNumber]) {
                     timestamp = blockNumberToTimestamp[blockNumber];
-                    console.log("timestamp from cache", timestamp);
+                   //console.log("timestamp from cache", timestamp);
                 } else
                     timestamp = Number(
                         (
@@ -125,7 +125,7 @@ export const onInput = (callback: (input: Input) => void) => {
                     //console.log("binary", binary);
                     const address = binary[0];
                     const amount = binary[1];
-                    console.log("Recieved transaction indexer.ts:", address, timestamp);
+                   //console.log("Recieved transaction indexer.ts:", address, timestamp);
                     callback({
                         type: InputType.Deposit,
                         timestamp,
@@ -137,21 +137,21 @@ export const onInput = (callback: (input: Input) => void) => {
                         const data = logs[0].data;
                         //from hex to string
                         const json = hexToString(data);
-                        console.log("json", json);
+                       //console.log("json", json);
                         const input: Input = JSON.parse(
                             json.substring(
                                 json.indexOf('{"'),
                                 json.lastIndexOf("}") + 1,
                             ),
                         );
-                        console.log("Recieved transaction indexer.ts:", transaction.from, timestamp);
+                       //console.log("Recieved transaction indexer.ts:", transaction.from, timestamp);
                         callback({
                             ...input,
                             timestamp,
                             sender: transaction.from,
                         });
                     } catch (e) {
-                        console.log("error", e);
+                       //console.log("error", e);
                     }
                 }
 

@@ -336,7 +336,7 @@ export const useAimingFire = (
     
 
     return useCallback(() => {
-        console.log("is firing")
+       //console.log("is firing")
         //if (isError || isLoading || isSuccess) return;
         dispatch(clearAiming());
         dispatch(setEmitting({mass, type, id, x: direction.x, y: direction.y}))
