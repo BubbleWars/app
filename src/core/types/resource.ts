@@ -15,7 +15,6 @@ export const RESOURCE_MASS = {
 export interface Resource extends Entity {
     id: string;
     resource: ResourceType;
-    amount: number;
 }
 
 export interface ResourceNode extends Entity {

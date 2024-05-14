@@ -89,7 +89,7 @@ export const snapshotInit = (initialState?: Snapshot) => {
 
         if (!initialState?.nodes || initialState.nodes.length == 0) {
            //console.log("generating snapshot nodes");
-            // generateNodes(snapshotWorld, snapshotNodes, 1);
+            generateNodes(snapshotWorld, snapshotNodes, 1);
             // for (let index = 0; index < 100; index++) {
             //     const { x, y } = generateSpawnPoint(
             //         0,

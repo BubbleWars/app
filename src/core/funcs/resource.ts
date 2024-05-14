@@ -9,7 +9,7 @@ import {
     WORLD_HEIGHT,
     WORLD_WIDTH,
 } from "../consts";
-import { createBubble, updateBubble } from "./bubble";
+import { createBubble, destroyBubble, getBubbleEthMass, getBubbleResourceMass, updateBubble } from "./bubble";
 import { Bubble } from "../types/bubble";
 import { addEvent } from "./events";
 import { EventsType } from "../types/events";
@@ -51,7 +51,7 @@ export const generateNodes = (
     //     }
     // }
 
-    createNode(world, nodes, ResourceType.Energy, 0, 0, 0);
+    createNode(world, nodes, ResourceType.ENERGY, 0, 0, 0);
 
     //console.log("spawned nodes", count);
 };
@@ -81,7 +81,7 @@ export const generateResourceId = (
 export const createNode = (
     world: World,
     nodes: Map<string, ResourceNode>,
-    type: ResourceType = ResourceType.Energy,
+    type: ResourceType = ResourceType.ENERGY,
     x: number,
     y: number,
     mass: number = 0,
@@ -222,7 +222,7 @@ export const nodeEmitResource = (
     direction: Vec2,
 ): Resource => {
     const radius = massToRadius(newNodeMass) + 0.2;
-    const emittedResourceRadius = resourceMassToRadius(type, emittedMass);
+    const emittedResourceRadius = resourceMassToRadius(node.resource, emittedMass);
     const centerDelta = direction.clone().mul(radius + emittedResourceRadius);
     const emittedResourcePosition = node.body
         .getPosition()
@@ -312,18 +312,13 @@ export const nodeAbsorbResource = (
     absorbedResource: Resource,
     timeElapsed: number,
 ): void => {
-    //console.log("node absorbing resource", absorbedResource, timeElapsed, MASS_PER_SECOND)
-    const amountAbsorbed = Math.min(
-        absorbedResource.body.getMass(),
-        MASS_PER_SECOND * timeElapsed,
-    );
-    const newResourceMass = absorbedResource.body.getMass() - amountAbsorbed;
+    const amountAbsorbed = resourceMassToAmount(absorbedResource.resource, absorbedResource.body.getMass());
 
     //get emission
     const { newMass, emission } = getEmission(node, -amountAbsorbed);
     node.pendingResourceMass += emission;
 
-    updateResource(resources, absorbedResource, newResourceMass);
+    updateResource(resources, absorbedResource, 0);
     updateNode(node, newMass);
 };
 
@@ -334,17 +329,14 @@ export const nodeAbsorbBubble = (
     absorbedBubble: Bubble,
     timeElapsed: number,
 ): void => {
-    const amountAbsorbed = Math.min(
-        absorbedBubble.body.getMass(),
-        MASS_PER_SECOND * timeElapsed,
-    );
-    const newBubbleMass = absorbedBubble.body.getMass() - amountAbsorbed;
+    const ethAbsorbed = getBubbleEthMass(absorbedBubble);
+    const epBurned = getBubbleResourceMass(absorbedBubble, ResourceType.ENERGY)
+    
     //get emission
-    const { newMass, emission } = getEmission(node, amountAbsorbed);
+    const { newMass, emission } = getEmission(node, ethAbsorbed);
     node.pendingEthMass += emission;
-    //console.log("331node absorbing bubble", absorbedBubble, amountAbsorbed, newBubbleMass);
 
-    updateBubble(bubbles, absorbedBubble, newBubbleMass);
+    destroyBubble(bubbles, absorbedBubble)
     updateNode(node, newMass);
 };
 
