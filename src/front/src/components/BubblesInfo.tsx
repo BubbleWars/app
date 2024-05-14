@@ -127,7 +127,7 @@ export const Inventory = ({
     )
 }
 
-export const BubblesInfo = ({bubble}: {bubble: BubbleState}) => {
+export const BubblesInfo = ({bubble, position}: {bubble: BubbleState, position: THREE.Vector3}) => {
     const userSocial = useUserSocial({ address: bubble?.owner });
     const social = userSocial?.social ?? null;
 
@@ -135,7 +135,7 @@ export const BubblesInfo = ({bubble}: {bubble: BubbleState}) => {
 
     const displayName = social ?? truncateAddress(bubble.owner);
     const radius = massToRadius(bubble.mass);
-    const pos = new THREE.Vector3(bubble.position.x, bubble.position.y, 0);
+    const pos = position.clone();
     const mass = bubble?.mass;
 
     const lineHeightVector = new THREE.Vector3(0, -radius / 3, 0);

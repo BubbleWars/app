@@ -143,6 +143,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
     const radius = massToRadius(bubble?.mass ?? 0);
 
     const [mainBubble, setMainBubble] = useState<BubbleState>(null);
+    const [position, setPosition] = useState(new THREE.Vector3(0,0,0));
 
     useFrame((state, delta) => {
         const elapsedTime = delta;
@@ -232,6 +233,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
         meshRef.current.position.set(newX, newY, 0);
         meshRef.current.updateMatrix();
 
+        setPosition(new THREE.Vector3(newX, newY, 0));
         setMainBubble(currentState.bubbles.find((bubble) => bubble.id == bubbleId));
     });
 
@@ -298,6 +300,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
             <BubblesInfo
                 key={bubbleId}
                 bubble={mainBubble}
+                position = {position}
             />
         </>
     );
