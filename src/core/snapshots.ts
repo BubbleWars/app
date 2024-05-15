@@ -183,6 +183,7 @@ export const snapshotInit = (initialState?: Snapshot) => {
                 node.id,
                 node.emissionDirection,
                 node.lastEmission,
+                node,
             );
         });
         snapshotCurrentState.pendingInputs.forEach((input) => {

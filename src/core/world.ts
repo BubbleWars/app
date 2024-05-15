@@ -180,6 +180,7 @@ export const init = (initialState?: Snapshot) => {
                 node.id,
                 node.emissionDirection,
                 node.lastEmission,
+                node
             );
         });
         currentState.pendingInputs.forEach((input) => {

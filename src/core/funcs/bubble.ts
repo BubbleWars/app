@@ -444,10 +444,10 @@ export const absorbResource = (
     switch (resourceType) {    
         case ResourceType.ENERGY:
             //Check kinetic energy for PUNCTURE
-            if(isResourceActivated(absorbedResource)){
-                punctureBubble(bubbles, resources, bubble, absorbedResource, timestamp, isSnapshot);
-                break;
-            }
+            // if(isResourceActivated(absorbedResource)){
+            //     punctureBubble(bubbles, resources, bubble, absorbedResource, timestamp, isSnapshot);
+            //     break;
+            // }
             //Transfer RED to bubble
             transferResourceToBubble(bubbles, resources, bubble, absorbedResource, timestamp);
             break;

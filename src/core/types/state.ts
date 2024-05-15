@@ -35,8 +35,20 @@ export interface ResourceNodeState {
     type: ResourceType;
     position: { x: number; y: number };
     mass: number;
+
+    //Emission info
     emissionDirection: { x: number; y: number };
     lastEmission: number;
+    pendingEthEmission: { depositor: string, amount: number }[]; // amount of ETH pending to be emitted
+    pendingResourceEmission: { depositor: string, amount: number }[]; // amount of resource pending to be emitted
+
+
+    //Token Bonding curve info
+    currentSupply: number; // current supply of the token
+    marketCap: number; // current amount of ETH in node
+    inflation: number; // amount of token spawn without a buyer
+    burn: number; // amount of token burned without sells
+    k: number; // k constant in bonding curve
 }
 
 export interface ResourceState {

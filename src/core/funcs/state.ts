@@ -89,8 +89,18 @@ export const updateState = (
         owner: node.owner,
         position: node.body.getPosition().clone(),
         mass: node.mass,
+
+        //emission info
         emissionDirection: node.emissionDirection,
         lastEmission: node.lastEmission,
+        pendingEthEmission: node.pendingEthEmission.map((x) => x),
+        pendingResourceEmission: node.pendingResourceEmission.map((x) => x),
+
+        currentSupply: node.token.currentSupply,
+        marketCap: node.token.marketCap,
+        inflation: node.token.inflation,
+        burn: node.token.burn,
+        k: node.token.k,
     }));
 
     state.resources = Array.from(resources.values()).map((resource) => ({
