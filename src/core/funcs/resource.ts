@@ -6,6 +6,7 @@ import {
     DAMPENING,
     EMISSION_SPEED,
     MASS_PER_SECOND,
+    PLANCK_MASS,
     WORLD_HEIGHT,
     WORLD_WIDTH,
 } from "../consts";
@@ -570,17 +571,52 @@ export const handleNodeUpdates = (
         //Check if bubbles have been injected
         //If so emit resources
 
+        node.pendingResourceEmission.forEach((pending) => {
+            if (!node.lastEmission) node.lastEmission = timestamp;
+            const lastEmission = node.lastEmission;
+            if (timestamp - lastEmission < 0.1) {
+                return;
+            }
+            //console.log("pending resource mass", node.pendingResourceMass);
+            const depositor = pending.depositor;
+            const amount = pending.amount;
+            const resourceAmountToEmit = Math.min(amount, 1);
+            const emissionDir = Vec2(
+                node.emissionDirection.x,
+                node.emissionDirection.y,
+            );
+            handleEmission(
+                timestamp,
+                world,
+                node,
+                bubbles,
+                resources,
+                -resourceAmountToEmit,
+                emissionDir,
+                isSnapshot
+            );
+            removePendingResourceEmission(depositor, node, resourceAmountToEmit);
+
+            const newEmissionDir = rotateVec2(emissionDir, 1);
+            node.emissionDirection = {
+                x: newEmissionDir.x,
+                y: newEmissionDir.y,
+            };
+
+            node.lastEmission = timestamp;
+        })
+
         node.pendingEthEmission.forEach((pending) => {
             if (!node.lastEmission) node.lastEmission = timestamp;
             const lastEmission = node.lastEmission;
-            if (timestamp - lastEmission < 2) {
+            if (timestamp - lastEmission < 0.1) {
                 return;
             }
             const depositor = pending.depositor;
             const amount = pending.amount;
             //console.log("pending eth mass", node.pendingEthMass);
 
-            const ethMassToEmitPer = amount;
+            const ethMassToEmitPer = Math.min(amount, PLANCK_MASS * 5);
             const emissionDir = Vec2(
                 node.emissionDirection.x,
                 node.emissionDirection.y,
@@ -599,49 +635,14 @@ export const handleNodeUpdates = (
             //}
             removePendingEthEmission(depositor, node, ethMassToEmitPer);
 
-            // const newEmissionDir = rotateVec2(emissionDir, 1);
-            // node.emissionDirection = {
-            //     x: newEmissionDir.x,
-            //     y: newEmissionDir.y,
-            // };
+            const newEmissionDir = rotateVec2(emissionDir, 1);
+            node.emissionDirection = {
+                x: newEmissionDir.x,
+                y: newEmissionDir.y,
+            };
             node.lastEmission = timestamp;
-
         });
-        node.pendingResourceEmission.forEach((pending) => {
-            if (!node.lastEmission) node.lastEmission = timestamp;
-            const lastEmission = node.lastEmission;
-            if (timestamp - lastEmission < 2) {
-                return;
-            }
-            //console.log("pending resource mass", node.pendingResourceMass);
-            const depositor = pending.depositor;
-            const amount = pending.amount;
-            const resourceAmountToEmit = amount;
-            const emissionDir = Vec2(
-                node.emissionDirection.x,
-                node.emissionDirection.y,
-            );
-            handleEmission(
-                timestamp,
-                world,
-                node,
-                bubbles,
-                resources,
-                -resourceAmountToEmit,
-                emissionDir,
-                isSnapshot
-            );
-            removePendingResourceEmission(depositor, node, resourceAmountToEmit);
-
-            // const newEmissionDir = rotateVec2(emissionDir, 1);
-            // node.emissionDirection = {
-            //     x: newEmissionDir.x,
-            //     y: newEmissionDir.y,
-            // };
-
-            node.lastEmission = timestamp;
-
-        })
+        
 
     });
 };
