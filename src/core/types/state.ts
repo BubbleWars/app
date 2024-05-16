@@ -49,6 +49,10 @@ export interface ResourceNodeState {
     inflation: number; // amount of token spawn without a buyer
     burn: number; // amount of token burned without sells
     k: number; // k constant in bonding curve
+
+    inflationRate: number; // Amount of inflation per period
+    inflationPeriod: number; // Seconds, time between inflations
+    lastInflation: number; // Last time inflation was applied
 }
 
 export interface ResourceState {

@@ -132,6 +132,10 @@ export const createNode = (
         node.token.inflation = nodeState.inflation;
         node.token.burn = nodeState.burn;
         node.token.k = nodeState.k;
+
+        node.token.inflationRate = nodeState.inflationRate;
+        node.token.inflationPeriod = nodeState.inflationPeriod;
+        node.token.lastInflation = nodeState.lastInflation;
     }
 
     return node;
@@ -563,14 +567,7 @@ export const handleNodeUpdates = (
 ): void => {
     timeElapsed;
     nodes.forEach((node) => {
-        //Check if resources have been injected
-        //If so emit bubbles
-        
-
-        //console.log("handling node updates", node.id, node.pendingEthMass, node.pendingResourceMass);
-        //Check if bubbles have been injected
-        //If so emit resources
-
+        //HANDLE EMISSIONS
         node.pendingResourceEmission.forEach((pending) => {
             if (!node.lastEmission) node.lastEmission = timestamp;
             const lastEmission = node.lastEmission;
@@ -605,7 +602,6 @@ export const handleNodeUpdates = (
 
             node.lastEmission = timestamp;
         })
-
         node.pendingEthEmission.forEach((pending) => {
             if (!node.lastEmission) node.lastEmission = timestamp;
             const lastEmission = node.lastEmission;
@@ -642,7 +638,26 @@ export const handleNodeUpdates = (
             };
             node.lastEmission = timestamp;
         });
-        
+
+
+
+
+        //HANDLE INFLATION
+        const last = node.token.lastInflation;
+        const rate = node.token.inflationRate;
+        const period = node.token.inflationPeriod;
+        const mc = node.token.marketCap;
+
+        if(mc <= 0) return;
+        if(last === 0){
+            node.token.lastInflation = timestamp;
+            return;
+        }
+        if(timestamp - last < period) return;
+        const inflation = rate * (timestamp - last);
+        node.token.inflateSupply(inflation);
+        node.token.lastInflation = timestamp;
+        addPendingResourceEmission(node.owner, node, inflation);
 
     });
 };

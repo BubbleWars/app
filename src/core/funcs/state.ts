@@ -101,6 +101,10 @@ export const updateState = (
         inflation: node.token.inflation,
         burn: node.token.burn,
         k: node.token.k,
+
+        inflationRate: node.token.inflationRate,
+        inflationPeriod: node.token.inflationPeriod,
+        lastInflation: node.token.lastInflation,
     }));
 
     state.resources = Array.from(resources.values()).map((resource) => ({

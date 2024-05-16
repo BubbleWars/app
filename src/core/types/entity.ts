@@ -15,4 +15,5 @@ export interface Entity {
             mass: number;
         }
     >;
+    attractor?: string;
 }

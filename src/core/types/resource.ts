@@ -39,12 +39,19 @@ export class Token {
     burn: number;
     k: number;
 
+    inflationRate: number; // Amount of inflation per period
+    inflationPeriod: number; // Seconds, time between inflations
+    lastInflation: number; // Last time inflation was applied
+
     constructor(currentSupply = 0, marketCap = 0, inflation = 0, burn = 0, k = 0.00001) {
         this.currentSupply = currentSupply;
         this.marketCap = marketCap;
         this.inflation = inflation;
         this.burn = burn;
         this.k = k;
+        this.lastInflation = 0;
+        this.inflationRate = 1;
+        this.inflationPeriod = 20;
     }
 
     // Calculate the area under the curve from `x1` to `x2`
