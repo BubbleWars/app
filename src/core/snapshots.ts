@@ -25,11 +25,14 @@ import {
     createNode,
     createResource,
     generateNodes,
+    handleAttractors,
     handleNodeUpdates,
     resourceMassToAmount,
 } from "./funcs/resource";
 import { tempTimestamp } from "./world";
 import { createBoundary, createEdges, preciseRound } from "./funcs/utils";
+import { time } from "console";
+import { Attractor } from "./types/entity";
 
 export const snapshotUsers = new Map<Address, User>();
 export const snapshotBubbles = new Map<string, Bubble>();
@@ -38,6 +41,7 @@ export const snapshotObstacles = new Map<string, Obstacle>();
 export const snapshotNodes = new Map<string, ResourceNode>();
 export const snapshotResources = new Map<string, Resource>();
 export const snapshotPendingInputs = new Array<InputWithExecutionTime>();
+export const snapshotAttractors = new Array<Attractor>();
 
 //only client
 export const snapshots = new Map<number, Snapshot>();
@@ -55,6 +59,7 @@ export let snapshotCurrentState: Snapshot = {
     nodes: [],
     resources: [],
     obstacles: [],
+    attractors: [],
 };
 
 export let snapshotLastTimestamp = 0;
@@ -84,8 +89,11 @@ export const snapshotInit = (initialState?: Snapshot) => {
         snapshotPortals.clear();
         snapshotObstacles.clear();
         snapshotNodes.clear();
+        snapshotResources.clear();
+        snapshotAttractors.length = 0;
         snapshotPendingInputs.length = 0;
         snapshotDeferredUpdates.length = 0;
+
 
         if (!initialState?.nodes || initialState.nodes.length == 0) {
            //console.log("generating snapshot nodes");
@@ -167,6 +175,7 @@ export const snapshotInit = (initialState?: Snapshot) => {
                 resourceMassToAmount(resource.type, resource.mass),
                 resource.owner,
                 resource.id,
+                resource,
             );
             newResource.body.setLinearVelocity(
                 Vec2(resource.velocity.x, resource.velocity.y),
@@ -188,6 +197,9 @@ export const snapshotInit = (initialState?: Snapshot) => {
         });
         snapshotCurrentState.pendingInputs.forEach((input) => {
             snapshotPendingInputs.push(input);
+        });
+        snapshotCurrentState.attractors.forEach((attractor) => {
+            snapshotAttractors.push(attractor);
         });
     }
     createEdges(snapshotWorld, WORLD_WIDTH, WORLD_WIDTH);
@@ -285,7 +297,16 @@ export const snapshotRun = (
             snapshotNodes,
             snapshotBubbles,
             snapshotResources,
+            snapshotAttractors,
             stepDelta,
+        );
+        handleAttractors(
+            snapshotNodes,
+            snapshotResources,
+            snapshotBubbles,
+            snapshotPortals,
+            snapshotAttractors,
+            current,
         );
 
         // Step the snapshotWorld
@@ -322,6 +343,7 @@ export const snapshotRun = (
         snapshotObstacles,
         snapshotNodes,
         snapshotResources,
+        snapshotAttractors,
         snapshotLastTimestamp,
     );
 

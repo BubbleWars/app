@@ -25,10 +25,12 @@ import {
     createNode,
     createResource,
     generateNodes,
+    handleAttractors,
     handleNodeUpdates,
     resourceMassToAmount,
 } from "./funcs/resource";
 import { createBoundary, createEdges, preciseRound } from "./funcs/utils";
+import { Attractor } from "./types/entity";
 
 export const users = new Map<Address, User>();
 export const bubbles = new Map<string, Bubble>();
@@ -37,6 +39,7 @@ export const obstacles = new Map<string, Obstacle>();
 export const nodes = new Map<string, ResourceNode>();
 export const resources = new Map<string, Resource>();
 export const pendingInputs = new Array<InputWithExecutionTime>();
+export const attractors = new Array<Attractor>();
 
 export let world = new World({
     gravity: Vec2(0, 0),
@@ -51,6 +54,7 @@ export let currentState: Snapshot = {
     nodes: [],
     resources: [],
     obstacles: [],
+    attractors: [],
 };
 
 export let lastTimestamp = 0;
@@ -82,6 +86,7 @@ export const init = (initialState?: Snapshot) => {
         obstacles.clear();
         nodes.clear();
         resources.clear();
+        attractors.length = 0;
         pendingInputs.length = 0;
         deferredUpdates.length = 0;
 
@@ -164,6 +169,7 @@ export const init = (initialState?: Snapshot) => {
                 resourceMassToAmount(resource.type, resource.mass),
                 resource.owner,
                 resource.id,
+                resource,
             );
             newResource.body.setLinearVelocity(
                 Vec2(resource.velocity.x, resource.velocity.y),
@@ -185,6 +191,9 @@ export const init = (initialState?: Snapshot) => {
         });
         currentState.pendingInputs.forEach((input) => {
             pendingInputs.push(input);
+        });
+        currentState.attractors.forEach((attractor) => {
+            attractors.push(attractor);
         });
     }
     createEdges(world, WORLD_WIDTH, WORLD_HEIGHT);
@@ -267,7 +276,8 @@ export const run = (
 
         // Handle entity updates
         handleBubbleUpdates(current, bubbles, stepDelta);
-        handleNodeUpdates(current, world, nodes, bubbles, resources, stepDelta);
+        handleNodeUpdates(current, world, nodes, bubbles, resources, attractors, stepDelta);
+        handleAttractors(nodes, resources, bubbles, portals, attractors,  current);
 
         // Step the world
         world.step(stepDelta);
@@ -305,6 +315,7 @@ export const run = (
         obstacles,
         nodes,
         resources,
+        attractors,
         lastTimestamp,
     );
 

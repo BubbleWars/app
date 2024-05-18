@@ -16,7 +16,10 @@ import { addEvent } from "./events";
 import { EventsType } from "../types/events";
 import { createNoise2D } from "simplex-noise";
 import Alea from "alea";
-import { ResourceNodeState } from "../types/state";
+import { ResourceNodeState, ResourceState } from "../types/state";
+import { Portal } from "../types/portal";
+import { Attractor } from "../types/entity";
+import { addAttractor } from "./entity";
 
 export const resourceMassToAmount = (type: ResourceType, mass: number): number => {
     return mass / RESOURCE_MASS[type];
@@ -151,6 +154,7 @@ export const createResource = (
     mass: number,
     owner: string = ZeroAddress,
     id?: string,
+    resourceState?: ResourceState,
 ): Resource => {
     const radius = resourceMassToRadius(type, mass);
     const body = world.createBody({
@@ -173,6 +177,7 @@ export const createResource = (
         fixture,
         owner,
         balance: 0,
+        from: owner,
     };
     resource.body.setUserData(resourceId);
     resources.set(resource.body.getUserData() as string, resource);
@@ -191,6 +196,10 @@ export const createResource = (
         position: { x, y },
     });
 
+    if(resourceState){
+        //resource.attractor = resourceState.attractor;
+    }
+
     return resource;
 };
 
@@ -200,7 +209,7 @@ export const updateNode = (
     newEmitted?: number,
 ): void => {
     node.mass = newMass;
-    console.log("new node mass", newMass);
+    //console.log("new node mass", newMass);
     if (newEmitted) node.emitted = newEmitted;
     const radius = massToRadius(Math.max(node.mass, 1));
     node.body.destroyFixture(node.fixture);
@@ -260,6 +269,7 @@ export const nodeEmitResource = (
         emittedResourcePosition.x,
         emittedResourcePosition.y,
         emittedMass,
+        node.id,
     );
 
     //Apply mass conservation
@@ -291,7 +301,7 @@ export const nodeEmitBubble = (
     emittedMass: number,
     direction: Vec2,
 ): Bubble => {
-    const radius = massToRadius(newNodeMass) + 0.2;
+    const radius = massToRadius(newNodeMass) + 1;
     const emittedBubbleRadius = massToRadius(emittedMass);
     const centerDelta = direction.clone().mul((radius + emittedBubbleRadius)*2);
     const emittedBubblePosition = node.body
@@ -311,6 +321,8 @@ export const nodeEmitBubble = (
         null,
         node.id,
     );
+
+    //console.log("emitting bubble from node", emittedBubblePosition);
 
     //Apply mass conservation
     const newResourceMass = newNodeMass;
@@ -336,6 +348,7 @@ export const addPendingResourceEmission = (
     node: ResourceNode,
     amount: number,
 ): void => {
+    if(depositor == "0x" || depositor == "0x0000000000000000000000000000000000000001" || amount <= 0) return;
     const pendingResourceEmit = node.pendingResourceEmission
         .find((pending) => pending.depositor === depositor)
     if (pendingResourceEmit) {
@@ -350,6 +363,7 @@ export const addPendingEthEmission = (
     node: ResourceNode,
     amount: number,
 ): void => {
+    if(depositor == "0x" || depositor == "0x0000000000000000000000000000000000000001" || amount <= 0) return;
     const pendingEthEmit = node.pendingEthEmission
         .find((pending) => pending.depositor === depositor)
     if (pendingEthEmit) {
@@ -357,6 +371,7 @@ export const addPendingEthEmission = (
     } else {
         node.pendingEthEmission.push({ depositor, amount });
     }
+    console.log("pending eth emission", node.pendingEthEmission);
 }
 
 export const removePendingResourceEmission = (
@@ -394,6 +409,7 @@ export const removePendingEthEmission = (
 export const nodeAbsorbResource = (
     nodes: Map<string, ResourceNode>,
     resources: Map<string, Resource>,
+    bubbles: Map<string, Bubble>,
     node: ResourceNode,
     absorbedResource: Resource,
     timeElapsed: number,
@@ -403,10 +419,14 @@ export const nodeAbsorbResource = (
 
     //get emission
     const ethToEmission = node.token.sell(resourceAbsorbed);
-    addPendingEthEmission(absorbedResource.owner, node, ethToEmission);
 
     updateResource(resources, absorbedResource, 0);
     updateNode(node, currentMass - ethToEmission);
+
+    //Add pending eth emission
+    const nearestDepositor  = absorbedResource.owner ?? absorbedResource.from;
+    addPendingEthEmission(nearestDepositor, node, ethToEmission);
+
 };
 
 export const nodeAbsorbBubble = (
@@ -420,12 +440,13 @@ export const nodeAbsorbBubble = (
     const ethAbsorbed = getBubbleEthMass(absorbedBubble);
     const epBurned = getBubbleResourceMass(absorbedBubble, ResourceType.ENERGY)
     
-    const resourceToEmit = node.token.buy(ethAbsorbed)
-    addPendingResourceEmission(absorbedBubble.owner, node, resourceToEmit);
-
     destroyBubble(bubbles, absorbedBubble)
-
     updateNode(node, currentMass + ethAbsorbed);
+
+    //Add pending resource emission
+    const resourceToEmit = node.token.buy(ethAbsorbed)
+    const nearestDepositor = getNearestBubbleToPosition(node.body.getPosition(), bubbles, absorbedBubble.owner)?.body.getUserData() as string ?? "0x"
+    addPendingResourceEmission(nearestDepositor, node, resourceToEmit);
 };
 
 export const getAdjustedRatio = (node: ResourceNode): number => {
@@ -488,8 +509,8 @@ export const handleEmission = (
         //for (let i = 0; i < 1; i++) {
             const massToEmit = emission ;
             const direction = rotateVec2(startDir, (Math.PI / 8));
-            console.log(isSnapshot ? "SNAPSHOT" : "", "emitting resource", massToEmit, direction);
-            nodeEmitResource(
+            //console.log(isSnapshot ? "SNAPSHOT" : "", "emitting resource", massToEmit, direction);
+            return nodeEmitResource(
                 timestamp,
                 world,
                 node,
@@ -504,8 +525,8 @@ export const handleEmission = (
         //for (let i = 0; i < 1; i++) {
             const massToEmit = emission ;
             const direction = rotateVec2(startDir, (Math.PI / 8) );
-            console.log(isSnapshot ? "SNAPSHOT" : "", "emitting bubble", massToEmit, direction);
-            nodeEmitBubble(
+            //console.log(isSnapshot ? "SNAPSHOT" : "", "emitting bubble", massToEmit, direction);
+            return nodeEmitBubble(
                 timestamp,
                 world,
                 bubbles,
@@ -562,6 +583,7 @@ export const handleNodeUpdates = (
     nodes: Map<string, ResourceNode>,
     bubbles: Map<string, Bubble>,
     resources: Map<string, Resource>,
+    attractors: Attractor[],
     timeElapsed: number,
     isSnapshot: boolean = false
 ): void => {
@@ -582,7 +604,7 @@ export const handleNodeUpdates = (
                 node.emissionDirection.x,
                 node.emissionDirection.y,
             );
-            handleEmission(
+            const emittedResource = handleEmission(
                 timestamp,
                 world,
                 node,
@@ -592,6 +614,9 @@ export const handleNodeUpdates = (
                 emissionDir,
                 isSnapshot
             );
+            if(depositor != "0x" && emittedResource) {
+                addAttractor(attractors, { to: depositor, from: emittedResource.body.getUserData() as string });
+            }
             removePendingResourceEmission(depositor, node, resourceAmountToEmit);
 
             const newEmissionDir = rotateVec2(emissionDir, 1);
@@ -618,7 +643,7 @@ export const handleNodeUpdates = (
                 node.emissionDirection.y,
             );
 
-            handleEmission(
+            const emittedBubble = handleEmission(
                 timestamp,
                 world,
                 node,
@@ -628,6 +653,13 @@ export const handleNodeUpdates = (
                 emissionDir,
                 isSnapshot
             );
+            if(depositor != "0x" && emittedBubble) {
+                addAttractor(attractors, { to: depositor, from: emittedBubble.body.getUserData() as string });
+            }
+            else {
+                //console.log("not adding attractor", depositor);
+            }
+            //emittedBubble.attractor = depositor;
             //}
             removePendingEthEmission(depositor, node, ethMassToEmitPer);
 
@@ -642,25 +674,227 @@ export const handleNodeUpdates = (
 
 
 
-        //HANDLE INFLATION
-        const last = node.token.lastInflation;
-        const rate = node.token.inflationRate;
-        const period = node.token.inflationPeriod;
-        const mc = node.token.marketCap;
+        // //HANDLE INFLATION
+        // const last = node.token.lastInflation;
+        // const rate = node.token.inflationRate;
+        // const period = node.token.inflationPeriod;
+        // const mc = node.token.marketCap;
 
-        if(mc <= 0) return;
-        if(last === 0){
-            node.token.lastInflation = timestamp;
-            return;
-        }
-        if(timestamp - last < period) return;
-        const inflation = rate * (timestamp - last);
-        node.token.inflateSupply(inflation);
-        node.token.lastInflation = timestamp;
-        addPendingResourceEmission(node.owner, node, inflation);
+        // if(mc <= 0) return;
+        // if(last === 0){
+        //     node.token.lastInflation = timestamp;
+        //     return;
+        // }
+        // if(timestamp - last < period) return;
+        // const inflation = rate * (timestamp - last);
+        // node.token.inflateSupply(inflation);
+        // node.token.lastInflation = timestamp;
+        // addPendingResourceEmission(node.owner, node, inflation);
 
     });
 };
+
+export const getEntity = (
+    id: string,
+    nodes: Map<string, ResourceNode>,
+    bubbles: Map<string, Bubble>,
+    portals: Map<string, Portal>,
+    resources: Map<string, Resource>,
+): ResourceNode | Bubble | Portal | Resource => {
+    const node = nodes?.get(id);
+    const bubble = bubbles?.get(id);
+    const portal = portals?.get(id);
+    const resource = resources?.get(id);
+
+    if (node) return node;
+    if (bubble) return bubble;
+    if (portal) return portal;
+    if (resource) return resource;
+}
+
+
+export const getEntityPosition = (
+    id: string,
+    nodes: Map<string, ResourceNode>,
+    bubbles: Map<string, Bubble>,
+    portals: Map<string, Portal>,
+    resources: Map<string, Resource>,
+): Vec2 => {
+    const entity = getEntity(id, nodes, bubbles, portals, resources);
+    if (!entity) return Vec2();
+
+    return entity.body.getPosition();
+}
+
+
+export const getNearestBubbleToPosition = (
+    position: Vec2,
+    bubbles: Map<string, Bubble>,
+    owner: string
+): Bubble => {
+    let nearestBubble = null;
+    let nearestDistance = Infinity;
+    bubbles.forEach((bubble) => {
+        const distance = bubble.body.getPosition().clone().sub(position).length();
+        if (bubble.owner !== owner) return;
+        if (distance < nearestDistance) {
+            nearestBubble = bubble;
+            nearestDistance = distance;
+        }
+    });
+    return nearestBubble;
+}
+
+
+
+export const handleAttractors = (
+    nodes: Map<string, ResourceNode>,
+    resources: Map<string, Resource>,
+    bubbles: Map<string, Bubble>,
+    portals: Map<string, Portal>,
+    attractors: Attractor[],
+    timestamp: number,
+): void => {
+    const _ = attractors.filter((attractor) => {
+        if(!attractor.from || !attractor.to){
+            console.log("Invalid attractor undefined", attractor);
+            return false;
+        }
+        const to = getEntity(attractor.to, null, bubbles, null, resources);
+        const from = getEntity(attractor.from, null, bubbles, null, resources);
+        if(!to || !from) {
+            console.log("Invalid attractor", attractor);
+            return false
+        };
+    
+        const toPos = to.body.getPosition();
+        const fromPos = from.body.getPosition();
+    
+        const direction = toPos.clone().sub(fromPos);
+        const distance = direction.length();
+        direction.normalize();
+    
+        // Apply force
+        const force = direction.mul(1 / (distance * distance));
+        from.body.applyForceToCenter(force);
+    
+        return true;
+    })
+    attractors.length = 0;
+    attractors.push(..._);
+
+    // //Check resources attractors
+    // resources.forEach((resource) => {
+    //     // Return if resource has no attractor
+    //     if (!resource?.attractor || resource?.attractor == "0x0000000000000000000000000000000000000001"){
+    //         console.log("No attractor for resource", resource);
+    //         return;
+    //     }
+
+    //     // Resource pos
+    //     const pos = resource.body.getPosition();
+    //     console.log("resource pos", pos);
+
+    //     // Find nearest bubble with attractor string as owner
+    //     const nearestBubble = getNearestBubbleToPosition(pos, bubbles, resource.attractor);
+
+    //     // Get attractor position
+    //     const attractorPos = nearestBubble?.body.getPosition();
+    //     if (!attractorPos) {
+    //         console.log("No attractor position found for resource", attractorPos);
+    //         return;
+    //     }
+
+    //     // Get ejector position
+    //     const ejectorPos = getEntityPosition(resource?.owner, nodes, bubbles, portals, resources);
+    //     console.log("ejector pos", ejectorPos);
+
+    //     // Check if ejector position is valid
+    //     if (ejectorPos?.x == undefined) {
+    //         console.log("Invalid ejector position for resource", ejectorPos);
+    //         return;
+    //     }
+
+    //     // Get direction to attractor
+    //     const toAttractor = attractorPos.clone().sub(pos);
+    //     console.log("to attractor", toAttractor);
+
+    //     // Get from ejector
+    //     const fromEjector = pos.clone().sub(ejectorPos);
+    //     console.log("from ejector", fromEjector);
+
+    //     // Get attractor force
+    //     const distance = toAttractor.length();
+    //     toAttractor.normalize();
+
+    //     // Get ejector force
+    //     const distance2 = fromEjector.length();
+    //     fromEjector.normalize();
+
+    //     // Apply force
+    //     const force = toAttractor.mul(1 / (distance * distance)).add(fromEjector.mul(0.001 / (distance2 * distance2)));
+    //     resource.body.applyForceToCenter(force);
+    //     console.log("resource force", force);
+    // });
+
+
+    // //Check bubbles attractors
+    // bubbles.forEach((bubble) => {
+    //     // Return if bubble has no attractor
+    //     if (!bubble?.attractor || bubble?.attractor == "0x0000000000000000000000000000000000000001"){
+    //         console.log("No attractor for bubble", bubble);
+    //         return;
+    //     }
+
+    //     // Bubble pos
+    //     const pos = bubble.body.getPosition();
+
+    //     // Find nearest bubble with attractor string as owner
+    //     const nearestBubble = getNearestBubbleToPosition(pos, bubbles, bubble.attractor);
+
+    //     // Get attractor position
+    //     const attractorPos = nearestBubble?.body.getPosition();
+    //     if (!attractorPos) {
+    //         console.log("No attractor position found for bubble", attractorPos);
+    //         return;
+    //     }
+
+    //     // Get ejector position
+    //     const ejectorPos = getEntityPosition(bubble?.owner, nodes, bubbles, portals, resources);
+    //     console.log("ejector pos", ejectorPos);
+
+    //     // Check if ejector position is valid
+    //     if (ejectorPos?.x == undefined) {
+    //         console.log("Invalid ejector position for bubble", ejectorPos);
+    //         return;
+    //     }
+
+    //     // Get direction to attractor
+    //     const toAttractor = attractorPos.clone().sub(pos);
+    //     console.log("to attractor", toAttractor);
+
+
+    //     // Get from ejector
+    //     const fromEjector = pos.clone().sub(ejectorPos);
+    //     console.log("from ejector", fromEjector);
+
+    //     // Get attractor force
+    //     const distance = toAttractor.length();
+    //     toAttractor.normalize();
+
+    //     // Get ejector force
+    //     const distance2 = fromEjector.length();
+    //     fromEjector.normalize();
+
+    //     // Apply force
+    //     const force = toAttractor.mul(1 / (distance * distance)).add(fromEjector.mul(0.001 / (distance2 * distance2)));
+    //     bubble.body.applyForceToCenter(force);
+    //     console.log("bubble force", force);
+
+    // });
+};
+
+
 
 // export const resourceCollideResource = (
 //   resources: Map<string, Resource>,

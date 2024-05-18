@@ -1,4 +1,5 @@
 import { Puncture, PuncturePoint } from "./bubble";
+import { Attractor } from "./entity";
 import { InputWithExecutionTime } from "./inputs";
 import { ResourceType } from "./resource";
 import { User } from "./user";
@@ -13,6 +14,7 @@ export interface BubbleState {
     punctures: { point: PuncturePoint; puncture: Puncture }[];
     lastPunctureEmit: number | undefined;
     from: string | undefined;
+    attractor: string | undefined;
 }
 
 export interface PortalState {
@@ -62,6 +64,7 @@ export interface ResourceState {
     position: { x: number; y: number };
     velocity: { x: number; y: number };
     mass: number;
+    attractor: string | undefined;
 }
 
 export interface Snapshot {
@@ -73,6 +76,7 @@ export interface Snapshot {
     obstacles: ObstacleState[];
     nodes: ResourceNodeState[];
     resources: ResourceState[];
+    attractors: Attractor[];
 }
 
 export type History = Snapshot[];

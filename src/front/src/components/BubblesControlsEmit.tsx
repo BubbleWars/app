@@ -168,7 +168,7 @@ export const BubblesControlsEmit = ({
         const minMass = PLANCK_MASS;
         const step = PLANCK_MASS;
         const newMass = Math.min(
-            Math.max(mass + (Math.sign(event.deltaY) * step), minMass),
+            Math.max(mass + (event.deltaY * step), minMass),
             maxMass,
         );
         setMass(newMass);

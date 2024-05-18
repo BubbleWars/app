@@ -14,6 +14,7 @@ import {
     nodes,
     resources,
     tempTimestamp,
+    attractors,
 } from "../world";
 import { portalAbsorbBubble, portalAbsorbResource } from "./portal";
 import { absorbBubble, absorbResource, getBubbleEthMass } from "./bubble";
@@ -27,6 +28,7 @@ import {
 } from "../snapshots";
 import { Resource, ResourceNode } from "../types/resource";
 import { nodeAbsorbBubble, nodeAbsorbResource } from "./resource";
+import { Attractor } from "../types/entity";
 
 export const updateState = (
     state: Snapshot,
@@ -37,6 +39,7 @@ export const updateState = (
     obstacles: Map<string, Obstacle>,
     nodes: Map<string, ResourceNode>,
     resources: Map<string, Resource>,
+    attractors: Array<Attractor>,
     timestamp: number,
 ) => {
     state.timestamp = timestamp;
@@ -67,6 +70,7 @@ export const updateState = (
                 };
             }),
             from: bubble.from,
+            attractor: null,
         };
     });
     state.portals = Array.from(portals.values()).map((portal) => ({
@@ -114,7 +118,10 @@ export const updateState = (
         position: resource.body.getPosition().clone(),
         velocity: resource.body.getLinearVelocity().clone(),
         mass: resource.body.getMass(),
+        attractor: null,
     }));
+
+    state.attractors = [...attractors]
 };
 
 export const createState = (
@@ -125,6 +132,7 @@ export const createState = (
     obstacles: Map<string, Obstacle>,
     nodes: Map<string, ResourceNode>,
     resources: Map<string, Resource>,
+    attractors: Array<Attractor>,
     timestamp: number,
 ): Snapshot => {
     const state: Snapshot = {
@@ -136,6 +144,7 @@ export const createState = (
         obstacles: [],
         nodes: [],
         resources: [],
+        attractors: [],
     };
     updateState(
         state,
@@ -146,6 +155,7 @@ export const createState = (
         obstacles,
         nodes,
         resources,
+        attractors,
         timestamp,
     );
     return state;
@@ -233,12 +243,12 @@ export const handleContact = (contact: Contact) => {
     if (n1 && r2) {
         //console.log("node absorb resource")
         deferredUpdates.push(() => {
-            nodeAbsorbResource(nodes, resources, n1, r2, STEP_DELTA);
+            nodeAbsorbResource(nodes, resources, bubbles, n1, r2, STEP_DELTA);
         });
     } else if (n2 && r1) {
         //console.log("node absorb resource")
         deferredUpdates.push(() => {
-            nodeAbsorbResource(nodes, resources, n2, r1, STEP_DELTA);
+            nodeAbsorbResource(nodes, resources, bubbles, n2, r1, STEP_DELTA);
         });
     }
 
@@ -388,6 +398,7 @@ export const handleSnapshotContact = (contact: Contact) => {
             nodeAbsorbResource(
                 snapshotNodes,
                 snapshotResources,
+                snapshotBubbles,
                 n1,
                 r2,
                 STEP_DELTA,
@@ -398,6 +409,7 @@ export const handleSnapshotContact = (contact: Contact) => {
             nodeAbsorbResource(
                 snapshotNodes,
                 snapshotResources,
+                snapshotBubbles,
                 n2,
                 r1,
                 STEP_DELTA,

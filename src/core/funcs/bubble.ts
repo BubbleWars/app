@@ -150,6 +150,8 @@ export const createBubble = (
         bubbleState.punctures.forEach(({ point, puncture }) => {
             bubble.punctures?.set(point, puncture);
         });
+
+        bubble.attractor = bubbleState.attractor;
     }
 
     addEvent({

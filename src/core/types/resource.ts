@@ -43,7 +43,7 @@ export class Token {
     inflationPeriod: number; // Seconds, time between inflations
     lastInflation: number; // Last time inflation was applied
 
-    constructor(currentSupply = 0, marketCap = 0, inflation = 0, burn = 0, k = 0.00001) {
+    constructor(currentSupply = 0, marketCap = 0, inflation = 0, burn = 0, k = 0.001) {
         this.currentSupply = currentSupply;
         this.marketCap = marketCap;
         this.inflation = inflation;

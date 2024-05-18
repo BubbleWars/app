@@ -15,5 +15,9 @@ export interface Entity {
             mass: number;
         }
     >;
-    attractor?: string;
+}
+
+export interface Attractor {
+    to: string; // Entity to attract to
+    from: string; //Entity being attracted
 }
