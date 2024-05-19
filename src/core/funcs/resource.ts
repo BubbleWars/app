@@ -20,6 +20,7 @@ import { ResourceNodeState, ResourceState } from "../types/state";
 import { Portal } from "../types/portal";
 import { Attractor } from "../types/entity";
 import { addAttractor } from "./entity";
+import { pseudoRandom } from "./portal";
 
 export const resourceMassToAmount = (type: ResourceType, mass: number): number => {
     return mass / RESOURCE_MASS[type];
@@ -445,7 +446,9 @@ export const nodeAbsorbBubble = (
 
     //Add pending resource emission
     const resourceToEmit = node.token.buy(ethAbsorbed)
-    const nearestDepositor = getNearestBubbleToPosition(node.body.getPosition(), bubbles, absorbedBubble.owner)?.body.getUserData() as string ?? "0x"
+    const nearestDepositor = getNearestBubbleToPositionWithMinMass(
+        node.body.getPosition(), bubbles, absorbedBubble.owner, PLANCK_MASS
+    )?.body.getUserData() as string ?? "0x"
     addPendingResourceEmission(nearestDepositor, node, resourceToEmit);
 };
 
@@ -599,11 +602,19 @@ export const handleNodeUpdates = (
             //console.log("pending resource mass", node.pendingResourceMass);
             const depositor = pending.depositor;
             const amount = pending.amount;
-            const resourceAmountToEmit = Math.min(amount, 1);
-            const emissionDir = Vec2(
-                node.emissionDirection.x,
-                node.emissionDirection.y,
-            );
+            const resourceAmountToEmit = Math.max(
+                Math.min(amount, 1),
+                0
+            )
+            const nodePosition = node.body.getPosition();
+            const depositorPosition = getEntityPosition(depositor, nodes, bubbles, null, resources);
+            const range = 30;
+            const randomRotation = (2 * range) * pseudoRandom(timestamp) - range; // Random rotation between -range and range
+            const dirToDepositor = depositorPosition.clone().sub(nodePosition);
+            dirToDepositor.normalize()
+            //console.log("dir to depositor", dirToDepositor, " random rotation", randomRotation);
+            const emissionDir =  rotateVec2(dirToDepositor, randomRotation * Math.PI / 180);
+            //console.log("emission dir", emissionDir);
             const emittedResource = handleEmission(
                 timestamp,
                 world,
@@ -618,11 +629,10 @@ export const handleNodeUpdates = (
                 addAttractor(attractors, { to: depositor, from: emittedResource.body.getUserData() as string });
             }
             removePendingResourceEmission(depositor, node, resourceAmountToEmit);
-
-            const newEmissionDir = rotateVec2(emissionDir, 1);
+            
             node.emissionDirection = {
-                x: newEmissionDir.x,
-                y: newEmissionDir.y,
+                x: emissionDir.x,
+                y: emissionDir.y,
             };
 
             node.lastEmission = timestamp;
@@ -637,11 +647,20 @@ export const handleNodeUpdates = (
             const amount = pending.amount;
             //console.log("pending eth mass", node.pendingEthMass);
 
-            const ethMassToEmitPer = Math.min(amount, PLANCK_MASS * 5);
-            const emissionDir = Vec2(
-                node.emissionDirection.x,
-                node.emissionDirection.y,
-            );
+            const ethMassToEmitPer = Math.max(
+                Math.min(amount, PLANCK_MASS * 10),
+                0
+            )
+            const nodePosition = node.body.getPosition();
+            const depositorPosition = getEntityPosition(depositor, nodes, bubbles, null, resources);
+            const range = 30;
+            const randomRotation = (2 * range) * pseudoRandom(timestamp) - range; // Random rotation between -range and range
+            const dirToDepositor = depositorPosition.clone().sub(nodePosition);
+            dirToDepositor.normalize()
+            //console.log("dir to depositor", dirToDepositor, " random rotation", randomRotation);
+            const emissionDir =  rotateVec2(dirToDepositor, randomRotation * Math.PI / 180);
+            //console.log("emission dir", emissionDir);
+
 
             const emittedBubble = handleEmission(
                 timestamp,
@@ -663,10 +682,9 @@ export const handleNodeUpdates = (
             //}
             removePendingEthEmission(depositor, node, ethMassToEmitPer);
 
-            const newEmissionDir = rotateVec2(emissionDir, 1);
             node.emissionDirection = {
-                x: newEmissionDir.x,
-                y: newEmissionDir.y,
+                x: emissionDir.x,
+                y: emissionDir.y,
             };
             node.lastEmission = timestamp;
         });
@@ -745,6 +763,25 @@ export const getNearestBubbleToPosition = (
     return nearestBubble;
 }
 
+export const getNearestBubbleToPositionWithMinMass = (
+    position: Vec2,
+    bubbles: Map<string, Bubble>,
+    owner: string,
+    minMass: number
+): Bubble => {
+    let nearestBubble = null;
+    let nearestDistance = Infinity;
+    bubbles.forEach((bubble) => {
+        const distance = bubble.body.getPosition().clone().sub(position).length();
+        if (bubble.owner !== owner || bubble.body.getMass() <= minMass) return;
+        if (distance < nearestDistance) {
+            nearestBubble = bubble;
+            nearestDistance = distance;
+        }
+    });
+    return nearestBubble;
+}
+
 
 
 export const handleAttractors = (
@@ -757,15 +794,21 @@ export const handleAttractors = (
 ): void => {
     const _ = attractors.filter((attractor) => {
         if(!attractor.from || !attractor.to){
-            console.log("Invalid attractor undefined", attractor);
+            //console.log("Invalid attractor undefined", attractor);
             return false;
         }
         const to = getEntity(attractor.to, null, bubbles, null, resources);
         const from = getEntity(attractor.from, null, bubbles, null, resources);
-        if(!to || !from) {
-            console.log("Invalid attractor", attractor);
+        if(!to || !from){
+            //console.log("Invalid attractor", attractor);
             return false
         };
+
+        const emitter = getEntity(from.from, nodes, bubbles, portals, resources);
+        if(!emitter){
+            //console.log("Invalid emitter", from.from);
+            return false;
+        }
     
         const toPos = to.body.getPosition();
         const fromPos = from.body.getPosition();
@@ -773,9 +816,14 @@ export const handleAttractors = (
         const direction = toPos.clone().sub(fromPos);
         const distance = direction.length();
         direction.normalize();
+
+        const directionFromEmitter = fromPos.clone().sub(emitter.body.getPosition());
+        const distanceFromEmitter = directionFromEmitter.length();
+        directionFromEmitter.normalize();
     
         // Apply force
-        const force = direction.mul(1 / (distance * distance));
+        const force = direction.mul(1 / (distance*distance))
+        const forceFromEmitter = directionFromEmitter.mul(0.01 / (distanceFromEmitter*distanceFromEmitter*distanceFromEmitter))
         from.body.applyForceToCenter(force);
     
         return true;
