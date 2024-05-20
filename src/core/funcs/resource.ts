@@ -841,11 +841,11 @@ export const handleAttractors = (
         const multiplier = Math.max(1, crossProductAngle(velocity, direction, angle) * 1);
     
         // Apply force
-        const force = direction.mul(1 / (distance*distance)).mul(multiplier);
+        const force = direction.mul(Math.min(10, 1 / (distance*distance))).mul(multiplier);
         from.body.applyForceToCenter(force);
 
         // Cap velocity
-        const maxSpeed = 5; // Define your max speed here
+        const maxSpeed = 3; // Define your max speed here
         const cappedVelocity = capVelocity(from.body.getLinearVelocity(), maxSpeed);
         from.body.setLinearVelocity(cappedVelocity);
     
