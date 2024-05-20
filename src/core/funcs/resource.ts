@@ -580,6 +580,20 @@ export function rotateVec2(vector, angle) {
     );
 }
 
+export function crossProduct(a: Vec2, b: Vec2): number {
+    return a.x * b.y - a.y * b.x;
+}
+
+export function crossProductAngle(a: Vec2, b: Vec2, angle: number): number {
+    const l1 = a.clone().length();
+    const l2 = b.clone().length();
+    return l1 * l2* Math.sin(angle);
+}
+
+export function angleBetween(a: Vec2, b: Vec2): number {
+    return Math.atan2(crossProduct(a, b), Vec2.dot(a, b));
+}
+
 export const handleNodeUpdates = (
     timestamp: number,
     world: World,
@@ -782,6 +796,14 @@ export const getNearestBubbleToPositionWithMinMass = (
     return nearestBubble;
 }
 
+export const capVelocity = (velocity: Vec2, maxSpeed: number): Vec2  => {
+    if (velocity.length() > maxSpeed) {
+        velocity.normalize();
+        return velocity.mul(maxSpeed);
+    }
+    return velocity;
+}
+
 
 
 export const handleAttractors = (
@@ -803,12 +825,6 @@ export const handleAttractors = (
             //console.log("Invalid attractor", attractor);
             return false
         };
-
-        const emitter = getEntity(from.from, nodes, bubbles, portals, resources);
-        if(!emitter){
-            //console.log("Invalid emitter", from.from);
-            return false;
-        }
     
         const toPos = to.body.getPosition();
         const fromPos = from.body.getPosition();
@@ -817,14 +833,21 @@ export const handleAttractors = (
         const distance = direction.length();
         direction.normalize();
 
-        const directionFromEmitter = fromPos.clone().sub(emitter.body.getPosition());
-        const distanceFromEmitter = directionFromEmitter.length();
-        directionFromEmitter.normalize();
+        const velocity = from.body.getLinearVelocity().clone()
+        //const vMagnitude = velocity.length();
+        //velocity.normalize();
+        //Modulus by 90 degrees in radians
+        const angle = Math.abs(angleBetween(velocity, direction)) % (Math.PI / 2);
+        const multiplier = Math.max(1, crossProductAngle(velocity, direction, angle) * 1);
     
         // Apply force
-        const force = direction.mul(1 / (distance*distance))
-        const forceFromEmitter = directionFromEmitter.mul(0.01 / (distanceFromEmitter*distanceFromEmitter*distanceFromEmitter))
+        const force = direction.mul(1 / (distance*distance)).mul(multiplier);
         from.body.applyForceToCenter(force);
+
+        // Cap velocity
+        const maxSpeed = 5; // Define your max speed here
+        const cappedVelocity = capVelocity(from.body.getLinearVelocity(), maxSpeed);
+        from.body.setLinearVelocity(cappedVelocity);
     
         return true;
     })
