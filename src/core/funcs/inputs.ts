@@ -346,7 +346,7 @@ const handleEmit = (input: Emit, client: boolean): boolean => {
             //console.log("Portal owner is not user");
             return false;
         }
-        if (totalMass <= input.mass) {
+        if (totalMass < input.mass) {
             //console.log("Portal mass is less than input mass");
             return false;
         }
@@ -367,7 +367,7 @@ const handleEmit = (input: Emit, client: boolean): boolean => {
             //console.log("Bubble owner is not user");
             return false;
         }
-        if (totalMass <= input.mass) {
+        if (totalMass < input.mass) {
             //console.log("Bubble mass is less than input mass");
             return false;
         }

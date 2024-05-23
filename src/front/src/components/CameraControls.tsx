@@ -53,12 +53,19 @@ export const CustomCameraControls = () => {
     const lock = useSelector((state: any) => state.interpolation.lock);
     const controlsActive = useSelector((state: any) => state.interpolation.controlsActive);
     const dispatch = useDispatch();
+    
 
     useEffect(() => {
         if (pan) {
             controls.current.moveTo(pan.x, pan.y, camera.position.z, true);
         }
     }, [pan]);
+
+    useEffect(() => {
+        if (controls.current) {
+            controls.current.minZoom = 30;
+        }
+    }, [controls]);
 
     useFrame(() => {
         // if (controlsActive) {
