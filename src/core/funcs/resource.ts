@@ -3,7 +3,9 @@ import { RESOURCE_MASS, Resource, ResourceNode, ResourceType, Token } from "../t
 import { calculateEmissionVelocity, massToRadius } from "./utils";
 import { ZeroAddress } from "ethers";
 import {
+    CLASH_VELOCITY,
     DAMPENING,
+    EMISSION_INTERVALS,
     EMISSION_SPEED,
     MASS_PER_SECOND,
     PLANCK_MASS,
@@ -20,7 +22,8 @@ import { ResourceNodeState, ResourceState } from "../types/state";
 import { Portal } from "../types/portal";
 import { Attractor } from "../types/entity";
 import { addAttractor } from "./entity";
-import { pseudoRandom } from "./portal";
+import { SeededRandom, pseudoRandom } from "./portal";
+import { world } from "../world";
 
 export const resourceMassToAmount = (type: ResourceType, mass: number): number => {
     return mass / RESOURCE_MASS[type];
@@ -60,6 +63,78 @@ export const generateNodes = (
     createNode(world, nodes, ResourceType.ENERGY, 0, 0, 0);
 
     //console.log("spawned nodes", count);
+};
+
+export const clamp = (value: number, min: number, max: number): number => {
+    return Math.max(min, Math.min(max, value));
+}
+
+export const generateResources = (
+    world: World,
+    resources: Map<string, Resource>,
+    nodes: Map<string, ResourceNode>,
+    portals: Map<string, Portal>,
+    bubbles: Map<string, Bubble>,
+    amount: number,
+    node: ResourceNode,
+    range: number,
+): void => {
+    let count = 0;
+
+
+    for(let i = 0; i < amount; i++){
+        let attempt = 0;
+        let safeSpawnFound = false;
+        const minimumSafeDistance = 10;
+        const entityRadius = resourceMassToRadius(ResourceType.ENERGY, 1);
+
+        while(!safeSpawnFound){
+            const seed = attempt + count + resources.size + nodes.size + portals.size + bubbles.size;
+            const rngX = new SeededRandom(seed);
+            const rngY = new SeededRandom(seed * seed);
+            const x = (rngX.next() * WORLD_WIDTH - WORLD_WIDTH/2);
+            const y = (rngY.next() * WORLD_HEIGHT - WORLD_HEIGHT/2);
+            const spawnPoint = Vec2(x, y);
+
+            // Check distance from portals
+            let isSafe = true;
+            portals.forEach((portal) => {
+                const portalPosition = portal.body.getPosition();
+                const portalRadius = portal.fixture.getShape().getRadius();
+                if (Vec2.distance(spawnPoint, portalPosition) < entityRadius + portalRadius + minimumSafeDistance) {
+                    isSafe = false;
+                }
+            });
+
+            // Check distance from bubbles
+            bubbles.forEach((bubble) => {
+                const bubblePosition = bubble.body.getPosition();
+                const bubbleRadius = bubble.fixture.getShape().getRadius();
+                if (Vec2.distance(spawnPoint, bubblePosition) < entityRadius + bubbleRadius + minimumSafeDistance) {
+                    isSafe = false;
+                }
+            });
+
+            // Check distance from nodes
+            nodes.forEach((node) => {
+                const nodePosition = node.body.getPosition();
+                const nodeRadius = node.fixture.getShape().getRadius();
+                if (Vec2.distance(spawnPoint, nodePosition) < entityRadius + nodeRadius + minimumSafeDistance) {
+                    isSafe = false;
+                }
+            });
+
+            if(isSafe){
+                createResource(0, world, resources, ResourceType.ENERGY, x, y, 1, node.owner);
+                safeSpawnFound = true;
+            }
+
+            attempt++;
+        }
+        count++;
+    }
+
+    //console.log("spawned resources", count);
 };
 
 export const generateNodeId = (nodes: Map<string, ResourceNode>): string => {
@@ -163,7 +238,8 @@ export const createResource = (
         type: "dynamic",
         linearDamping: DAMPENING,
     });
-    body.setMassData({ mass, center: Vec2(0, 0), I: 0 });
+    const realMass = resourceAmountToMass(type, mass);
+    body.setMassData({ mass:realMass, center: Vec2(0, 0), I: 0 });
     const fixture = body.createFixture({
         shape: Circle(radius),
         density: 1,
@@ -280,7 +356,7 @@ export const nodeEmitResource = (
 
     //Apply momentum
     const emittedResourceVelocityDirection = direction.clone();
-    const emittedResourceVelocityMagnitude = calculateEmissionVelocity(newNodeMass, emittedMass);
+    const emittedResourceVelocityMagnitude = CLASH_VELOCITY / 2;
     const emittedResourceRelativeVelocity =
         emittedResourceVelocityDirection.mul(emittedResourceVelocityMagnitude);
     const emittedResourceVelocity = node.body
@@ -331,7 +407,7 @@ export const nodeEmitBubble = (
 
     //Apply momentum
     const emittedBubbleVelocityDirection = direction.clone();
-    const emittedBubbleVelocityMagnitude = calculateEmissionVelocity(newNodeMass, emittedMass);
+    const emittedBubbleVelocityMagnitude = CLASH_VELOCITY / 2;
     const emittedBubbleRelativeVelocity = emittedBubbleVelocityDirection.mul(
         emittedBubbleVelocityMagnitude,
     );
@@ -600,6 +676,7 @@ export const handleNodeUpdates = (
     nodes: Map<string, ResourceNode>,
     bubbles: Map<string, Bubble>,
     resources: Map<string, Resource>,
+    portals: Map<string, Portal>,
     attractors: Attractor[],
     timeElapsed: number,
     isSnapshot: boolean = false
@@ -610,7 +687,7 @@ export const handleNodeUpdates = (
         node.pendingResourceEmission.forEach((pending) => {
             if (!node.lastEmission) node.lastEmission = timestamp;
             const lastEmission = node.lastEmission;
-            if (timestamp - lastEmission < 0.1) {
+            if (timestamp - lastEmission < EMISSION_INTERVALS) {
                 return;
             }
             //console.log("pending resource mass", node.pendingResourceMass);
@@ -654,7 +731,7 @@ export const handleNodeUpdates = (
         node.pendingEthEmission.forEach((pending) => {
             if (!node.lastEmission) node.lastEmission = timestamp;
             const lastEmission = node.lastEmission;
-            if (timestamp - lastEmission < 0.1) {
+            if (timestamp - lastEmission < EMISSION_INTERVALS) {
                 return;
             }
             const depositor = pending.depositor;
@@ -706,22 +783,22 @@ export const handleNodeUpdates = (
 
 
 
-        // //HANDLE INFLATION
-        // const last = node.token.lastInflation;
-        // const rate = node.token.inflationRate;
-        // const period = node.token.inflationPeriod;
-        // const mc = node.token.marketCap;
+        //HANDLE INFLATION
+        const last = node.token.lastInflation;
+        const rate = node.token.inflationRate;
+        const period = node.token.inflationPeriod;
+        const mc = node.token.marketCap;
 
-        // if(mc <= 0) return;
-        // if(last === 0){
-        //     node.token.lastInflation = timestamp;
-        //     return;
-        // }
-        // if(timestamp - last < period) return;
-        // const inflation = rate * (timestamp - last);
-        // node.token.inflateSupply(inflation);
-        // node.token.lastInflation = timestamp;
-        // addPendingResourceEmission(node.owner, node, inflation);
+        if(mc <= 0) return;
+        if(last === 0){
+            node.token.lastInflation = timestamp;
+            return;
+        }
+        if(timestamp - last < period) return;
+        const inflation = rate;
+        node.token.inflateSupply(inflation);
+        node.token.lastInflation = timestamp;
+        generateResources(world, resources, nodes, portals, bubbles, inflation, node, 0);
 
     });
 };
@@ -797,7 +874,8 @@ export const getNearestBubbleToPositionWithMinMass = (
 }
 
 export const capVelocity = (velocity: Vec2, maxSpeed: number): Vec2  => {
-    if (velocity.length() > maxSpeed) {
+    if (velocity.length() >= maxSpeed) {
+        //console.log("capping velocity", velocity);
         velocity.normalize();
         return velocity.mul(maxSpeed);
     }
@@ -825,6 +903,11 @@ export const handleAttractors = (
             //console.log("Invalid attractor", attractor);
             return false
         };
+
+        // Cap velocity
+        const maxSpeed = CLASH_VELOCITY/2; // Define your max speed here
+        const cappedVelocity = capVelocity(from.body.getLinearVelocity(), maxSpeed);
+        from.body.setLinearVelocity(cappedVelocity);
     
         const toPos = to.body.getPosition();
         const fromPos = from.body.getPosition();
@@ -838,16 +921,15 @@ export const handleAttractors = (
         //velocity.normalize();
         //Modulus by 90 degrees in radians
         const angle = Math.abs(angleBetween(velocity, direction)) % (Math.PI / 2);
-        const multiplier = Math.max(1, crossProductAngle(velocity, direction, angle) * 1);
+        const multiplier = crossProductAngle(velocity, direction, angle) * 1;
     
         // Apply force
-        const force = direction.mul(Math.min(10, 1 / (distance*distance))).mul(multiplier);
+        const force = direction.mul(Math.min(1, 1 / (distance*distance))).mul(multiplier);
         from.body.applyForceToCenter(force);
 
         // Cap velocity
-        const maxSpeed = 3; // Define your max speed here
-        const cappedVelocity = capVelocity(from.body.getLinearVelocity(), maxSpeed);
-        from.body.setLinearVelocity(cappedVelocity);
+        const cappedVelocity2 = capVelocity(from.body.getLinearVelocity(), maxSpeed);
+        from.body.setLinearVelocity(cappedVelocity2);
     
         return true;
     })

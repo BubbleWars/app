@@ -2,9 +2,9 @@ import { Circle, Vec2, World } from "planck-js";
 import { Bubble, PuncturePoint } from "../types/bubble";
 import { calculateDeltaVelocity, calculateEjectionVelocity, calculateEmissionVelocity, massToRadius } from "./utils";
 import { Address } from "../types/address";
-import { CLASH_KE, DAMPENING, EMISSION_SPEED, MASS_PER_SECOND, PLANCK_MASS } from "../consts";
+import { CLASH_KE, CLASH_VELOCITY, DAMPENING, EMISSION_SPEED, MASS_PER_SECOND, PLANCK_MASS } from "../consts";
 import { RESOURCE_MASS, Resource, ResourceType } from "../types/resource";
-import { createResource, resourceMassToAmount, resourceMassToRadius, rotateVec2, updateResource } from "./resource";
+import { createResource, resourceAmountToMass, resourceMassToAmount, resourceMassToRadius, rotateVec2, updateResource } from "./resource";
 import { addEvent } from "./events";
 import { EventsType } from "../types/events";
 import { ZeroAddress } from "ethers";
@@ -326,8 +326,8 @@ export const emitResource = (
 
     //Apply momentum conservation
     const originalBubbleMomentum = totalMomentum.clone();
-    const emittedResourceVelocityDirection = direction.clone()
-    const emittedResourceVelocityMagnitude = calculateEmissionVelocity(getTotalBubbleMass(bubble), mass);
+    const emittedResourceVelocityDirection = direction.clone();
+    const emittedResourceVelocityMagnitude = CLASH_VELOCITY * 1.5;
     const emittedResourceRelativeVelocity =
         emittedResourceVelocityDirection.mul(emittedResourceVelocityMagnitude);
     const emittedResourceVelocity = bubble.body
@@ -425,11 +425,13 @@ export const subtractPuncturePoint = (
 
 
 
-export const isResourceActivated = (resource: Resource) => {
-    const v = resource.body.getLinearVelocity().clone().length();
-    const ke = 0.5 * resource.body.getMass() * v * v;
-    return ke > CLASH_KE;
+export const isResourceActivated = (vx: number, vy: number) => {
+    const v = Math.sqrt(vx * vx + vy * vy);
+    //console.log("magnitude of velocity", v, vx, vy)
+    return v > CLASH_VELOCITY;
+
 }
+
 
 
 export const absorbResource = (
@@ -446,10 +448,12 @@ export const absorbResource = (
     switch (resourceType) {    
         case ResourceType.ENERGY:
             //Check kinetic energy for PUNCTURE
-            // if(isResourceActivated(absorbedResource)){
-            //     punctureBubble(bubbles, resources, bubble, absorbedResource, timestamp, isSnapshot);
-            //     break;
-            // }
+            const { x, y } = absorbedResource.body.getLinearVelocity();
+            if(isResourceActivated(x, y)){
+                console.log("resource is activated", absorbedResource.body.getLinearVelocity().length());
+                punctureBubble(bubbles, resources, bubble, absorbedResource, timestamp, isSnapshot);
+                break;
+            }
             //Transfer RED to bubble
             transferResourceToBubble(bubbles, resources, bubble, absorbedResource, timestamp);
             break;

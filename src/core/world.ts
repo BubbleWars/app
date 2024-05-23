@@ -276,7 +276,7 @@ export const run = (
 
         // Handle entity updates
         handleBubbleUpdates(current, bubbles, stepDelta);
-        handleNodeUpdates(current, world, nodes, bubbles, resources, attractors, stepDelta);
+        handleNodeUpdates(current, world, nodes, bubbles, resources, portals, attractors, stepDelta);
         handleAttractors(nodes, resources, bubbles, portals, attractors,  current);
 
         // Step the world

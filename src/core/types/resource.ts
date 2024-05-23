@@ -51,7 +51,8 @@ export class Token {
         this.k = k;
         this.lastInflation = 0;
         this.inflationRate = 1;
-        this.inflationPeriod = 20;
+        //Every 1hr
+        this.inflationPeriod = 60;
     }
 
     // Calculate the area under the curve from `x1` to `x2`

@@ -13,6 +13,7 @@ import { CLASH_KE } from "../../../core/consts";
 import { ResourceType } from "../../../core/types/resource";
 import { ResourceTypeToName } from "./BubblesInfo";
 import { resourceMassToAmount } from "../../../core/funcs/resource";
+import { isResourceActivated } from "../../../core/funcs/bubble";
 
 export const RESOURCE_TO_COLOR = {
     [ResourceType.ENERGY]: "#0000ff",
@@ -28,7 +29,7 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
     const [disableLerp, setDisableLerp] = useState<boolean>(false);
     const resource = currentState.resources.find(
         (resource) => resource.id === resourceId,
-    ) ?? {id:"", position: {x: 0, y: 0}, mass: 0, velocity: {x: 0, y: 0}, type: ResourceType.BLUE, owner: ""};
+    ) ?? {id:"", position: {x: 0, y: 0}, mass: 0, velocity: {x: 0, y: 0}, type: ResourceType.ENERGY, owner: ""};
     const mass = resource?.mass.toFixed(2) ?? "0";
     const amount = resourceMassToAmount(resource?.type, resource?.mass ?? 0);
     const radius = massToRadius(parseInt(mass ?? "0")) + 0.5;
@@ -119,6 +120,10 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
     const baseColor = RESOURCE_TO_COLOR[resource.type]
     const outlineColor = darkenColor(baseColor, 0.2); // Darken by 20%
 
+    console.log("velocity in resource", velocity.x, velocity.y)
+    console.log("is resource activated", isResourceActivated(velocity.x, velocity.y))
+    console.log("resource type", resource.type == ResourceType.ENERGY)
+
     return (
         <>
             <CustomText
@@ -130,9 +135,9 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
                 color={baseColor}
                 noOutline={true}
             >
-                {amount} {ResourceTypeToName[resource.type]?.toUpperCase()}
+                {amount} {ResourceTypeToName[resource.type]?.toUpperCase()}  {magnitude}
             </CustomText>
-            {kineticEnergy > CLASH_KE && resource.type == ResourceType.ENERGY && (
+            {isResourceActivated(velocity.x, velocity.y) && resource.type == ResourceType.ENERGY && (
                 <CustomText
                     position={new THREE.Vector3(radius + 1, 0, 0).add(
                         textPosition,
@@ -161,7 +166,7 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
                 <Outlines thickness={2} color={outlineColor} />
                 <meshBasicMaterial
                     toneMapped={false}
-                    color={baseColor}
+                    color={isResourceActivated(velocity.x, velocity.y) ? "red" : baseColor}
                 />
             </mesh>
         </>

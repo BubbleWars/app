@@ -297,6 +297,7 @@ export const snapshotRun = (
             snapshotNodes,
             snapshotBubbles,
             snapshotResources,
+            snapshotPortals,
             snapshotAttractors,
             stepDelta,
         );

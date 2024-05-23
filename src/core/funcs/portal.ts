@@ -25,7 +25,7 @@ export function pseudoRandom(seed) {
     return x - Math.floor(x);
 }
 
-class SeededRandom {
+export class SeededRandom {
     modulus: number;
     multiplier: number;
     increment: number;

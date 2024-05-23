@@ -63,7 +63,7 @@ export const CustomCameraControls = () => {
 
     useEffect(() => {
         if (controls.current) {
-            controls.current.minZoom = 30;
+            controls.current.minZoom = 0;
         }
     }, [controls]);
 

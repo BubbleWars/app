@@ -8,6 +8,7 @@ export const MIN_MASS = 0.000001;
 export const EMISSION_SPEED = 0.08;
 export const DAMPENING = 0.05;
 export const ENERGY_NODE_COUNT = 100;
+export const EMISSION_INTERVALS = 0.5;
 
 //The amount of energy in each bubble is calculated according to E=mc^2 * MASS_ENERGY_CONVERSION_EFFICIENCY
 //This refers to the efficiency of converting the Total possible energy within the bubble to the energy that can be used by the user
@@ -15,5 +16,6 @@ export const MASS_ENERGY_CONVERSION_EFFICIENCY  =  13.969 * Math.pow(10, -9); //
 export const C = 3 * Math.pow(10, 8); //Speed of light in m/s
 export const MAX_VELOCITY = 1.3;
 export const CLASH_KE = 0.0001;
+export const CLASH_VELOCITY = 2;
 export const PLANCK_MASS = 0.001; 
 export const MIN_DELTA_VELOCITY = 0.1;
