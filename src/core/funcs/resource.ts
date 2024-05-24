@@ -784,21 +784,21 @@ export const handleNodeUpdates = (
 
 
         //HANDLE INFLATION
-        const last = node.token.lastInflation;
-        const rate = node.token.inflationRate;
-        const period = node.token.inflationPeriod;
-        const mc = node.token.marketCap;
+        // const last = node.token.lastInflation;
+        // const rate = node.token.inflationRate;
+        // const period = node.token.inflationPeriod;
+        // const mc = node.token.marketCap;
 
-        if(mc <= 0) return;
-        if(last === 0){
-            node.token.lastInflation = timestamp;
-            return;
-        }
-        if(timestamp - last < period) return;
-        const inflation = rate;
-        node.token.inflateSupply(inflation);
-        node.token.lastInflation = timestamp;
-        generateResources(world, resources, nodes, portals, bubbles, inflation, node, 0);
+        // if(mc <= 0) return;
+        // if(last === 0){
+        //     node.token.lastInflation = timestamp;
+        //     return;
+        // }
+        // if(timestamp - last < period) return;
+        // const inflation = rate;
+        // node.token.inflateSupply(inflation);
+        // node.token.lastInflation = timestamp;
+        // generateResources(world, resources, nodes, portals, bubbles, inflation, node, 0);
 
     });
 };
@@ -833,6 +833,23 @@ export const getEntityPosition = (
     if (!entity) return Vec2();
 
     return entity.body.getPosition();
+}
+
+export const getNearestNodeToPosition = (
+    position: Vec2,
+    nodes: Map<string, ResourceNode>,
+): ResourceNode => {
+    let nearestNode = null;
+    let nearestDistance = Infinity;
+    nodes.forEach((node) => {
+        const distance = node.body.getPosition().clone().sub(position).length();
+        if(node.token.currentSupply <= 0) return;
+        if (distance < nearestDistance) {
+            nearestNode = node;
+            nearestDistance = distance;
+        }
+    });
+    return nearestNode;
 }
 
 

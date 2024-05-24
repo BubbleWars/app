@@ -1,4 +1,6 @@
 import { PLANCK_MASS } from "../consts";
+import { clamp } from "../funcs/resource";
+import { preciseRound } from "../funcs/utils";
 import { Entity } from "./entity";
 
 export const RESOURCE_INFLATION_RATE = 1 / (60 * 60 * 24); // 1 per day
@@ -55,16 +57,24 @@ export class Token {
         this.inflationPeriod = 60;
     }
 
+    getSupplyRatio() {
+        if (this.currentSupply + this.inflation - this.burn <= 0) {
+            return 1;
+        }
+        return this.currentSupply / (this.currentSupply + this.inflation - this.burn);
+    }
+
     // Calculate the area under the curve from `x1` to `x2`
     getChangeInValue(x1, x2) {
         return this.k * ((x2 ** 3 / 3) - (x1 ** 3 / 3));
     }
 
     // Get the true change in value with the modifier applied
-    getTrueChangeInValue(x1, x2) {
-        const changeInValue = this.getChangeInValue(x1, x2);
-        const modifier = this.getModifier();
-        return changeInValue * modifier;
+    getTrueChangeInValue(changeInSupply) {
+        const currentSupply = this.currentSupply;
+        const realChangeInSupply = changeInSupply * this.getSupplyRatio();
+        const changeInValue = this.getChangeInValue(currentSupply, currentSupply + realChangeInSupply);
+        return changeInValue;
     }
 
     // Function to calculate the change in supply given a change in value
@@ -79,54 +89,48 @@ export class Token {
 
     // Function to calculate the true change in supply given a change in value, taking into account the modifier
     getTrueChangeInSupply(delta) {
-        const modifier = this.getModifier();
-        const adjustedDelta = delta / modifier;
-        return this.getChangeInSupply(adjustedDelta);
-    }
+        const changeInSupply = this.getChangeInSupply(delta);
+        const ratio = this.getSupplyRatio();
 
-    // Calculate the modifier based on the current state
-    getModifier() {
-        const adjustedSupply = this.currentSupply + this.inflation - this.burn;
-        const originalMarketCap = this.getChangeInValue(0, adjustedSupply);
+        return changeInSupply * ratio;
 
-        // Ensure no division by zero or invalid operations
-        if (originalMarketCap === 0) {
-            return 1; // Return a default modifier if original market cap is zero
-        }
-
-        const modifier = this.marketCap / originalMarketCap;
-        return isNaN(modifier) || !isFinite(modifier) ? 1 : modifier;
     }
 
     // Function to inflate the supply
     inflateSupply(amount) {
         this.inflation += amount;
-        this.currentSupply += amount;
+        this.inflation = preciseRound(this.inflation, 9);
+        console.log("inflating supply", amount, this.currentSupply);
     }
 
     // Function to burn the supply
     burnSupply(amount) {
         this.burn += amount;
-        this.currentSupply -= amount;
+        this.burn = preciseRound(this.burn, 9);
+        console.log("burning supply", amount, this.currentSupply);
     }
 
     // Function to sell tokens and return the change in value
     sell(amount) {
+        const clippedAmount = clamp(amount, 0, this.currentSupply);
         if (amount > this.currentSupply) {
-            throw new Error('Cannot sell more than the current supply');
+            console.log("amount", amount, "current supply", this.currentSupply);
+            //throw new Error('Cannot sell more than the current supply')
         }
 
         const oldSupply = this.currentSupply;
-        const newSupply = this.currentSupply - amount;
+        const newSupply = this.currentSupply - clippedAmount;
 
-        const changeInValue = this.getTrueChangeInValue(newSupply, oldSupply);
+        const changeInValue = this.getTrueChangeInValue(-clippedAmount);
 
         // Update the current supply
-        this.currentSupply = newSupply;
+        this.currentSupply = preciseRound(newSupply, 9);
         // Decrease the market cap proportionally
-        this.marketCap -= changeInValue;
+        this.marketCap += changeInValue;
 
-        return changeInValue;
+        console.log("selling", amount, changeInValue, this.currentSupply);
+
+        return Math.abs(changeInValue);
     }
 
     // Function to buy tokens and return the amount of tokens received
@@ -135,8 +139,11 @@ export class Token {
 
         // Update the current supply
         this.currentSupply += supplyChange;
+        this.currentSupply = preciseRound(this.currentSupply, 9);
         // Increase the market cap proportionally
         this.marketCap += value;
+
+        console.log("buying", value, supplyChange, this.currentSupply);
 
         return supplyChange;
     }

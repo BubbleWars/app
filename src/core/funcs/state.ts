@@ -220,11 +220,11 @@ export const handleContact = (contact: Contact) => {
     //Bubble-Resource collision
     else if (b1 && r2) {
         deferredUpdates.push(() => {
-            absorbResource(bubbles, resources, b1, r2, STEP_DELTA, tempTimestamp);
+            absorbResource(bubbles, resources, nodes, b1, r2, STEP_DELTA, tempTimestamp);
         });
     } else if (b2 && r1) {
         deferredUpdates.push(() => {
-            absorbResource(bubbles, resources, b2, r1, STEP_DELTA, tempTimestamp);
+            absorbResource(bubbles, resources, nodes, b2, r1, STEP_DELTA, tempTimestamp);
         });
     }
 
@@ -348,6 +348,7 @@ export const handleSnapshotContact = (contact: Contact) => {
             absorbResource(
                 snapshotBubbles,
                 snapshotResources,
+                snapshotNodes,
                 b1,
                 r2,
                 STEP_DELTA,
@@ -360,6 +361,7 @@ export const handleSnapshotContact = (contact: Contact) => {
             absorbResource(
                 snapshotBubbles,
                 snapshotResources,
+                snapshotNodes,
                 b2,
                 r1,
                 STEP_DELTA,

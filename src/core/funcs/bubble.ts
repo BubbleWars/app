@@ -3,8 +3,8 @@ import { Bubble, PuncturePoint } from "../types/bubble";
 import { calculateDeltaVelocity, calculateEjectionVelocity, calculateEmissionVelocity, massToRadius } from "./utils";
 import { Address } from "../types/address";
 import { CLASH_KE, CLASH_VELOCITY, DAMPENING, EMISSION_SPEED, MASS_PER_SECOND, PLANCK_MASS } from "../consts";
-import { RESOURCE_MASS, Resource, ResourceType } from "../types/resource";
-import { createResource, resourceAmountToMass, resourceMassToAmount, resourceMassToRadius, rotateVec2, updateResource } from "./resource";
+import { RESOURCE_MASS, Resource, ResourceNode, ResourceType } from "../types/resource";
+import { clamp, createResource, getEntity, getNearestNodeToPosition, resourceAmountToMass, resourceMassToAmount, resourceMassToRadius, rotateVec2, updateResource } from "./resource";
 import { addEvent } from "./events";
 import { EventsType } from "../types/events";
 import { ZeroAddress } from "ethers";
@@ -437,6 +437,7 @@ export const isResourceActivated = (vx: number, vy: number) => {
 export const absorbResource = (
     bubbles: Map<string, Bubble>,
     resources: Map<string, Resource>,
+    nodes: Map<string, ResourceNode>,
     bubble: Bubble,
     absorbedResource: Resource,
     timeElapsed: number,
@@ -450,8 +451,8 @@ export const absorbResource = (
             //Check kinetic energy for PUNCTURE
             const { x, y } = absorbedResource.body.getLinearVelocity();
             if(isResourceActivated(x, y)){
-                console.log("resource is activated", absorbedResource.body.getLinearVelocity().length());
-                punctureBubble(bubbles, resources, bubble, absorbedResource, timestamp, isSnapshot);
+                //console.log("resource is activated", absorbedResource.body.getLinearVelocity().length());
+                punctureBubble(bubbles, resources, nodes, bubble, absorbedResource, timestamp, isSnapshot);
                 break;
             }
             //Transfer RED to bubble
@@ -491,6 +492,7 @@ export const  calculatePunctureEthAmount = (
 export const punctureBubble = (
     bubbles: Map<string, Bubble>,
     resources: Map<string, Resource>,
+    nodes: Map<string, ResourceNode>,
     bubble: Bubble,
     incoming: Resource,
     timestamp: number,
@@ -516,8 +518,19 @@ export const punctureBubble = (
         defense
     );
 
+    const amountToBurn = attack + clamp(attack, 0, defense);
+    const nodeToBurnFrom = getNearestNodeToPosition(incoming.body.getPosition(), nodes);
+    if (nodeToBurnFrom) {
+        nodeToBurnFrom.token.burnSupply(amountToBurn);
+    } else{
+        console.log("No node to burn from");
+    }
+
+
     //Calculate the damage
     const remaining = defense - attack;
+
+    
     if(remaining >= 0){
         setBubbleResourceMass(bubble, ResourceType.ENERGY, remaining);
      }else {

@@ -128,3 +128,8 @@ export const  preciseRound = (num: number, decimalPlaces: number): number => {
     const factor = Math.pow(10, decimalPlaces);
     return Math.round((num + Number.EPSILON) * factor) / factor;
 }
+
+export const clipDecimals = (num: number, decimalPlaces: number): number => {
+    const factor = Math.pow(10, decimalPlaces);
+    return Math.floor(num * factor) / factor;
+}
