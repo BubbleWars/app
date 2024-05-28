@@ -526,7 +526,7 @@ export const punctureBubble = (
     const amountToBurn = attack + clamp(attack, 0, defense);
     const nodeToBurnFrom = getNearestNodeToPosition(incoming.body.getPosition(), nodes);
     if (nodeToBurnFrom) {
-        nodeToBurnFrom.token.burnSupply(amountToBurn);
+        console.log("Send EP to protocol")
     } else{
         console.log("No node to burn from");
     }

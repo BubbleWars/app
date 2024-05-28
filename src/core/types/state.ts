@@ -48,13 +48,7 @@ export interface ResourceNodeState {
     //Token Bonding curve info
     currentSupply: number; // current supply of the token
     marketCap: number; // current amount of ETH in node
-    inflation: number; // amount of token spawn without a buyer
-    burn: number; // amount of token burned without sells
     k: number; // k constant in bonding curve
-
-    inflationRate: number; // Amount of inflation per period
-    inflationPeriod: number; // Seconds, time between inflations
-    lastInflation: number; // Last time inflation was applied
 }
 
 export interface ResourceState {

@@ -37,44 +37,21 @@ export interface ResourceNode extends Entity {
 export class Token {
     currentSupply: number;
     marketCap: number;
-    inflation: number;
-    burn: number;
     k: number;
 
-    inflationRate: number; // Amount of inflation per period
-    inflationPeriod: number; // Seconds, time between inflations
-    lastInflation: number; // Last time inflation was applied
 
-    constructor(currentSupply = 0, marketCap = 0, inflation = 0, burn = 0, k = 0.001) {
+    constructor(currentSupply = 0, marketCap = 0, k = 0.001) {
         this.currentSupply = currentSupply;
         this.marketCap = marketCap;
-        this.inflation = inflation;
-        this.burn = burn;
         this.k = k;
-        this.lastInflation = 0;
-        this.inflationRate = 1;
         //Every 1hr
-        this.inflationPeriod = 60;
-    }
-
-    getSupplyRatio() {
-        if (this.currentSupply + this.inflation - this.burn <= 0) {
-            return 1;
-        }
-        return this.currentSupply / (this.currentSupply + this.inflation - this.burn);
     }
 
     // Calculate the area under the curve from `x1` to `x2`
-    getChangeInValue(x1, x2) {
-        return this.k * ((x2 ** 3 / 3) - (x1 ** 3 / 3));
-    }
-
-    // Get the true change in value with the modifier applied
-    getTrueChangeInValue(changeInSupply) {
+    getChangeInValue(delta) {
         const currentSupply = this.currentSupply;
-        const realChangeInSupply = changeInSupply * this.getSupplyRatio();
-        const changeInValue = this.getChangeInValue(currentSupply, currentSupply + realChangeInSupply);
-        return changeInValue;
+        const newSupply = currentSupply + delta;
+        return this.k * ((newSupply ** 3 / 3) - (currentSupply ** 3 / 3));
     }
 
     // Function to calculate the change in supply given a change in value
@@ -85,29 +62,6 @@ export class Token {
 
         const supplyChange = newSupply - this.currentSupply;
         return supplyChange;
-    }
-
-    // Function to calculate the true change in supply given a change in value, taking into account the modifier
-    getTrueChangeInSupply(delta) {
-        const changeInSupply = this.getChangeInSupply(delta);
-        const ratio = this.getSupplyRatio();
-
-        return changeInSupply * ratio;
-
-    }
-
-    // Function to inflate the supply
-    inflateSupply(amount) {
-        this.inflation += amount;
-        this.inflation = preciseRound(this.inflation, 9);
-        console.log("inflating supply", amount, this.currentSupply);
-    }
-
-    // Function to burn the supply
-    burnSupply(amount) {
-        this.burn += amount;
-        this.burn = preciseRound(this.burn, 9);
-        console.log("burning supply", amount, this.currentSupply);
     }
 
     // Function to sell tokens and return the change in value
@@ -122,7 +76,7 @@ export class Token {
         const oldSupply = this.currentSupply;
         const newSupply = this.currentSupply - clippedAmount;
 
-        const changeInValue = preciseRound(this.getTrueChangeInValue(-clippedAmount), 3);
+        const changeInValue = preciseRound(this.getChangeInValue(-clippedAmount), 3);
 
         // Update the current supply
         this.currentSupply = preciseRound(newSupply, 9);
@@ -137,7 +91,7 @@ export class Token {
     // Function to buy tokens and return the amount of tokens received
     buy(value) {
         const realValue = preciseRound(value, 3);
-        const supplyChange = preciseRound(this.getTrueChangeInSupply(realValue), 9 );
+        const supplyChange = preciseRound(this.getChangeInSupply(realValue), 9 );
 
         // Update the current supply
         this.currentSupply += supplyChange;

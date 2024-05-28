@@ -213,13 +213,8 @@ export const createNode = (
         //Tokebn bonding curve info
         node.token.currentSupply = nodeState.currentSupply;
         node.token.marketCap = nodeState.marketCap;
-        node.token.inflation = nodeState.inflation;
-        node.token.burn = nodeState.burn;
         node.token.k = nodeState.k;
 
-        node.token.inflationRate = nodeState.inflationRate;
-        node.token.inflationPeriod = nodeState.inflationPeriod;
-        node.token.lastInflation = nodeState.lastInflation;
     }
 
     return node;
@@ -785,26 +780,6 @@ export const handleNodeUpdates = (
             };
             node.lastEmission = timestamp;
         });
-
-
-
-
-        //HANDLE INFLATION
-        // const last = node.token.lastInflation;
-        // const rate = node.token.inflationRate;
-        // const period = node.token.inflationPeriod;
-        // const mc = node.token.marketCap;
-
-        // if(mc <= 0) return;
-        // if(last === 0){
-        //     node.token.lastInflation = timestamp;
-        //     return;
-        // }
-        // if(timestamp - last < period) return;
-        // const inflation = rate;
-        // node.token.inflateSupply(inflation);
-        // node.token.lastInflation = timestamp;
-        // generateResources(world, resources, nodes, portals, bubbles, inflation, node, 0);
 
     });
 };
