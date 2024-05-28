@@ -163,6 +163,11 @@ export const createBubble = (
     setBubbleEthMass(bubble, mass);
     //console.log("bubble created", bubble.body.getUserData() as string)
    //console.log("bubble created with mass:", mass)
+
+//    console.log("bubble created at position: ", x, y);
+//    if(x == undefined || y == undefined) {
+//         console.log("bubble created at undefined position");
+//    }
     return bubble;
 };
 
@@ -526,6 +531,8 @@ export const punctureBubble = (
         console.log("No node to burn from");
     }
 
+
+    console.log("puncturing bubble", amount, defense, attack, amountToBurn, nodeToBurnFrom?.id, incoming.body.getPosition().x, incoming.body.getPosition().y, bubble.body.getPosition().x, bubble.body.getPosition().y);
 
     //Calculate the damage
     const remaining = defense - attack;

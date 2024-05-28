@@ -171,7 +171,7 @@ export const BubblesControlsEmit = ({
             Math.max(mass + (event.deltaY * step), minMass),
             maxMass,
         );
-        setMass(newMass);
+        setMass(1);
     });
 
     //if(isSuccess || isError) return null

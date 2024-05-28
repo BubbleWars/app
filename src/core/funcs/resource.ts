@@ -198,6 +198,11 @@ export const createNode = (
     node.body.setUserData(`node-${nodes.size}`);
     nodes.set(node.body.getUserData() as string, node);
 
+    // console.log("creating node at position", x, y);
+    // if(x == undefined || y == undefined){
+    //     console.log("undefined position", x, y);
+    // }
+
     if(nodeState){
         //Emission info
         node.emissionDirection = nodeState.emissionDirection;
@@ -285,7 +290,7 @@ export const updateNode = (
     newMass: number,
     newEmitted?: number,
 ): void => {
-    node.mass = newMass;
+    node.mass = Math.max(newMass, 0);
     //console.log("new node mass", newMass);
     if (newEmitted) node.emitted = newEmitted;
     const radius = massToRadius(Math.max(node.mass, 1));
@@ -331,7 +336,7 @@ export const nodeEmitResource = (
     emittedMass: number,
     direction: Vec2,
 ): Resource => {
-    const radius = massToRadius(newNodeMass) + 0.2;
+    const radius = massToRadius(newNodeMass) + 5;
     const emittedResourceRadius = resourceMassToRadius(node.resource, emittedMass);
     const centerDelta = direction.clone().mul(radius + emittedResourceRadius);
     const emittedResourcePosition = node.body
@@ -378,7 +383,7 @@ export const nodeEmitBubble = (
     emittedMass: number,
     direction: Vec2,
 ): Bubble => {
-    const radius = massToRadius(newNodeMass) + 1;
+    const radius = massToRadius(newNodeMass) + 5;
     const emittedBubbleRadius = massToRadius(emittedMass);
     const centerDelta = direction.clone().mul((radius + emittedBubbleRadius)*2);
     const emittedBubblePosition = node.body
@@ -496,6 +501,7 @@ export const nodeAbsorbResource = (
 
     //get emission
     const ethToEmission = node.token.sell(resourceAbsorbed);
+    console.log("ethToEmission", ethToEmission);
 
     updateResource(resources, absorbedResource, 0);
     updateNode(node, currentMass - ethToEmission);

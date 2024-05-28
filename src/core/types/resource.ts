@@ -112,38 +112,40 @@ export class Token {
 
     // Function to sell tokens and return the change in value
     sell(amount) {
-        const clippedAmount = clamp(amount, 0, this.currentSupply);
+        const realAmount = preciseRound(amount, 9);
+        const clippedAmount = clamp(realAmount, 0, this.currentSupply);
         if (amount > this.currentSupply) {
-            console.log("amount", amount, "current supply", this.currentSupply);
+            console.log("amount", realAmount, "current supply", this.currentSupply);
             //throw new Error('Cannot sell more than the current supply')
         }
 
         const oldSupply = this.currentSupply;
         const newSupply = this.currentSupply - clippedAmount;
 
-        const changeInValue = this.getTrueChangeInValue(-clippedAmount);
+        const changeInValue = preciseRound(this.getTrueChangeInValue(-clippedAmount), 3);
 
         // Update the current supply
         this.currentSupply = preciseRound(newSupply, 9);
         // Decrease the market cap proportionally
-        this.marketCap += changeInValue;
+        this.marketCap += preciseRound(changeInValue, 3);
 
-        console.log("selling", amount, changeInValue, this.currentSupply);
+        console.log("selling", realAmount, changeInValue, this.currentSupply);
 
-        return Math.abs(changeInValue);
+        return Math.abs(preciseRound(changeInValue, 3));
     }
 
     // Function to buy tokens and return the amount of tokens received
     buy(value) {
-        const supplyChange = this.getTrueChangeInSupply(value);
+        const realValue = preciseRound(value, 3);
+        const supplyChange = preciseRound(this.getTrueChangeInSupply(realValue), 9 );
 
         // Update the current supply
         this.currentSupply += supplyChange;
         this.currentSupply = preciseRound(this.currentSupply, 9);
         // Increase the market cap proportionally
-        this.marketCap += value;
+        this.marketCap += realValue;
 
-        console.log("buying", value, supplyChange, this.currentSupply);
+        console.log("buying", realValue, supplyChange, this.currentSupply);
 
         return supplyChange;
     }
