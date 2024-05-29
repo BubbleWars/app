@@ -19,6 +19,7 @@ import {
     obstacles,
     pendingInputs,
     portals,
+    protocol,
     resources,
     run,
     tempTimestamp,
@@ -44,6 +45,7 @@ import {
     snapshotNodes,
     snapshotPendingInputs,
     snapshotPortals,
+    snapshotProtocol,
     snapshotResources,
     snapshotRun,
     snapshotTempTimestamp,
@@ -52,6 +54,7 @@ import {
 } from "../snapshots";
 import { ResourceType } from "../types/resource";
 import { resourceMassToAmount, updateResource } from "./resource";
+import { AssetType, FeeType } from "../types/protocol";
 
 const isNode =
     typeof process !== "undefined" &&
@@ -255,13 +258,14 @@ const handleSpawnPortal = (input: SpawnPortal, client: boolean): boolean => {
     //Create portal
     user.balance -= amount;
     if (client) {
+        const amountAfterFees = snapshotProtocol.processFee(FeeType.SPAWN, AssetType.ETH, amount);
         const { x, y } = generateSpawnPoint(
             input.timestamp,
             snapshotWorld,
             snapshotPortals,
             snapshotBubbles,
             snapshotNodes,
-            amount,
+            amountAfterFees,
         );
         createPortal(
             snapshotPortals,
@@ -269,18 +273,19 @@ const handleSpawnPortal = (input: SpawnPortal, client: boolean): boolean => {
             user.address,
             x,
             y,
-            amount,
+            amountAfterFees,
         );
     } else {
+        const amountAfterFees = protocol.processFee(FeeType.SPAWN, AssetType.ETH, amount);
         const { x, y } = generateSpawnPoint(
             input.timestamp,
             world,
             portals,
             bubbles,
             nodes,
-            amount,
+            amountAfterFees,
         );
-        createPortal(portals, world, user.address, x, y, amount);
+        createPortal(portals, world, user.address, x, y, amountAfterFees);
     }
 
     return true;
