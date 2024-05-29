@@ -260,12 +260,12 @@ export const handleContact = (contact: Contact) => {
     if (n1 && r2) {
         //console.log("node absorb resource")
         deferredUpdates.push(() => {
-            nodeAbsorbResource(nodes, resources, bubbles, n1, r2, STEP_DELTA);
+            nodeAbsorbResource(nodes, resources, bubbles, protocol, n1, r2, STEP_DELTA);
         });
     } else if (n2 && r1) {
         //console.log("node absorb resource")
         deferredUpdates.push(() => {
-            nodeAbsorbResource(nodes, resources, bubbles, n2, r1, STEP_DELTA);
+            nodeAbsorbResource(nodes, resources, bubbles, protocol, n2, r1, STEP_DELTA);
         });
     }
 
@@ -273,12 +273,12 @@ export const handleContact = (contact: Contact) => {
     else if (n1 && b2) {
         //console.log("node absorb bubble")
         deferredUpdates.push(() => {
-            nodeAbsorbBubble(nodes, bubbles, n1, b2, STEP_DELTA);
+            nodeAbsorbBubble(nodes, bubbles, protocol, n1, b2, STEP_DELTA);
         });
     } else if (n2 && b1) {
         //console.log("node absorb bubble")
         deferredUpdates.push(() => {
-            nodeAbsorbBubble(nodes, bubbles, n2, b1, STEP_DELTA);
+            nodeAbsorbBubble(nodes, bubbles, protocol, n2, b1, STEP_DELTA);
         });
     }
 
@@ -420,6 +420,7 @@ export const handleSnapshotContact = (contact: Contact) => {
                 snapshotNodes,
                 snapshotResources,
                 snapshotBubbles,
+                snapshotProtocol,
                 n1,
                 r2,
                 STEP_DELTA,
@@ -431,6 +432,7 @@ export const handleSnapshotContact = (contact: Contact) => {
                 snapshotNodes,
                 snapshotResources,
                 snapshotBubbles,
+                snapshotProtocol,
                 n2,
                 r1,
                 STEP_DELTA,
@@ -444,6 +446,7 @@ export const handleSnapshotContact = (contact: Contact) => {
             nodeAbsorbBubble(
                 snapshotNodes,
                 snapshotBubbles,
+                snapshotProtocol,
                 n1,
                 b2,
                 STEP_DELTA,
@@ -454,6 +457,7 @@ export const handleSnapshotContact = (contact: Contact) => {
             nodeAbsorbBubble(
                 snapshotNodes,
                 snapshotBubbles,
+                snapshotProtocol,
                 n2,
                 b1,
                 STEP_DELTA,

@@ -2,6 +2,7 @@ import { PLANCK_MASS } from "../consts";
 import { clamp } from "../funcs/resource";
 import { preciseRound } from "../funcs/utils";
 import { Entity } from "./entity";
+import { AssetType, FeeType, Protocol } from "./protocol";
 
 export const RESOURCE_INFLATION_RATE = 1 / (60 * 60 * 24); // 1 per day
 
@@ -65,7 +66,7 @@ export class Token {
     }
 
     // Function to sell tokens and return the change in value
-    sell(amount) {
+    sell(protocol: Protocol, amount: number) {
         const realAmount = preciseRound(amount, 9);
         const clippedAmount = clamp(realAmount, 0, this.currentSupply);
         if (amount > this.currentSupply) {
@@ -85,21 +86,25 @@ export class Token {
 
         console.log("selling", realAmount, changeInValue, this.currentSupply);
 
-        return Math.abs(preciseRound(changeInValue, 3));
+        const ethReceived = Math.abs(preciseRound(changeInValue, 3));
+        const ethAfterFee = protocol.processFee(FeeType.TRADE, AssetType.ETH, ethReceived);
+
+        return ethAfterFee;
     }
 
     // Function to buy tokens and return the amount of tokens received
-    buy(value) {
+    buy(protocol: Protocol, value: number) {
         const realValue = preciseRound(value, 3);
-        const supplyChange = preciseRound(this.getChangeInSupply(realValue), 9 );
+        const valueAfterFee = protocol.processFee(FeeType.TRADE, AssetType.ETH, realValue);
+        const supplyChange = preciseRound(this.getChangeInSupply(valueAfterFee), 9 );
 
         // Update the current supply
         this.currentSupply += supplyChange;
-        this.currentSupply = preciseRound(this.currentSupply, 9);
-        // Increase the market cap proportionally
+4        // Increase the market cap proportionally
         this.marketCap += realValue;
 
         console.log("buying", realValue, supplyChange, this.currentSupply);
+        console.log("value after fee", valueAfterFee, "deducted", realValue - valueAfterFee);  
 
         return supplyChange;
     }

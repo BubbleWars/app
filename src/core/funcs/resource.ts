@@ -24,6 +24,7 @@ import { Attractor } from "../types/entity";
 import { addAttractor } from "./entity";
 import { SeededRandom, pseudoRandom } from "./portal";
 import { world } from "../world";
+import { Protocol } from "../types/protocol";
 
 export const resourceMassToAmount = (type: ResourceType, mass: number): number => {
     return mass / RESOURCE_MASS[type];
@@ -485,6 +486,7 @@ export const nodeAbsorbResource = (
     nodes: Map<string, ResourceNode>,
     resources: Map<string, Resource>,
     bubbles: Map<string, Bubble>,
+    protocol: Protocol,
     node: ResourceNode,
     absorbedResource: Resource,
     timeElapsed: number,
@@ -493,7 +495,7 @@ export const nodeAbsorbResource = (
     const resourceAbsorbed = resourceMassToAmount(absorbedResource.resource, absorbedResource.body.getMass());
 
     //get emission
-    const ethToEmission = node.token.sell(resourceAbsorbed);
+    const ethToEmission = node.token.sell(protocol, resourceAbsorbed);
     console.log("ethToEmission", ethToEmission);
 
     updateResource(resources, absorbedResource, 0);
@@ -508,6 +510,7 @@ export const nodeAbsorbResource = (
 export const nodeAbsorbBubble = (
     nodes: Map<string, ResourceNode>,
     bubbles: Map<string, Bubble>,
+    protocol: Protocol,
     node: ResourceNode,
     absorbedBubble: Bubble,
     timeElapsed: number,
@@ -520,7 +523,7 @@ export const nodeAbsorbBubble = (
     updateNode(node, currentMass + ethAbsorbed);
 
     //Add pending resource emission
-    const resourceToEmit = node.token.buy(ethAbsorbed)
+    const resourceToEmit = node.token.buy(protocol, ethAbsorbed)
     const nearestDepositor = getNearestBubbleToPositionWithMinMass(
         node.body.getPosition(), bubbles, absorbedBubble.owner, PLANCK_MASS
     )?.body.getUserData() as string ?? "0x"
