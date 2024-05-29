@@ -15,6 +15,7 @@ import { get } from "http";
 import { snapshotPendingInputs } from "../snapshots";
 import { InputType } from "../types/inputs";
 import { timeStamp } from "console";
+import { AssetType, Protocol } from "../types/protocol";
 
 //const PUNCTURE_EMIT_PER_SECOND = 100;
 
@@ -443,6 +444,7 @@ export const absorbResource = (
     bubbles: Map<string, Bubble>,
     resources: Map<string, Resource>,
     nodes: Map<string, ResourceNode>,
+    protocol: Protocol,
     bubble: Bubble,
     absorbedResource: Resource,
     timeElapsed: number,
@@ -457,7 +459,7 @@ export const absorbResource = (
             const { x, y } = absorbedResource.body.getLinearVelocity();
             if(isResourceActivated(x, y)){
                 //console.log("resource is activated", absorbedResource.body.getLinearVelocity().length());
-                punctureBubble(bubbles, resources, nodes, bubble, absorbedResource, timestamp, isSnapshot);
+                punctureBubble(bubbles, resources, nodes, protocol, bubble, absorbedResource, timestamp, isSnapshot);
                 break;
             }
             //Transfer RED to bubble
@@ -498,6 +500,7 @@ export const punctureBubble = (
     bubbles: Map<string, Bubble>,
     resources: Map<string, Resource>,
     nodes: Map<string, ResourceNode>,
+    protocol: Protocol,
     bubble: Bubble,
     incoming: Resource,
     timestamp: number,
@@ -525,11 +528,12 @@ export const punctureBubble = (
 
     const amountToBurn = attack + clamp(attack, 0, defense);
     const nodeToBurnFrom = getNearestNodeToPosition(incoming.body.getPosition(), nodes);
-    if (nodeToBurnFrom) {
+    //if (nodeToBurnFrom) {
+        protocol.deposit(AssetType.ENERGY, amountToBurn);
         console.log("Send EP to protocol")
-    } else{
-        console.log("No node to burn from");
-    }
+    //} else{
+    //    console.log("No node to burn from");
+    //}
 
 
     console.log("puncturing bubble", amount, defense, attack, amountToBurn, nodeToBurnFrom?.id, incoming.body.getPosition().x, incoming.body.getPosition().y, bubble.body.getPosition().x, bubble.body.getPosition().y);

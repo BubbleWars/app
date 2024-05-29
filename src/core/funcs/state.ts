@@ -15,6 +15,7 @@ import {
     resources,
     tempTimestamp,
     attractors,
+    protocol,
 } from "../world";
 import { portalAbsorbBubble, portalAbsorbResource } from "./portal";
 import { absorbBubble, absorbResource, getBubbleEthMass } from "./bubble";
@@ -25,6 +26,7 @@ import {
     snapshotNodes,
     snapshotResources,
     snapshotTempTimestamp,
+    snapshotProtocol,
 } from "../snapshots";
 import { Resource, ResourceNode } from "../types/resource";
 import { nodeAbsorbBubble, nodeAbsorbResource } from "./resource";
@@ -235,11 +237,11 @@ export const handleContact = (contact: Contact) => {
     //Bubble-Resource collision
     else if (b1 && r2) {
         deferredUpdates.push(() => {
-            absorbResource(bubbles, resources, nodes, b1, r2, STEP_DELTA, tempTimestamp);
+            absorbResource(bubbles, resources, nodes, protocol, b1, r2, STEP_DELTA, tempTimestamp);
         });
     } else if (b2 && r1) {
         deferredUpdates.push(() => {
-            absorbResource(bubbles, resources, nodes, b2, r1, STEP_DELTA, tempTimestamp);
+            absorbResource(bubbles, resources, nodes, protocol, b2, r1, STEP_DELTA, tempTimestamp);
         });
     }
 
@@ -364,6 +366,7 @@ export const handleSnapshotContact = (contact: Contact) => {
                 snapshotBubbles,
                 snapshotResources,
                 snapshotNodes,
+                snapshotProtocol,
                 b1,
                 r2,
                 STEP_DELTA,
@@ -377,6 +380,7 @@ export const handleSnapshotContact = (contact: Contact) => {
                 snapshotBubbles,
                 snapshotResources,
                 snapshotNodes,
+                snapshotProtocol,
                 b2,
                 r1,
                 STEP_DELTA,

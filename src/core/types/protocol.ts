@@ -12,6 +12,7 @@ import { ProtocolState } from "./state";
 
 //Protocol revenue split
 const BUYBACK_PERCENTAGE = 0.5;
+const FARMER_PERCENTAGE = 0.5;
 
 export enum AssetType {
     ETH = "ETH",
