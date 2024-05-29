@@ -319,7 +319,7 @@ export const snapshotRun = (
             snapshotAttractors,
             current,
         );
-        snapshotProtocol.run(current, snapshotWorld, snapshotUsers, snapshotBubbles, snapshotPortals, snapshotObstacles, snapshotNodes, snapshotResources, snapshotPendingInputs);
+        snapshotProtocol.run(current, snapshotWorld, snapshotUsers, snapshotBubbles, snapshotPortals, snapshotObstacles, snapshotNodes, snapshotResources, snapshotProtocol, snapshotPendingInputs);
 
         // Step the snapshotWorld
         snapshotWorld.step(stepDelta);

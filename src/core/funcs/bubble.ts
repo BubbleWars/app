@@ -172,6 +172,15 @@ export const createBubble = (
     return bubble;
 };
 
+export const bubbleRemoveEth = (
+    bubble: Bubble,
+    amount: number,
+    timestamp: number,
+): void => {
+    const newEthMass = getBubbleEthMass(bubble) - amount;
+    setBubbleEthMass(bubble, newEthMass);
+}
+
 export const destroyBubble = (
     bubbles: Map<string, Bubble>,
     bubble: Bubble,

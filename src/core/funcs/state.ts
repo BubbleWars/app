@@ -18,7 +18,7 @@ import {
     protocol,
 } from "../world";
 import { portalAbsorbBubble, portalAbsorbResource } from "./portal";
-import { absorbBubble, absorbResource, getBubbleEthMass } from "./bubble";
+import { absorbBubble, absorbResource, bubbleRemoveEth, getBubbleEthMass, setBubbleEthMass } from "./bubble";
 import {
     snapshotBubbles,
     snapshotDeferredUpdates,
@@ -31,7 +31,7 @@ import {
 import { Resource, ResourceNode } from "../types/resource";
 import { nodeAbsorbBubble, nodeAbsorbResource } from "./resource";
 import { Attractor } from "../types/entity";
-import { AssetType, Protocol } from "../types/protocol";
+import { AssetType, FeeType, Protocol } from "../types/protocol";
 
 export const updateState = (
     state: Snapshot,
@@ -207,6 +207,8 @@ export const handleContact = (contact: Contact) => {
     const r2 = resources.get(
         contact.getFixtureB().getBody().getUserData() as string,
     );
+    const is1Edge = contact.getFixtureA().getShape().getType() == 'edge'
+    const is2Edge = contact.getFixtureB().getShape().getType() == 'edge'
 
     //Portal-Bubble collision
     if (p1 && b2) {
@@ -285,6 +287,13 @@ export const handleContact = (contact: Contact) => {
     //Resource-Reosurce collision
     else if (r1 && r2) {
         contact.setRestitution(1);
+    } 
+    
+    //Bubble-Border collision
+    else if (b1 && is2Edge) {
+        contact.setRestitution(1);
+    } else if (b2 && is1Edge) {
+        contact.setRestitution(1);
     }
 
     //Bubble-Obstacle collision
@@ -320,6 +329,8 @@ export const handleSnapshotContact = (contact: Contact) => {
     const r2 = snapshotResources.get(
         contact.getFixtureB().getBody().getUserData() as string,
     );
+    const is1Edge = contact.getFixtureA().getShape().getType() == 'edge'
+    const is2Edge = contact.getFixtureB().getShape().getType() == 'edge'
 
     //Portal-Bubble collision
     if (p1 && b2) {
@@ -470,6 +481,17 @@ export const handleSnapshotContact = (contact: Contact) => {
         contact.setRestitution(1);
     }
 
+    //Bubble-Border collision
+    else if (b1 && is2Edge) {
+        const remainingEth = protocol.processFee(FeeType.BORDER, AssetType.ETH, getBubbleEthMass(b1));
+        setBubbleEthMass(b1, remainingEth);
+        contact.setRestitution(1);
+    } else if (b2 && is1Edge) {
+        const remainingEth = protocol.processFee(FeeType.BORDER, AssetType.ETH, getBubbleEthMass(b2));
+        setBubbleEthMass(b2, remainingEth);
+        contact.setRestitution(1);
+    }
+    
     //Bubble-Obstacle collision
     else if (b1 && !b2) {
         contact.setRestitution(1);

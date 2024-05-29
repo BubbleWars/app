@@ -63,7 +63,6 @@ export class Protocol {
         if(balance) this.balance[type] = balance + amount;
         else this.balance[type] = amount;
     }
-
     getPendingBalance(type: AssetType) {
         return this.pendingBalance[type];
     }
@@ -83,13 +82,14 @@ export class Protocol {
     }
 
     buyBack(
+        protocol: Protocol,
         ethAmount: number,
         nodes: Map<Address, ResourceNode>,
     ) {
         const buyPerNode = ethAmount / nodes.size;
         let amountBought = 0;
         nodes.forEach((node) => {
-            amountBought += node.token.buy(buyPerNode);
+            amountBought += node.token.buy(protocol, buyPerNode);
         });
         return amountBought;
     }
@@ -103,6 +103,7 @@ export class Protocol {
         obstacles: Map<Address, Obstacle>,
         nodes: Map<Address, ResourceNode>,
         resources: Map<Address, Resource>,
+        protocol: Protocol,
         pendingInputs: Array<InputWithExecutionTime>,
     ) {
         const pendingBalance = this.pendingBalance[type];
@@ -114,7 +115,7 @@ export class Protocol {
                     break;
             
                 case AssetType.ETH:
-                    const energyToSpawn = this.buyBack(pendingBalance, nodes);
+                    const energyToSpawn = this.buyBack(protocol, pendingBalance, nodes);
                     this.addPendingSpawn(AssetType.ENERGY, energyToSpawn);
                     this.removePendingBalance(type, pendingBalance);
                     break;
@@ -177,6 +178,7 @@ export class Protocol {
         obstacles: Map<Address, Obstacle>,
         nodes: Map<Address, ResourceNode>,
         resources: Map<Address, Resource>,
+        protocol: Protocol,
         pendingInputs: Array<InputWithExecutionTime>,
     ){
         const timePassed = timestamp - this.last;
@@ -193,7 +195,8 @@ export class Protocol {
             portals, 
             obstacles, 
             nodes, 
-            resources, 
+            resources,
+            protocol,
             pendingInputs
         );
         this.handlePendingBalance(
@@ -205,6 +208,7 @@ export class Protocol {
             obstacles, 
             nodes, 
             resources, 
+            protocol,
             pendingInputs
         );
         this.handlePendingSpawn(

@@ -290,8 +290,8 @@ export const run = (
         handleBubbleUpdates(current, bubbles, stepDelta);
         handleNodeUpdates(current, world, nodes, bubbles, resources, portals, attractors, stepDelta);
         handleAttractors(nodes, resources, bubbles, portals, attractors,  current);
-        protocol.run(current, world, users, bubbles, portals, obstacles, nodes, resources, pendingInputs);
-        
+        protocol.run(current, world, users, bubbles, portals, obstacles, nodes, resources, protocol, pendingInputs);
+
         // Step the world
         world.step(stepDelta);
         current = preciseRound(current + stepDelta, 2);
