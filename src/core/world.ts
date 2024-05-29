@@ -31,6 +31,7 @@ import {
 } from "./funcs/resource";
 import { createBoundary, createEdges, preciseRound } from "./funcs/utils";
 import { Attractor } from "./types/entity";
+import { Protocol } from "./types/protocol";
 
 export const users = new Map<Address, User>();
 export const bubbles = new Map<string, Bubble>();
@@ -40,6 +41,7 @@ export const nodes = new Map<string, ResourceNode>();
 export const resources = new Map<string, Resource>();
 export const pendingInputs = new Array<InputWithExecutionTime>();
 export const attractors = new Array<Attractor>();
+export const protocol = new Protocol()
 
 export let world = new World({
     gravity: Vec2(0, 0),
@@ -55,6 +57,14 @@ export let currentState: Snapshot = {
     resources: [],
     obstacles: [],
     attractors: [],
+    protocol: {
+        last: 0,
+        balance: 0,
+        pendingEthBalance: 0,
+        pendingEnergyBalance: 0,
+        pendingEnergySpawn: 0,
+    },
+
 };
 
 export let lastTimestamp = 0;
@@ -89,6 +99,8 @@ export const init = (initialState?: Snapshot) => {
         attractors.length = 0;
         pendingInputs.length = 0;
         deferredUpdates.length = 0;
+        protocol.init(initialState.protocol)
+
 
         if (!initialState?.nodes || initialState.nodes.length == 0) {
            //console.log("generating nodes");
@@ -278,7 +290,8 @@ export const run = (
         handleBubbleUpdates(current, bubbles, stepDelta);
         handleNodeUpdates(current, world, nodes, bubbles, resources, portals, attractors, stepDelta);
         handleAttractors(nodes, resources, bubbles, portals, attractors,  current);
-
+        protocol.run(current, world, users, bubbles, portals, obstacles, nodes, resources, pendingInputs);
+        
         // Step the world
         world.step(stepDelta);
         current = preciseRound(current + stepDelta, 2);
@@ -316,6 +329,7 @@ export const run = (
         nodes,
         resources,
         attractors,
+        protocol,
         lastTimestamp,
     );
 

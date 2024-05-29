@@ -29,6 +29,7 @@ import {
 import { Resource, ResourceNode } from "../types/resource";
 import { nodeAbsorbBubble, nodeAbsorbResource } from "./resource";
 import { Attractor } from "../types/entity";
+import { AssetType, Protocol } from "../types/protocol";
 
 export const updateState = (
     state: Snapshot,
@@ -40,6 +41,7 @@ export const updateState = (
     nodes: Map<string, ResourceNode>,
     resources: Map<string, Resource>,
     attractors: Array<Attractor>,
+    protocol: Protocol,
     timestamp: number,
 ) => {
     state.timestamp = timestamp;
@@ -116,6 +118,16 @@ export const updateState = (
     }));
 
     state.attractors = [...attractors]
+
+    state.protocol = {
+        last: protocol.last,
+        balance: protocol.balance[AssetType.ETH],
+        pendingEnergyBalance: protocol.getPendingBalance(AssetType.ENERGY),
+        pendingEthBalance: protocol.getPendingBalance(AssetType.ETH),
+        pendingEnergySpawn: protocol.getPendingSpawn(AssetType.ENERGY),
+    }
+
+
 };
 
 export const createState = (
@@ -127,6 +139,7 @@ export const createState = (
     nodes: Map<string, ResourceNode>,
     resources: Map<string, Resource>,
     attractors: Array<Attractor>,
+    protocol: Protocol,
     timestamp: number,
 ): Snapshot => {
     const state: Snapshot = {
@@ -139,6 +152,13 @@ export const createState = (
         nodes: [],
         resources: [],
         attractors: [],
+        protocol: {
+            last: 0,
+            balance: 0,
+            pendingEnergyBalance: 0,
+            pendingEthBalance: 0,
+            pendingEnergySpawn: 0,
+        },
     };
     updateState(
         state,
@@ -150,6 +170,7 @@ export const createState = (
         nodes,
         resources,
         attractors,
+        protocol,
         timestamp,
     );
     return state;

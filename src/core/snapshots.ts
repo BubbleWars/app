@@ -5,7 +5,7 @@ import { Obstacle } from "./types/obstacle";
 import { Address } from "./types/address";
 import { User } from "./types/user";
 import { Input, InputWithExecutionTime } from "./types/inputs";
-import { Snapshot } from "./types/state";
+import { ProtocolState, Snapshot } from "./types/state";
 import { MAX_ADVANCE_STATE_TIME, STEP_DELTA, WORLD_WIDTH } from "./consts";
 import { handleInput, handlePendingInputs } from "./funcs/inputs";
 import { updateState, handleSnapshotContact } from "./funcs/state";
@@ -33,6 +33,7 @@ import { tempTimestamp } from "./world";
 import { createBoundary, createEdges, preciseRound } from "./funcs/utils";
 import { time } from "console";
 import { Attractor } from "./types/entity";
+import { Protocol } from "./types/protocol";
 
 export const snapshotUsers = new Map<Address, User>();
 export const snapshotBubbles = new Map<string, Bubble>();
@@ -42,6 +43,7 @@ export const snapshotNodes = new Map<string, ResourceNode>();
 export const snapshotResources = new Map<string, Resource>();
 export const snapshotPendingInputs = new Array<InputWithExecutionTime>();
 export const snapshotAttractors = new Array<Attractor>();
+export const snapshotProtocol = new Protocol();
 
 //only client
 export const snapshots = new Map<number, Snapshot>();
@@ -60,6 +62,13 @@ export let snapshotCurrentState: Snapshot = {
     resources: [],
     obstacles: [],
     attractors: [],
+    protocol: {
+        last: 0,
+        balance: 0,
+        pendingEthBalance: 0,
+        pendingEnergyBalance: 0,
+        pendingEnergySpawn: 0,
+    },
 };
 
 export let snapshotLastTimestamp = 0;
@@ -93,6 +102,7 @@ export const snapshotInit = (initialState?: Snapshot) => {
         snapshotAttractors.length = 0;
         snapshotPendingInputs.length = 0;
         snapshotDeferredUpdates.length = 0;
+        snapshotProtocol.init(initialState.protocol);
 
 
         if (!initialState?.nodes || initialState.nodes.length == 0) {
@@ -309,6 +319,7 @@ export const snapshotRun = (
             snapshotAttractors,
             current,
         );
+        snapshotProtocol.run(current, snapshotWorld, snapshotUsers, snapshotBubbles, snapshotPortals, snapshotObstacles, snapshotNodes, snapshotResources, snapshotPendingInputs);
 
         // Step the snapshotWorld
         snapshotWorld.step(stepDelta);
@@ -345,6 +356,7 @@ export const snapshotRun = (
         snapshotNodes,
         snapshotResources,
         snapshotAttractors,
+        snapshotProtocol,
         snapshotLastTimestamp,
     );
 

@@ -76,8 +76,6 @@ export const generateResources = (
     portals: Map<string, Portal>,
     bubbles: Map<string, Bubble>,
     amount: number,
-    node: ResourceNode,
-    range: number,
 ): void => {
     let count = 0;
 
@@ -124,10 +122,10 @@ export const generateResources = (
                 }
             });
 
-            if(isSafe){
-                createResource(0, world, resources, ResourceType.ENERGY, x, y, 1, node.owner);
-                safeSpawnFound = true;
-            }
+            // if(isSafe){
+            //     createResource(0, world, resources, ResourceType.ENERGY, x, y, 1, node.owner);
+            //     safeSpawnFound = true;
+            // }
 
             attempt++;
         }

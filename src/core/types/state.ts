@@ -44,7 +44,6 @@ export interface ResourceNodeState {
     pendingEthEmission: { depositor: string, amount: number }[]; // amount of ETH pending to be emitted
     pendingResourceEmission: { depositor: string, amount: number }[]; // amount of resource pending to be emitted
 
-
     //Token Bonding curve info
     currentSupply: number; // current supply of the token
     marketCap: number; // current amount of ETH in node
@@ -61,6 +60,15 @@ export interface ResourceState {
     attractor: string | undefined;
 }
 
+export interface ProtocolState {
+    last: number,
+    balance: number
+    pendingEthBalance: number,
+    pendingEnergyBalance: number,
+    pendingEnergySpawn: number
+}
+
+
 export interface Snapshot {
     timestamp: number;
     pendingInputs: InputWithExecutionTime[];
@@ -71,6 +79,7 @@ export interface Snapshot {
     nodes: ResourceNodeState[];
     resources: ResourceState[];
     attractors: Attractor[];
+    protocol: ProtocolState;
 }
 
 export type History = Snapshot[];
