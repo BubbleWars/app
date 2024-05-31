@@ -99,7 +99,7 @@ export const generateResources = (
             let isSafe = true;
             portals.forEach((portal) => {
                 const portalPosition = portal.body.getPosition();
-                const portalRadius = portal.fixture.getShape().getRadius();
+                const portalRadius = portal?.fixture?.getShape()?.getRadius() ?? 0;
                 if (Vec2.distance(spawnPoint, portalPosition) < entityRadius + portalRadius + minimumSafeDistance) {
                     isSafe = false;
                 }
@@ -108,7 +108,7 @@ export const generateResources = (
             // Check distance from bubbles
             bubbles.forEach((bubble) => {
                 const bubblePosition = bubble.body.getPosition();
-                const bubbleRadius = bubble.fixture.getShape().getRadius();
+                const bubbleRadius = bubble?.fixture?.getShape()?.getRadius() ?? 0;
                 if (Vec2.distance(spawnPoint, bubblePosition) < entityRadius + bubbleRadius + minimumSafeDistance) {
                     isSafe = false;
                 }
@@ -117,16 +117,16 @@ export const generateResources = (
             // Check distance from nodes
             nodes.forEach((node) => {
                 const nodePosition = node.body.getPosition();
-                const nodeRadius = node.fixture.getShape().getRadius();
+                const nodeRadius = node?.fixture?.getShape()?.getRadius() ?? 0;
                 if (Vec2.distance(spawnPoint, nodePosition) < entityRadius + nodeRadius + minimumSafeDistance) {
                     isSafe = false;
                 }
             });
 
-            // if(isSafe){
-            //     createResource(0, world, resources, ResourceType.ENERGY, x, y, 1, node.owner);
-            //     safeSpawnFound = true;
-            // }
+            if(isSafe){
+                createResource(0, world, resources, ResourceType.ENERGY, x, y, 1);
+                safeSpawnFound = true;
+            }
 
             attempt++;
         }

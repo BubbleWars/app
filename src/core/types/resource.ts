@@ -41,7 +41,7 @@ export class Token {
     k: number;
 
 
-    constructor(currentSupply = 0, marketCap = 0, k = 0.001) {
+    constructor(currentSupply = 0, marketCap = 0, k = 0.00001) {
         this.currentSupply = currentSupply;
         this.marketCap = marketCap;
         this.k = k;
@@ -77,12 +77,12 @@ export class Token {
         const oldSupply = this.currentSupply;
         const newSupply = this.currentSupply - clippedAmount;
 
-        const changeInValue = preciseRound(this.getChangeInValue(-clippedAmount), 3);
+        const changeInValue = preciseRound(this.getChangeInValue(-clippedAmount), 9);
 
         // Update the current supply
         this.currentSupply = preciseRound(newSupply, 9);
         // Decrease the market cap proportionally
-        this.marketCap += preciseRound(changeInValue, 3);
+        this.marketCap += preciseRound(changeInValue, 9);
 
         console.log("selling", realAmount, changeInValue, this.currentSupply);
 
@@ -92,9 +92,23 @@ export class Token {
         return ethAfterFee;
     }
 
+    buyWithoutFee(value: number) {
+        const realValue = preciseRound(value, 9);
+        const supplyChange = preciseRound(this.getChangeInSupply(realValue), 9 );
+
+        // Update the current supply
+        this.currentSupply += supplyChange;
+4        // Increase the market cap proportionally
+        this.marketCap += realValue;
+
+        console.log("buying", realValue, supplyChange, this.currentSupply);
+
+        return supplyChange;
+    }
+
     // Function to buy tokens and return the amount of tokens received
     buy(protocol: Protocol, value: number) {
-        const realValue = preciseRound(value, 3);
+        const realValue = preciseRound(value, 9);
         const valueAfterFee = protocol.processFee(FeeType.TRADE, AssetType.ETH, realValue);
         const supplyChange = preciseRound(this.getChangeInSupply(valueAfterFee), 9 );
 

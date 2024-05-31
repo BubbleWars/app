@@ -20,8 +20,8 @@ export enum AssetType {
 }
 
 export enum FeeType {
-    SPAWN = 5,
-    TRADE = 5,
+    SPAWN = 10,
+    TRADE = 2.5,
     BORDER = 10,  
 }
 
@@ -29,8 +29,8 @@ export class Protocol {
     //Constants
     MAX_NODES = 10;
     MAX_RESOURCES = 10000;
-    inflationRate = 10 // Max inflation rate per cycle
-    cycle: number = 100; // Should run every 100s
+    inflationRate = 1 // Max inflation rate per cycle
+    cycle: number = 10; // Should run every 100s
 
     //State
     last: number = 0; // Last time the protocol was run
@@ -39,45 +39,53 @@ export class Protocol {
     pendingSpawn: Map<AssetType, number> = new Map<AssetType, number>(); // Pending spawn of ETH or ENERGY to be used for buyback if ETH or respawn if ENERGY
 
     deposit(type: AssetType, amount: number) { 
+        console.log("Depositing", type, amount);
         if(type == AssetType.ENERGY) this.addPendingBalance(type, amount);
         else {
             let amountForBuyBack = amount * BUYBACK_PERCENTAGE;
             let remaining = amount - amountForBuyBack;
-            this.balance[type] += remaining;
+            this.addBalance(type, remaining);
+            this.addPendingBalance(AssetType.ETH, amountForBuyBack);
         }
     }
     withdraw(type: AssetType, amount: number) { 
-        this.balance[type] -= amount 
+        console.log("Withdrawing", type, amount);
+        this.addBalance(type, -amount);
     }
     processFee(type: FeeType, asset: AssetType, amount: number) {
+        const feeTypeAsString = FeeType[type];
+        console.log("Processing fee", feeTypeAsString, "for", amount, asset);
         const fee = amount * type / 100;
         this.deposit(asset, fee);
         return amount - fee;
     }
 
     getBalance(type: AssetType) {
-        return this.balance[type];
+        return this.balance.get(type);
     }
     addBalance(type: AssetType, amount: number) {
-        const balance = this.balance[type];
-        if(balance) this.balance[type] = balance + amount;
-        else this.balance[type] = amount;
+        console.log("Adding balance", type, amount);
+        const balance = this.getBalance(type);
+        if(balance) this.balance.set(type, balance + amount);
+        else this.balance.set(type, amount);
     }
     getPendingBalance(type: AssetType) {
-        return this.pendingBalance[type];
+        return this.pendingBalance.get(type);
     }
 
     addPendingBalance(type: AssetType, amount: number) {
         //handle if new type doesn't exist
-        const balance = this.pendingBalance[type];
-        if(balance) this.pendingBalance[type] = balance + amount;
-        else this.pendingBalance[type] = amount;
+        const balance = this.pendingBalance.get(type);
+        if(balance) this.pendingBalance.set(type, balance + amount);
+        else this.pendingBalance.set(type, amount);
+
+        console.log("Adding pending balance", type, amount, "pending balance", this.pendingBalance);
     }
  
     removePendingBalance(type: AssetType, amount: number) {
         //handle if new type doesn't exist
-        const balance = this.pendingBalance[type];
-        if(balance >= amount) this.pendingBalance[type] -= amount;
+        const balance = this.pendingBalance.get(type);
+        if(balance >= amount) this.pendingBalance.set(type, balance - amount);
         else false;
     }
 
@@ -89,8 +97,9 @@ export class Protocol {
         const buyPerNode = ethAmount / nodes.size;
         let amountBought = 0;
         nodes.forEach((node) => {
-            amountBought += node.token.buy(protocol, buyPerNode);
+            amountBought += node.token.buyWithoutFee(buyPerNode);
         });
+        console.log("Bought back", amountBought, "energy for", ethAmount, "ETH");
         return amountBought;
     }
 
@@ -106,8 +115,9 @@ export class Protocol {
         protocol: Protocol,
         pendingInputs: Array<InputWithExecutionTime>,
     ) {
-        const pendingBalance = this.pendingBalance[type];
+        const pendingBalance = this.getPendingBalance(type);
         if(pendingBalance) {
+            console.log("Pending balance found, handling", type, pendingBalance)
             switch (type) {
                 case AssetType.ENERGY:
                     this.addPendingSpawn(type, pendingBalance);
@@ -123,23 +133,28 @@ export class Protocol {
                     break;
             }
         }
+
+        console.log("Handled pending balance", type, pendingBalance);
     }
 
     getPendingSpawn(type: AssetType) {
-        return this.pendingSpawn[type];
+        return this.pendingSpawn.get(type);
     }
 
     addPendingSpawn(type: AssetType, amount: number) {
+        console.log("Adding pending spawn", type, amount);
         //handle if new type doesn't exist
-        const balance = this.pendingSpawn[type];
-        if(balance) this.pendingSpawn[type] = balance + amount;
-        else this.pendingSpawn[type] = amount; 
+        const balance = this.pendingSpawn.get(type);
+        if(balance) this.pendingSpawn.set(type, balance + amount);
+        else this.pendingSpawn.set(type, amount);
+        console.log("Pending spawn", this.pendingSpawn);
     }
 
     removePendingSpawn(type: AssetType, amount: number) {
+        console.log("Removing pending spawn", type, amount);
         //handle if new type doesn't exist
-        const balance = this.pendingSpawn[type];
-        if(balance >= amount) this.pendingSpawn[type] -= amount;
+        const balance = this.pendingSpawn.get(type);
+        if(balance >= amount) this.pendingSpawn.set(type, balance - amount);
         else false;
     }
 
@@ -154,8 +169,8 @@ export class Protocol {
         resources: Map<Address, Resource>,
         pendingInputs: Array<InputWithExecutionTime>,
     ) {
-        const pending = this.pendingSpawn[type];
-        const amountToSpawn = Math.min(pending, this.balance[type], this.inflationRate);
+        const pending = this.getPendingSpawn(type);
+        const amountToSpawn = Math.min(pending, this.getPendingSpawn(type), this.inflationRate);
 
         generateResources(
             world,
@@ -167,6 +182,8 @@ export class Protocol {
         );
 
         this.removePendingSpawn(type, amountToSpawn);
+
+        console.log("Spawned", amountToSpawn, type);
     }
     
     run(
@@ -182,10 +199,7 @@ export class Protocol {
         pendingInputs: Array<InputWithExecutionTime>,
     ){
         const timePassed = timestamp - this.last;
-        if(timePassed < this.cycle) {
-            this.last = timestamp;
-            return;
-        }
+        if(timePassed < this.cycle) return;
 
         this.handlePendingBalance(
             AssetType.ETH,
