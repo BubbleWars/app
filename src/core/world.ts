@@ -46,7 +46,6 @@ export const protocol = new Protocol()
 export let world = new World({
     gravity: Vec2(0, 0),
 });
-world.
 
 export let currentState: Snapshot = {
     timestamp: 0,
