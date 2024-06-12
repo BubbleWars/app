@@ -285,9 +285,7 @@ export const emitBubble = (
     const m = getTotalBubbleMass(bubble);
     const me = emittedBubble.body.getMass();
     const deltaVelocity = calculateDeltaVelocity(emittedBubbleRelativeVelocity, m, me);
-    bubble.body.setLinearVelocity(
-        bubble.body.getLinearVelocity().clone().add(deltaVelocity),
-    );
+    bubble.body.applyLinearImpulse(deltaVelocity.clone().mul(bubble.body.getMass()), bubble.body.getPosition(), true);
 
     return emittedBubble;
 };

@@ -20,6 +20,6 @@ export const MAX_VELOCITY = 1.3;
 export const CLASH_KE = 0.0001;
 export const CLASH_VELOCITY = 2;
 export const PLANCK_MASS = 0.001; 
-export const MIN_DELTA_VELOCITY = 0.4;
+export const MIN_DELTA_VELOCITY = 0.1;
 
 Settings.velocityThreshold = 0.05;
