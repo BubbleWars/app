@@ -8,7 +8,7 @@ export const STEP_DELTA = 0.01;
 export const MAX_ADVANCE_STATE_TIME = 500;
 export const MIN_MASS = 0.000001;
 export const EMISSION_SPEED = 0.08;
-export const DAMPENING = 0.05;
+export const DAMPENING = 0.08;
 export const ENERGY_NODE_COUNT = 100;
 export const EMISSION_INTERVALS = 0.5;
 
@@ -20,6 +20,6 @@ export const MAX_VELOCITY = 1.3;
 export const CLASH_KE = 0.0001;
 export const CLASH_VELOCITY = 2;
 export const PLANCK_MASS = 0.001; 
-export const MIN_DELTA_VELOCITY = 0.1;
+export const MIN_DELTA_VELOCITY = 0.4;
 
 Settings.velocityThreshold = 0.05;

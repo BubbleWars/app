@@ -12,6 +12,7 @@ import { useState } from "react";
 import { setAiming } from "@/store/controls";
 import { BubbleState } from "../../../core/types/state";
 import { useFrame } from "@react-three/fiber";
+import { RESOURCE_TO_COLOR } from "./Resources";
 
 export const ResourceTypeToName = {
     [ResourceType.BUBBLE]: "ETH",
@@ -33,7 +34,7 @@ export const ResourceButton = ({
     amount: number,
 }) => {
     const dispatch = useDispatch();
-    const colorName = ResourceTypeToName[type];
+    const colorName = RESOURCE_TO_COLOR[type];
     const [text, setText] = useState<string>(amount.toFixed(2));
     const [isHovered, setIsHovered] = useState<boolean>(false);
     const mass = Math.max(amount/10, 1); // 10% of the resource but at least 1

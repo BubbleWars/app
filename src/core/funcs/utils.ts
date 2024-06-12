@@ -109,19 +109,8 @@ export const truncateAddress = (
     return address.slice(0, 2 + length) + ".." + address.slice(-length);
 };
 
-export const ethereumAddressToColor = (ethAddress: string) => {
-    if (
-        !ethAddress ||
-        ethAddress.length !== 42 ||
-        !ethAddress.startsWith("0x")
-    ) {
-        return "#000000";
-    }
-
-    // Use the first six characters after '0x' as the color code
-    const colorCode = ethAddress.substring(2, 8);
-
-    return `#${colorCode}`;
+export const ethereumAddressToColor = (ethAddress: `0x${string}`): string => {
+    return getAddressColor(ethAddress, 1000);
 };
 
 export const  preciseRound = (num: number, decimalPlaces: number): number => {
@@ -132,4 +121,51 @@ export const  preciseRound = (num: number, decimalPlaces: number): number => {
 export const clipDecimals = (num: number, decimalPlaces: number): number => {
     const factor = Math.pow(10, decimalPlaces);
     return Math.floor(num * factor) / factor;
+}
+
+function hslToHex(h, s, l) {
+    l /= 100;
+    const a = s * Math.min(l, 1 - l) / 100;
+    const f = n => {
+        const k = (n + h / 30) % 12;
+        const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+        return Math.round(255 * color).toString(16).padStart(2, '0');   // convert to Hex and prefix "0" if needed
+    };
+    return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+function getColorFromPalette(index, maxColors) {
+    // Calculate the increment based on the maxColors
+    const increment = 360 / maxColors;
+
+    // Calculate the angle on the color wheel
+    let angle = (index * increment) % 360;
+
+    // If the index is odd, invert the angle to achieve the alternating pattern
+    if (index % 2 !== 0) {
+        angle = 360 - angle;
+    }
+
+    // Convert the angle to a HSL color with full saturation and lightness
+    const color = hslToHex(angle, 100, 50);
+
+    return color;
+}
+
+function getAddressAsNumber(address: `0x${string}`): number {
+    // Convert the address to a number by summing the ASCII values of each character
+    return address.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+}
+
+function getAddressColor(address: `0x${string}`, maxColors: number): string {
+    // Get the address as a number
+    const addressNumber = getAddressAsNumber(address);
+
+    // Calculate the index based on the maxColors
+    const index = addressNumber % maxColors;
+
+    // Get the color from the palette
+    const color = getColorFromPalette(index, maxColors);
+
+    return color;
 }

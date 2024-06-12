@@ -15,7 +15,7 @@ import { GameBar } from "./components/GameBar";
 import { Canvas, extend } from "@react-three/fiber";
 import { CustomCameraControls } from "./components/CameraControls";
 import * as THREE from "three";
-import { Text, Text3D } from "@react-three/drei";
+import { Plane, Text, Text3D } from "@react-three/drei";
 import { ScreenTitle } from "./components/screens/ScreenTitle";
 import { ScreenSpawnPortal } from "./components/screens/ScreenSpawnPortal";
 import { useState } from "react";
@@ -26,6 +26,26 @@ import { BarBottom } from "./components/ui/BarBottom";
 import { usePrivy } from "@privy-io/react-auth";
 import { ScreenLogin } from "./components/screens/ScreenLogin";
 import { WORLD_WIDTH } from "../../core/consts";
+
+import { useLoader } from '@react-three/fiber';
+import { TextureLoader } from 'three';
+
+function Background() {
+    const defaultUrl = "/bg.png";
+    const texture = useLoader(TextureLoader, defaultUrl);
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(400, 400);
+
+    return (
+        <Plane
+            position={[0, 0, -10]}
+        >
+            <planeGeometry args={[WORLD_WIDTH*10, WORLD_WIDTH*10]} />
+            <meshBasicMaterial attach="material" map={texture} />
+        </Plane>
+    );
+}
+
 
 function App() {
     //const { snapshot } = useInspect({ type: InspectType.State, value: 0 });
@@ -49,18 +69,13 @@ function App() {
                 dpr={[1, 2]}
                 style={{ height: "100vh", width: "100vw" }}
             >
-                <color attach="background" args={[0xFAFAFA]} />
+                <Background />
+
                 <Game />
                 <CustomCameraControls />
 
-                <gridHelper
-                    position={[0, 0, -10]}
-                    rotation={[Math.PI / 2, 0, 0]}
-                    args={[WORLD_WIDTH, 100, 0xeee8d5, 0xeee8d5]}
-                />
             </Canvas>
-            <BarSide />
-            <BarBottom />
+
             {!authenticated && <ScreenLogin />}
             {authenticated && <ScreenSpawnPortal /> }
             {authenticated && <ScreenTitle />}

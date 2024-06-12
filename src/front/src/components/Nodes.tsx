@@ -47,12 +47,7 @@ export const Node = ({ nodeId }: { nodeId: string }) => {
                 <sphereGeometry />
                 <Outlines thickness={0.1} color={outlineColor} />
                 <meshBasicMaterial toneMapped={false} color={baseColor} />
-                <Sparkles
-                    color={baseColor}
-                    size={1000000}
-                    count={2}
-                    speed={1}
-                />
+                
             </mesh>
         </>
     );

@@ -16,7 +16,7 @@ import { resourceMassToAmount } from "../../../core/funcs/resource";
 import { isResourceActivated } from "../../../core/funcs/bubble";
 
 export const RESOURCE_TO_COLOR = {
-    [ResourceType.ENERGY]: "#0000ff",
+    [ResourceType.ENERGY]: "#3ABEF9",
 }
 
 export const Resource = ({ resourceId }: { resourceId: string }) => {
@@ -32,7 +32,7 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
     ) ?? {id:"", position: {x: 0, y: 0}, mass: 0, velocity: {x: 0, y: 0}, type: ResourceType.ENERGY, owner: ""};
     const mass = resource?.mass.toFixed(2) ?? "0";
     const amount = resourceMassToAmount(resource?.type, resource?.mass ?? 0);
-    const radius = massToRadius(parseInt(mass ?? "0")) + 0.5;
+    const radius = massToRadius(parseInt(mass ?? "0"));
     const velocity = resource?.velocity
     const magnitude = Math.sqrt(velocity?.x ** 2 + velocity?.y ** 2)
     const kineticEnergy =
@@ -97,7 +97,7 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
             }
             //console.log("resource not found")
         }
-        const radius = massToRadius(resource.mass);
+        const radius = massToRadius(resource.mass) + 0.1;
         const newRadius = MathUtils.lerp(meshRef.current.scale.x, radius, 0.1);
         meshRef.current.scale.set(newRadius, newRadius, newRadius);
         //console.log("resource position:", resource.position)
@@ -118,7 +118,7 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
 
     //blue in hex
     const baseColor = RESOURCE_TO_COLOR[resource.type]
-    const outlineColor = darkenColor(baseColor, 0.2); // Darken by 20%
+    const outlineColor = darkenColor(baseColor, 0.5); // Darken by 20%
 
     console.log("velocity in resource", velocity.x, velocity.y)
     console.log("is resource activated", isResourceActivated(velocity.x, velocity.y))
@@ -127,15 +127,15 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
     return (
         <>
             <CustomText
-                position={new THREE.Vector3(radius + 1, radius + 0.5, 0).add(
+                position={new THREE.Vector3(radius + 0.3, radius + 0.4, 0).add(
                     textPosition,
                 )}
                 //position={textPosition}
-                size={radius * 0.5}
-                color={baseColor}
-                noOutline={true}
+                size={0.2}
+                color={"white"}
+                
             >
-                {amount} {ResourceTypeToName[resource.type]?.toUpperCase()}  {magnitude}
+                {amount.toFixed(2)}
             </CustomText>
             {isResourceActivated(velocity.x, velocity.y) && resource.type == ResourceType.ENERGY && (
                 <CustomText
@@ -143,8 +143,7 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
                         textPosition,
                     )}
                     //position={textPosition}
-                    size={radius * 0.2}
-                    color={baseColor}
+                    size={radius * 0.5}
                     noOutline={true}
                     >
                         WILL HURT!
@@ -163,7 +162,7 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
                 onContextMenu={() => setIsSelected(false)}
             >
                 <sphereGeometry />
-                <Outlines thickness={2} color={outlineColor} />
+                <Outlines thickness={0.1} color={outlineColor} />
                 <meshBasicMaterial
                     toneMapped={false}
                     color={isResourceActivated(velocity.x, velocity.y) ? "red" : baseColor}

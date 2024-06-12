@@ -102,6 +102,7 @@ import Outline from "./Outline";
 import { text } from "stream/consumers";
 import { usePfpTexture, useTextureWithFallback } from "@/hooks/state";
 import { BubbleState } from "../../../core/types/state";
+import ShadowMesh from "./Shadow";
 
 export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
     const { wallets } = useWallets();
@@ -131,7 +132,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
 
     const pfpUrl = user?.pfpUrl;
    //console.log("pfpUrl", pfpUrl)
-    const texture = usePfpTexture(pfpUrl, "/bubblewars.png", user?.social);
+    //const texture = usePfpTexture(pfpUrl, "/bubblewars.png", user?.social);
     //texture.anisotropy = 16;
     //if(!bubble) return null;
     const velocity = bubble?.velocity ?? { x: 0, y: 0 };
@@ -264,7 +265,8 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
                     bubbleId={bubbleId}
                 />
             )}
-            <Circle
+            <ShadowMesh originalMesh={
+            <mesh
             args={[undefined, 60]}
                 ref={meshRef}
                 onPointerEnter={() => {
@@ -283,18 +285,15 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
                 }}
                 onContextMenu={() => setIsSelected(false)}
             >
-                <meshBasicMaterial toneMapped={false} map={texture} />
-                <Edges 
-                
-                    scale={1.05}
-                    isLineSegments={true}
-                    threshold={15} // Display edges only when the angle between two faces exceeds this value (default=15 degrees)
-                    color="grey"
-                    lineWidth={10}
-                >
-                </Edges>
+                <sphereGeometry args={[undefined, undefined, 60]} />
+                <Outlines thickness={0.05} color={outlineColor } renderOrder={10}/>
+                <meshBasicMaterial 
+                  color={baseColor} 
+                />
 
-            </Circle>
+            </mesh>}
+                originalRef={meshRef}
+             />
 
             
             <BubblesInfo

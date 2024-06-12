@@ -136,7 +136,7 @@ export const Portal = ({ portalId }: { portalId: string }) => {
 
     // Calculate the outline color based on the Ethereum address
     const baseColor = ethereumAddressToColor(portalId);
-    const outlineColor = lightenColor(baseColor, 0.3);
+    const outlineColor = darkenColor(baseColor, 0.5);
 
     useEffect(() => {
         //console.log("setIsBubbleSelected: ui", isSelected)
@@ -145,12 +145,12 @@ export const Portal = ({ portalId }: { portalId: string }) => {
 
     return (
         <>
-          <CustomGeometryParticles 
+          {/* <CustomGeometryParticles 
             count={60} 
             radius={radius*4.2}
             position={new THREE.Vector3(portal.position.x, portal.position.y, 0)} 
             color={baseColor}
-          />
+          /> */}
           {isSelected && (
                 <PortalsControlsEmit
                     isHovered={isHovered}
@@ -175,7 +175,7 @@ export const Portal = ({ portalId }: { portalId: string }) => {
                 ref={meshRef}
             >
                 <sphereGeometry />
-                <Outlines thickness={0.05} color={'black'} />
+                <Outlines thickness={0.05} color={outlineColor }/>
                 <meshBasicMaterial 
                   color={baseColor} 
                 />
