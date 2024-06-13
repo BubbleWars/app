@@ -42,6 +42,8 @@ void main() {
   
   // scale the particle position on the x-axis by the length
   particlePosition.x *= length * 5.0;
+  //make sure no particle is less than 0 on the x-axis
+  particlePosition.x = max(particlePosition.x, 0.0);
 
   // scale down the particle position on the y-axis
   particlePosition.y *= 0.5;
@@ -52,7 +54,7 @@ void main() {
 
   // Now translate by uRadius along uDirection
   //vec3 normalizedUDirection = normalize(uDirection);
-  particlePosition -= vec3(uRadius * uDirection.x*0.9, uRadius * uDirection.y*0.9, 0.0);
+  particlePosition -= vec3(uRadius * uDirection.x*0.9 * length, uRadius * uDirection.y*0.9 * length, 0.0);
 
   vDistance = particlePosition.z + 0.1;
 
@@ -63,7 +65,7 @@ void main() {
   gl_Position = projectedPosition;
 
   // Adjust point size based on the zoom level
-  gl_PointSize = 0.1 * uRadius * uZoom; // Use a base size and adjust based on zoom level
+  gl_PointSize = 0.2 * uRadius * uZoom; // Use a base size and adjust based on zoom level
 
   // Optionally, apply a further size attenuation factor here if necessary
   // gl_PointSize *= attenuationFactor;

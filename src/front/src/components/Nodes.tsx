@@ -10,6 +10,7 @@ import { currentState } from "../../../core/world";
 import { snapshotCurrentState } from "../../../core/snapshots";
 import { Outlines, Sparkles } from "@react-three/drei";
 import { darkenColor } from "../utils";
+import ShadowMesh from "./Shadow";
 
 export const Node = ({ nodeId }: { nodeId: string }) => {
     const meshRef = useRef<any>();
@@ -30,9 +31,8 @@ export const Node = ({ nodeId }: { nodeId: string }) => {
     const baseColor = "#87CEEB";
     const outlineColor = darkenColor(baseColor, 0.2); // Darken by 20%
 
-    return (
-        <>
-            <mesh
+    const mainMesh = (
+        <mesh
                 ref={meshRef}
                 onPointerEnter={() => {
                     if (!isSelected) setIsHovered(true);
@@ -49,6 +49,12 @@ export const Node = ({ nodeId }: { nodeId: string }) => {
                 <meshBasicMaterial toneMapped={false} color={baseColor} />
                 
             </mesh>
+    )
+
+    return (
+        <>
+        <ShadowMesh originalMesh={mainMesh} originalRef={meshRef} />
+            
         </>
     );
 };
