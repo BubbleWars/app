@@ -26,7 +26,7 @@ import fragmentShader from "../shaders/bubbleParticleFrag.glsl?raw";
 import { CustomGeometryParticles } from "./Portals";
 
 
-const BubbleMovementParticles =(props: { count: number, radius: number, position: THREE.Vector3, color: THREE.Color | string, direction: { x: number, y: number}, height: number }) => {
+const BubbleMovementParticles =(props: {magnitude: number, count: number, radius: number, position: THREE.Vector3, color: THREE.Color | string, direction: { x: number, y: number}, height: number }) => {
     const { count, radius, color, height, direction } = props;
   const { camera } = useThree()
   const zoom = camera.zoom
@@ -40,7 +40,7 @@ const BubbleMovementParticles =(props: { count: number, radius: number, position
     const positions = new Float32Array(count * 3);
     
     for (let i = 0; i < count; i++) {
-      const distance = radius
+      const distance = 1
       const theta = THREE.MathUtils.randFloatSpread(360);
   
       let x = distance * Math.cos(theta);
@@ -52,7 +52,7 @@ const BubbleMovementParticles =(props: { count: number, radius: number, position
     }
     
     return positions;
-  }, [count, radius]);
+  }, [count]);
 
   const uniforms = useRef({
     uTime: { value: 0.0 },
@@ -60,6 +60,7 @@ const BubbleMovementParticles =(props: { count: number, radius: number, position
     uColor: { value: (new THREE.Color(color)).convertLinearToSRGB() },
     uZoom: { value: zoom },
     uDirection: { value: new THREE.Vector2(0, 1) },
+    uMagnitude: { value: 1 },
   }).current;
 
   useEffect(() => {
@@ -67,7 +68,8 @@ const BubbleMovementParticles =(props: { count: number, radius: number, position
     uniforms.uColor.value = new THREE.Color(color).convertLinearToSRGB();
     uniforms.uZoom.value = zoom;
     uniforms.uDirection.value = new THREE.Vector2(direction.x, direction.y);
-  }, [radius, color, zoom, direction]);
+    uniforms.uMagnitude.value = props.magnitude;
+  }, [radius, color, zoom, direction, props.magnitude]);
   
 
   useFrame(() => {
@@ -135,11 +137,13 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
     //const texture = usePfpTexture(pfpUrl, "/bubblewars.png", user?.social);
     //texture.anisotropy = 16;
     //if(!bubble) return null;
-    const velocity = bubble?.velocity ?? { x: 0, y: 0 };
-    const normalizedVelocity = {
+    const [ velocity, setVelocity ] = useState(bubble.velocity);
+    const normalizedVelocity = useMemo(() => {
+        return {
         x: velocity.x / Math.sqrt(velocity.x ** 2 + velocity.y ** 2),
         y: velocity.y / Math.sqrt(velocity.x ** 2 + velocity.y ** 2),
-    }
+        }
+    }, [velocity]);
     const inverseVelocity = { x: -velocity.x, y: -velocity.y };
     const radius = massToRadius(bubble?.mass ?? 0);
 
@@ -221,6 +225,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
         const newRadius = MathUtils.lerp(meshRef.current.scale.x, radius, 0.1);
         meshRef.current.scale.set(newRadius, newRadius, newRadius);
         //console.log("bubble position:", bubble.position)
+        const lastX = meshRef.current.position.x;
         const newX = MathUtils.lerp(
             meshRef.current.position.x,
             bubble.position.x,
@@ -235,6 +240,18 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
         meshRef.current.updateMatrix();
 
         setPosition(new THREE.Vector3(newX, newY, 0));
+
+        const newVelocityX = MathUtils.lerp(
+            velocity.x,
+            bubble.velocity.x,
+            LERP_SPEED/10
+        );
+        const newVelocityY = MathUtils.lerp(
+            velocity.y,
+            bubble.velocity.y,
+            LERP_SPEED/10
+        );
+        setVelocity({ x: newVelocityX, y: newVelocityY });
         setMainBubble(currentState.bubbles.find((bubble) => bubble.id == bubbleId));
     });
 
@@ -253,10 +270,11 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
         <>
             <BubbleMovementParticles
                 direction={normalizedVelocity}
+                magnitude={Math.sqrt(velocity.x ** 2 + velocity.y ** 2)}
                 height={radius*2}
                 count={20}
                 radius={radius}
-                position={new THREE.Vector3(bubble.position.x, bubble.position.y, 0)}
+                position={position}
                 color={baseColor}
             />
             {isSelected && (

@@ -12,7 +12,7 @@ void main() {
     if (alpha < 0.0 || distanceFromCenter > 0.5) {
         discard;
     }
-    gl_FragColor = vec4(color, alpha*0.2);
+    gl_FragColor = vec4(color, alpha);
   
 }
 
