@@ -14,7 +14,7 @@ import {
     Vector2Schema,
     WorldState,
 } from "./schema/WorldState";
-import { currentState, currentState, init, rollbackToState, run } from "../../../core/world";
+import { currentState, init, rollbackToState, run } from "../../../core/world";
 import {
     snapshotRollback,
     snapshotRun,
@@ -24,7 +24,7 @@ import {
 } from "../../../core/snapshots";
 import { onBlock, onInput, onInspect, onUser } from "./indexer";
 import { handleInput } from "../../../core/funcs/inputs";
-import { Snapshot } from "../../../core/types/state";
+import { CircleState, PolygonState, Snapshot } from "../../../core/types/state";
 import { ArraySchema } from "@colyseus/schema";
 import { setOnEvent } from "../../../core/funcs/events";
 import { EventsType } from "../../../core/types/events";
@@ -91,13 +91,22 @@ const updateState = (state: WorldState, snapshot: Snapshot): WorldState => {
 
     //Set obstacles
     state.obstacles.clear();
-    snapshot.obstacles.forEach((obstacle) => {
+    snapshot.obstacles.obstaclesStates.forEach((obstacle) => {
         const newObstacle = new ObstacleStateSchema();
         newObstacle.id = obstacle.id;
         newObstacle.positionX = obstacle.position.x;
         newObstacle.positionY = obstacle.position.y;
-        newObstacle.velocityX = obstacle.velocity.x;
-        newObstacle.velocityY = obstacle.velocity.y;
+        newObstacle.type = obstacle.shape.type;
+        newObstacle.angle = obstacle.angle;
+        newObstacle.radius = (obstacle.shape as CircleState)?.radius ?? 0;
+        newObstacle.vertices = new ArraySchema<Vector2Schema>();
+        ((obstacle.shape as PolygonState)?.vertices ?? []).forEach((vertex) => {
+            const newVertex = new Vector2Schema();
+            newVertex.x = vertex.x;
+            newVertex.y = vertex.y;
+            newObstacle.vertices.push(newVertex);
+        });
+
         state.obstacles.push(newObstacle);
     });
 

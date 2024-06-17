@@ -1,8 +1,10 @@
+import { ShapeType } from "planck-js/lib/shape";
 import { Puncture, PuncturePoint } from "./bubble";
 import { Attractor } from "./entity";
 import { InputWithExecutionTime } from "./inputs";
 import { ResourceType } from "./resource";
 import { User } from "./user";
+import { ObstacleGroupDef } from "./obstacle";
 
 export interface BubbleState {
     id: string;
@@ -23,13 +25,6 @@ export interface PortalState {
     position: { x: number; y: number };
     mass: number;
     resources: { resource: ResourceType; mass: number }[];
-}
-
-export interface ObstacleState {
-    id: string;
-    position: { x: number; y: number };
-    velocity: { x: number; y: number };
-    vertices: { x: number; y: number }[];
 }
 
 export interface ResourceNodeState {
@@ -60,6 +55,37 @@ export interface ResourceState {
     attractor: string | undefined;
 }
 
+export interface ShapeState {
+    type: ShapeType;
+}
+
+export interface CircleState extends ShapeState {
+    type: "circle",
+    radius: number;
+}
+
+export interface PolygonState extends ShapeState {
+    type: "polygon",
+    vertices: { x: number; y: number }[];
+}
+
+export type ObstacleShapeState = ShapeState | CircleState | PolygonState;
+
+export interface ObstacleState {
+    id: string;
+    shape: ObstacleShapeState;
+    position: { x: number; y: number };
+    angle: number;
+    linearVelocity: { x: number; y: number };
+    angularVelocity: number;
+}
+
+export interface ObstaclesState {
+    obstaclesStates: ObstacleState[]; // For sending to clients
+    obstacleSnapshots: ObstacleGroupDef[]; //For snapshots and rollbacks
+}
+
+
 export interface ProtocolState {
     last: number,
     balance: number
@@ -75,10 +101,10 @@ export interface Snapshot {
     users: User[];
     bubbles: BubbleState[];
     portals: PortalState[];
-    obstacles: ObstacleState[];
     nodes: ResourceNodeState[];
     resources: ResourceState[];
     attractors: Attractor[];
+    obstacles: ObstaclesState;
     protocol: ProtocolState;
 }
 

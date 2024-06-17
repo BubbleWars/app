@@ -4,7 +4,7 @@ import { nodes } from "../world";
 import { Address } from "./address";
 import { Bubble } from "./bubble";
 import { InputWithExecutionTime } from "./inputs";
-import { Obstacle } from "./obstacle";
+import { Obstacle, ObstacleGroup } from "./obstacle";
 import { Portal } from "./portal";
 import { Resource, ResourceNode } from "./resource";
 import { User } from "./user";
@@ -192,7 +192,7 @@ export class Protocol {
         users: Map<Address, User>,
         bubbles: Map<Address, Bubble>,
         portals: Map<Address, Portal>,
-        obstacles: Map<Address, Obstacle>,
+        obstacles: ObstacleGroup[],
         nodes: Map<Address, ResourceNode>,
         resources: Map<Address, Resource>,
         protocol: Protocol,

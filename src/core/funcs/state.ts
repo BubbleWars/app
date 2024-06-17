@@ -3,7 +3,7 @@ import { STEP_DELTA } from "../consts";
 import { Address } from "../types/address";
 import { Bubble } from "../types/bubble";
 import { InputWithExecutionTime } from "../types/inputs";
-import { Obstacle } from "../types/obstacle";
+import { Obstacle, ObstacleGroup } from "../types/obstacle";
 import { Portal } from "../types/portal";
 import { Snapshot } from "../types/state";
 import { User } from "../types/user";
@@ -32,6 +32,8 @@ import { Resource, ResourceNode } from "../types/resource";
 import { nodeAbsorbBubble, nodeAbsorbResource } from "./resource";
 import { Attractor } from "../types/entity";
 import { AssetType, FeeType, Protocol } from "../types/protocol";
+import { getObstacleGroupState } from "./obstacle";
+import { stat } from "fs";
 
 export const updateState = (
     state: Snapshot,
@@ -39,7 +41,7 @@ export const updateState = (
     users: Map<Address, User>,
     bubbles: Map<string, Bubble>,
     portals: Map<string, Portal>,
-    obstacles: Map<string, Obstacle>,
+    obstacles: ObstacleGroup[],
     nodes: Map<string, ResourceNode>,
     resources: Map<string, Resource>,
     attractors: Array<Attractor>,
@@ -84,12 +86,7 @@ export const updateState = (
         mass: portal.mass,
         resources: Array.from((portal.resources ?? []).values()),
     }));
-    state.obstacles = Array.from(obstacles.values()).map((obstacle) => ({
-        id: obstacle.body.getUserData() as string,
-        position: obstacle.body.getPosition().clone(),
-        velocity: obstacle.body.getLinearVelocity().clone(),
-        vertices: obstacle.vertices,
-    }));
+    state.obstacles = getObstacleGroupState(obstacles);
 
     state.nodes = Array.from(nodes.values()).map((node) => ({
         type: node.resource,

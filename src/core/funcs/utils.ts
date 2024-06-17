@@ -134,7 +134,7 @@ function hslToHex(h, s, l) {
     return `#${f(0)}${f(8)}${f(4)}`;
 }
 
-function getColorFromPalette(index, maxColors) {
+export function getColorFromPalette(index, maxColors) {
     // Calculate the increment based on the maxColors
     const increment = 360 / maxColors;
 
@@ -152,12 +152,12 @@ function getColorFromPalette(index, maxColors) {
     return color;
 }
 
-function getAddressAsNumber(address: `0x${string}`): number {
+export function getAddressAsNumber(address: `0x${string}`): number {
     // Convert the address to a number by summing the ASCII values of each character
     return address.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
 }
 
-function getAddressColor(address: `0x${string}`, maxColors: number): string {
+export function getAddressColor(address: `0x${string}`, maxColors: number): string {
     // Get the address as a number
     const addressNumber = getAddressAsNumber(address);
 

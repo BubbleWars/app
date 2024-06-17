@@ -1,7 +1,7 @@
 import { Vec2, World } from "planck-js";
 import { Bubble } from "./types/bubble";
 import { Portal } from "./types/portal";
-import { Obstacle } from "./types/obstacle";
+import { Obstacle, ObstacleGroup } from "./types/obstacle";
 import { Address } from "./types/address";
 import { User } from "./types/user";
 import { Input, InputWithExecutionTime } from "./types/inputs";
@@ -34,11 +34,12 @@ import { createBoundary, createEdges, preciseRound } from "./funcs/utils";
 import { time } from "console";
 import { Attractor } from "./types/entity";
 import { Protocol } from "./types/protocol";
+import { generateObstacles, setObstacleGroupFromState } from "./funcs/obstacle";
 
 export const snapshotUsers = new Map<Address, User>();
 export const snapshotBubbles = new Map<string, Bubble>();
 export const snapshotPortals = new Map<string, Portal>();
-export const snapshotObstacles = new Map<string, Obstacle>();
+export const snapshotObstacles: ObstacleGroup[] = new Array<ObstacleGroup>();
 export const snapshotNodes = new Map<string, ResourceNode>();
 export const snapshotResources = new Map<string, Resource>();
 export const snapshotPendingInputs = new Array<InputWithExecutionTime>();
@@ -60,7 +61,10 @@ export let snapshotCurrentState: Snapshot = {
     portals: [],
     nodes: [],
     resources: [],
-    obstacles: [],
+    obstacles: {
+        obstaclesStates: [],
+        obstacleSnapshots: [],
+    },
     attractors: [],
     protocol: {
         last: 0,
@@ -96,7 +100,7 @@ export const snapshotInit = (initialState?: Snapshot) => {
         snapshotUsers.clear();
         snapshotBubbles.clear();
         snapshotPortals.clear();
-        snapshotObstacles.clear();
+        snapshotObstacles.length = 0;
         snapshotNodes.clear();
         snapshotResources.clear();
         snapshotAttractors.length = 0;
@@ -108,6 +112,7 @@ export const snapshotInit = (initialState?: Snapshot) => {
         if (!initialState?.nodes || initialState.nodes.length == 0) {
            //console.log("generating snapshot nodes");
             generateNodes(snapshotWorld, snapshotNodes, 1);
+            generateObstacles(snapshotWorld, snapshotObstacles, 3);
             // for (let index = 0; index < 100; index++) {
             //     const { x, y } = generateSpawnPoint(
             //         0,
@@ -211,6 +216,7 @@ export const snapshotInit = (initialState?: Snapshot) => {
         snapshotCurrentState.attractors.forEach((attractor) => {
             snapshotAttractors.push(attractor);
         });
+        snapshotObstacles.push(...setObstacleGroupFromState(snapshotWorld,snapshotCurrentState.obstacles));
     }
     createEdges(snapshotWorld, WORLD_WIDTH, WORLD_WIDTH);
 

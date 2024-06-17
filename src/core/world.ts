@@ -2,14 +2,15 @@ import { Vec2, World } from "planck-js";
 import { Bubble } from "./types/bubble";
 import { Portal } from "./types/portal";
 import { Resource, ResourceNode } from "./types/resource";
-import { Obstacle } from "./types/obstacle";
+import { Obstacle, ObstacleGroup } from "./types/obstacle";
 import { Address } from "./types/address";
 import { User } from "./types/user";
 import { InputWithExecutionTime } from "./types/inputs";
-import { Snapshot } from "./types/state";
+import { ObstaclesState, Snapshot } from "./types/state";
 import { STEP_DELTA, WORLD_HEIGHT, WORLD_WIDTH } from "./consts";
 import { handlePendingInputs } from "./funcs/inputs";
 import { updateState, handleContact } from "./funcs/state";
+import { generateObstacles, setObstacleGroupFromState } from "./funcs/obstacle";
 import {
     applyPortalGravity,
     createPortal,
@@ -36,7 +37,7 @@ import { Protocol } from "./types/protocol";
 export const users = new Map<Address, User>();
 export const bubbles = new Map<string, Bubble>();
 export const portals = new Map<string, Portal>();
-export const obstacles = new Map<string, Obstacle>();
+export const obstacles: ObstacleGroup[] = new Array<ObstacleGroup>();
 export const nodes = new Map<string, ResourceNode>();
 export const resources = new Map<string, Resource>();
 export const pendingInputs = new Array<InputWithExecutionTime>();
@@ -55,7 +56,10 @@ export let currentState: Snapshot = {
     portals: [],
     nodes: [],
     resources: [],
-    obstacles: [],
+    obstacles: {
+        obstaclesStates: [],
+        obstacleSnapshots: [],
+    },
     attractors: [],
     protocol: {
         last: 0,
@@ -93,7 +97,7 @@ export const init = (initialState?: Snapshot) => {
         users.clear();
         bubbles.clear();
         portals.clear();
-        obstacles.clear();
+        obstacles.length = 0;
         nodes.clear();
         resources.clear();
         attractors.length = 0;
@@ -105,6 +109,7 @@ export const init = (initialState?: Snapshot) => {
         if (!initialState?.nodes || initialState.nodes.length == 0) {
            //console.log("generating nodes");
             generateNodes(world, nodes, 1);
+            generateObstacles(world, obstacles, 3);
             // for (let index = 0; index < 100; index++) {
             //     const { x, y } = generateSpawnPoint(
             //         0,
@@ -207,6 +212,7 @@ export const init = (initialState?: Snapshot) => {
         currentState.attractors.forEach((attractor) => {
             attractors.push(attractor);
         });
+        obstacles.push(...setObstacleGroupFromState(world, currentState.obstacles)) 
     }
     createEdges(world, WORLD_WIDTH, WORLD_HEIGHT);
 

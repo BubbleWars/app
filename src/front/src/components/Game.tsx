@@ -1,5 +1,5 @@
 import { useFrame } from "@react-three/fiber";
-import { BubbleState, PortalState, Snapshot } from "../../../core/types/state";
+import { BubbleState, ObstacleState, PortalState, Snapshot } from "../../../core/types/state";
 import { Portals } from "./Portals";
 import { Bubbles } from "./Bubbles";
 import { useEffect, useState } from "react";
@@ -29,6 +29,9 @@ import { ResourceType } from "../../../core/types/resource";
 import { userSocialsState } from "@/hooks/socials";
 import { Aiming } from "./controls/Aiming";
 import { Emitting } from "./controls/Emitting";
+import { WorldState } from "../../../indexer/src/rooms/schema/WorldState";
+import { ShapeType } from "planck-js/lib/shape";
+import { Obstacles } from "./Obstacle";
 
 const client = new Client(INDEXER_URL);
 let room = await client.joinOrCreate("world");
@@ -73,7 +76,7 @@ export const resourceDestroyPositions: {
 //Create init function for state.onChange
 const initStateServer = (room) => {
     room.state.onChange(() => {
-        const { timestamp, users, bubbles, portals, nodes, resources, syncBubbleStartPositions, userSocials } = room.state;
+        const { timestamp, users, bubbles, portals, nodes, resources, syncBubbleStartPositions, userSocials, obstacles } = room.state as WorldState;
 
         //Timestamp
         currentState.timestamp = timestamp
@@ -230,6 +233,33 @@ const initStateServer = (room) => {
             }
             currentState.resources.push(tempResource)
         })
+
+        //Obstacles
+        currentState.obstacles.obstaclesStates.length = 0;
+        obstacles.forEach((obstacle) => {
+            const vertices: {x: number, y:number}[] = []
+            obstacle.vertices.forEach((value)=>{
+                vertices.push({
+                    x: value.x,
+                    y: value.y
+                })
+            })
+            const tempObstacle: ObstacleState = {
+                id: obstacle.id,
+                position: {
+                    x: obstacle.positionX,
+                    y: obstacle.positionY,
+                },
+                angle: obstacle.angle,
+                shape: {
+                    type: obstacle.type as ShapeType,
+                    radius: obstacle.radius,
+                    vertices
+                }
+            }
+            currentState.obstacles.obstaclesStates.push(tempObstacle)
+        })
+
     });
 
     room.connection.events.onclose = (e) => {
@@ -289,6 +319,7 @@ export const Game = () => {
     const [portalIds, setPortalIds] = useState<string[]>([]);
     const [nodeIds, setNodeIds] = useState<string[]>([]);
     const [resourceIds, setResourceIds] = useState<string[]>([]);
+    const [obstacleIds, setObstacleIds] = useState<string[]>([]);
 
     // //Initialize client state
     // useEffect(() => {
@@ -433,6 +464,7 @@ export const Game = () => {
         setPortalIds(currentState.portals.map((portal) => portal.id));
         setNodeIds(currentState.nodes.map((node) => node.id));
         setResourceIds(currentState.resources.map((resource) => resource.id));
+        setObstacleIds(currentState.obstacles.obstaclesStates.map((obstacle) => obstacle.id));
     });
 
     //console.log(inputs)
@@ -442,6 +474,7 @@ export const Game = () => {
             <Bubbles bubbles={bubbleIds ?? []} />
             <Nodes nodes={nodeIds ?? []} />
             <Resources resources={resourceIds ?? []} />
+            <Obstacles obstacles={obstacleIds ?? []} />
             <Aiming />
             <Emitting />
         </>

@@ -70,8 +70,9 @@ export class ObstacleStateSchema extends Schema {
     @type("string") id: string = "";
     @type("number") positionX: number = 0;
     @type("number") positionY: number = 0;
-    @type("number") velocityX: number = 0;
-    @type("number") velocityY: number = 0;
+    @type("number") angle: number = 0;
+    @type("string") type: string = "";
+    @type("number") radius: number = 0;
     @type([Vector2Schema]) vertices = new ArraySchema<Vector2Schema>();
 }
 
