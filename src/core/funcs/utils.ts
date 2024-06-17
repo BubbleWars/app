@@ -110,7 +110,7 @@ export const truncateAddress = (
 };
 
 export const ethereumAddressToColor = (ethAddress: `0x${string}`): string => {
-    return getAddressColor(ethAddress, 1000);
+    return getAddressColor(ethAddress, 250);
 };
 
 export const  preciseRound = (num: number, decimalPlaces: number): number => {

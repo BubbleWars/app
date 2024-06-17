@@ -24,6 +24,7 @@ import { useWallets } from "@privy-io/react-auth";
 import vertexShader from "../shaders/portalVertexShader.glsl?raw";
 import fragmentShader from "../shaders/portalFragmentShader.glsl?raw";
 import Outline from "./Outline";
+import { PortalRadialEffect } from "./PortalRadialEffect";
 
 export const CustomGeometryParticles = (props: { count: number, radius: number, position: THREE.Vector3, color: THREE.Color | string }) => {
   const { count, radius, position, color } = props;
@@ -121,6 +122,8 @@ export const Portal = ({ portalId }: { portalId: string }) => {
     ) ?? { position: { x: 0, y: 0 }, mass: 0, owner: "", velocity: { x: 0, y: 0 }, resources: [], id: "" };
     const radius = massToRadius(portal.mass);
 
+    const [lerpedRadius, setLerpedRadius] = useState<number>(radius);
+
     useFrame(() => {
         const portal = currentState.portals.find(
             (portal) => portal.id === portalId,
@@ -129,6 +132,7 @@ export const Portal = ({ portalId }: { portalId: string }) => {
         const radius = massToRadius(portal.mass);
         const newRadius = MathUtils.lerp(meshRef.current.scale.x, radius, 0.1);
         meshRef.current.scale.set(newRadius, newRadius, newRadius);
+        setLerpedRadius(newRadius);
         //console.log("portal position:", portal.position)
         meshRef.current.position.set(portal.position.x, portal.position.y, 0);
         meshRef.current.updateMatrix();
@@ -151,6 +155,11 @@ export const Portal = ({ portalId }: { portalId: string }) => {
             position={new THREE.Vector3(portal.position.x, portal.position.y, 0)} 
             color={baseColor}
           /> */}
+          <PortalRadialEffect
+            position={new THREE.Vector3(portal.position.x, portal.position.y, 0)}
+            radius={lerpedRadius}
+            color={baseColor}
+          />
           {isSelected && (
                 <PortalsControlsEmit
                     isHovered={isHovered}
