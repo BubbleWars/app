@@ -25,6 +25,7 @@ import vertexShader from "../shaders/portalVertexShader.glsl?raw";
 import fragmentShader from "../shaders/portalFragmentShader.glsl?raw";
 import Outline from "./Outline";
 import { PortalRadialEffect } from "./PortalRadialEffect";
+import ShadowMesh from "./Shadow";
 
 export const CustomGeometryParticles = (props: { count: number, radius: number, position: THREE.Vector3, color: THREE.Color | string }) => {
   const { count, radius, position, color } = props;
@@ -166,6 +167,7 @@ export const Portal = ({ portalId }: { portalId: string }) => {
                     portalId={portalId}
                 />
             )}
+            <ShadowMesh originalMesh={
             <mesh
                 onPointerEnter={() => {
                     if (!isSelected) setIsHovered(true);
@@ -188,7 +190,9 @@ export const Portal = ({ portalId }: { portalId: string }) => {
                 <meshBasicMaterial 
                   color={baseColor} 
                 />
-            </mesh>
+            </mesh>}
+            originalRef={meshRef}
+          />
             
             
             <PortalsInfo portalId={portalId} />

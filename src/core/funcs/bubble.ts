@@ -16,6 +16,7 @@ import { snapshotPendingInputs } from "../snapshots";
 import { InputType } from "../types/inputs";
 import { timeStamp } from "console";
 import { AssetType, Protocol } from "../types/protocol";
+import { getTotalInventoryMass } from "./entity";
 
 //const PUNCTURE_EMIT_PER_SECOND = 100;
 
@@ -206,8 +207,9 @@ export const updateBubble = (
     bubble: Bubble,
     timestamp?: number,
 ): void => {
-    const newEthMass = bubble.balance;
+    const newEthMass = bubble.balance ?? 0;
     const newResourceMass = getTotalResourceMass(bubble);
+    //const newInventoryMass = getTotalInventoryMass(bubble);
     const newMass = newEthMass + newResourceMass;
 
     //Check if should DESTROY bubble

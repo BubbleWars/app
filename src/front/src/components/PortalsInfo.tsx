@@ -52,6 +52,7 @@ export const PortalsInfo = ({ portalId }: { portalId: string }) => {
             <CustomText size={radius / 3} color="white" position={textPosition}>
                 {displayName}
             </CustomText>
+            */}
             <CustomText
                 size={radius / 12}
                 position={textPosition
@@ -59,13 +60,13 @@ export const PortalsInfo = ({ portalId }: { portalId: string }) => {
                     .add(new THREE.Vector3(0, radius / 4, 0))}
             >
                 PORTAL
-            </CustomText> */}
+            </CustomText> 
             <CustomText
                     size={radius / 3.0}
                     color="white"
                     position={textPosition}
                 >
-                    {portal.mass.toFixed(2)}
+                    {portal.mass.toFixed(2)} ETH
                     
                 </CustomText>
                 
@@ -74,7 +75,7 @@ export const PortalsInfo = ({ portalId }: { portalId: string }) => {
                 size={radius / 8} 
                 color="white" position={new THREE.Vector3(0, -radius/4, 0)}
             >
-                {truncateAddress(portal.owner)}
+                @{displayName}
             </CustomText>
                 
                 {/* <CustomText

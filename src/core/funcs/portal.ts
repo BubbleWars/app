@@ -13,6 +13,7 @@ import { createBubble, destroyBubble, getBubbleEthMass, getTotalBubbleMass, setB
 import { Obstacle } from "../types/obstacle";
 import { Resource, ResourceNode, ResourceType } from "../types/resource";
 import { createResource, updateResource } from "./resource";
+import { getItemMass } from "./entity";
 
 function deterministicHash(x: number, y: number): number {
     let hash = (Math.floor(x) * 0x1f1f1f1f) ^ Math.floor(y);
@@ -196,6 +197,9 @@ export const getPortalMass = (portal: Portal): number => {
     let resourceMass = 0;
     portal.resources?.forEach((resource) => {
         resourceMass += resource.mass;
+    });
+    portal?.inventory?.items?.forEach((item) => {
+        resourceMass += getItemMass(item);
     });
     return totalMass - resourceMass;
 };

@@ -34,6 +34,18 @@ import { createBoundary, createEdges, preciseRound } from "./funcs/utils";
 import { Attractor } from "./types/entity";
 import { Protocol } from "./types/protocol";
 
+export type WorldState = {
+    users: Map<Address, User>;
+    bubbles: Map<string, Bubble>;
+    portals: Map<string, Portal>;
+    obstacles: ObstacleGroup[];
+    nodes: Map<string, ResourceNode>;
+    resources: Map<string, Resource>;
+    pendingInputs: InputWithExecutionTime[];
+    attractors: Attractor[];
+    protocol: Protocol;
+};
+
 export const users = new Map<Address, User>();
 export const bubbles = new Map<string, Bubble>();
 export const portals = new Map<string, Portal>();
