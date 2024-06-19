@@ -120,6 +120,12 @@ jobs:
             # - name: Wait for Front-End Setup
             #   run: sleep 20 # Adjust the sleep duration as needed
 
+            - name: Free Port 2001
+              run: |
+                  if lsof -Pi :2001 -sTCP:LISTEN -t >/dev/null ; then
+                    kill -9 $(lsof -t -i:2001)
+                  fi
+
             - name: Deploy Faucet Server
               run: |
                   cd src/front
