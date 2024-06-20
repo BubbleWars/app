@@ -35,7 +35,7 @@ export const calculateDeltaVelocity = (ve: Vec2, m:number, me: number): Vec2 => 
     
     deltaVelocity
         .sub(minDeltaVeclocity)
-        .mul(Math.sqrt((me - PLANCK_MASS)/((m/PLANCK_MASS)-PLANCK_MASS)))
+        .mul(Math.sqrt((me)/((m))))
         .add(minDeltaVeclocity);
 
     //console.log("delta velocity", deltaVelocity.length());
