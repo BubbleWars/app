@@ -40,7 +40,7 @@ export const ERC20PortalAddress = "0x9C21AEb2093C32DDbC53eEF24B873BDCd1aDa1DB";
 export const ERC721PortalAddress = "0x237F8DD094C0e47f4236f12b4Fa01d6Dae89fb87";
 export const EtherPortalAddress = "0xFfdbe43d4c855BF7e0f105c400A50857f53AB044";
 export const InputBoxAddress = "0x59b22D57D4f067708AB0c00552767405926dc768";
-export const SunodoTokenAddress = "0xae7f61eCf06C65405560166b259C54031428A9C4";
+export const cartesiTokenAddress = "0xae7f61eCf06C65405560166b259C54031428A9C4";
 export const CartesiDAppAddress = "0x70ac08179605AF2D9e75782b8DEcDD3c22aA4D0C";
 
 export const CartesiDAppFactory = {
@@ -83,8 +83,8 @@ export const InputBox = {
     abi: InputBox__factory.abi,
 } as const;
 
-export const SunodoToken = {
-    address: SunodoTokenAddress,
+export const cartesiToken = {
+    address: cartesiTokenAddress,
     abi: erc20ABI,
 } as const;
 

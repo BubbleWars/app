@@ -2,7 +2,7 @@
 
 ## Dependencies
 
-Nodejs, Docker, Sunodo [Sunodo Docs](https://docs.sunodo.io/guide/introduction/installing).
+Nodejs, Docker, cartesi [cartesi Docs](https://docs.cartesi.io/guide/introduction/installing).
 
 ## Quick Start
 
@@ -12,7 +12,7 @@ After installing the necessary packages, run the following command to set up the
 
 ```bash
 npm i
-sunodo run --no-backend --block-time 1
+cartesi run --no-backend --block-time 1
 ```
 
 ### Starting the Node Backend

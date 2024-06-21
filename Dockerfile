@@ -19,12 +19,12 @@ RUN yarn install && yarn build
 # performance when loading the Cartesi Machine.
 FROM --platform=linux/riscv64 cartesi/node:20.8.0-jammy-slim
 
-ARG MACHINE_EMULATOR_TOOLS_VERSION=0.12.0
+ARG MACHINE_EMULATOR_TOOLS_VERSION=0.14.1
 ADD https://github.com/cartesi/machine-emulator-tools/releases/download/v${MACHINE_EMULATOR_TOOLS_VERSION}/machine-emulator-tools-v${MACHINE_EMULATOR_TOOLS_VERSION}.deb /
 RUN dpkg -i /machine-emulator-tools-v${MACHINE_EMULATOR_TOOLS_VERSION}.deb \
   && rm /machine-emulator-tools-v${MACHINE_EMULATOR_TOOLS_VERSION}.deb
 
-LABEL io.sunodo.sdk_version=0.3.0
+LABEL io.cartesi.rollups.sdk_version=0.6.0
 LABEL io.cartesi.rollups.ram_size=128Mi
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -33,7 +33,8 @@ set -e
 apt-get update
 apt-get install -y --no-install-recommends \
   busybox-static=1:1.30.1-7ubuntu3
-rm -rf /var/lib/apt/lists/*
+rm -rf /var/lib/apt/lists/* /var/log/* /var/cache/*
+useradd --create-home --user-group dapp
 EOF
 
 ENV PATH="/opt/cartesi/bin:${PATH}"

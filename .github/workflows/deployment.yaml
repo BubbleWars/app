@@ -37,21 +37,21 @@ jobs:
             #       sudo apt-get update
             #       sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-            # - name: Install Sunodo
+            # - name: Install cartesi
             #   run: |
             #     success=false
             #     attempts=0
             #     max_attempts=3
             #     while ! $success && [ $attempts -lt $max_attempts ]; do
-            #       pnpm install -g @sunodo/cli && success=true || success=false
+            #       pnpm install -g @cartesi/cli && success=true || success=false
             #       attempts=$((attempts + 1))
             #       if ! $success; then
-            #         echo "Attempt $attempts to install Sunodo failed. Trying again in 5 seconds..."
+            #         echo "Attempt $attempts to install cartesi failed. Trying again in 5 seconds..."
             #         sleep 5
             #       fi
             #     done
             #     if ! $success; then
-            #       echo "Failed to install Sunodo after $max_attempts attempts."
+            #       echo "Failed to install cartesi after $max_attempts attempts."
             #       exit 1
             #     fi
 
@@ -89,7 +89,7 @@ jobs:
                   sudo systemctl restart docker
 
             - name: Set up Local Blockchain and Smart Contracts
-              run: pm2 start --name blockchain "sunodo run --no-backend --block-time 1"
+              run: pm2 start --name blockchain "cartesi run --no-backend --block-time 1"
 
             # - name: Wait for Blockchain Setup
             #   run: sleep 30 # Adjust the sleep duration as needed
