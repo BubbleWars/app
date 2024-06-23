@@ -209,8 +209,8 @@ export const updateBubble = (
 ): void => {
     const newEthMass = bubble.balance ?? 0;
     const newResourceMass = getTotalResourceMass(bubble);
-    //const newInventoryMass = getTotalInventoryMass(bubble);
-    const newMass = newEthMass + newResourceMass;
+    const newInventoryMass = getTotalInventoryMass(bubble);
+    const newMass = newEthMass + newResourceMass + newInventoryMass;
 
     //Check if should DESTROY bubble
     if (newMass <= 0 || newEthMass <= 0) {

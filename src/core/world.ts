@@ -35,6 +35,7 @@ import { Attractor } from "./types/entity";
 import { Protocol } from "./types/protocol";
 
 export type WorldState = {
+    timestamp: number;
     users: Map<Address, User>;
     bubbles: Map<string, Bubble>;
     portals: Map<string, Portal>;

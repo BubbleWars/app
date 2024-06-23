@@ -2,7 +2,7 @@ import { Bubble } from "../types/bubble";
 import { Attractor, Entity } from "../types/entity";
 import { Item, ItemMasses } from "../types/items";
 import { Portal } from "../types/portal";
-import { WorldState } from "../world";
+import { WorldState, world } from "../world";
 import { getTotalBubbleMass, updateBubble } from "./bubble";
 import { getPortalMass, updatePortal } from "./portal";
 
@@ -18,13 +18,13 @@ export const isInInventory = (
 export const getItemMass = (
     item: Item,
 ): number => {
-    return ItemMasses[item.type];
+    return ItemMasses[item.type] || 0;
 }
 
 export const getTotalInventoryMass = (
     entity: Entity,
 ): number => {
-    return entity.inventory.items
+    return entity?.inventory?.items
         .reduce((acc, item) => acc + getItemMass(item), 0);
 }
 
@@ -50,6 +50,7 @@ export const addInventoryItem = (
 }
 
 export const removeInventoryItem = (
+    worldState: WorldState,
     entity: Entity | Bubble | Portal,
     type: 'bubble' | 'portal',
     item: Item,
@@ -57,6 +58,17 @@ export const removeInventoryItem = (
     const success = false;
     if (!isInInventory(entity, item)) return success;
     
+    if(type === 'bubble') {
+        const bubble = entity as Bubble;
+        bubble.inventory.items = bubble.inventory.items
+            .filter((i) => i.id !== item.id);
+        updateBubble(worldState.bubbles, bubble);
+    }else if(type === 'portal') {
+        const portal = entity as Portal;
+        portal.inventory.items = portal.inventory.items
+            .filter((i) => i.id !== item.id);
+        updatePortal(portal, getPortalMass(portal));
+    }
     
     return success;
 
