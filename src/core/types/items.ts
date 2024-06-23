@@ -140,6 +140,10 @@ export interface ItemBubble extends Entity {
     item: Item;
 }
 
+export interface ItemObstacle extends ObstacleDef {
+    item: Item;
+}
+
 export interface Inventory {
     //items with max array length of MAX_ITEMS
     items: Item[];

@@ -1,5 +1,5 @@
 import { Entity } from "../types/entity";
-import { Item, ItemParams, ItemType, MAX_EQUIPPED, ShieldItem, SwordItem } from "../types/items"
+import { Item, ItemBubble, ItemObstacle, ItemParams, ItemType, MAX_EQUIPPED, ShieldItem, SwordItem } from "../types/items"
 import { WorldState } from "../world";
 import { isInInventory } from "./entity";
 
@@ -101,6 +101,41 @@ export const useItem = (
             break;
         default:
     }
+    return success;
+}
+
+export const ejectItem = (
+    worldState: WorldState,
+    entity: Entity,
+    item: Item,
+    direction: { x: number, y: number },
+): boolean => {
+    const success = false;
+    if (!isInInventory(entity, item)) return success; //Item must be in inventory
+    if (isEquipped(entity, item)) return success; //Unequip first
+
+    //Eject item
+    return success;
+}
+
+export const createItemBubble = (
+    worldState: WorldState,
+    entity: Entity,
+    item: Item,
+): ItemBubble | null => {
+    const success = false;
+
+    //Create bubble
+    return success;
+}
+
+export const createItemObstacle = (
+    worldState: WorldState,
+    entity: Entity,
+    item: Item,
+): ItemObstacle => {
+    const success = false;
+    return success;
 }
 
 export const chargeSword = (
