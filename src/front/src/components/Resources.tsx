@@ -14,6 +14,7 @@ import { ResourceType } from "../../../core/types/resource";
 import { ResourceTypeToName } from "./BubblesInfo";
 import { resourceMassToAmount } from "../../../core/funcs/resource";
 import { isResourceActivated } from "../../../core/funcs/bubble";
+import { EffectGlow } from "./EffectGlow";
 
 export const RESOURCE_TO_COLOR = {
     [ResourceType.ENERGY]: "#3ABEF9",
@@ -126,16 +127,18 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
 
     return (
         <>
+        <EffectGlow position={new THREE.Vector3(resource.position.x, resource.position.y, 0)} radius={radius+0.4} color={'#87CEEB'} />
             <CustomText
                 position={new THREE.Vector3(radius + 0.3, radius + 0.4, 0).add(
                     textPosition,
                 )}
                 //position={textPosition}
-                size={0.2}
+                size={0.4}
                 color={"white"}
+                outlineColor={baseColor}
                 
             >
-                {amount.toFixed(2)}
+                {amount.toFixed(2)} $BBL
             </CustomText>
             {isResourceActivated(velocity.x, velocity.y) && resource.type == ResourceType.ENERGY && (
                 <CustomText

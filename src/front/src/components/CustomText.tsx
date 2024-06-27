@@ -9,6 +9,8 @@ export const CustomText = ({
     anchorX = "center",
     anchorY = "middle",
     noOutline = false,
+    thickness = null,
+    outlineColor = "black",
 }:
     | {
           children: string | undefined;
@@ -27,8 +29,8 @@ export const CustomText = ({
             letterSpacing={-0.0}
             fontWeight="bold"
             fontSize={size}
-            outlineColor={"black"}
-            outlineWidth={size * 0.05}
+            outlineColor={outlineColor}
+            outlineWidth={noOutline ? 0 : thickness ?? size * 0.1}
             anchorX={anchorX as any}
             anchorY={anchorY as any}
             position={position?.clone().add(new THREE.Vector3(0, 0, 6)) ?? new THREE.Vector3(0, 0, 0)}
