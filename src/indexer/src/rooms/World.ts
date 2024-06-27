@@ -5,6 +5,8 @@ import { fetchAllUsers, fetchUsers } from "./privyApi";
 import {
     BubbleStateSchema,
     EntityResourceStateSchema,
+    ItemBubbleStateSchema,
+    ItemSchema,
     ObstacleStateSchema,
     PortalStateSchema,
     ResourceNodeStateSchema,
@@ -31,12 +33,47 @@ import { EventsType } from "../../../core/types/events";
 import { User } from "../../../core/types/user";
 import { snapshot } from "viem/_types/actions/test/snapshot";
 import { preciseRound } from "../../../core/funcs/utils";
+import { Item } from "../../../core/types/items";
 
 let timeOffset = 0;
 const getNow = () => {
     return preciseRound((Date.now() / 1000) + timeOffset, 2);
 
 }
+
+const createItemSchema = (item: Item ): ItemSchema => {
+    const newItem = new ItemSchema();
+    newItem.obstacle = item.state.obstacle;
+    newItem.bubbled = item.state.bubbled;
+    newItem.equipped = item.state.equipped;
+    newItem.using = item.state.using;
+    newItem.cooldownWait = item.state.cooldown.wait;
+    newItem.cooldownStarted = item.state.cooldown.started;
+    newItem.cooldownDuration = item.state.cooldown.duration;
+    newItem.swordDirection = item.state?.direction ?? 0;
+    newItem.swordSwingingWait = item.state?.swinging?.wait ?? 0;
+    newItem.swordSwingingStarted = item.state?.swinging?.started ?? 0;
+    newItem.swordSwingingDuration = item.state?.swinging?.duration ?? 0;
+    newItem.swordChargeStarted = item.state?.charge?.started ?? 0;
+    newItem.swordChargeDuration = item.state?.charge?.duration ?? 0;
+    newItem.swordChargeAmount = item.state?.charge?.amount ?? 0;
+
+    newItem.shieldActiveWait = item.state?.active?.wait ?? 0;
+    newItem.shieldActiveStarted = item.state?.active?.started ?? 0;
+    newItem.shieldActiveDuration = item.state?.active?.duration ?? 0;
+    newItem.shieldDirectionX = item.state?.direction?.x ?? 0;
+    newItem.shieldDirectionY = item.state?.direction?.y ?? 0;
+
+    newItem.id = item.id;
+    newItem.type = item.type;
+    newItem.equippable = item.equippable;
+    newItem.usable = item.usable;
+    newItem.throwable = item.throwable;
+    newItem.consumable = item.consumable;
+
+    return newItem;
+}
+
 
 const updateState = (state: WorldState, snapshot: Snapshot): WorldState => {
     state.timestamp = snapshot.timestamp;
@@ -67,6 +104,16 @@ const updateState = (state: WorldState, snapshot: Snapshot): WorldState => {
             newEntityResource.mass = resource.mass;
             newEntityResource.resource = resource.resource;
             newBubble.resources.push(newEntityResource);
+        });
+        newBubble.inventory = new ArraySchema<ItemSchema>();
+        bubble.inventory.forEach((item) => {
+            const newItem = createItemSchema(item);
+            newBubble.inventory.push(newItem);
+        });
+        newBubble.equipped = new ArraySchema<ItemSchema>();
+        bubble.equipped.forEach((item) => {
+            const newItem = createItemSchema(item);
+            newBubble.equipped.push(newItem);
         });
         state.bubbles.push(newBubble);
     });
@@ -138,6 +185,15 @@ const updateState = (state: WorldState, snapshot: Snapshot): WorldState => {
         newResource.mass = resource.mass;
         newResource.type = resource.type;
         state.resources.push(newResource);
+    });
+
+    //Set ItemBubbles
+    state.itemBubbles.clear();
+    snapshot.itemBubbles.forEach((itemBubble) => {
+        const newItemBubble = new ItemBubbleStateSchema();
+        newItemBubble.id = itemBubble.id;
+        newItemBubble.owner = itemBubble.owner;
+
     });
 
     return state;

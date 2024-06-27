@@ -35,6 +35,9 @@ import { time } from "console";
 import { Attractor } from "./types/entity";
 import { Protocol } from "./types/protocol";
 import { generateObstacles, setObstacleGroupFromState } from "./funcs/obstacle";
+import { ItemBubble, ItemObstacle } from "./types/items";
+import { WorldState } from "./world";
+import { createItemBubble, createItemObstacle, handleItemObstacle, handleItemObstacles } from "./funcs/items";
 
 export const snapshotUsers = new Map<Address, User>();
 export const snapshotBubbles = new Map<string, Bubble>();
@@ -45,6 +48,8 @@ export const snapshotResources = new Map<string, Resource>();
 export const snapshotPendingInputs = new Array<InputWithExecutionTime>();
 export const snapshotAttractors = new Array<Attractor>();
 export const snapshotProtocol = new Protocol();
+export const snapshotItemObstacles: ItemObstacle[] = [];
+export const snapshotItemBubbles: ItemBubble[] = [];
 
 //only client
 export const snapshots = new Map<number, Snapshot>();
@@ -73,11 +78,30 @@ export let snapshotCurrentState: Snapshot = {
         pendingEnergyBalance: 0,
         pendingEnergySpawn: 0,
     },
+    itemBubbles: [],
+    itemObstacles: [],
 };
 
 export let snapshotLastTimestamp = 0;
 
 export let snapshotTempTimestamp = 0;
+
+export const snapshotWorldState: WorldState = {
+    world: snapshotWorld,
+    timestamp: snapshotLastTimestamp,
+    current: snapshotTempTimestamp,
+    users: snapshotUsers,
+    bubbles: snapshotBubbles,
+    portals: snapshotPortals,
+    obstacles: snapshotObstacles,
+    nodes: snapshotNodes,
+    resources: snapshotResources,
+    pendingInputs: snapshotPendingInputs,
+    attractors: snapshotAttractors,
+    protocol: snapshotProtocol,
+    itemObstacles: itemObstacles,
+    itemBubbles: itemBubbles,
+};
 
 //Deferred updates called after the physics step
 export let snapshotDeferredUpdates: Array<() => void> = [];
@@ -107,6 +131,8 @@ export const snapshotInit = (initialState?: Snapshot) => {
         snapshotPendingInputs.length = 0;
         snapshotDeferredUpdates.length = 0;
         snapshotProtocol.init(initialState.protocol);
+        snapshotItemObstacles.length = 0;
+        snapshotItemBubbles.length = 0;
 
 
         if (!initialState?.nodes || initialState.nodes.length == 0) {
@@ -217,6 +243,22 @@ export const snapshotInit = (initialState?: Snapshot) => {
             snapshotAttractors.push(attractor);
         });
         snapshotObstacles.push(...setObstacleGroupFromState(snapshotWorld,snapshotCurrentState.obstacles));
+        snapshotCurrentState.itemBubbles.forEach((item) => {
+            snapshotItemBubbles.push(createItemBubble(
+                snapshotWorldState,
+                item.item,
+                item.position,
+                item.velocity,
+            ))
+        })
+        snapshotCurrentState.itemObstacles.forEach((item) => {
+            snapshotItemObstacles.push(createItemObstacle(
+                snapshotWorldState,
+                item.item,
+                item.position,
+                item.velocity,
+            ))
+        });
     }
     createEdges(snapshotWorld, WORLD_WIDTH, WORLD_WIDTH);
 
@@ -325,6 +367,7 @@ export const snapshotRun = (
             snapshotAttractors,
             current,
         );
+        handleItemObstacles(snapshotWorldState)
         snapshotProtocol.run(current, snapshotWorld, snapshotUsers, snapshotBubbles, snapshotPortals, snapshotObstacles, snapshotNodes, snapshotResources, snapshotProtocol, snapshotPendingInputs);
 
         // Step the snapshotWorld
@@ -363,6 +406,8 @@ export const snapshotRun = (
         snapshotResources,
         snapshotAttractors,
         snapshotProtocol,
+        snapshotItemBubbles,
+        snapshotItemObstacles,
         snapshotLastTimestamp,
     );
 

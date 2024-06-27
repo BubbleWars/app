@@ -5,7 +5,7 @@ import { Bubble } from "../types/bubble";
 import { InputWithExecutionTime } from "../types/inputs";
 import { Obstacle, ObstacleGroup } from "../types/obstacle";
 import { Portal } from "../types/portal";
-import { Snapshot } from "../types/state";
+import { ItemBubbleState, Snapshot } from "../types/state";
 import { User } from "../types/user";
 import {
     portals,
@@ -16,6 +16,13 @@ import {
     tempTimestamp,
     attractors,
     protocol,
+    world,
+    users,
+    obstacles,
+    pendingInputs,
+    itemObstacles,
+    itemBubbles,
+    worldState,
 } from "../world";
 import { portalAbsorbBubble, portalAbsorbResource } from "./portal";
 import { absorbBubble, absorbResource, bubbleRemoveEth, getBubbleEthMass, setBubbleEthMass } from "./bubble";
@@ -27,13 +34,18 @@ import {
     snapshotResources,
     snapshotTempTimestamp,
     snapshotProtocol,
+    snapshotWorldState,
 } from "../snapshots";
 import { Resource, ResourceNode } from "../types/resource";
 import { nodeAbsorbBubble, nodeAbsorbResource } from "./resource";
 import { Attractor } from "../types/entity";
 import { AssetType, FeeType, Protocol } from "../types/protocol";
-import { getObstacleGroupState } from "./obstacle";
+import { getBodyId, getObstacleGroupState } from "./obstacle";
 import { stat } from "fs";
+import { getFixtureType, handleWeaponBubbleContact, handleWeaponObjectContact, isBubbleShieldActive } from "./items";
+import { get } from "http";
+import { absorbItemBubble, absorbItemObstacle } from "./entity";
+import { ItemBubble, ItemObstacle } from "../types/items";
 
 export const updateState = (
     state: Snapshot,
@@ -46,6 +58,8 @@ export const updateState = (
     resources: Map<string, Resource>,
     attractors: Array<Attractor>,
     protocol: Protocol,
+    itemBubbles: ItemBubble[],
+    itemObstacles: ItemObstacle[],
     timestamp: number,
 ) => {
     state.timestamp = timestamp;
@@ -77,6 +91,8 @@ export const updateState = (
             }),
             from: bubble.from,
             attractor: null,
+            inventory: bubble.inventory.items,
+            equipped: bubble.inventory.equipped,
         };
     });
     state.portals = Array.from(portals.values()).map((portal) => ({
@@ -85,6 +101,8 @@ export const updateState = (
         position: portal.body.getPosition().clone(),
         mass: portal.mass,
         resources: Array.from((portal.resources ?? []).values()),
+        inventory: portal.inventory.items,
+        equipped: portal.inventory.equipped,
     }));
     state.obstacles = getObstacleGroupState(obstacles);
 
@@ -125,6 +143,18 @@ export const updateState = (
         pendingEthBalance: protocol.getPendingBalance(AssetType.ETH),
         pendingEnergySpawn: protocol.getPendingSpawn(AssetType.ENERGY),
     }
+
+    state.itemBubbles = itemBubbles.map((item) => ({
+        item: item.item,
+        position: { x: item.body.getPosition().x, y: item.body.getPosition().y },
+        velocity: { x: item.body.getLinearVelocity().x, y: item.body.getLinearVelocity().y }
+    }));
+
+    state.itemObstacles = itemObstacles.map((item) => ({
+        item: item.item,
+        position: { x: item.body.getPosition().x, y: item.body.getPosition().y },
+        velocity: { x: item.body.getLinearVelocity().x, y: item.body.getLinearVelocity().y }
+    }));
 
 
 };
@@ -170,6 +200,8 @@ export const createState = (
         resources,
         attractors,
         protocol,
+        itemBubbles,
+        itemObstacles,
         timestamp,
     );
     return state;
@@ -180,6 +212,14 @@ export const getStatePayload = (state: Snapshot): string => {
 };
 
 export const handleContact = (contact: Contact) => {
+    const fixtureA = contact.getFixtureA();
+    const fixtureB = contact.getFixtureB();
+    const fixtureAType = getFixtureType(fixtureA);
+    const fixtureBType = getFixtureType(fixtureB);
+    const bodyA = fixtureA.getBody();
+    const bodyB = fixtureB.getBody();
+    const idA = getBodyId(bodyA);
+    const idB = getBodyId(bodyB);
     const p1 = portals.get(
         contact.getFixtureA().getBody().getUserData() as string,
     );
@@ -204,11 +244,37 @@ export const handleContact = (contact: Contact) => {
     const r2 = resources.get(
         contact.getFixtureB().getBody().getUserData() as string,
     );
+    const itemBubble1 = itemBubbles.find((item) =>  getBodyId(item.body) == idA);
+    const itemBubble2 = itemBubbles.find((item) =>  getBodyId(item.body) == idB);
+
+    const itemObstacle1 = itemObstacles.find((item) =>  getBodyId(item.body) == idA);
+    const itemObstacle2 = itemObstacles.find((item) =>  getBodyId(item.body) == idB);
+
     const is1Edge = contact.getFixtureA().getShape().getType() == 'edge'
     const is2Edge = contact.getFixtureB().getShape().getType() == 'edge'
 
+
+    //Sword-Bubble collision
+    const fixtureAIsSword = fixtureAType == 'sword';
+    const fixtureBIsSword = fixtureBType == 'sword';
+    if(fixtureAIsSword && b2){
+        handleWeaponBubbleContact(worldState, b1, b2)
+    }else if (fixtureBIsSword && b1) {
+        handleWeaponBubbleContact(worldState, b2, b1)
+    }
+    //Sword-Sword collision
+    else if (fixtureAIsSword && fixtureBIsSword) {
+        handleWeaponObjectContact(worldState, bodyA, bodyB)
+    }
+    //Sword-Everything collision
+    else if (fixtureAIsSword) {
+        handleWeaponObjectContact(worldState, bodyA, bodyB)
+    } else if (fixtureBIsSword) {
+        handleWeaponObjectContact(worldState, bodyB, bodyA)
+
+    }
     //Portal-Bubble collision
-    if (p1 && b2) {
+    else if (p1 && b2) {
         deferredUpdates.push(() => {
             portalAbsorbBubble(tempTimestamp, bubbles, p1, b2, STEP_DELTA);
         });
@@ -223,14 +289,89 @@ export const handleContact = (contact: Contact) => {
         const m1 = b1?.body.getMass();
         const m2 = b2?.body.getMass();
         if (m1 > m2) {
+            if(isBubbleShieldActive(b2)){
+                contact.setRestitution(1);
+            }else{
             deferredUpdates.push(() => {
                 absorbBubble(bubbles, b1, b2, STEP_DELTA);
-            });
+            })}
         } else if (m2 > m1) {
-            deferredUpdates.push(() => {
+            if(isBubbleShieldActive(b1)){
+                contact.setRestitution(1);
+            }else { deferredUpdates.push(() => {
                 absorbBubble(bubbles, b2, b1, STEP_DELTA);
-            });
+            })}
         }
+    }
+
+    //Bubble-ItemBubble collision
+    else if (b1 && itemBubble2) {
+        deferredUpdates.push(() => {
+            absorbItemBubble<Bubble>(worldState, 'bubble', b1, itemBubble2)
+        });
+    
+    } else if (b2 && itemBubble1) {
+        deferredUpdates.push(() => {
+            absorbItemBubble<Bubble>(worldState, 'bubble', b2, itemBubble1)
+        });
+    }
+
+    //Bubble-ItemObstacle collision
+    else if (b1 && itemObstacle2) {
+        deferredUpdates.push(() => {
+           absorbItemObstacle<Bubble>(worldState, 'bubble', b1, itemObstacle2)
+           
+        });
+        
+    } else if (b2 && itemObstacle1) {
+        deferredUpdates.push(() => {
+            absorbItemObstacle<Bubble>(worldState, 'bubble', b2, itemObstacle1)
+        });
+    }
+
+    //Portal-ItemBubble collision
+    else if (p1 && itemBubble2) {
+        deferredUpdates.push(() => {
+            absorbItemBubble<Portal>(worldState, 'portal', p1, itemBubble2)
+            
+        });
+    } else if (p2 && itemBubble1) {
+        deferredUpdates.push(() => {
+            absorbItemBubble<Portal>(worldState, 'portal', p2, itemBubble1)
+        });
+    }
+
+    //Portal-ItemObstacle collision
+    else if (p1 && itemObstacle2) {
+        deferredUpdates.push(() => {
+            absorbItemObstacle<Portal>(worldState, 'portal', p1, itemObstacle2)
+        });
+    } else if (p2 && itemObstacle1) {
+        deferredUpdates.push(() => {
+            absorbItemObstacle<Portal>(worldState, 'portal', p2, itemObstacle1)
+        });
+    }
+
+    //Node ItemBubble collision
+    else if (n1 && itemBubble2) {
+        deferredUpdates.push(() => {
+            absorbItemBubble<ResourceNode>(worldState, 'node', n1, itemBubble2)
+        });
+    } else if (n2 && itemBubble1) {
+        deferredUpdates.push(() => {
+            absorbItemBubble<ResourceNode>(worldState, 'node', n2, itemBubble1)
+        });
+    }
+
+    //Node ItemObstacle collision
+    else if (n1 && itemObstacle2) {
+        deferredUpdates.push(() => {
+            absorbItemObstacle<ResourceNode>(worldState, 'node', n1, itemObstacle2)
+        });
+    } else if (n2 && itemObstacle1) {
+        deferredUpdates.push(() => {
+            absorbItemObstacle<ResourceNode>(worldState, 'node', n2, itemObstacle1)
+        });
     }
 
     //Bubble-Resource collision
@@ -299,9 +440,22 @@ export const handleContact = (contact: Contact) => {
     } else if (b2 && !b1) {
         contact.setRestitution(1);
     }
+
+
+    else {
+        contact.setRestitution(1);
+    }
 };
 
 export const handleSnapshotContact = (contact: Contact) => {
+    const fixtureA = contact.getFixtureA();
+    const fixtureB = contact.getFixtureB();
+    const fixtureAType = getFixtureType(fixtureA);
+    const fixtureBType = getFixtureType(fixtureB);
+    const bodyA = fixtureA.getBody();
+    const bodyB = fixtureB.getBody();
+    const idA = getBodyId(bodyA);
+    const idB = getBodyId(bodyB);
     const p1 = snapshotPortals.get(
         contact.getFixtureA().getBody().getUserData() as string,
     );
@@ -326,8 +480,34 @@ export const handleSnapshotContact = (contact: Contact) => {
     const r2 = snapshotResources.get(
         contact.getFixtureB().getBody().getUserData() as string,
     );
+    const itemBubble1 = itemBubbles.find((item) =>  getBodyId(item.body) == idA);
+    const itemBubble2 = itemBubbles.find((item) =>  getBodyId(item.body) == idB);
+
+    const itemObstacle1 = itemObstacles.find((item) =>  getBodyId(item.body) == idA);
+    const itemObstacle2 = itemObstacles.find((item) =>  getBodyId(item.body) == idB);
+
     const is1Edge = contact.getFixtureA().getShape().getType() == 'edge'
     const is2Edge = contact.getFixtureB().getShape().getType() == 'edge'
+
+    //Sword-Bubble collision
+    const fixtureAIsSword = fixtureAType == 'sword';
+    const fixtureBIsSword = fixtureBType == 'sword';
+    if(fixtureAIsSword && b2){
+        handleWeaponBubbleContact(snapshotWorldState, b1, b2)
+    }else if (fixtureBIsSword && b1) {
+        handleWeaponBubbleContact(snapshotWorldState, b2, b1)
+    }
+    //Sword-Sword collision
+    else if (fixtureAIsSword && fixtureBIsSword) {
+        handleWeaponObjectContact(snapshotWorldState, bodyA, bodyB)
+    }
+    //Sword-Everything collision
+    else if (fixtureAIsSword) {
+        handleWeaponObjectContact(snapshotWorldState, bodyA, bodyB)
+    } else if (fixtureBIsSword) {
+        handleWeaponObjectContact(snapshotWorldState, bodyB, bodyA)
+
+    }
 
     //Portal-Bubble collision
     if (p1 && b2) {
@@ -365,6 +545,76 @@ export const handleSnapshotContact = (contact: Contact) => {
                 absorbBubble(snapshotBubbles, b2, b1, STEP_DELTA);
             });
         }
+    }
+
+    //Bubble-ItemBubble collision
+    else if (b1 && itemBubble2) {
+        deferredUpdates.push(() => {
+            absorbItemBubble<Bubble>(snapshotWorldState, 'bubble', b1, itemBubble2)
+        });
+    
+    } else if (b2 && itemBubble1) {
+        deferredUpdates.push(() => {
+            absorbItemBubble<Bubble>(snapshotWorldState, 'bubble', b2, itemBubble1)
+        });
+    }
+
+    //Bubble-ItemObstacle collision
+    else if (b1 && itemObstacle2) {
+        deferredUpdates.push(() => {
+           absorbItemObstacle<Bubble>(snapshotWorldState, 'bubble', b1, itemObstacle2)
+           
+        });
+        
+    } else if (b2 && itemObstacle1) {
+        deferredUpdates.push(() => {
+            absorbItemObstacle<Bubble>(snapshotWorldState, 'bubble', b2, itemObstacle1)
+        });
+    }
+
+    //Portal-ItemBubble collision
+    else if (p1 && itemBubble2) {
+        deferredUpdates.push(() => {
+            absorbItemBubble<Portal>(snapshotWorldState, 'portal', p1, itemBubble2)
+            
+        });
+    } else if (p2 && itemBubble1) {
+        deferredUpdates.push(() => {
+            absorbItemBubble<Portal>(snapshotWorldState, 'portal', p2, itemBubble1)
+        });
+    }
+
+    //Portal-ItemObstacle collision
+    else if (p1 && itemObstacle2) {
+        deferredUpdates.push(() => {
+            absorbItemObstacle<Portal>(snapshotWorldState, 'portal', p1, itemObstacle2)
+        });
+    } else if (p2 && itemObstacle1) {
+        deferredUpdates.push(() => {
+            absorbItemObstacle<Portal>(snapshotWorldState, 'portal', p2, itemObstacle1)
+        });
+    }
+
+    //Node ItemBubble collision
+    else if (n1 && itemBubble2) {
+        deferredUpdates.push(() => {
+            absorbItemBubble<ResourceNode>(snapshotWorldState, 'node', n1, itemBubble2)
+        });
+    } else if (n2 && itemBubble1) {
+        deferredUpdates.push(() => {
+            absorbItemBubble<ResourceNode>(snapshotWorldState, 'node', n2, itemBubble1)
+        });
+    }
+
+    //Node ItemObstacle collision
+    else if (n1 && itemObstacle2) {
+        deferredUpdates.push(() => {
+            absorbItemObstacle<ResourceNode>(snapshotWorldState, 'node', n1, itemObstacle2)
+        });
+    } else if (n2 && itemObstacle1) {
+        deferredUpdates.push(() => {
+            absorbItemObstacle<ResourceNode>(snapshotWorldState, 'node', n2, itemObstacle1)
+        });
     }
 
     //Bubble-Resource collision
@@ -493,6 +743,10 @@ export const handleSnapshotContact = (contact: Contact) => {
     else if (b1 && !b2) {
         contact.setRestitution(1);
     } else if (b2 && !b1) {
+        contact.setRestitution(1);
+    }
+
+    else {
         contact.setRestitution(1);
     }
 };

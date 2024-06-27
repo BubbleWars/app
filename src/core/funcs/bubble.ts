@@ -7,7 +7,7 @@ import { RESOURCE_MASS, Resource, ResourceNode, ResourceType } from "../types/re
 import { clamp, createResource, getEntity, getNearestNodeToPosition, resourceAmountToMass, resourceMassToAmount, resourceMassToRadius, rotateVec2, updateResource } from "./resource";
 import { addEvent } from "./events";
 import { EventsType } from "../types/events";
-import { ZeroAddress } from "ethers";
+import { ZeroAddress, id } from "ethers";
 import { BubbleState } from "../types/state";
 import { pseudoRandom } from "./portal";
 import { bubbles, pendingInputs } from "../world";
@@ -17,9 +17,17 @@ import { InputType } from "../types/inputs";
 import { timeStamp } from "console";
 import { AssetType, Protocol } from "../types/protocol";
 import { getTotalInventoryMass } from "./entity";
+import { handleInventory } from "./items";
 
 //const PUNCTURE_EMIT_PER_SECOND = 100;
 
+
+export const getBubble = (
+    id: string,
+    bubbles: Map<string, Bubble>,
+): Bubble => {
+    return bubbles?.get(id) as Bubble ?? null;
+}
 
 export const generateBubbleId = (
     bubbles: Map<string, Bubble>,
@@ -606,6 +614,30 @@ export const punctureBubble = (
     // updateResource(resources, incoming, 0);   
 }
 
+//Creates puncture but without resource
+export const createPunctureInBubble = (
+    bubbles: Map<string, Bubble>,
+    bubble: Bubble,
+    puncturePoint: PuncturePoint,
+    timestamp: number,
+    attack: number,
+    defense: number,
+): void => {
+    const punctureAmount = calculatePunctureEthAmount(
+        getBubbleEthMass(bubble), 
+        attack, 
+        defense
+    );
+    
+    addPuncturePoint(
+        bubble, 
+        puncturePoint, 
+        punctureAmount,
+        timestamp
+    );
+}
+
+
 export const handlePunctures = (
     timestamp: number,
     bubbles: Map<string, Bubble>,
@@ -670,5 +702,6 @@ export const handleBubbleUpdates = (
 ): void => {
     bubbles.forEach((bubble) => {
         handlePunctures(timestamp, bubbles, bubble, timeElapsed, isSnapshot);
+        handleInventory(timestamp, bubble);
     });
 };

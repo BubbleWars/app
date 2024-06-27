@@ -5,6 +5,7 @@ import { InputWithExecutionTime } from "./inputs";
 import { ResourceType } from "./resource";
 import { User } from "./user";
 import { ObstacleGroupDef } from "./obstacle";
+import { Item } from "./items";
 
 export interface BubbleState {
     id: string;
@@ -17,6 +18,8 @@ export interface BubbleState {
     lastPunctureEmit: number | undefined;
     from: string | undefined;
     attractor: string | undefined;
+    inventory: Item[];
+    equipped: Item[];
 }
 
 export interface PortalState {
@@ -25,6 +28,8 @@ export interface PortalState {
     position: { x: number; y: number };
     mass: number;
     resources: { resource: ResourceType; mass: number }[];
+    inventory: Item[];
+    equipped: Item[];
 }
 
 export interface ResourceNodeState {
@@ -94,6 +99,18 @@ export interface ProtocolState {
     pendingEnergySpawn: number
 }
 
+export interface ItemBubbleState {
+    item: Item,
+    position: {x: number, y: number},
+    velocity: {x: number, y: number},
+}
+
+export interface ItemObstacleState {
+    item: Item,
+    position: {x: number, y: number},
+    velocity: {x: number, y: number},
+}
+
 
 export interface Snapshot {
     timestamp: number;
@@ -106,6 +123,8 @@ export interface Snapshot {
     attractors: Attractor[];
     obstacles: ObstaclesState;
     protocol: ProtocolState;
+    itemBubbles: ItemBubbleState[],
+    itemObstacles: ItemObstacleState[]
 }
 
 export type History = Snapshot[];

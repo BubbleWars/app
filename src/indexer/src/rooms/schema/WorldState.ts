@@ -17,6 +17,54 @@ export class UserSocialSchema extends Schema {
     @type("string") privyId: string = "";
 }
 
+export class ItemSchema extends Schema {
+    //Base ItemState
+    @type("boolean") obstacle: boolean = false;
+    @type("boolean") bubbled: boolean = false;
+    @type("boolean") equipped: boolean = false;
+    @type("boolean") using: boolean = false;
+    @type("number") cooldownWait: number = 0;
+    @type("number") cooldownStarted: number = 0;
+    @type("number") cooldownDuration: number = 0;
+
+    //Sword ItemState
+    @type("number") swordDirection: number = 0;
+    @type("number") swordSwingingWait: number = 0;
+    @type("number") swordSwingingStarted: number = 0;
+    @type("number") swordSwingingDuration: number = 0;
+    @type("number") swordChargeStarted: number = 0;
+    @type("number") swordChargeDuration: number = 0;
+    @type("number") swordChargeAmount: number = 0;
+
+    //Shield ItemState
+    @type("number") shieldActiveWait: number = 0;
+    @type("number") shieldActiveStarted: number = 0;
+    @type("number") shieldActiveDuration: number = 0;
+    @type("number") shieldDirectionX: number = 0;
+    @type("number") shieldDirectionY: number = 0;
+
+    //BaseItem 
+    @type("string") id: string = "";
+    @type("number") type: number = 0;
+    @type("boolean") equippable: boolean = false;
+    @type("boolean") usable: boolean = false;
+    @type("boolean") throwable: boolean = false;
+    @type("boolean") consumable: boolean = false;
+    
+}
+
+export class ItemBubbleStateSchema extends Schema {
+    @type(ItemSchema) item = new ItemSchema();
+    @type(Vector2Schema) position = new Vector2Schema();
+    @type(Vector2Schema) velocity = new Vector2Schema();
+}
+
+export class ItemObstacleStateSchema extends Schema {
+    @type(ItemSchema) item = new ItemSchema();
+    @type(Vector2Schema) position = new Vector2Schema();
+    @type(Vector2Schema) velocity = new Vector2Schema();
+}
+
 export class InputWithExecutionTimeSchema extends Schema {
     @type("string") type: string = "";
     @type("number") executionTime: number = 0;
@@ -54,6 +102,10 @@ export class BubbleStateSchema extends Schema {
     @type("number") startPositionX: number = 0;
     @type("number") startPositionY: number = 0;
     @type("string") from: string = "";
+
+    //Inventory
+    @type([ItemSchema]) inventory = new ArraySchema<ItemSchema>();
+    @type([ItemSchema]) equipped = new ArraySchema<ItemSchema>();
 }
 
 export class PortalStateSchema extends Schema {
@@ -64,6 +116,10 @@ export class PortalStateSchema extends Schema {
     @type("number") mass: number = 0;
     @type([EntityResourceStateSchema]) resources =
         new ArraySchema<EntityResourceStateSchema>();
+
+    //Inventory
+    @type([ItemSchema]) inventory = new ArraySchema<ItemSchema>();
+    @type([ItemSchema]) equipped = new ArraySchema<ItemSchema>();
 }
 
 export class ObstacleStateSchema extends Schema {
@@ -119,4 +175,6 @@ export class WorldState extends Schema {
         new MapSchema<Vector2Schema>();
     @type({ map: Vector2Schema }) syncResourceStartPositions =
         new MapSchema<Vector2Schema>();
+    @type({ map: ItemBubbleStateSchema }) itemBubbles = new MapSchema<ItemBubbleStateSchema>();
+    @type({ map: ItemObstacleStateSchema }) itemObstacles = new MapSchema<ItemObstacleStateSchema>();
 }

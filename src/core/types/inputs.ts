@@ -1,8 +1,11 @@
+import { ItemParams } from "./items";
 import { ResourceType } from "./resource";
 
 export enum InputType {
     SpawnPortal = "spawnPortal",
     Emit = "emit",
+    UseItem = "useItem",
+    EjectItem = "ejectItem",
     Deposit = "deposit",
     Withdraw = "withdraw",
     Invalid = "invalid",
@@ -46,6 +49,20 @@ export interface Emit extends BaseInput {
     direction: { x: number; y: number }; //direction to emit bubble
 }
 
+export interface UseItem extends BaseInput {
+    type: InputType.UseItem;
+    from: string;
+    id: string; // item id
+    params: ItemParams;
+}
+
+export interface EjectItem extends BaseInput {
+    type: InputType.EjectItem;
+    direction: { x: number; y: number };
+    from: string;
+    id: string;
+}
+
 export interface PunctureInput extends BaseInput {
     type: InputType.Puncture;
     bubbleId: string;
@@ -55,7 +72,7 @@ export interface PunctureInput extends BaseInput {
     executionTime?: number;
 }
 
-export type Input = SpawnPortal | Emit | Deposit | Withdraw | Invalid | PunctureInput;
+export type Input = SpawnPortal | Emit | Deposit | Withdraw | Invalid | PunctureInput | EjectItem | UseItem;
 export type InputWithExecutionTime = Emit | PunctureInput;
 
 export interface AdvanceData {

@@ -10,6 +10,8 @@ import {
     Inspect,
     InspectType,
     PunctureInput,
+    UseItem,
+    EjectItem,
 } from "../types/inputs";
 import { ethers } from "ethers";
 import {
@@ -25,6 +27,7 @@ import {
     tempTimestamp,
     users,
     world,
+    worldState,
 } from "../world";
 import { Address } from "../types/address";
 import { User } from "../types/user";
@@ -37,7 +40,7 @@ import {
     portalEmitResource,
 } from "./portal";
 import { decodePacked } from "./utils";
-import { addPuncturePoint, emitBubble, emitResource, getBubbleEthMass, getBubbleResourceMass, setBubbleResourceMass } from "./bubble";
+import { addPuncturePoint, emitBubble, emitResource, getBubble, getBubbleEthMass, getBubbleResourceMass, setBubbleResourceMass } from "./bubble";
 import { Vec2 } from "planck-js";
 import {
     snapshotBubbles,
@@ -55,6 +58,8 @@ import {
 import { ResourceType } from "../types/resource";
 import { resourceMassToAmount, updateResource } from "./resource";
 import { AssetType, FeeType } from "../types/protocol";
+import { ejectItem, useItem } from "./items";
+import { getInventoryItem } from "./entity";
 
 const isNode =
     typeof process !== "undefined" &&
@@ -126,6 +131,28 @@ export const parseInput = (data: AdvanceData): Input | false => {
                 emissionType: payloadJSON.emissionType ?? "bubble",
                 direction: payloadJSON.direction,
             };
+        case InputType.UseItem:
+            return {
+                type: InputType.UseItem,
+                timestamp: timestamp,
+                sender: sender,
+                blockNumber: blockNumber,
+                inputIndex: inputIndex,
+                epochIndex: epochIndex,
+                item: payloadJSON.item,
+                params: payloadJSON.params,
+            };
+        case InputType.EjectItem:
+            return {
+                type: InputType.EjectItem,
+                timestamp: timestamp,
+                sender: sender,
+                blockNumber: blockNumber,
+                inputIndex: inputIndex,
+                epochIndex: epochIndex,
+                direction: payloadJSON.direction,
+                id: payloadJSON.id,
+            };
         case InputType.Withdraw:
             return {
                 type: InputType.Withdraw,
@@ -177,6 +204,12 @@ export const handleInput = async (
         case InputType.Withdraw:
             await handleWithdraw(input, client);
             break;
+        case InputType.UseItem:
+            await handleUseItem(input, client);
+            break;
+        case InputType.EjectItem:
+            await handleEjectItem(input, client);
+            break;
     }
     if (!client) {
         //sendNotice(input);
@@ -185,6 +218,62 @@ export const handleInput = async (
 
     return true;
 };
+
+const handleUseItem = async (
+    input: UseItem,
+    client: boolean = false,
+): Promise<boolean> => {
+    const bubble = getBubble(
+        input.from,
+        client ? snapshotBubbles : bubbles,
+    );
+    if (!bubble) return false;
+
+    //Get item
+    const item = getInventoryItem(
+        client ? snapshotWorldState : worldState,
+        bubble,
+        input.id,
+    );
+
+    //Check if bubble owns the item
+    useItem(
+        client ? worldState : snapshotWorldState,
+        bubble,
+        item,
+        input.params,
+    )
+
+}
+
+const handleEjectItem = async (
+    input: EjectItem,
+    client: boolean = false,
+): Promise<boolean> => {
+    const bubble = getBubble(
+        input.from,
+        client ? snapshotBubbles : bubbles,
+    );
+    if (!bubble) return false;
+
+    //Get item
+    const item = getInventoryItem(
+        client ? snapshotWorldState : worldState,
+        bubble,
+        input.id,
+    );  
+
+    //Check if bubble owns the item
+    if (!item) return false;
+
+    //Eject item
+    ejectItem(
+        client ? snapshotWorldState : worldState,
+        bubble,
+        item,
+        input.direction,
+    )
+}
 
 const handleDeposit = (
     { sender, amount, timestamp }: Deposit,

@@ -33,9 +33,13 @@ import {
 import { createBoundary, createEdges, preciseRound } from "./funcs/utils";
 import { Attractor } from "./types/entity";
 import { Protocol } from "./types/protocol";
+import { ItemBubble, ItemObstacle } from "./types/items";
+import { createItemBubble, createItemObstacle, handleItemObstacles } from "./funcs/items";
 
 export type WorldState = {
+    world: World;
     timestamp: number;
+    current: number;
     users: Map<Address, User>;
     bubbles: Map<string, Bubble>;
     portals: Map<string, Portal>;
@@ -45,6 +49,8 @@ export type WorldState = {
     pendingInputs: InputWithExecutionTime[];
     attractors: Attractor[];
     protocol: Protocol;
+    itemObstacles: ItemObstacle[];
+    itemBubbles: ItemBubble[];
 };
 
 export const users = new Map<Address, User>();
@@ -56,10 +62,16 @@ export const resources = new Map<string, Resource>();
 export const pendingInputs = new Array<InputWithExecutionTime>();
 export const attractors = new Array<Attractor>();
 export const protocol = new Protocol()
+export const itemObstacles: ItemObstacle[] = [];
+export const itemBubbles: ItemBubble[] = [];
+
+    
 
 export let world = new World({
     gravity: Vec2(0, 0),
 });
+
+
 
 export let currentState: Snapshot = {
     timestamp: 0,
@@ -87,6 +99,23 @@ export let currentState: Snapshot = {
 export let lastTimestamp = 0;
 
 export let tempTimestamp = 0; // for accessing the current state of the world
+
+export const worldState: WorldState = {
+    world,
+    timestamp: lastTimestamp,
+    current: tempTimestamp,
+    users,
+    bubbles,
+    portals,
+    obstacles,
+    nodes,
+    resources,
+    pendingInputs,
+    attractors,
+    protocol,
+    itemObstacles,
+    itemBubbles,
+};
 
 //Deferred updates called after the physics step
 export let deferredUpdates: Array<() => void> = [];
@@ -117,6 +146,8 @@ export const init = (initialState?: Snapshot) => {
         pendingInputs.length = 0;
         deferredUpdates.length = 0;
         protocol.init(initialState.protocol)
+        itemObstacles.length = 0;
+        itemBubbles.length = 0;
 
 
         if (!initialState?.nodes || initialState.nodes.length == 0) {
@@ -226,6 +257,22 @@ export const init = (initialState?: Snapshot) => {
             attractors.push(attractor);
         });
         obstacles.push(...setObstacleGroupFromState(world, currentState.obstacles)) 
+        currentState.itemBubbles.forEach((item) => {
+            itemBubbles.push(createItemBubble(
+                worldState, 
+                item.item,
+                item.position,
+                item.velocity,
+            ));
+        })
+        currentState.itemObstacles.forEach((item) => {
+            itemObstacles.push(createItemObstacle(
+                worldState, 
+                item.item,
+                item.position,
+                item.velocity,
+            ));
+        });
     }
     createEdges(world, WORLD_WIDTH, WORLD_HEIGHT);
 
@@ -309,6 +356,7 @@ export const run = (
         handleBubbleUpdates(current, bubbles, stepDelta);
         handleNodeUpdates(current, world, nodes, bubbles, resources, portals, attractors, stepDelta);
         handleAttractors(nodes, resources, bubbles, portals, attractors,  current);
+        handleItemObstacles(worldState);
         protocol.run(current, world, users, bubbles, portals, obstacles, nodes, resources, protocol, pendingInputs);
 
         // Step the world
@@ -349,6 +397,8 @@ export const run = (
         resources,
         attractors,
         protocol,
+        itemBubbles,
+        itemObstacles,
         lastTimestamp,
     );
 
