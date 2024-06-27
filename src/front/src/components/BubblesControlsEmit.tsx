@@ -161,18 +161,35 @@ export const BubblesControlsEmit = ({
     //     //console.log("tx:", tx)
     // }, [tx]);
 
-    //Scroll action
+    // Scroll action
     useOnWheel((event) => {
         if (isError || isLoading || isSuccess) return;
+        
         const maxMass = emitEth ? ethMass : blueMass;
         const minMass = PLANCK_MASS;
-        const step = PLANCK_MASS;
+        const baseStep = PLANCK_MASS;
+        
+        // Determine the adaptive step size
+        const delta = event.deltaY;
+        const absDelta = Math.abs(delta);
+        let adaptiveStep = baseStep;
+        
+        if (absDelta > 50) {
+            adaptiveStep = baseStep * 10;
+        } else if (absDelta > 20) {
+            adaptiveStep = baseStep * 5;
+        } else if (absDelta > 10) {
+            adaptiveStep = baseStep * 2;
+        }
+        
         const newMass = Math.min(
-            Math.max(mass + (event.deltaY * step), minMass),
-            maxMass,
+            Math.max(mass + (delta / 100) * adaptiveStep, minMass),
+            maxMass
         );
-        setMass(1);
+        
+        setMass(newMass);
     });
+
 
     //if(isSuccess || isError) return null
 

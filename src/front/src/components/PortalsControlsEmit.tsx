@@ -29,6 +29,7 @@ import { setControlsActive, setIsBubbleSelected } from "../store/interpolation";
 
 import { useWallets } from "@privy-io/react-auth";
 import { getPortalMass } from "../../../core/funcs/portal";
+import { PLANCK_MASS } from "../../../core/consts";
 
 export const PortalsControlsEmit = ({
     portalId,
@@ -163,17 +164,32 @@ export const PortalsControlsEmit = ({
     //     //console.log("tx:", tx)
     // }, [tx]);
 
-    //Scroll action
+    // Scroll action
     useOnWheel((event) => {
         if (isError || isLoading || isSuccess) return;
-              
+        
         const maxMass = emitEth ? ethMass : blueMass;
-        const minMass = 0.05;
-        const step = 0.01;
+        const minMass = PLANCK_MASS;
+        const baseStep = PLANCK_MASS;
+        
+        // Determine the adaptive step size
+        const delta = event.deltaY;
+        const absDelta = Math.abs(delta);
+        let adaptiveStep = baseStep;
+        
+        if (absDelta > 50) {
+            adaptiveStep = baseStep * 10;
+        } else if (absDelta > 20) {
+            adaptiveStep = baseStep * 5;
+        } else if (absDelta > 10) {
+            adaptiveStep = baseStep * 2;
+        }
+        
         const newMass = Math.min(
-            Math.max(mass + event.deltaY * step, minMass),
-            maxMass,
+            Math.max(mass + (delta / 100) * adaptiveStep, minMass),
+            maxMass
         );
+        
         setMass(newMass);
     });
 
