@@ -127,7 +127,6 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
 
     return (
         <>
-        <EffectGlow position={new THREE.Vector3(resource.position.x, resource.position.y, 0)} radius={radius+0.4} color={'#87CEEB'} />
             <CustomText
                 position={new THREE.Vector3(radius + 0.3, radius + 0.4, 0).add(
                     textPosition,

@@ -78,6 +78,16 @@ export const getBubbleResourceMass = (
     return bubbleResource?.mass || 0;
 };
 
+export const getBubbleStateResourceMass = (
+    bubble: BubbleState,
+    resource: ResourceType,
+): number => {
+    if (!bubble.resources) return 0;
+    if (!bubble.resources?.find((r) => r.resource == resource)) return 0;
+    const bubbleResource = bubble.resources?.find((r) => r.resource == resource);
+    return bubbleResource?.mass || 0;
+}
+
 export const setBubbleResourceMass = (
     bubble: Bubble,
     resource: ResourceType,
@@ -239,6 +249,7 @@ export const emitBubble = (
     mass: number,
     direction: Vec2,
     emissionDirection?: Vec2,
+    isPuncture: boolean = false,
 ): Bubble => {
     //if(!bubble.controllable) throw new Error("Cannot emit from a non-controllable bubble");
     const bubbleEthMass = getBubbleEthMass(bubble);
@@ -247,7 +258,7 @@ export const emitBubble = (
         return;
     }
     //console.log("emitting bubble", mass, bubble.body.getMass() );
-    const radius = bubble.fixture.getShape().getRadius();
+    const radius = bubble?.fixture?.getShape()?.getRadius() ?? 0;
     const emittedBubbleRadius = massToRadius(mass);
     const centerDelta = direction.clone().mul(radius + emittedBubbleRadius);
     const emittedBubblePosition = bubble.body
@@ -281,12 +292,13 @@ export const emitBubble = (
     const emittedBubbleVelocity = bubble.body
         .getLinearVelocity()
         .clone()
-        .add(emittedBubbleRelativeVelocity);
+        .add(emittedBubbleRelativeVelocity)
+        .mul(isPuncture ? 0.1 : 1);
 
     emittedBubble.body.setLinearVelocity(emittedBubbleVelocity);
     const m = getTotalBubbleMass(bubble);
     const me = emittedBubble.body.getMass();
-    const deltaVelocity = calculateDeltaVelocity(emittedBubbleRelativeVelocity, m, me);
+    const deltaVelocity = calculateDeltaVelocity(emittedBubbleRelativeVelocity, m, me).mul(isPuncture ? 0.1 : 1);
     bubble.body.applyLinearImpulse(deltaVelocity.clone().mul(bubble.body.getMass()), bubble.body.getPosition(), true);
 
     return emittedBubble;

@@ -14,6 +14,7 @@ import { Obstacle } from "../types/obstacle";
 import { Resource, ResourceNode, ResourceType } from "../types/resource";
 import { createResource, updateResource } from "./resource";
 import { getItemMass } from "./entity";
+import { PortalState } from "../types/state";
 
 function deterministicHash(x: number, y: number): number {
     let hash = (Math.floor(x) * 0x1f1f1f1f) ^ Math.floor(y);
@@ -211,6 +212,14 @@ export const getPortalResourceMass = (
     const portalResource = portal.resources?.get(resource);
     return portalResource?.mass || 0;
 };
+
+export const getPortalStateResourceMass = (
+    portal: PortalState,
+    resource: ResourceType,
+): number => {
+    const portalResource = portal.resources?.find((r) => r.resource === resource);
+    return portalResource?.mass || 0;
+}
 
 export const setPortalResourceMass = (
     portal: Portal,

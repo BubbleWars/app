@@ -1,5 +1,5 @@
 import { useQuery } from "@apollo/client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
     GetNoticesDocument,
     GetNoticesQuery,
@@ -76,6 +76,27 @@ export const useMachineTimestamp = (
 
     //return the greatest timestamp
     return Math.max(greatestNoticeTimestamp, snapshotTimestamp);
+};
+
+//Use effect that runs every specified amount of seconds
+export const useInterval = (callback: () => void, delay: number) => {
+    const savedCallback = useRef<() => void>();
+
+    // Remember the latest callback
+    useEffect(() => {
+        savedCallback.current = callback;
+    }, [callback]);
+
+    // Set up the interval
+    useEffect(() => {
+        function tick() {
+            if (savedCallback.current) savedCallback.current();
+        }
+        if (delay !== null) {
+            const id = setInterval(tick, delay);
+            return () => clearInterval(id);
+        }
+    }, [delay]);
 };
 
 //Get current timestamp on local machine (Seconds)

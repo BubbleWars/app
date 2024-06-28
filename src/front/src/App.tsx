@@ -29,6 +29,7 @@ import { WORLD_WIDTH } from "../../core/consts";
 
 import { useLoader } from '@react-three/fiber';
 import { TextureLoader } from 'three';
+import { StatsLeaderboard } from "./components/ui/StatsLeaderboard";
 
 function Background() {
     const defaultUrl = "/bg.png";
@@ -75,6 +76,8 @@ function App() {
                 <CustomCameraControls />
 
             </Canvas>
+            <StatsLeaderboard />
+
 
             {!authenticated && <ScreenLogin />}
             {authenticated && <ScreenSpawnPortal /> }

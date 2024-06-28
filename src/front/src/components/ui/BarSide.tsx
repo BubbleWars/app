@@ -58,6 +58,11 @@ import { User } from "../../../../core/types/user";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { Separator } from "./separator";
 import { ChevronDown } from "lucide-react";
+import { getPortalResourceMass, getPortalStateResourceMass } from "../../../../core/funcs/portal";
+import { Title } from "@radix-ui/react-dialog";
+import { UserView } from "./UserView";
+import { getBubbleStateResourceMass } from "../../../../core/funcs/bubble";
+import { useInterval, useMachineTimestamp } from "@/hooks/state";
 
 export const RESOURCE_TO_COLOR = {
     [ResourceType.Energy]: "#0000FF",
@@ -172,6 +177,84 @@ export const VelocityIcon = ({
         </div>
     );
 };
+
+// export const LeaderboardPlayer = ({player, rank}: {player: User}) => {
+//     const portal = currentState.portals.find((portal) => portal.owner === player.address);
+//     const bubbles = currentState.bubbles.filter((bubble) => bubble.owner === player.address);
+//     const portalResourceMass = getPortalStateResourceMass(portal, ResourceType.ENERGY);
+//     const bubblesResourceMass = bubbles.reduce((acc, bubble) => acc + bubble.resources.find(resource => resource.resource === ResourceType.ENERGY)?.mass ?? 0, 0);
+//     const totalResourceMass = portalResourceMass + bubblesResourceMass;
+
+
+
+//     return (
+//         <div className="flex items-center space-x-2">
+//             <p>
+//         </div>
+//     );
+
+// }  
+
+export const ListPlayersLeaderboard = ({ players }: { players: User[] }) => {
+    const [fullPlayers, setFullPlayers] = useState<{ address: string; resourcesCollected: number }[]>(
+        players.map((player) => {
+            const portal = currentState.portals.find((portal) => portal.owner === player.address);
+            const bubbles = currentState.bubbles.filter((bubble) => bubble.owner === player.address);
+            const portalResourceMass = getPortalStateResourceMass(portal, ResourceType.ENERGY);
+            const bubblesResourceMass = bubbles.reduce((acc, bubble) => acc + getBubbleStateResourceMass(bubble, ResourceType.ENERGY) ?? 0, 0);
+            const totalResourceMass = portalResourceMass + bubblesResourceMass;
+            return {
+                address: player.address,
+                resourcesCollected: totalResourceMass,
+            };
+        }).sort((a, b) => b.resourcesCollected - a.resourcesCollected)
+    );
+    
+    
+   
+    useInterval(() => {
+        setFullPlayers(
+            players.map((player) => {
+                const portal = currentState.portals.find((portal) => portal.owner === player.address);
+                const bubbles = currentState.bubbles.filter((bubble) => bubble.owner === player.address);
+                const portalResourceMass = getPortalStateResourceMass(portal, ResourceType.ENERGY);
+                const bubblesResourceMass = bubbles.reduce((acc, bubble) => acc + getBubbleStateResourceMass(bubble, ResourceType.ENERGY) ?? 0, 0);
+                const totalResourceMass = portalResourceMass + bubblesResourceMass;
+                return {
+                    address: player.address,
+                    resourcesCollected: totalResourceMass,
+                };
+            }).sort((a, b) => b.resourcesCollected - a.resourcesCollected)
+        );
+    }, 1000);
+
+    return (
+<div className="rounded-md border fixed right-0 top-0 w-97 h-96 p-4" style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)' }}>
+            <h1 className="font-bold text-lg">Leaderboard</h1>
+            <ScrollArea className="rounded-md border">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Rank</TableHead>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Tokens Owned</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {fullPlayers.map((player, index) => (
+                            <TableRow>
+                                <TableCell>{index + 1}</TableCell>
+                                <TableCell><UserView address={player.address}/></TableCell>
+                                <TableCell><div className="text-sm text-bold text-blue-500">{player.resourcesCollected.toFixed(2)} $BBL</div></TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </ScrollArea>
+        </div>
+    );
+};
+
 
 export const ListPlayers = ({ players }: { players: User[] }) => {
     const fullPlayers: {
