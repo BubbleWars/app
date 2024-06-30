@@ -26,12 +26,14 @@ export const ResourceButton = ({
     position,
     size,
     amount,
+    isPortal = false,
 } : {
     id: string,
     type: ResourceType,
     position: THREE.Vector3,
     size: number,
     amount: number,
+    isPortal: boolean
 }) => {
     const dispatch = useDispatch();
     const colorName = RESOURCE_TO_COLOR[type];
@@ -40,7 +42,7 @@ export const ResourceButton = ({
     const mass = Math.max(amount/10, 1); // 10% of the resource but at least 1
 
     useFrame(() => {
-        if(isHovered) setText("Emit " + colorName);
+        if(isHovered) setText("Emit $BBL");
         else setText(amount.toFixed(2));
     })
 
@@ -49,7 +51,7 @@ export const ResourceButton = ({
             position={position}
             onPointerEnter={() => setIsHovered(true)}
             onPointerLeave={() => setIsHovered(false)}
-            onClick={() => dispatch(setAiming({ id, type, mass}))}
+            onClick={() => dispatch(setAiming({ id, type, mass, isPortal}))}
         >
             <CustomText
                 color={colorName}
@@ -63,15 +65,17 @@ export const ResourceButton = ({
 }
 
 export const Inventory = ({
-    bubbleId,
+    id,
     radius,
     position,
-    resources
+    resources,
+    isPortal = false,
 }: {
-    bubbleId: string,
+    id: string,
     radius: number,
     position: THREE.Vector3,
     resources: { resource: ResourceType; mass: number }[] | null
+    isPortal: boolean
 }) => {
     //3 degrees
     const pos = position.clone()
@@ -85,10 +89,11 @@ export const Inventory = ({
     return (
         <>
             <ResourceButton
-                id={bubbleId}
+                id={id}
                 type={ResourceType.ENERGY}
                 position={energyPos}
                 size={radius / 7}
+                isPortal={isPortal}
                 amount={energyAmount}
             />
 
@@ -131,7 +136,7 @@ export const BubblesInfo = ({bubble, position}: {bubble: BubbleState, position: 
 
             <Inventory 
                 key={bubble.id}
-                bubbleId={bubble.id} 
+                id={bubble.id} 
                 radius={radius} 
                 position={pos} 
                 resources={bubble?.resources} 

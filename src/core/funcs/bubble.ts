@@ -295,12 +295,12 @@ export const emitBubble = (
         .getLinearVelocity()
         .clone()
         .add(emittedBubbleRelativeVelocity)
-        .mul(isPuncture ? 0.1 : 1);
+        .mul(isPuncture ? 0.5 : 1);
 
     emittedBubble.body.setLinearVelocity(emittedBubbleVelocity);
     const m = getTotalBubbleMass(bubble);
     const me = emittedBubble.body.getMass();
-    const deltaVelocity = calculateDeltaVelocity(emittedBubbleRelativeVelocity, m, me).mul(isPuncture ? 0.1 : 1);
+    const deltaVelocity = calculateDeltaVelocity(emittedBubbleRelativeVelocity, m, me).mul(isPuncture ? 0.5 : 1);
     bubble.body.applyLinearImpulse(deltaVelocity.clone().mul(bubble.body.getMass()), bubble.body.getPosition(), true);
 
     if(isPuncture)

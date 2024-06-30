@@ -253,9 +253,9 @@ export const usePfpTexture = (imageUrl, fallbackImage, social) => {
 
 //Controls
 
-export const useAiming = (): {mass: number, type: ResourceType, id: string} => {
+export const useAiming = (): {mass: number, type: ResourceType, id: string, isPortal:boolean} => {
     const aiming = useSelector((state: any) => state.controls.aiming)
-    return aiming ?? {mass: null, type: null, id: null};
+    return aiming ?? {mass: null, type: null, id: null, isPortal: false};
 }
 
 export const useClearAiming = (): () => void => {
@@ -277,7 +277,7 @@ export const useAimingResource = (): ResourceType => {
 
 export const useAimingLine = (): [THREE.Vector3, THREE.Vector3, THREE.Vector3] => {
     const { viewport } = useThree();
-    const { id } = useAiming();
+    const { id, isPortal } = useAiming();
     
     const [p1, setP1] = useState<THREE.Vector3>(new THREE.Vector3(10, 10, 0));
     const [p2, setP2] = useState<THREE.Vector3>(new THREE.Vector3(20, 0, 0));
@@ -286,9 +286,9 @@ export const useAimingLine = (): [THREE.Vector3, THREE.Vector3, THREE.Vector3] =
     //Calculate direction
     useFrame(({ pointer, camera }) => {
         if(!id) return;
-        const bubble = currentState?.bubbles?.find((bubble) => bubble.id == id) ?? {position: {x: 0, y: 0}, mass: 0};
-        const position = new THREE.Vector3(bubble.position.x, bubble.position.y, 0)
-        const radius = massToRadius(bubble.mass)
+        const entity = (isPortal ? currentState?.portals : currentState?.bubbles)?.find((entity) => entity.id == id) ?? {position: {x: 0, y: 0}, mass: 0};
+        const position = new THREE.Vector3(entity.position.x, entity.position.y, 0)
+        const radius = massToRadius(entity.mass)
         const length = radius * 3;
 
         //camera.updateProjectionMatrix();

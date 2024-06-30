@@ -7,6 +7,7 @@ import { ResourceType } from "../../../core/types/resource";
 import { C } from "../../../core/consts";
 import { useDisplayName } from "./GetDisplayName";
 import { useUserSocial } from "@/hooks/socials";
+import { Inventory } from "./BubblesInfo";
 
 export const PortalsInfo = ({ portalId }: { portalId: string }) => {
     const portal = currentState.portals.find(
@@ -87,6 +88,15 @@ export const PortalsInfo = ({ portalId }: { portalId: string }) => {
                     {energyAmount.toFixed(2)} EP
                 </CustomText> */}
             </group>
+
+            <Inventory
+                key={portal.id}
+                id={portal.id}
+                isPortal={true}
+                radius={radius}
+                position={textPosition}
+                resources={portal.resources}
+            />
         </>
     );
 };

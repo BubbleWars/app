@@ -6,7 +6,7 @@ import { ResourceType } from "../../../core/types/resource";
 interface ControlsState {
     hovered: string | null; //hovered entity id
     selected: string | null; //selected entity id
-    aiming: {id: string, mass: number, type: ResourceType} | null, //list of aiming entities and their mass
+    aiming: {id: string, mass: number, type: ResourceType, isPortal:boolean} | null, //list of aiming entities and their mass
     emitting: {[id: string]: {id:string, mass: number, type: ResourceType, x: number, y: number}}; //list of emitting entities and their directions
 }
 
@@ -25,9 +25,9 @@ export const controlsSlice = createSlice({
         setSelected: (state, action: PayloadAction<string | null>) => {
             state.selected = action.payload;
         },
-        setAiming: (state, action: PayloadAction<{id: string, mass: number, type: ResourceType}>) => {
+        setAiming: (state, action: PayloadAction<{id: string, mass: number, type: ResourceType, isPortal: boolean}>) => {
            //console.log("setAiming", action.payload);
-            state.aiming= {mass: action.payload.mass, type: action.payload.type, id: action.payload.id};
+            state.aiming= {mass: action.payload.mass, type: action.payload.type, id: action.payload.id, isPortal: action.payload.isPortal};
         },
         setEmitting: (state, action: PayloadAction<{id: string, mass: number, type: ResourceType, x: number, y: number}>) => {
             state.emitting[action.payload.id] = {id:action.payload.id, mass: action.payload.mass, type: action.payload.type, x: action.payload.x, y: action.payload.y};
