@@ -39,7 +39,7 @@ export class Protocol {
     pendingSpawn: Map<AssetType, number> = new Map<AssetType, number>(); // Pending spawn of ETH or ENERGY to be used for buyback if ETH or respawn if ENERGY
 
     deposit(type: AssetType, amount: number) { 
-        console.log("Depositing", type, amount);
+       //console.log("Depositing", type, amount);
         if(type == AssetType.ENERGY) this.addPendingBalance(type, amount);
         else {
             let amountForBuyBack = amount * BUYBACK_PERCENTAGE;
@@ -49,12 +49,12 @@ export class Protocol {
         }
     }
     withdraw(type: AssetType, amount: number) { 
-        console.log("Withdrawing", type, amount);
+       //console.log("Withdrawing", type, amount);
         this.addBalance(type, -amount);
     }
     processFee(type: FeeType, asset: AssetType, amount: number) {
         const feeTypeAsString = FeeType[type];
-        console.log("Processing fee", feeTypeAsString, "for", amount, asset);
+       //console.log("Processing fee", feeTypeAsString, "for", amount, asset);
         const fee = amount * type / 100;
         this.deposit(asset, fee);
         return amount - fee;
@@ -64,7 +64,7 @@ export class Protocol {
         return this.balance.get(type);
     }
     addBalance(type: AssetType, amount: number) {
-        console.log("Adding balance", type, amount);
+       //console.log("Adding balance", type, amount);
         const balance = this.getBalance(type);
         if(balance) this.balance.set(type, balance + amount);
         else this.balance.set(type, amount);
@@ -79,7 +79,7 @@ export class Protocol {
         if(balance) this.pendingBalance.set(type, balance + amount);
         else this.pendingBalance.set(type, amount);
 
-        console.log("Adding pending balance", type, amount, "pending balance", this.pendingBalance);
+       //console.log("Adding pending balance", type, amount, "pending balance", this.pendingBalance);
     }
  
     removePendingBalance(type: AssetType, amount: number) {
@@ -99,7 +99,7 @@ export class Protocol {
         nodes.forEach((node) => {
             amountBought += node.token.buyWithoutFee(buyPerNode);
         });
-        console.log("Bought back", amountBought, "energy for", ethAmount, "ETH");
+       //console.log("Bought back", amountBought, "energy for", ethAmount, "ETH");
         return amountBought;
     }
 
@@ -117,7 +117,7 @@ export class Protocol {
     ) {
         const pendingBalance = this.getPendingBalance(type);
         if(pendingBalance) {
-            console.log("Pending balance found, handling", type, pendingBalance)
+           //console.log("Pending balance found, handling", type, pendingBalance)
             switch (type) {
                 case AssetType.ENERGY:
                     this.addPendingSpawn(type, pendingBalance);
@@ -134,7 +134,7 @@ export class Protocol {
             }
         }
 
-        console.log("Handled pending balance", type, pendingBalance);
+       //console.log("Handled pending balance", type, pendingBalance);
     }
 
     getPendingSpawn(type: AssetType) {
@@ -142,16 +142,16 @@ export class Protocol {
     }
 
     addPendingSpawn(type: AssetType, amount: number) {
-        console.log("Adding pending spawn", type, amount);
+       //console.log("Adding pending spawn", type, amount);
         //handle if new type doesn't exist
         const balance = this.pendingSpawn.get(type);
         if(balance) this.pendingSpawn.set(type, balance + amount);
         else this.pendingSpawn.set(type, amount);
-        console.log("Pending spawn", this.pendingSpawn);
+       //console.log("Pending spawn", this.pendingSpawn);
     }
 
     removePendingSpawn(type: AssetType, amount: number) {
-        console.log("Removing pending spawn", type, amount);
+       //console.log("Removing pending spawn", type, amount);
         //handle if new type doesn't exist
         const balance = this.pendingSpawn.get(type);
         if(balance >= amount) this.pendingSpawn.set(type, balance - amount);
@@ -183,7 +183,7 @@ export class Protocol {
 
         this.removePendingSpawn(type, amountToSpawn);
 
-        console.log("Spawned", amountToSpawn, type);
+       //console.log("Spawned", amountToSpawn, type);
     }
     
     run(

@@ -30,7 +30,7 @@ export const createObstacle = (
     const body = world.createBody(opts.bodyDef);
     body.createFixture(opts.fixtureDef);
     setBodyId(body, opts.id);
-    console.log("created obstacle", opts.id, "at", body.getPosition())
+   //console.log("created obstacle", opts.id, "at", body.getPosition())
     return body;
 }
 
@@ -189,14 +189,14 @@ export const setObstacleGroupFromState = (
 
     return obstacleSnapshots.map((snapshot) => {
         const bodies = snapshot.bodies.map((opts) => {
-            console.log("creating obstacle", opts)
+           //console.log("creating obstacle", opts)
             return createObstacle(world, opts)
         });
         const joints = snapshot.joints.map((opts) => {
             const bodyA = getBody(world, opts.bodyA);
             const bodyB = getBody(world, opts.bodyB);
             const newOpts = { ...opts.jointDef, bodyA, bodyB };
-            console.log("bodyA position", bodyA.getPosition());
+           //console.log("bodyA position", bodyA.getPosition());
             return world.createJoint(new RevoluteJoint(newOpts));
         });
         return { bodies, joints };
@@ -275,8 +275,8 @@ export const createRotatingTriangle = (
     const centerX = (vertices[0].x + vertices[1].x + vertices[2].x) / 3;
     const centerY = (vertices[0].y + vertices[1].y + vertices[2].y) / 3;
     const centroid = Vec2(centerX, centerY);
-    console.log("triangle centroid", centroid)
-    console.log("creating triangle at", position)
+   //console.log("triangle centroid", centroid)
+   //console.log("creating triangle at", position)
 
 
     const body = createObstacle(world, { id, bodyDef, fixtureDef });
@@ -288,7 +288,7 @@ export const createRotatingTriangle = (
         referenceAngle: 0,
     }));
 
-    console.log("position after joint", body.getPosition())
+   //console.log("position after joint", body.getPosition())
 
     return  [body, joint];
 }

@@ -121,9 +121,9 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
     const baseColor = RESOURCE_TO_COLOR[resource.type]
     const outlineColor = darkenColor(baseColor, 0.5); // Darken by 20%
 
-    console.log("velocity in resource", velocity.x, velocity.y)
-    console.log("is resource activated", isResourceActivated(velocity.x, velocity.y))
-    console.log("resource type", resource.type == ResourceType.ENERGY)
+   //console.log("velocity in resource", velocity.x, velocity.y)
+   //console.log("is resource activated", isResourceActivated(velocity.x, velocity.y))
+   //console.log("resource type", resource.type == ResourceType.ENERGY)
 
     return (
         <>

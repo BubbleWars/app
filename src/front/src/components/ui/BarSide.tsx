@@ -243,9 +243,9 @@ export const ListPlayersLeaderboard = ({ players }: { players: User[] }) => {
                     <TableBody>
                         {fullPlayers.map((player, index) => (
                             <TableRow>
-                                <TableCell>{index + 1}</TableCell>
+                                <TableCell>#{index + 1}</TableCell>
                                 <TableCell><UserView address={player.address}/></TableCell>
-                                <TableCell><div className="text-sm text-bold text-blue-500">{player.resourcesCollected.toFixed(2)} $BBL</div></TableCell>
+                                <TableCell><div className="text-sm text-bold text-blue-400">{player.resourcesCollected.toFixed(2)} $BBL</div></TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

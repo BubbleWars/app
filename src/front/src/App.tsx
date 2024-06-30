@@ -30,6 +30,7 @@ import { WORLD_WIDTH } from "../../core/consts";
 import { useLoader } from '@react-three/fiber';
 import { TextureLoader } from 'three';
 import { StatsLeaderboard } from "./components/ui/StatsLeaderboard";
+import { StatsEventBox } from "./components/ui/StatsEventBox";
 
 function Background() {
     const defaultUrl = "/bg.png";
@@ -77,6 +78,7 @@ function App() {
 
             </Canvas>
             <StatsLeaderboard />
+            <StatsEventBox />
 
 
             {!authenticated && <ScreenLogin />}

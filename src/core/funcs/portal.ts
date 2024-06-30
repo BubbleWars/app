@@ -9,12 +9,15 @@ import {
     WORLD_WIDTH,
 } from "../consts";
 import { Bubble } from "../types/bubble";
-import { createBubble, destroyBubble, getBubbleEthMass, getTotalBubbleMass, setBubbleEthMass, setBubbleResourceMass, updateBubble } from "./bubble";
+import { createBubble, destroyBubble, getBubbleEthMass, getTotalBubbleMass, getTotalResourceMass, setBubbleEthMass, setBubbleResourceMass, updateBubble } from "./bubble";
 import { Obstacle } from "../types/obstacle";
 import { Resource, ResourceNode, ResourceType } from "../types/resource";
 import { createResource, updateResource } from "./resource";
 import { getItemMass } from "./entity";
 import { PortalState } from "../types/state";
+import { addEvent } from "./events";
+import { EventsType } from "../types/events";
+import { getBodyId } from "./obstacle";
 
 function deterministicHash(x: number, y: number): number {
     let hash = (Math.floor(x) * 0x1f1f1f1f) ^ Math.floor(y);
@@ -140,6 +143,9 @@ export const createPortal = (
     // updatePortal(portal, mass);
     //console.log("portal created", portal.body.getUserData());
     //console.log("portal created", { owner, balance: 0, mass, x, y });
+
+    
+
     return portal;
 };
 
@@ -244,6 +250,7 @@ export const portalAbsorbBubble = (
     const absorbedTotalMass = getTotalBubbleMass(absorbedBubble);
     const newPortalEthMass = getPortalMass(portal) + absorbedEthMass; 
     const newTotalMass = portal.mass + absorbedTotalMass;
+    const totalAbsorbedResourceAmount = getTotalResourceMass(absorbedBubble);
 
     //Transfer resources to portal
     if(absorbedBubble.resources){
@@ -260,6 +267,20 @@ export const portalAbsorbBubble = (
     //Transfer ETH to portal
     updatePortal(portal, newTotalMass);
     destroyBubble(bubbles, absorbedBubble) 
+
+    //Emit event
+    addEvent({
+        type: EventsType.AbsorbBubble,
+        absorber: portal.owner,
+        absorbed: absorbedBubble.owner,
+        absorberEntityId: getBodyId(portal.body),
+        absorbedResourceAmount: totalAbsorbedResourceAmount,
+        amount: absorbedEthMass,
+        isPortal: true,
+        blockNumber: 0,
+        timestamp,
+
+    })
 };
 
 export const portalEmitBubble = (
@@ -320,6 +341,15 @@ export const portalEmitBubble = (
     // setBubbleResourceMass(emittedBubble, ResourceType.GREEN, 10);
     // setBubbleResourceMass(emittedBubble, ResourceType.VIOLET, 10);
 
+    //Emit event
+    addEvent({
+        type: EventsType.EmitBubble,
+        userAddress: portal.owner,
+        amount: mass,
+        blockNumber: 0,
+        timestamp,
+    })
+
     return emittedBubble;
 };
 
@@ -345,6 +375,17 @@ export const portalAbsorbResource = (
     );
 
     updateResource(resources, absorbedResource, 0);
+
+    //Emit event
+    addEvent({
+        type: EventsType.AbsorbResource,
+        absorber: portal.owner,
+        absorberEntityId: getBodyId(portal.body),
+        amount: amountAbsorbed,
+        isPortal: true,
+        blockNumber: 0,
+        timestamp: 0,
+    })
 };
 
 export const portalEmitResource = (
@@ -404,6 +445,16 @@ export const portalEmitResource = (
         .add(emittedResourceRelativeVelocity);
     emittedResource.body.setLinearVelocity(emittedResourceVelocity);
     //console.log("emittedResourcePosition after velocity", JSON.stringify(emittedResource.body.getPosition()));
+
+    //Emit event
+    addEvent({
+        type: EventsType.EmitResource,
+        userAddress: portal.owner,
+        amount: mass,
+        fromPortal: true,
+        blockNumber: 0,
+        timestamp,
+    })
 
     return emittedResource;
 };

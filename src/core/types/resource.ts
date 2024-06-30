@@ -70,7 +70,7 @@ export class Token {
         const realAmount = preciseRound(amount, 9);
         const clippedAmount = clamp(realAmount, 0, this.currentSupply);
         if (amount > this.currentSupply) {
-            console.log("amount", realAmount, "current supply", this.currentSupply);
+           //console.log("amount", realAmount, "current supply", this.currentSupply);
             //throw new Error('Cannot sell more than the current supply')
         }
 
@@ -84,7 +84,7 @@ export class Token {
         // Decrease the market cap proportionally
         this.marketCap += preciseRound(changeInValue, 9);
 
-        console.log("selling", realAmount, changeInValue, this.currentSupply);
+       //console.log("selling", realAmount, changeInValue, this.currentSupply);
 
         const ethReceived = Math.abs(preciseRound(changeInValue, 3));
         const ethAfterFee = protocol.processFee(FeeType.TRADE, AssetType.ETH, ethReceived);
@@ -101,7 +101,7 @@ export class Token {
 4        // Increase the market cap proportionally
         this.marketCap += realValue;
 
-        console.log("buying", realValue, supplyChange, this.currentSupply);
+       //console.log("buying", realValue, supplyChange, this.currentSupply);
 
         return supplyChange;
     }
@@ -117,8 +117,8 @@ export class Token {
 4        // Increase the market cap proportionally
         this.marketCap += realValue;
 
-        console.log("buying", realValue, supplyChange, this.currentSupply);
-        console.log("value after fee", valueAfterFee, "deducted", realValue - valueAfterFee);  
+       //console.log("buying", realValue, supplyChange, this.currentSupply);
+       //console.log("value after fee", valueAfterFee, "deducted", realValue - valueAfterFee);  
 
         return supplyChange;
     }

@@ -197,9 +197,9 @@ export const createNode = (
     node.body.setUserData(`node-${nodes.size}`);
     nodes.set(node.body.getUserData() as string, node);
 
-    // console.log("creating node at position", x, y);
+    ////console.log("creating node at position", x, y);
     // if(x == undefined || y == undefined){
-    //     console.log("undefined position", x, y);
+    //    //console.log("undefined position", x, y);
     // }
 
     if(nodeState){
@@ -265,12 +265,12 @@ export const createResource = (
     //         balance: 0,
     //     });
 
-    addEvent({
-        timestamp,
-        type: EventsType.CreateResource,
-        id: resource.id,
-        position: { x, y },
-    });
+    // addEvent({
+    //     timestamp,
+    //     type: EventsType.CreateResource,
+    //     id: resource.id,
+    //     position: { x, y },
+    // });
 
     if(resourceState){
         //resource.attractor = resourceState.attractor;
@@ -447,7 +447,7 @@ export const addPendingEthEmission = (
     } else {
         node.pendingEthEmission.push({ depositor, amount });
     }
-    console.log("pending eth emission", node.pendingEthEmission);
+   //console.log("pending eth emission", node.pendingEthEmission);
 }
 
 export const removePendingResourceEmission = (
@@ -496,7 +496,7 @@ export const nodeAbsorbResource = (
 
     //get emission
     const ethToEmission = node.token.sell(protocol, resourceAbsorbed);
-    console.log("ethToEmission", ethToEmission);
+   //console.log("ethToEmission", ethToEmission);
 
     updateResource(resources, absorbedResource, 0);
     updateNode(node, currentMass - ethToEmission);
@@ -504,6 +504,16 @@ export const nodeAbsorbResource = (
     //Add pending eth emission
     const nearestDepositor  = absorbedResource.owner ?? absorbedResource.from;
     addPendingEthEmission(nearestDepositor, node, ethToEmission);
+
+    //Emit event
+    addEvent({
+        blockNumber: 0,
+        timestamp: timeElapsed,
+        type: EventsType.SellResource,
+        seller: absorbedResource.owner,
+        amount: resourceAbsorbed,
+        cost: ethToEmission,
+    });
 
 };
 
@@ -528,6 +538,16 @@ export const nodeAbsorbBubble = (
         node.body.getPosition(), bubbles, absorbedBubble.owner, PLANCK_MASS
     )?.body.getUserData() as string ?? "0x"
     addPendingResourceEmission(nearestDepositor, node, resourceToEmit);
+
+    //Emit event
+    addEvent({
+        blockNumber: 0,
+        timestamp: timeElapsed,
+        type: EventsType.BuyResource,
+        buyer: absorbedBubble.owner,
+        amount: resourceToEmit,
+        cost: ethAbsorbed,
+    });
 };
 
 export const getAdjustedRatio = (node: ResourceNode): number => {
@@ -939,13 +959,13 @@ export const handleAttractors = (
     // resources.forEach((resource) => {
     //     // Return if resource has no attractor
     //     if (!resource?.attractor || resource?.attractor == "0x0000000000000000000000000000000000000001"){
-    //         console.log("No attractor for resource", resource);
+    //        //console.log("No attractor for resource", resource);
     //         return;
     //     }
 
     //     // Resource pos
     //     const pos = resource.body.getPosition();
-    //     console.log("resource pos", pos);
+    //    //console.log("resource pos", pos);
 
     //     // Find nearest bubble with attractor string as owner
     //     const nearestBubble = getNearestBubbleToPosition(pos, bubbles, resource.attractor);
@@ -953,27 +973,27 @@ export const handleAttractors = (
     //     // Get attractor position
     //     const attractorPos = nearestBubble?.body.getPosition();
     //     if (!attractorPos) {
-    //         console.log("No attractor position found for resource", attractorPos);
+    //        //console.log("No attractor position found for resource", attractorPos);
     //         return;
     //     }
 
     //     // Get ejector position
     //     const ejectorPos = getEntityPosition(resource?.owner, nodes, bubbles, portals, resources);
-    //     console.log("ejector pos", ejectorPos);
+    //    //console.log("ejector pos", ejectorPos);
 
     //     // Check if ejector position is valid
     //     if (ejectorPos?.x == undefined) {
-    //         console.log("Invalid ejector position for resource", ejectorPos);
+    //        //console.log("Invalid ejector position for resource", ejectorPos);
     //         return;
     //     }
 
     //     // Get direction to attractor
     //     const toAttractor = attractorPos.clone().sub(pos);
-    //     console.log("to attractor", toAttractor);
+    //    //console.log("to attractor", toAttractor);
 
     //     // Get from ejector
     //     const fromEjector = pos.clone().sub(ejectorPos);
-    //     console.log("from ejector", fromEjector);
+    //    //console.log("from ejector", fromEjector);
 
     //     // Get attractor force
     //     const distance = toAttractor.length();
@@ -986,7 +1006,7 @@ export const handleAttractors = (
     //     // Apply force
     //     const force = toAttractor.mul(1 / (distance * distance)).add(fromEjector.mul(0.001 / (distance2 * distance2)));
     //     resource.body.applyForceToCenter(force);
-    //     console.log("resource force", force);
+    //    //console.log("resource force", force);
     // });
 
 
@@ -994,7 +1014,7 @@ export const handleAttractors = (
     // bubbles.forEach((bubble) => {
     //     // Return if bubble has no attractor
     //     if (!bubble?.attractor || bubble?.attractor == "0x0000000000000000000000000000000000000001"){
-    //         console.log("No attractor for bubble", bubble);
+    //        //console.log("No attractor for bubble", bubble);
     //         return;
     //     }
 
@@ -1007,28 +1027,28 @@ export const handleAttractors = (
     //     // Get attractor position
     //     const attractorPos = nearestBubble?.body.getPosition();
     //     if (!attractorPos) {
-    //         console.log("No attractor position found for bubble", attractorPos);
+    //        //console.log("No attractor position found for bubble", attractorPos);
     //         return;
     //     }
 
     //     // Get ejector position
     //     const ejectorPos = getEntityPosition(bubble?.owner, nodes, bubbles, portals, resources);
-    //     console.log("ejector pos", ejectorPos);
+    //    //console.log("ejector pos", ejectorPos);
 
     //     // Check if ejector position is valid
     //     if (ejectorPos?.x == undefined) {
-    //         console.log("Invalid ejector position for bubble", ejectorPos);
+    //        //console.log("Invalid ejector position for bubble", ejectorPos);
     //         return;
     //     }
 
     //     // Get direction to attractor
     //     const toAttractor = attractorPos.clone().sub(pos);
-    //     console.log("to attractor", toAttractor);
+    //    //console.log("to attractor", toAttractor);
 
 
     //     // Get from ejector
     //     const fromEjector = pos.clone().sub(ejectorPos);
-    //     console.log("from ejector", fromEjector);
+    //    //console.log("from ejector", fromEjector);
 
     //     // Get attractor force
     //     const distance = toAttractor.length();
@@ -1041,7 +1061,7 @@ export const handleAttractors = (
     //     // Apply force
     //     const force = toAttractor.mul(1 / (distance * distance)).add(fromEjector.mul(0.001 / (distance2 * distance2)));
     //     bubble.body.applyForceToCenter(force);
-    //     console.log("bubble force", force);
+    //    //console.log("bubble force", force);
 
     // });
 };

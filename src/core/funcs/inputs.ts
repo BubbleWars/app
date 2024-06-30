@@ -55,6 +55,9 @@ import {
 import { ResourceType } from "../types/resource";
 import { resourceMassToAmount, updateResource } from "./resource";
 import { AssetType, FeeType } from "../types/protocol";
+import { addEvent } from "./events";
+import { EventsType } from "../types/events";
+import { getBodyId } from "./obstacle";
 
 const isNode =
     typeof process !== "undefined" &&
@@ -275,6 +278,18 @@ const handleSpawnPortal = (input: SpawnPortal, client: boolean): boolean => {
             y,
             amountAfterFees,
         );
+
+        //Emit event
+        addEvent({
+            type: EventsType.SpawnPortal,
+            portalId: user.address,
+            userAddress: user.address,
+            amount: amountAfterFees,
+            blockNumber: input.blockNumber,
+            timestamp: input.timestamp,
+            hash: "0",
+            sender: user.address,
+        })
     } else {
         const amountAfterFees = protocol.processFee(FeeType.SPAWN, AssetType.ETH, amount);
         const { x, y } = generateSpawnPoint(
@@ -286,7 +301,20 @@ const handleSpawnPortal = (input: SpawnPortal, client: boolean): boolean => {
             amountAfterFees,
         );
         createPortal(portals, world, user.address, x, y, amountAfterFees);
+
+        //Emit event
+        addEvent({
+            type: EventsType.SpawnPortal,
+            portalId: user.address,
+            userAddress: user.address,
+            amount: amountAfterFees,
+            blockNumber: input.blockNumber,
+            timestamp: input.timestamp,
+            hash: "0",
+            sender: user.address,
+        })
     }
+    
 
     return true;
 };

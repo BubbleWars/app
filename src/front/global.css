@@ -95,16 +95,15 @@
 @font-face {
   font-family: 'Aux Mono';
   src: local('Aux Mono Regular'), local('Aux-Mono-Regular'),
-      url('fonts/LilitaOne-Regular.woff2') format('woff2'),
-      url('fonts/LilitaOne-Regular.woff') format('woff'),
-      url('fonts/LilitaOne-Regular.ttf') format('truetype');
+      url('/AuxMono-Regular.woff2') format('woff2'),
+      url('/AuxMono-Regular.woff') format('woff'),
+      url('/AuxMono-Regular.ttf') format('truetype');
+  font-weight: 400;
   font-style: normal;
 }
+
 body {
   font-family: 'Aux Mono';
-  letter-spacing: 4px;
-  color: white;
-  -webkit-text-stroke-width: 0.5px;
-  -webkit-text-stroke-color: black;
+  letter-spacing: 0px;
 }
 

@@ -5,6 +5,7 @@ import { fetchAllUsers, fetchUsers } from "./privyApi";
 import {
     BubbleStateSchema,
     EntityResourceStateSchema,
+    EventSchema,
     ObstacleStateSchema,
     PortalStateSchema,
     ResourceNodeStateSchema,
@@ -13,6 +14,7 @@ import {
     UserSocialSchema,
     Vector2Schema,
     WorldState,
+    eventToSchema,
 } from "./schema/WorldState";
 import { currentState, init, rollbackToState, run } from "../../../core/world";
 import {
@@ -198,37 +200,9 @@ export class World extends Room<WorldState> {
           //console.log("Recieved input World.ts", input);
           const startTime = Date.now();
 
-            setOnEvent((event: Event | any) => {
-                //only if event.id does not exist within bubbleIds
-                if (event.type == EventsType.CreateBubble) {
-                    //if (!bubbleIds.includes(event.id)) {
-                    const pos = new Vector2Schema();
-                    pos.x = event.position.x;
-                    pos.y = event.position.y;
-                    this.state.syncBubbleStartPositions.set(event.id, pos);
-                    const processTime = Date.now() - startTime;
-                   //console.log("Processed input in:" + processTime + "ms", "current timestamp", this.state.timestamp);
-                    setOnEvent(() => {});
-                    //}
-                } else if (event.type == EventsType.DestroyBubble) {
-                    //if (bubbleIds.includes(event.id)) {
-                    //console.log("new event 22", event)
-                    //bubbleDestroyPositions[event.id] =
-                    event.position;
-                    setOnEvent(() => {});
-                    //}
-                } else if (event.type == EventsType.CreateResource) {
-                    //if (!resourceIds.includes(event.id)) {
-                    //console.log("new event 33", event)
-                    const pos = new Vector2Schema();
-                    pos.x = event.position.x;
-                    pos.y = event.position.y;
-                    this.state.syncResourceStartPositions.set(event.id, pos);
-                    event.position;
-                    setOnEvent(() => {});
-                    //}
-                }
-            });
+            
+
+            
 
 
             //If current block is ahead of input, rollback and append input
@@ -251,12 +225,17 @@ export class World extends Room<WorldState> {
             const isServerAhead = input.timestamp < serverTimestamp;
             const mainSnapshots = snapshots;
             const mainCurrentState = currentState;
+            setOnEvent((event) => {
+                    console.log("broadcasting event", EventsType[event.type], event);
+                    this.broadcast("event", event, { afterNextPatch: true });
+                });
             if(isServerAhead){
               //console.log("Server is ahead. Input timestamp:", input.timestamp, "Server timestamp:", this.state.timestamp)
               const stateOfInput = snapshots.get(input.timestamp);
               //console.log("pending inputs of snapshot state", JSON.stringify(stateOfInput?.pendingInputs), "to be set to server")
               rollbackToState(stateOfInput as Snapshot);
             }else {
+                
                 handleInput(input);
             }
             //console.log("snapshot bubbles", snapshotCurrentState.bubbles)
@@ -306,6 +285,10 @@ export class World extends Room<WorldState> {
     }
 
     update(time: number) {
+        setOnEvent((event) => {
+            console.log("broadcasting event", EventsType[event.type], event);
+            this.broadcast("event", event, {afterNextPatch: true})
+        });
         //
         // handle game loop
         //
@@ -315,5 +298,6 @@ export class World extends Room<WorldState> {
         }
         run(getNow());
         updateState(this.state, currentState);
+
     }
 }

@@ -19,7 +19,7 @@ import { useDispatch } from "react-redux";
 import { Nodes } from "./Nodes";
 import { Resources } from "./Resources";
 import { clearEvents, setOnEvent } from "../../../core/funcs/events";
-import { EventsType } from "../../../core/types/events";
+import { Event, EventsType } from "../../../core/types/events";
 import { Client } from "colyseus.js";
 import { INDEXER_URL, LERP_SPEED } from "../consts";
 import { current } from "@reduxjs/toolkit";
@@ -72,6 +72,8 @@ export const resourceStartPositions: {
 export const resourceDestroyPositions: {
     [key: string]: { x: number; y: number };
 } = {};
+
+export const events: Event[] = [];
 
 //Create init function for state.onChange
 const initStateServer = (room) => {
@@ -261,6 +263,12 @@ const initStateServer = (room) => {
         })
 
     });
+
+    room.onMessage("event", (message) => {
+        console.log("new event", message);
+        //alert("new event")
+        events.push(message)
+    })
 
     room.connection.events.onclose = (e) => {
        //console.log("connection closed", e)

@@ -17,6 +17,7 @@ import { InputType } from "../types/inputs";
 import { timeStamp } from "console";
 import { AssetType, Protocol } from "../types/protocol";
 import { getTotalInventoryMass } from "./entity";
+import { getBodyId } from "./obstacle";
 
 //const PUNCTURE_EMIT_PER_SECOND = 100;
 
@@ -166,19 +167,19 @@ export const createBubble = (
         bubble.attractor = bubbleState.attractor;
     }
 
-    addEvent({
-        type: EventsType.CreateBubble,
-        id: bubble.body.getUserData() as string,
-        timestamp,
-        position: { x, y },
-    });
+    // addEvent({
+    //     type: EventsType.CreateBubble,
+    //     id: bubble.body.getUserData() as string,
+    //     timestamp,
+    //     position: { x, y },
+    // });
     setBubbleEthMass(bubble, mass);
     //console.log("bubble created", bubble.body.getUserData() as string)
    //console.log("bubble created with mass:", mass)
 
-//    console.log("bubble created at position: ", x, y);
+//   //console.log("bubble created at position: ", x, y);
 //    if(x == undefined || y == undefined) {
-//         console.log("bubble created at undefined position");
+//        //console.log("bubble created at undefined position");
 //    }
     return bubble;
 };
@@ -205,6 +206,7 @@ export const destroyBubble = (
             x: bubble.body.getPosition().x,
             y: bubble.body.getPosition().y,
         },
+        blockNumber: 0,
     });
    //console.log("destroying bubble ");
     bubbles.delete(bubble.body.getUserData() as string);
@@ -301,6 +303,25 @@ export const emitBubble = (
     const deltaVelocity = calculateDeltaVelocity(emittedBubbleRelativeVelocity, m, me).mul(isPuncture ? 0.1 : 1);
     bubble.body.applyLinearImpulse(deltaVelocity.clone().mul(bubble.body.getMass()), bubble.body.getPosition(), true);
 
+    if(isPuncture)
+        addEvent({
+            type: EventsType.PunctureEmit,
+            puncturerAddress: bubble.owner,
+            puncturedAddress: bubble.owner,
+            amount: mass,
+            timestamp,
+            blockNumber: 0,
+        })
+    else addEvent({
+        type: EventsType.EmitBubble,
+        userAddress: bubble.owner,
+        amount: mass,
+        fromPortal: false,
+        timestamp,
+        blockNumber: 0,
+        hash: "0",
+        sender: bubble.owner,
+    })
     return emittedBubble;
 };
 
@@ -371,6 +392,16 @@ export const emitResource = (
             .mul(1 / bubble.body.getMass()),
     );
 
+    //Add event
+    addEvent({
+        type: EventsType.EmitResource,
+        userAddress:  bubble.owner,
+        amount: mass,
+        fromPortal: false,
+        timestamp,
+        blockNumber: 0
+    })
+
     
     return emittedResource;
 };
@@ -385,6 +416,7 @@ export const absorbBubble = (
     const absorbedTotalMass = getTotalBubbleMass(absorbedBubble);
     const newBubbleEthMass = getBubbleEthMass(bubble) + absorbedEthMass;
     const newTotalMass = getTotalBubbleMass(bubble) + absorbedTotalMass;
+    const absorbedResourceAmount = getBubbleResourceMass(absorbedBubble, ResourceType.ENERGY);
 
     //Transfer resources to bubble
     if (absorbedBubble.resources) {
@@ -405,6 +437,18 @@ export const absorbBubble = (
         const newBubbleMomentum = bubble.body.getLinearVelocity().clone().mul(bubble.body.getMass()).add(momentumAbsorbed);
         bubble.body.setLinearVelocity(newBubbleMomentum.mul(1 / newTotalMass));
     }
+
+    //Emit event
+    addEvent({
+        type: EventsType.AbsorbBubble,
+        absorber: bubble.owner,
+        absorbed: absorbedBubble.owner,
+        absorbedResourceAmount,
+        absorberEntityId: getBodyId(bubble.body),
+        amount: absorbedTotalMass,
+        timestamp: 0,
+        blockNumber: 0,
+    });
 };
 
 
@@ -437,6 +481,8 @@ export const addPuncturePoint = (
         const puncture = bubble.punctures.get(puncturePoint);
         if (puncture) puncture.amount += amount;
     }
+
+    //Emit event
 }
 
 export const subtractPuncturePoint = (
@@ -494,7 +540,18 @@ export const absorbResource = (
         const totalMomentum = bubble.body.getLinearVelocity().clone().mul(bubble.body.getMass());
         const newBubbleMomentum = totalMomentum.add(resourceMomentum);
         bubble.body.setLinearVelocity(newBubbleMomentum.mul(1 / bubble.body.getMass()));
-    }   
+    } 
+    
+    //Emit event
+    addEvent({
+        type: EventsType.AbsorbResource,
+        absorber: bubble.owner,
+        absorberEntityId: getBodyId(bubble.body),
+        amount: resourceMassToAmount(absorbedResource.resource, absorbedResource.body.getMass()),
+        timestamp,
+        blockNumber: 0,
+    });
+
 };
 
 /**
@@ -551,13 +608,23 @@ export const punctureBubble = (
     const nodeToBurnFrom = getNearestNodeToPosition(incoming.body.getPosition(), nodes);
     //if (nodeToBurnFrom) {
         protocol.deposit(AssetType.ENERGY, amountToBurn);
-        console.log("Send EP to protocol")
+       //console.log("Send EP to protocol")
     //} else{
-    //    console.log("No node to burn from");
+    //   //console.log("No node to burn from");
     //}
 
 
-    console.log("puncturing bubble", amount, defense, attack, amountToBurn, nodeToBurnFrom?.id, incoming.body.getPosition().x, incoming.body.getPosition().y, bubble.body.getPosition().x, bubble.body.getPosition().y);
+   //console.log("puncturing bubble", amount, defense, attack, amountToBurn, nodeToBurnFrom?.id, incoming.body.getPosition().x, incoming.body.getPosition().y, bubble.body.getPosition().x, bubble.body.getPosition().y);
+
+    //Emit event
+    addEvent({
+        type: EventsType.PunctureBubble,
+        puncturerAddress: incoming.owner,
+        puncturedAddress: bubble.owner,
+        amount,
+        timestamp,
+        blockNumber: 0
+    });
 
     //Calculate the damage
     const remaining = defense - attack;
@@ -660,7 +727,8 @@ export const handlePunctures = (
                     bubble,
                     amountEmitted,
                     puncturePointVec,
-                    emissionDirection
+                    emissionDirection,
+                    true,
                 );
                 puncture.amount = newPunctureAmount;
                 if (newPunctureAmount <= 0)
