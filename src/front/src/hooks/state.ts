@@ -311,14 +311,14 @@ export const useAimingLine = (): [THREE.Vector3, THREE.Vector3, THREE.Vector3] =
 }
 
 export const useAimingMass = (): number => {
-    const { id, type } = useAiming();
+    const { id, type, isPortal } = useAiming();
     const [mass, setMass] = useState<number>(1);
 
     //Handle scrolling to change mass
     useOnWheel((event) => {
         if(id){
-            const bubble = currentState?.bubbles?.find((bubble) => bubble.id == id)
-            const max = bubble?.resources?.find((resource) => resource.resource == type)?.mass ?? 0;
+            const entity = (isPortal ? currentState?.portals : currentState?.bubbles)?.find((entity) => entity.id == id) ?? {position: {x: 0, y: 0}, mass: 0, resources: []};
+            const max = entity?.resources?.find((resource) => resource.resource == type)?.mass ?? 0;
             const minMass = 1;
             const step = 1;
             const newMass = Math.min(

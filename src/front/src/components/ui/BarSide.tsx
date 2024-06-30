@@ -229,9 +229,9 @@ export const ListPlayersLeaderboard = ({ players }: { players: User[] }) => {
     }, 1000);
 
     return (
-<div className="rounded-md border fixed right-0 top-0 w-97 h-96 p-4" style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)' }}>
+<div className="rounded-md border fixed right-0 top-0 h-96 p-4" style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', width:"500px" }}>
             <h1 className="font-bold text-lg">Leaderboard</h1>
-            <ScrollArea className="rounded-md border">
+            <ScrollArea className="">
                 <Table>
                     <TableHeader>
                         <TableRow>

@@ -12,7 +12,7 @@ import { Bubble } from "../types/bubble";
 import { createBubble, destroyBubble, getBubbleEthMass, getTotalBubbleMass, getTotalResourceMass, setBubbleEthMass, setBubbleResourceMass, updateBubble } from "./bubble";
 import { Obstacle } from "../types/obstacle";
 import { Resource, ResourceNode, ResourceType } from "../types/resource";
-import { createResource, updateResource } from "./resource";
+import { createResource, resourceMassToAmount, updateResource } from "./resource";
 import { getItemMass } from "./entity";
 import { PortalState } from "../types/state";
 import { addEvent } from "./events";
@@ -348,6 +348,9 @@ export const portalEmitBubble = (
         amount: mass,
         blockNumber: 0,
         timestamp,
+        fromPortal: true,
+        hash:"0",
+        sender: portal.owner,
     })
 
     return emittedBubble;
@@ -361,7 +364,8 @@ export const portalAbsorbResource = (
     timeElapsed: number,
 ): void => {
     if (!portal || !absorbedResource) return;
-    const amountAbsorbed = absorbedResource.body.getMass();
+    const trueResourceMass = absorbedResource.body.getMass();
+    const amountAbsorbed = resourceMassToAmount(absorbedResource.resource, trueResourceMass);
     const newPortalMass = portal.mass + amountAbsorbed;
     //console.log("portalAbsorbBubble", amountAbsorbed, newPortalMass);
     updatePortal(portal, newPortalMass);

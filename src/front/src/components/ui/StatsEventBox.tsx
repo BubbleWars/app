@@ -67,7 +67,7 @@ export const StatsEventBox = () => {
     return (
         <div
             className="p-4 rounded-md border fixed right-0 bottom-0"
-            style={{ backgroundColor: "rgba(255, 255, 255, 0.8)" }}
+            style={{ backgroundColor: "rgba(255, 255, 255, 0.8)", width:"500px" }}
         >
             <h1 className="font-bold text-lg">Events</h1>
             <ScrollArea className="w-97 h-96" style={{ overflowY: "auto" }} ref={scrollRef}>
