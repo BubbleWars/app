@@ -66,7 +66,7 @@ export const StatsEventBox = () => {
 
     return (
         <div
-            className="p-4 rounded-md border fixed right-0 bottom-0"
+            className="p-4 rounded-md border fixed right-0 bottom-[10vh]"
             style={{ backgroundColor: "rgba(255, 255, 255, 0.8)", width:"500px" }}
         >
             <h1 className=" text-lg">Events</h1>

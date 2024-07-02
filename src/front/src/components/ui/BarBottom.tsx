@@ -1,12 +1,31 @@
 import { UserView } from "./UserView";
 import { currentState } from "../../../../core/world";
-import { MassView, PositionIcon, ResourcesIcon } from "./BarSide";
+import { MassView, PositionIcon, ResourceMassView, ResourcesIcon } from "./BarSide";
 import { useEffect, useMemo, useState } from "react";
 import { Resource, ResourceType } from "../../../../core/types/resource";
-import { ResourceState } from "../../../../core/types/state";
+import { BubbleState, ResourceState } from "../../../../core/types/state";
 import { useFrame } from "@react-three/fiber";
 import { useWallets } from "@privy-io/react-auth";
 import { useUserSocial } from "@/hooks/socials";
+import { getPortalStateResourceMass } from "../../../../core/funcs/portal";
+import { PLANCK_MASS } from "../../../../core/consts";
+import { getBubbleStateResourceMass } from "../../../../core/funcs/bubble";
+
+export const BubbleStateView = ({ bubbles }: { bubbles: BubbleState[] }) => {
+    return (
+        <div className="flex flex-row space-x-2">
+            {bubbles.map((bubble, index) => (
+                <div className="flex flex-col">
+                    <p className="text-xs">Bubble #{index}</p>
+                    <div className="flex flex-row space-x-2">
+                        <MassView mass={bubble.mass} />
+                        <ResourceMassView mass={getBubbleStateResourceMass(bubble, ResourceType.ENERGY)} />
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+}
 
 export const BarBottom = () => {
     const { wallets } = useWallets();
@@ -19,7 +38,8 @@ export const BarBottom = () => {
     const portal = currentState.portals.find(portal => portal.id.toLowerCase() == address.toLowerCase());
     const [ balance, setBalance ] = useState<number>(0);
     const [ position, setPosition ] = useState<{x: number, y: number}>({x: 0, y: 0});
-    const [ resources, setResources ] = useState<{resource: ResourceType, mass: number}[]>([]);
+    const [ resourceMass, setResourceMass ] = useState<number>(0);
+    const [ bubbles, setBubbles ] = useState<BubbleState[]>([]);
 
     useEffect(() => {
         const intervalId = setInterval(() => {
@@ -28,7 +48,8 @@ export const BarBottom = () => {
             if(portal) {
                 setBalance(portal.mass);
                 setPosition(portal.position);
-                setResources(portal.resources);
+                setResourceMass(getPortalStateResourceMass(portal, ResourceType.ENERGY))
+                setBubbles(currentState.bubbles.filter(bubble => bubble.owner.toLowerCase() == address.toLowerCase() && bubble.mass > PLANCK_MASS));
             }
         }, 1000)
         return () => clearInterval(intervalId);
@@ -41,12 +62,18 @@ export const BarBottom = () => {
                 <PositionIcon position={position} />
             </div>
             <div className="flex flex-col items-left">
-                <p className="text-sm font-semibold">Mass</p>
-                <p className=""><MassView mass={balance} /></p>
+                <p className="text-sm font-semibold">Your Portal</p>
+                <div className="flex flex-row space-x-2">
+                    <p className=""><MassView mass={balance} /></p>
+                    <p className="text-xs"><ResourceMassView mass={resourceMass} /></p>
+                </div>
+                
             </div>
             <div className="flex flex-col items-left">
-                <p className="text-sm font-semibold">Resources</p>
-                <ResourcesIcon resources={resources} />
+                <p className="text-sm font-semibold">Your Bubbles</p>
+                <div className="flex flex-row space-x-2">
+                    <BubbleStateView bubbles={bubbles} />
+                </div>
             </div>
         </div>
     );

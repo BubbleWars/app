@@ -75,7 +75,11 @@ export const AddressView = ({ id }: { id: string }) => {
 }
 
 export const MassView = ({ mass }: { mass: number }) => {
-    return <p className="text-xs bold blue">{mass.toFixed(2)} ETH</p>
+    return <p className="text-xs bold text-green-500">{mass.toFixed(2)} ETH</p>
+}
+
+export const ResourceMassView = ({ mass }: { mass: number }) => {
+    return <p className="text-xs bold text-blue-500">{mass.toFixed(2)} $BBL</p>
 }
 
 export const CameraLock = ({ id }: { id: string }) => {};
