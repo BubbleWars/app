@@ -230,7 +230,7 @@ export const ListPlayersLeaderboard = ({ players }: { players: User[] }) => {
 
     return (
 <div className="rounded-md border fixed right-0 top-0 h-96 p-4" style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', width:"500px" }}>
-            <h1 className="font-bold text-lg">Leaderboard</h1>
+            <h1 className=" text-lg">Leaderboard</h1>
             <ScrollArea className="">
                 <Table>
                     <TableHeader>
@@ -466,8 +466,8 @@ export const BarSide = () => {
                     <ScrollArea>
                         <div className="p-4 bg-white flex-1 h-full">
                             <div className="max-w-md mx-auto">
-                                <Drawer.Title className="font-medium font-bold mb-4">
-                                    <h1 className="font-bold">World stats</h1>
+                                <Drawer.Title className="font-medium  mb-4">
+                                    <h1 className="">World stats</h1>
                                 </Drawer.Title>
                                 <Tabs defaultValue="yours">
                                     <TabsList defaultValue={"yours"}>

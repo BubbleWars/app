@@ -98,7 +98,7 @@ export class Token {
 
         // Update the current supply
         this.currentSupply += supplyChange;
-4        // Increase the market cap proportionally
+        // Increase the market cap proportionally
         this.marketCap += realValue;
 
        //console.log("buying", realValue, supplyChange, this.currentSupply);
@@ -114,12 +114,34 @@ export class Token {
 
         // Update the current supply
         this.currentSupply += supplyChange;
-4        // Increase the market cap proportionally
+        // Increase the market cap proportionally
         this.marketCap += realValue;
 
        //console.log("buying", realValue, supplyChange, this.currentSupply);
        //console.log("value after fee", valueAfterFee, "deducted", realValue - valueAfterFee);  
 
         return supplyChange;
+    }
+
+    //View functions
+
+    // The current supply of the token
+    getSupply(){
+        return this.currentSupply;
+    }
+
+    // The current market cap of the token
+    getMarketcap(){
+        return this.marketCap;
+    }
+
+    // The value of the token at the amount bought
+    getBuyPrice(amount){
+        return this.getChangeInValue(amount);
+    }
+
+    // The value of the token at the amount sold
+    getSellPrice(amount){
+        return this.getChangeInValue(-amount);
     }
 }

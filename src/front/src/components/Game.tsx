@@ -212,6 +212,9 @@ const initStateServer = (room) => {
                     y: node.emissionDirectionY,
                 },
                 lastEmission: node.lastEmission,
+                currentSupply: node.currentSupply,
+                marketCap: node.marketCap,
+                k: node.k,
             }
             currentState.nodes.push(tempNode)
         })

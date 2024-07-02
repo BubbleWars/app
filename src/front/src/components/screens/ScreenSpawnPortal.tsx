@@ -77,7 +77,7 @@ export const ScreenSpawnPortal = () => {
         <div className="screen-title">
             <Card className="w-[550px] h-[550px] flex flex-col justify-center">
                 <CardHeader>
-                    <CardTitle className="w-full text-center font-bold">
+                    <CardTitle className="w-full text-center ">
                         Spawn your portal
                     </CardTitle>
                     <CardDescription className="w-full text-center">

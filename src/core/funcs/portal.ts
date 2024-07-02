@@ -12,7 +12,7 @@ import { Bubble } from "../types/bubble";
 import { createBubble, destroyBubble, getBubbleEthMass, getTotalBubbleMass, getTotalResourceMass, setBubbleEthMass, setBubbleResourceMass, updateBubble } from "./bubble";
 import { Obstacle } from "../types/obstacle";
 import { Resource, ResourceNode, ResourceType } from "../types/resource";
-import { createResource, resourceMassToAmount, updateResource } from "./resource";
+import { createResource, resourceMassToAmount, resourceMassToRadius, updateResource } from "./resource";
 import { getItemMass } from "./entity";
 import { PortalState } from "../types/state";
 import { addEvent } from "./events";
@@ -366,7 +366,7 @@ export const portalAbsorbResource = (
     if (!portal || !absorbedResource) return;
     const trueResourceMass = absorbedResource.body.getMass();
     const amountAbsorbed = resourceMassToAmount(absorbedResource.resource, trueResourceMass);
-    const newPortalMass = portal.mass + amountAbsorbed;
+    const newPortalMass = portal.mass;
     //console.log("portalAbsorbBubble", amountAbsorbed, newPortalMass);
     updatePortal(portal, newPortalMass);
 
@@ -402,12 +402,13 @@ export const portalEmitResource = (
     mass: number,
     direction: Vec2 = new Vec2(1, 1),
 ): Resource => {
+    console.log("portalEmitResource", mass);
     if (mass > getPortalResourceMass(portal, resource)){
        //console.log("Cannot emit more than the portal's resource mass");
         return;
     }
     const portalRadius = portal.fixture.getShape().getRadius();
-    const emittedResourceRadius = massToRadius(mass);
+    const emittedResourceRadius = resourceMassToRadius(resource, mass);
     const centerDelta = direction
         .clone()
         .mul(portalRadius + emittedResourceRadius);
@@ -430,7 +431,7 @@ export const portalEmitResource = (
     //console.log("123at", emittedResource.body.getUserData());
     //console.log("123at", resources)
     //Apply mass conservation
-    const newPortalMass = portal.mass - mass;
+    const newPortalMass = portal.mass;
     updatePortal(portal, newPortalMass);
     setPortalResourceMass(
         portal,

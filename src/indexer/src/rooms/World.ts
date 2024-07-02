@@ -124,6 +124,9 @@ const updateState = (state: WorldState, snapshot: Snapshot): WorldState => {
         newNode.emissionDirectionX = node.emissionDirection.x;
         newNode.emissionDirectionY = node.emissionDirection.y;
         newNode.lastEmission = node.lastEmission;
+        newNode.k = node.k;
+        newNode.currentSupply = node.currentSupply;
+        newNode.marketCap = node.marketCap;
         state.nodes.push(newNode);
     });
 

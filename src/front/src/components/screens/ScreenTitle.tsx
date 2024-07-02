@@ -103,7 +103,7 @@ export const ScreenTitle = () => {
         <div className="screen-title">
             <Card className="w-[550px] h-[550px] flex flex-col justify-center">
       <CardHeader>
-        <CardTitle className="w-full text-center font-bold">
+        <CardTitle className="w-full text-center ">
             Bubblewars.io
         </CardTitle>
         <CardDescription className="text-center">Absorb ETH. Grow your bubbles. Conquer the infinite canvas.</CardDescription>

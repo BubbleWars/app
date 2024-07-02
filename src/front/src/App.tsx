@@ -31,6 +31,7 @@ import { useLoader } from '@react-three/fiber';
 import { TextureLoader } from 'three';
 import { StatsLeaderboard } from "./components/ui/StatsLeaderboard";
 import { StatsEventBox } from "./components/ui/StatsEventBox";
+import { StatsTokenomics } from "./components/ui/StatsTokenomics";
 
 function Background() {
     const defaultUrl = "/bg.png";
@@ -79,6 +80,8 @@ function App() {
             </Canvas>
             <StatsLeaderboard />
             <StatsEventBox />
+            <BarBottom />
+            <StatsTokenomics />
 
 
             {!authenticated && <ScreenLogin />}

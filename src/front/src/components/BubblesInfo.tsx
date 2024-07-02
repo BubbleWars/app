@@ -42,7 +42,7 @@ export const ResourceButton = ({
     const mass = Math.max(amount/10, 1); // 10% of the resource but at least 1
 
     useFrame(() => {
-        if(isHovered) setText("Emit $BBL");
+        if(isHovered) setText("Emit");
         else setText(amount.toFixed(2));
     })
 
@@ -54,10 +54,11 @@ export const ResourceButton = ({
             onClick={() => dispatch(setAiming({ id, type, mass, isPortal}))}
         >
             <CustomText
-                color={colorName}
-                size={size}
+                size={size*1.5}
+                color={"white"}
+                outlineColor={colorName}
             >
-                {text}
+                {text} $BBL
             </CustomText>
         </group>
         
@@ -80,7 +81,7 @@ export const Inventory = ({
     //3 degrees
     const pos = position.clone()
     const angleDelta = 15 * Math.PI / 180;
-    const dir = new THREE.Vector3(-1,0,0).multiplyScalar(radius*1.3);
+    const dir = new THREE.Vector3(-1,0,0).multiplyScalar(radius*1.7);
     const energyPos = pos.clone().add(dir.clone())
 
     const energyAmount = resources?.find((resource) => resource.resource == ResourceType.ENERGY)?.mass ?? 0;

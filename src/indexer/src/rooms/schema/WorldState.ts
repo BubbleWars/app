@@ -86,6 +86,11 @@ export class ResourceNodeStateSchema extends Schema {
     @type("number") emissionDirectionX: number = 0;
     @type("number") emissionDirectionY: number = 0;
     @type("number") lastEmission: number = 0;
+
+    //TokenInfo
+    @type("number") currentSupply: number = 0;
+    @type("number") marketCap: number = 0;
+    @type("number") k: number = 0;
 }
 
 export class ResourceStateSchema extends Schema {

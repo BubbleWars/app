@@ -24,7 +24,7 @@ export const CustomText = ({
     | any) => {
     return (
         <Text
-            font="fonts/LilitaOne-Regular.ttf"
+            font="LilitaOne-Regular.ttf"
             color={color}
             letterSpacing={-0.0}
             fontWeight="bold"
