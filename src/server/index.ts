@@ -24,6 +24,7 @@ async function handle_inspect(data) {
     //console.log("Received inspect request data " + JSON.stringify(data));
     const inspect = parseInspect(data);
     if (!inspect) return "reject";
+    console.log("Parsed inspect " + JSON.stringify(inspect));
     await handleInspect(inspect);
     return "accept";
 }

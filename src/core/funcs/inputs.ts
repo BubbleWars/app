@@ -71,6 +71,8 @@ const ETH_WITHDRAW_FUNCTION_SELECTOR = ethers
     .keccak256(ethers.toUtf8Bytes("withdrawEther(address,uint256)"))
     .slice(0, 4);
 
+console.log("HTTP rollup_server url is " + rollup_server);
+
 export const parseInput = (data: AdvanceData): Input | false => {
     //console.log("Received advance request data" + data);
     const payload = data.payload;

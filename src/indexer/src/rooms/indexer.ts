@@ -38,6 +38,7 @@ export const inspectState = async (
 ): Promise<Snapshot | undefined> => {
     const param = JSON.stringify(inspect);
     const url = `${process.env.INSPECTOR_URL}/${param}`;
+    console.log("inspect url", url);
     const response = await fetch(url);
     const json = await response.json();
     if (!json) return undefined;
@@ -69,7 +70,7 @@ export const publicClient = createPublicClient({
 
 export const onInspect = async (callback: (snapshot: Snapshot) => void) => {
     const snapshot = await inspectState({ type: InspectType.State, value: 0 });
-   //console.log("snapshot", snapshot);
+   console.log("snapshot", snapshot);
     callback(snapshot);
 };
 
