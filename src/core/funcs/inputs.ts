@@ -58,7 +58,7 @@ import { AssetType, FeeType } from "../types/protocol";
 import { addEvent } from "./events";
 import { EventsType } from "../types/events";
 import { getBodyId } from "./obstacle";
-import { MIN_PORTAL_DISTANCE, PORTAL_SPAWN_RADIUS, WORLD_RADIUS } from "../consts";
+import { MAX_PORTAL_AMOUNT, MIN_PORTAL_DISTANCE, PORTAL_SPAWN_RADIUS, WORLD_RADIUS } from "../consts";
 
 const isNode =
     typeof process !== "undefined" &&
@@ -271,6 +271,11 @@ const handleSpawnPortal = (input: SpawnPortal, client: boolean): boolean => {
             console.log("Failed to generate portal spawn point");
             return false;
         }
+        const isMaxPortal = snapshotPortals.size >= MAX_PORTAL_AMOUNT;
+        if(isMaxPortal){
+            console.log("Max portal amount reached");
+            return false;
+        }
         createPortal(
             snapshotPortals,
             snapshotWorld,
@@ -297,6 +302,11 @@ const handleSpawnPortal = (input: SpawnPortal, client: boolean): boolean => {
         const spawnPoint = generateSpawnPoint(world, radius, MIN_PORTAL_DISTANCE, PORTAL_SPAWN_RADIUS, WORLD_RADIUS);
         if (!spawnPoint) {
             console.log("Failed to generate portal spawn point");
+            return false;
+        }
+        const isMaxPortal = portals.size >= MAX_PORTAL_AMOUNT;
+        if(isMaxPortal){
+            console.log("Max portal amount reached");
             return false;
         }
         createPortal(portals, world, user.address, spawnPoint.x, spawnPoint.y, amountAfterFees);
