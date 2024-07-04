@@ -9,6 +9,9 @@ import { Portal } from "./portal";
 import { Resource, ResourceNode } from "./resource";
 import { User } from "./user";
 import { ProtocolState } from "./state";
+import { createPortal, generateSpawnPoint } from "../funcs/portal";
+import { massToRadius } from "../funcs/utils";
+import { MIN_PORTAL_DISTANCE, PORTAL_SPAWN_RADIUS, WORLD_RADIUS } from "../consts";
 
 //Protocol revenue split
 const BUYBACK_PERCENTAGE = 0.5;
@@ -30,7 +33,7 @@ export class Protocol {
     MAX_NODES = 10;
     MAX_RESOURCES = 10000;
     inflationRate = 1 // Max inflation rate per cycle
-    cycle: number = 10; // Should run every 100s
+    cycle: number = 1; // Should run every 100s
 
     //State
     last: number = 0; // Last time the protocol was run
@@ -200,6 +203,24 @@ export class Protocol {
     ){
         const timePassed = timestamp - this.last;
         if(timePassed < this.cycle) return;
+
+        // //Spawn portal
+        // const amountAfterFees = 1;
+        // const radius = massToRadius(amountAfterFees);
+        // const spawnPoint = generateSpawnPoint(world, radius, MIN_PORTAL_DISTANCE, PORTAL_SPAWN_RADIUS, WORLD_RADIUS);
+        // if (!spawnPoint) {
+        //     console.log("Failed to generate portal spawn point");
+        //     return false;
+        // }
+        // createPortal(
+        //     portals,
+        //     world,
+        //     "0x0" + portals.size,
+        //     spawnPoint.x,
+        //     spawnPoint.y,
+        //     amountAfterFees,
+        // );
+        
 
         this.handlePendingBalance(
             AssetType.ETH,

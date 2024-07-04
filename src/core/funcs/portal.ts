@@ -5,6 +5,7 @@ import { calculateEmissionVelocity, massToRadius } from "./utils";
 import {
     EMISSION_SPEED,
     MASS_PER_SECOND,
+    PORTAL_SPAWN_RADIUS,
     WORLD_HEIGHT,
     WORLD_WIDTH,
 } from "../consts";
@@ -18,6 +19,7 @@ import { PortalState } from "../types/state";
 import { addEvent } from "./events";
 import { EventsType } from "../types/events";
 import { getBodyId } from "./obstacle";
+import { WorldState } from "../world";
 
 function deterministicHash(x: number, y: number): number {
     let hash = (Math.floor(x) * 0x1f1f1f1f) ^ Math.floor(y);
@@ -50,74 +52,207 @@ export class SeededRandom {
 }
 
 export const generateSpawnPoint = (
-    timestamp: number,
-    world: { width: number, height: number },
-    portals: Map<string, Portal>,
-    bubbles: Map<string, Bubble>,
-    nodes: Map<string, ResourceNode>,
-    mass: number,
-    maxDistanceFromLastPortal: number = world.width
-): Vec2 => {
+    world: World,
+    radius: number, // Radius of the object to be spawned
+    distance: number, // Minimal distance from other objects
+    lowerBounds: number, // Minimal distance from the center
+    upperBounds: number, // Maximal distance from the center
+    padding: number = 2, // Distance from upperBounds and lowerBounds
+): Vec2 | null => {
 
-    const minimumSafeDistance = 10; // Minimum safe distance from other objects
-    let safeSpawnFound = false;
-    let attempt = 0;
-    let spawnPoint = new Vec2(0, 0);
-    const entityRadius = massToRadius(mass);
+    let found = false;
+    let tries = 0;
+    let size = world.getBodyCount();
 
-    while (!safeSpawnFound) {
-        const seed = attempt + portals.size + bubbles.size + nodes.size;
-        const rngX = new SeededRandom(seed);
-        const rngY = new SeededRandom(seed * seed);
-        const x = (rngX.next() * WORLD_WIDTH - WORLD_WIDTH/2) * 0.5;
-        const y = (rngY.next() * WORLD_HEIGHT - WORLD_HEIGHT/2) * 0.5;
+    while (!found) {
+        const seed = tries + size;
+        const seedTheta = new SeededRandom(seed);
+        const seedRadius = new SeededRandom(seed * seed);
 
-       //console.log("generateSpawnPoint", x, y);
+        // Generate a random angle between 0 and 2π
+        const theta = seedTheta.next() * 2 * Math.PI;
+        
+        // Adjust the bounds to account for the object's radius
+        const minRadius = lowerBounds + padding + radius;
+        const maxRadius = upperBounds - padding - radius;
+        
+        // Ensure the minRadius and maxRadius are valid
+        if (minRadius >= maxRadius) {
+            console.log("Invalid bounds: minRadius is greater than or equal to maxRadius");
+            return null;
+        }
 
-        spawnPoint = new Vec2(x, y);
+        // Generate a random radius between minRadius and maxRadius
+        const randomRadius = Math.sqrt(seedRadius.next() * (maxRadius * maxRadius - minRadius * minRadius) + minRadius * minRadius);
+        
+        // Convert polar coordinates (randomRadius, theta) to Cartesian coordinates (x, y)
+        const x = randomRadius * Math.cos(theta);
+        const y = randomRadius * Math.sin(theta);
 
-        let isSafe = true;
-
-        // Check distance from portals
-        portals.forEach((portal) => {
-            const portalPosition = portal.body.getPosition();
-            const portalRadius = portal.fixture.getShape().getRadius();
-            if (Vec2.distance(spawnPoint, portalPosition) < entityRadius + portalRadius + minimumSafeDistance) {
-                isSafe = false;
+        let safe = true;
+        let body = world.getBodyList();
+        console.log("world size", size);
+        while (body) {
+            const p = body.getPosition();
+            const fixture = body.getFixtureList();
+            if (!fixture) {
+                body = body.getNext();
+                continue;
             }
-        });
-
-        // // Check distance from bubbles
-        // bubbles.forEach((bubble) => {
-        //     const bubblePosition = bubble.body.getPosition();
-        //     const bubbleRadius = bubble.fixture.getShape().getRadius();
-        //     if (Vec2.distance(spawnPoint, bubblePosition) < entityRadius + bubbleRadius + minimumSafeDistance) {
-        //         isSafe = false;
-        //     }
-        // });
-
-        // Check distance from nodes
-        nodes.forEach((node) => {
-            const nodePosition = node.body.getPosition();
-            const nodeRadius = node.fixture.getShape().getRadius();
-            if (Vec2.distance(spawnPoint, nodePosition) < entityRadius + nodeRadius + minimumSafeDistance) {
-                isSafe = false;
+            if(fixture.getShape().getType() === "edge") {
+                body = body.getNext();
+                continue;
             }
-        });
+            if(getBodyId(body) === "boundary") {
+                body = body.getNext();
+                continue;
+            }
+            const r = fixture.getShape().getRadius();
+            if (Vec2.distance(Vec2(x, y), p) < r + radius + distance) {
+                safe = false;
+                break;
+            }
+            body = body.getNext();
+        }
 
-        if (isSafe) {
-            safeSpawnFound = true;
-        } else {
-            attempt++;
+        if (safe){
+            console.log("found with ", tries, " tries")
+            return Vec2(x, y);
+        }
+
+        tries++;
+        if(tries > 1000) {
+            console.log("failed to find a spawn point after 1000 tries");
+            return null;
         }
     }
 
-    if (!safeSpawnFound) {
-        throw new Error("Failed to find a safe spawn point after " + attempt + " attempts");
-    }
+    return null;
+}
 
-    return spawnPoint;
-};
+
+
+
+// export const generateSpawnPoint = (
+//     world: World,
+//     radius: number,
+//     distance: number,
+// ): Vec2 | null => {
+
+//     let found = false;
+//     let tries = 0;
+//     let size = world.getBodyCount();
+
+//     while (!found) {
+//         const seed = tries + size;
+//         const seedX = new SeededRandom(seed);
+//         const seedY = new SeededRandom(seed * seed);
+//         //Define x, random number between -WORLD_WIDTH/2 and WORLD_WIDTH/2
+//         const x = seedX.next() * WORLD_WIDTH - WORLD_WIDTH/2;
+//         const y = seedY.next() * WORLD_HEIGHT - WORLD_HEIGHT/2;
+
+//         let safe = true;
+//         let body = world.getBodyList();
+//         console.log("world size", size);
+//         while (body) {
+//             const p = body.getPosition();
+//             const fixture = body.getFixtureList();
+//             if (!fixture) {
+//                 body = body.getNext();
+//                 continue;
+//             }
+//             const r = fixture.getShape().getRadius();
+//             if (Vec2.distance(Vec2(x, y), p) < r + radius + distance) {
+//                 safe = false;
+//                 break;
+//             }
+//             body = body.getNext();
+//         }
+
+//         if (safe){
+//             console.log("found with ", tries, " tries")
+//             return Vec2(x, y);
+//         }
+
+//         tries++;
+//         if(tries > 1000) {
+//             console.log("failed to find a spawn point after 1000 tries");
+//             return null;
+//         }
+//     }
+
+//     return null;
+// }
+
+// export const generateSpawnPoint = (
+//     timestamp: number,
+//     world: { width: number, height: number },
+//     portals: Map<string, Portal>,
+//     bubbles: Map<string, Bubble>,
+//     nodes: Map<string, ResourceNode>,
+//     mass: number,
+//     maxDistanceFromLastPortal: number = world.width
+// ): Vec2 => {
+
+//     const minimumSafeDistance = 10; // Minimum safe distance from other objects
+//     let safeSpawnFound = false;
+//     let attempt = 0;
+//     let spawnPoint = new Vec2(0, 0);
+//     const entityRadius = massToRadius(mass);
+
+//     while (!safeSpawnFound) {
+//         const seed = attempt + portals.size + bubbles.size + nodes.size;
+//         const rngX = new SeededRandom(seed);
+//         const rngY = new SeededRandom(seed * seed);
+//         const x = (rngX.next() * WORLD_WIDTH - WORLD_WIDTH/2) * 0.5;
+//         const y = (rngY.next() * WORLD_HEIGHT - WORLD_HEIGHT/2) * 0.5;
+
+//        //console.log("generateSpawnPoint", x, y);
+
+//         spawnPoint = new Vec2(x, y);
+
+//         let isSafe = true;
+
+//         // Check distance from portals
+//         portals.forEach((portal) => {
+//             const portalPosition = portal.body.getPosition();
+//             const portalRadius = portal.fixture.getShape().getRadius();
+//             if (Vec2.distance(spawnPoint, portalPosition) < entityRadius + portalRadius + minimumSafeDistance) {
+//                 isSafe = false;
+//             }
+//         });
+
+//         // // Check distance from bubbles
+//         // bubbles.forEach((bubble) => {
+//         //     const bubblePosition = bubble.body.getPosition();
+//         //     const bubbleRadius = bubble.fixture.getShape().getRadius();
+//         //     if (Vec2.distance(spawnPoint, bubblePosition) < entityRadius + bubbleRadius + minimumSafeDistance) {
+//         //         isSafe = false;
+//         //     }
+//         // });
+
+//         // Check distance from nodes
+//         nodes.forEach((node) => {
+//             const nodePosition = node.body.getPosition();
+//             const nodeRadius = node.fixture.getShape().getRadius();
+//             if (Vec2.distance(spawnPoint, nodePosition) < entityRadius + nodeRadius + minimumSafeDistance) {
+//                 isSafe = false;
+//             }
+//         });
+
+//         if (isSafe) {
+//             safeSpawnFound = true;
+//         } else {
+//             attempt++;
+//         }
+//     }
+
+//     if (!safeSpawnFound) {
+//         throw new Error("Failed to find a safe spawn point after " + attempt + " attempts");
+//     }
+
+//     return spawnPoint;
+// };
 
 
 export const createPortal = (
@@ -128,6 +263,10 @@ export const createPortal = (
     y: number,
     mass: number,
 ): Portal => {
+    if (portals.size >= PORTAL_SPAWN_RADIUS){
+        console.log("Cannot create more portals than the max limit");
+        return;
+    }
     const radius = massToRadius(mass);
     const body = world.createBody({ position: Vec2(x, y), type: "static" });
     body.setMassData({ mass, center: Vec2(0, 0), I: 0 });

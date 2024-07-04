@@ -6,7 +6,7 @@ import { Address } from "./types/address";
 import { User } from "./types/user";
 import { Input, InputWithExecutionTime } from "./types/inputs";
 import { ProtocolState, Snapshot } from "./types/state";
-import { MAX_ADVANCE_STATE_TIME, STEP_DELTA, WORLD_WIDTH } from "./consts";
+import { MAX_ADVANCE_STATE_TIME, STEP_DELTA, WORLD_RADIUS, WORLD_WIDTH } from "./consts";
 import { handleInput, handlePendingInputs } from "./funcs/inputs";
 import { updateState, handleSnapshotContact } from "./funcs/state";
 import {
@@ -218,7 +218,7 @@ export const snapshotInit = (initialState?: Snapshot) => {
         });
         snapshotObstacles.push(...setObstacleGroupFromState(snapshotWorld,snapshotCurrentState.obstacles));
     }
-    createEdges(snapshotWorld, WORLD_WIDTH, WORLD_WIDTH);
+    createEdges(snapshotWorld, WORLD_RADIUS);
 
     //Create initial portal
     //const portal = createPortal(portals, snapshotWorld, "0x0", 0, 0, 10);

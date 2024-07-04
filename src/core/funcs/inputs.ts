@@ -36,7 +36,7 @@ import {
     portalEmitBubble,
     portalEmitResource,
 } from "./portal";
-import { decodePacked } from "./utils";
+import { decodePacked, massToRadius } from "./utils";
 import { addPuncturePoint, emitBubble, emitResource, getBubbleEthMass, getBubbleResourceMass, setBubbleResourceMass } from "./bubble";
 import { Vec2 } from "planck-js";
 import {
@@ -58,6 +58,7 @@ import { AssetType, FeeType } from "../types/protocol";
 import { addEvent } from "./events";
 import { EventsType } from "../types/events";
 import { getBodyId } from "./obstacle";
+import { MIN_PORTAL_DISTANCE, PORTAL_SPAWN_RADIUS, WORLD_RADIUS } from "../consts";
 
 const isNode =
     typeof process !== "undefined" &&
@@ -264,20 +265,18 @@ const handleSpawnPortal = (input: SpawnPortal, client: boolean): boolean => {
     user.balance -= amount;
     if (client) {
         const amountAfterFees = snapshotProtocol.processFee(FeeType.SPAWN, AssetType.ETH, amount);
-        const { x, y } = generateSpawnPoint(
-            input.timestamp,
-            snapshotWorld,
-            snapshotPortals,
-            snapshotBubbles,
-            snapshotNodes,
-            amountAfterFees,
-        );
+        const radius = massToRadius(amountAfterFees);
+        const spawnPoint = generateSpawnPoint(snapshotWorld, radius, MIN_PORTAL_DISTANCE, PORTAL_SPAWN_RADIUS, WORLD_RADIUS);
+        if (!spawnPoint) {
+            console.log("Failed to generate portal spawn point");
+            return false;
+        }
         createPortal(
             snapshotPortals,
             snapshotWorld,
             user.address,
-            x,
-            y,
+            spawnPoint.x,
+            spawnPoint.y,
             amountAfterFees,
         );
 
@@ -294,15 +293,13 @@ const handleSpawnPortal = (input: SpawnPortal, client: boolean): boolean => {
         })
     } else {
         const amountAfterFees = protocol.processFee(FeeType.SPAWN, AssetType.ETH, amount);
-        const { x, y } = generateSpawnPoint(
-            input.timestamp,
-            world,
-            portals,
-            bubbles,
-            nodes,
-            amountAfterFees,
-        );
-        createPortal(portals, world, user.address, x, y, amountAfterFees);
+        const radius = massToRadius(amountAfterFees);
+        const spawnPoint = generateSpawnPoint(world, radius, MIN_PORTAL_DISTANCE, PORTAL_SPAWN_RADIUS, WORLD_RADIUS);
+        if (!spawnPoint) {
+            console.log("Failed to generate portal spawn point");
+            return false;
+        }
+        createPortal(portals, world, user.address, spawnPoint.x, spawnPoint.y, amountAfterFees);
 
         //Emit event
         addEvent({

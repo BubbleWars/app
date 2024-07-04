@@ -15,7 +15,7 @@ import { GameBar } from "./components/GameBar";
 import { Canvas, extend } from "@react-three/fiber";
 import { CustomCameraControls } from "./components/CameraControls";
 import * as THREE from "three";
-import { Plane, Text, Text3D } from "@react-three/drei";
+import { Edges, Plane, Text, Text3D } from "@react-three/drei";
 import { ScreenTitle } from "./components/screens/ScreenTitle";
 import { ScreenSpawnPortal } from "./components/screens/ScreenSpawnPortal";
 import { useState } from "react";
@@ -25,13 +25,14 @@ import "../global.css"
 import { BarBottom } from "./components/ui/BarBottom";
 import { usePrivy } from "@privy-io/react-auth";
 import { ScreenLogin } from "./components/screens/ScreenLogin";
-import { WORLD_WIDTH } from "../../core/consts";
+import { WORLD_RADIUS, WORLD_WIDTH } from "../../core/consts";
 
 import { useLoader } from '@react-three/fiber';
 import { TextureLoader } from 'three';
 import { StatsLeaderboard } from "./components/ui/StatsLeaderboard";
 import { StatsEventBox } from "./components/ui/StatsEventBox";
 import { StatsTokenomics } from "./components/ui/StatsTokenomics";
+import { Edge } from "planck-js";
 
 function Background() {
     const defaultUrl = "/bg.png";
@@ -43,10 +44,22 @@ function Background() {
         <Plane
             position={[0, 0, -10]}
         >
-            <planeGeometry args={[WORLD_WIDTH*10, WORLD_WIDTH*10]} />
+            <planeGeometry args={[WORLD_WIDTH*5, WORLD_WIDTH*5]} />
             <meshBasicMaterial attach="material" map={texture} />
         </Plane>
     );
+}
+
+//Circle border
+function Border() {
+    return (
+        <mesh>
+            <circleGeometry args={[WORLD_RADIUS, 100]} />
+            <meshBasicMaterial transparent={true} opacity={0} color={"#000000"} />
+            <Edges />
+        </mesh>
+    );
+
 }
 
 
@@ -76,17 +89,20 @@ function App() {
 
                 <Game />
                 <CustomCameraControls />
+                <Border />
 
             </Canvas>
             <StatsLeaderboard />
             <StatsEventBox />
             <BarBottom />
             <StatsTokenomics />
+            
 
 
             {!authenticated && <ScreenLogin />}
             {authenticated && <ScreenSpawnPortal /> }
             {authenticated && <ScreenTitle />}
+
             {/* <button onClick={logout}>Log out</button> */}
         </>
     );

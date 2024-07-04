@@ -7,7 +7,7 @@ import { Address } from "./types/address";
 import { User } from "./types/user";
 import { InputWithExecutionTime } from "./types/inputs";
 import { ObstaclesState, Snapshot } from "./types/state";
-import { STEP_DELTA, WORLD_HEIGHT, WORLD_WIDTH } from "./consts";
+import { STEP_DELTA, WORLD_HEIGHT, WORLD_RADIUS, WORLD_WIDTH } from "./consts";
 import { handlePendingInputs } from "./funcs/inputs";
 import { updateState, handleContact } from "./funcs/state";
 import { generateObstacles, setObstacleGroupFromState } from "./funcs/obstacle";
@@ -34,17 +34,6 @@ import { createBoundary, createEdges, preciseRound } from "./funcs/utils";
 import { Attractor } from "./types/entity";
 import { Protocol } from "./types/protocol";
 
-export type WorldState = {
-    users: Map<Address, User>;
-    bubbles: Map<string, Bubble>;
-    portals: Map<string, Portal>;
-    obstacles: ObstacleGroup[];
-    nodes: Map<string, ResourceNode>;
-    resources: Map<string, Resource>;
-    pendingInputs: InputWithExecutionTime[];
-    attractors: Attractor[];
-    protocol: Protocol;
-};
 
 export const users = new Map<Address, User>();
 export const bubbles = new Map<string, Bubble>();
@@ -86,6 +75,20 @@ export let currentState: Snapshot = {
 export let lastTimestamp = 0;
 
 export let tempTimestamp = 0; // for accessing the current state of the world
+
+export type WorldState = {
+    world: World;
+    timestamp: number;
+    users: Map<Address, User>;
+    bubbles: Map<string, Bubble>;
+    portals: Map<string, Portal>;
+    obstacles: ObstacleGroup[];
+    nodes: Map<string, ResourceNode>;
+    resources: Map<string, Resource>;
+    pendingInputs: InputWithExecutionTime[];
+    attractors: Attractor[];
+    protocol: Protocol;
+};
 
 //Deferred updates called after the physics step
 export let deferredUpdates: Array<() => void> = [];
@@ -226,7 +229,7 @@ export const init = (initialState?: Snapshot) => {
         });
         obstacles.push(...setObstacleGroupFromState(world, currentState.obstacles)) 
     }
-    createEdges(world, WORLD_WIDTH, WORLD_HEIGHT);
+    createEdges(world, WORLD_RADIUS);
 
     //Create initial portal
     //const portal = createPortal(portals, world, "0x0", 0, 0, 10);

@@ -9,7 +9,9 @@ import {
     EMISSION_SPEED,
     MASS_PER_SECOND,
     PLANCK_MASS,
+    PORTAL_SPAWN_RADIUS,
     WORLD_HEIGHT,
+    WORLD_RADIUS,
     WORLD_WIDTH,
 } from "../consts";
 import { createBubble, destroyBubble, getBubbleEthMass, getBubbleResourceMass, updateBubble } from "./bubble";
@@ -22,7 +24,7 @@ import { ResourceNodeState, ResourceState } from "../types/state";
 import { Portal } from "../types/portal";
 import { Attractor } from "../types/entity";
 import { addAttractor } from "./entity";
-import { SeededRandom, pseudoRandom } from "./portal";
+import { SeededRandom, generateSpawnPoint, pseudoRandom } from "./portal";
 import { world } from "../world";
 import { Protocol } from "../types/protocol";
 
@@ -87,50 +89,9 @@ export const generateResources = (
         const minimumSafeDistance = 10;
         const entityRadius = resourceMassToRadius(ResourceType.ENERGY, 1);
 
-        while(!safeSpawnFound){
-            const seed = attempt + count + resources.size + nodes.size + portals.size + bubbles.size;
-            const rngX = new SeededRandom(seed);
-            const rngY = new SeededRandom(seed * seed);
-            const x = (rngX.next() * WORLD_WIDTH - WORLD_WIDTH/2);
-            const y = (rngY.next() * WORLD_HEIGHT - WORLD_HEIGHT/2);
-            const spawnPoint = Vec2(x, y);
-
-            // Check distance from portals
-            let isSafe = true;
-            portals.forEach((portal) => {
-                const portalPosition = portal.body.getPosition();
-                const portalRadius = portal?.fixture?.getShape()?.getRadius() ?? 0;
-                if (Vec2.distance(spawnPoint, portalPosition) < entityRadius + portalRadius + minimumSafeDistance) {
-                    isSafe = false;
-                }
-            });
-
-            // Check distance from bubbles
-            bubbles.forEach((bubble) => {
-                const bubblePosition = bubble.body.getPosition();
-                const bubbleRadius = bubble?.fixture?.getShape()?.getRadius() ?? 0;
-                if (Vec2.distance(spawnPoint, bubblePosition) < entityRadius + bubbleRadius + minimumSafeDistance) {
-                    isSafe = false;
-                }
-            });
-
-            // Check distance from nodes
-            nodes.forEach((node) => {
-                const nodePosition = node.body.getPosition();
-                const nodeRadius = node?.fixture?.getShape()?.getRadius() ?? 0;
-                if (Vec2.distance(spawnPoint, nodePosition) < entityRadius + nodeRadius + minimumSafeDistance) {
-                    isSafe = false;
-                }
-            });
-
-            if(isSafe){
-                createResource(0, world, resources, ResourceType.ENERGY, x, y, 1);
-                safeSpawnFound = true;
-            }
-
-            attempt++;
-        }
-        count++;
+        const point = generateSpawnPoint(world, entityRadius, minimumSafeDistance, WORLD_RADIUS*0.1, PORTAL_SPAWN_RADIUS);
+        if(!point) return;
+        createResource(0, world, resources, ResourceType.ENERGY, point.x, point.y, 1);
     }
 
     //console.log("spawned resources", count);

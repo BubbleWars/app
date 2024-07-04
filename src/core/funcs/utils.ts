@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
-import { Edge, Vec2, World } from "planck-js";
+import { Chain, Circle, Edge, Vec2, World } from "planck-js";
 import { C, MASS_ENERGY_CONVERSION_EFFICIENCY, MAX_VELOCITY, MIN_DELTA_VELOCITY, PLANCK_MASS } from "../consts";
+import { setBodyId } from "./obstacle";
 
 export const massToRadius = (mass: number): number => {
     return Math.sqrt(mass / Math.PI);
@@ -53,19 +54,41 @@ export const createBoundary = (
     });
 };
 
+// Create circular boundary with internal collision
 export const createEdges = (
-    world: World,
-    width: number,
-    height: number,
+    world: World, 
+    radius: number
 ) => {
-    const halfWidth = width / 2;
-    const halfHeight = height / 2;
+    const count = 500;
+    const vertices = [];
+    const angleStep = (2 * Math.PI) / count;
 
-    createBoundary(world, Vec2(-halfWidth, -halfHeight), Vec2(halfWidth, -halfHeight));
-    createBoundary(world, Vec2(halfWidth, -halfHeight), Vec2(halfWidth, halfHeight));
-    createBoundary(world, Vec2(halfWidth, halfHeight), Vec2(-halfWidth, halfHeight));
-    createBoundary(world, Vec2(-halfWidth, halfHeight), Vec2(-halfWidth, -halfHeight));
-}
+    // Calculate the vertices along the circumference
+    for (let i = 0; i < count; i++) {
+        const angle = i * angleStep;
+        const x = radius * Math.cos(angle);
+        const y = radius * Math.sin(angle);
+        vertices.push(Vec2(x, y));
+    }
+
+    // Close the loop by adding the first vertex at the end
+    vertices.push(vertices[0]);
+
+    // Create the static body for the boundary
+    const boundary = world.createBody({
+        position: Vec2(0, 0)
+    });
+
+    // Create a chain fixture for the boundary
+    const chainFixture = {
+        shape: Chain(vertices),
+        density: 0,
+        friction: 0.3,
+        restitution: 1.0 // Ensure that objects bounce perfectly
+    };
+
+    boundary.createFixture(chainFixture);
+};
 
 export const decodePacked = (types: string[], data: string) => {
     let offset = 2;
