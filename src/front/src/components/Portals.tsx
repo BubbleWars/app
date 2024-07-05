@@ -31,27 +31,9 @@ import { usePfpTexture } from "@/hooks/state";
 
 // Function to get the color in the center of the texture
 export function getCenterColor(texture) {
-  const renderer = new THREE.WebGLRenderer();
-  const width = texture.image.width;
-  const height = texture.image.height;
-
-  const renderTarget = new THREE.WebGLRenderTarget(width, height);
-  renderer.setRenderTarget(renderTarget);
-
-  const material = new THREE.MeshBasicMaterial({ map: texture });
-  const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
-  const scene = new THREE.Scene();
-  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-
-  scene.add(quad);
-  renderer.render(scene, camera);
-
-  const readBuffer = new Uint8Array(4);
-  const centerX = Math.floor(width / 2);
-  const centerY = Math.floor(height / 2);
-  renderer.readRenderTargetPixels(renderTarget, centerX, centerY, 1, 1, readBuffer);
-
-  const [r, g, b] = readBuffer;
+  
+  //brown
+  const [r, g, b] = [0, 0, 0];
   console.log("center color:", r, g, b);
   return new THREE.Color(`rgb(${r},${g},${b})`);
 }
