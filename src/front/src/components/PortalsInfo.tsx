@@ -58,7 +58,7 @@ export const PortalsInfo = ({ portalId }: { portalId: string }) => {
                 size={radius / 12}
                 position={textPosition
                     .clone()
-                    .add(new THREE.Vector3(0, radius / 4, 0))}
+                    .add(new THREE.Vector3(0, radius / 4, 10))}
             >
                 PORTAL
             </CustomText> 

@@ -25,6 +25,58 @@ import vertexShader from "../shaders/bubbleParticleVert.glsl?raw";
 import fragmentShader from "../shaders/bubbleParticleFrag.glsl?raw";
 import { CustomGeometryParticles } from "./Portals";
 
+const BubbleOutlineShader = ({
+    color = 'white',
+    outlineWidth = 0.05,
+    ...props
+}) => {
+    const materialRef = useRef();
+
+    const uniforms = useMemo(
+        () => ({
+            color: { value: new THREE.Color(color) },
+            outlineWidth: { value: outlineWidth }
+        }),
+        [color, outlineWidth]
+    );
+
+    useEffect(() => {
+        materialRef.current.uniforms.color.value = new THREE.Color(color);
+        materialRef.current.uniforms.outlineWidth.value = outlineWidth;
+    }, [color, outlineWidth]);
+
+    useFrame(() => {
+        materialRef.current.uniforms.outlineWidth.value = outlineWidth;
+    });
+
+    return (
+        <shaderMaterial
+            ref={materialRef}
+            vertexShader={`
+            varying vec3 vNormal;
+            void main() {
+                vNormal = normalize(normalMatrix * normal);
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+            `}
+            fragmentShader={`
+            uniform vec3 color;
+            uniform float outlineWidth;
+            varying vec3 vNormal;
+
+            void main() {
+                float intensity = 1.0 - dot(vNormal, vec3(0.0, 0.0, 1.0));
+                float outline = smoothstep(outlineWidth - 0.01, outlineWidth + 0.01, intensity);
+                gl_FragColor = vec4(color, outline);
+            }
+            `}
+            uniforms={uniforms}
+            side={THREE.BackSide}
+            {...props}
+        />
+    );
+};
+
 
 const BubbleMovementParticles =(props: {magnitude: number, count: number, radius: number, position: THREE.Vector3, color: THREE.Color | string, direction: { x: number, y: number}, height: number }) => {
     const { count, radius, color, height, direction } = props;
@@ -134,8 +186,8 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
 
     const pfpUrl = user?.pfpUrl;
    //console.log("pfpUrl", pfpUrl)
-    //const texture = usePfpTexture(pfpUrl, "/bubblewars.png", user?.social);
-    //texture.anisotropy = 16;
+    const texture = usePfpTexture(pfpUrl, pfpUrl, user?.social);
+    texture.anisotropy = 16;
     //if(!bubble) return null;
     const [ velocity, setVelocity ] = useState(bubble.velocity);
     const normalizedVelocity = useMemo(() => {
@@ -239,7 +291,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
         meshRef.current.position.set(newX, newY, 0);
         meshRef.current.updateMatrix();
 
-        setPosition(new THREE.Vector3(newX, newY, 0));
+        setPosition(new THREE.Vector3(newX, newY, 10));
 
         const newVelocityX = MathUtils.lerp(
             velocity.x,
@@ -303,11 +355,21 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
                 }}
                 onContextMenu={() => setIsSelected(false)}
             >
-                <sphereGeometry args={[undefined, undefined, 60]} />
-                <Outlines thickness={0.05} color={outlineColor } renderOrder={10}/>
-                <meshBasicMaterial 
-                  color={baseColor} 
+                <circleGeometry />
+                <meshBasicMaterial
+                  toneMapped={false}
+                  map={texture}
+                  color={"white"}
+                  transparent={true}
+                  opacity={1}
+                  depthWrite={true}
+                  depthTest={true}
                 />
+                <Edges 
+                color={"black"}
+                linewidth={4}
+                />
+
 
             </mesh>}
                 originalRef={meshRef}

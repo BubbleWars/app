@@ -44,7 +44,7 @@ function Background() {
         <Plane
             position={[0, 0, -10]}
         >
-            <planeGeometry args={[WORLD_WIDTH*5, WORLD_WIDTH*5]} />
+            <planeGeometry args={[WORLD_WIDTH*2, WORLD_WIDTH*2]} />
             <meshBasicMaterial attach="material" map={texture} />
         </Plane>
     );

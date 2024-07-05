@@ -47,7 +47,7 @@ const ShadowMesh: React.FC<ShadowMeshProps> = ({ originalMesh, originalRef,  ...
     <>
       <mesh ref={shadowRef} {...props}>
         {React.createElement(geometryType, { args: geometryArgs })}
-        <meshBasicMaterial color="black" opacity={0.2} transparent />
+        <meshBasicMaterial color="black" opacity={0.3} transparent />
       </mesh>
       {originalMesh}
     </>

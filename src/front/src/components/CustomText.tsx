@@ -24,7 +24,8 @@ export const CustomText = ({
     | any) => {
     return (
         <Text
-            font="LilitaOne-Regular.ttf"
+            renderOrder={Infinity}  // Ensure this is rendered on top
+            font="/fonts/LilitaOne-Regular.ttf"
             color={color}
             letterSpacing={-0.0}
             fontWeight="bold"
@@ -33,7 +34,7 @@ export const CustomText = ({
             outlineWidth={noOutline ? 0 : thickness ?? size * 0.1}
             anchorX={anchorX as any}
             anchorY={anchorY as any}
-            position={position?.clone().add(new THREE.Vector3(0, 0, 6)) ?? new THREE.Vector3(0, 0, 0)}
+            position={position?.clone().add(new THREE.Vector3(0, 0, 10)) ?? new THREE.Vector3(0, 0, 0)}
         >
             <meshBasicMaterial toneMapped={false} />
             {children}

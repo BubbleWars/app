@@ -228,6 +228,7 @@ export const usePfpTexture = (imageUrl, fallbackImage, social) => {
       // Function to check image availability
       const validateImage = async (url) => {
         try {
+            console.log("fetching image", url)
           const response = await fetch(url, { method: 'HEAD' });
           if (response.ok) {
             setValidatedUrl(url);
@@ -240,7 +241,7 @@ export const usePfpTexture = (imageUrl, fallbackImage, social) => {
         }
       };
       
-      const img = social ? "https://unavatar.io/twitter/" + social : imageUrl;
+      const img = social ? "https://unavatar.io/x/" + social : imageUrl;
       validateImage(img);
     }, [imageUrl, fallbackImage]);
   

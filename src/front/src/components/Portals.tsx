@@ -10,7 +10,7 @@ import { PortalState } from "../../../core/types/state";
 import { snapshotCurrentState } from "../../../core/snapshots";
 import { PortalsInfo } from "./PortalsInfo";
 import { PortalsControlsEmit } from "./PortalsControlsEmit";
-import { MeshDistortMaterial, MeshWobbleMaterial, Outlines, PointMaterial, Sparkles, useCamera } from "@react-three/drei";
+import { Edges, MeshDistortMaterial, MeshWobbleMaterial, Outlines, PointMaterial, Sparkles, useCamera } from "@react-three/drei";
 import { darkenColor, lightenColor } from "../utils";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -26,6 +26,35 @@ import fragmentShader from "../shaders/portalFragmentShader.glsl?raw";
 import Outline from "./Outline";
 import { PortalRadialEffect } from "./PortalRadialEffect";
 import ShadowMesh from "./Shadow";
+import { useUserSocial } from "@/hooks/socials";
+import { usePfpTexture } from "@/hooks/state";
+
+// Function to get the color in the center of the texture
+export function getCenterColor(texture) {
+  const renderer = new THREE.WebGLRenderer();
+  const width = texture.image.width;
+  const height = texture.image.height;
+
+  const renderTarget = new THREE.WebGLRenderTarget(width, height);
+  renderer.setRenderTarget(renderTarget);
+
+  const material = new THREE.MeshBasicMaterial({ map: texture });
+  const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
+  const scene = new THREE.Scene();
+  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+  scene.add(quad);
+  renderer.render(scene, camera);
+
+  const readBuffer = new Uint8Array(4);
+  const centerX = Math.floor(width / 2);
+  const centerY = Math.floor(height / 2);
+  renderer.readRenderTargetPixels(renderTarget, centerX, centerY, 1, 1, readBuffer);
+
+  const [r, g, b] = readBuffer;
+  console.log("center color:", r, g, b);
+  return new THREE.Color(`rgb(${r},${g},${b})`);
+}
 
 export const CustomGeometryParticles = (props: { count: number, radius: number, position: THREE.Vector3, color: THREE.Color | string }) => {
   const { count, radius, position, color } = props;
@@ -125,6 +154,10 @@ export const Portal = ({ portalId }: { portalId: string }) => {
 
     const [lerpedRadius, setLerpedRadius] = useState<number>(radius);
 
+    const user = useUserSocial({ address: portalId });
+    const pfpUrl = user?.pfpUrl;
+    const texture = usePfpTexture(pfpUrl, pfpUrl, user?.social);
+
     useFrame(() => {
         const portal = currentState.portals.find(
             (portal) => portal.id === portalId,
@@ -143,6 +176,13 @@ export const Portal = ({ portalId }: { portalId: string }) => {
     const baseColor = ethereumAddressToColor(portalId);
     const outlineColor = darkenColor(baseColor, 0.5);
 
+    const averageColor = useMemo(() => {
+      if (texture.image) {
+          return getCenterColor(texture);
+      }
+      return new THREE.Color(0xffffff); // default color if texture not loaded
+  }, [texture]);
+
     useEffect(() => {
         //console.log("setIsBubbleSelected: ui", isSelected)
         dispatch(setIsBubbleSelected(isSelected));
@@ -159,7 +199,7 @@ export const Portal = ({ portalId }: { portalId: string }) => {
           <PortalRadialEffect
             position={new THREE.Vector3(portal.position.x, portal.position.y, 0)}
             radius={lerpedRadius}
-            color={baseColor}
+            color={averageColor}
           />
           {isSelected && (
                 <PortalsControlsEmit
@@ -185,10 +225,21 @@ export const Portal = ({ portalId }: { portalId: string }) => {
                 onContextMenu={() => setIsSelected(false)}
                 ref={meshRef}
             >
-                <sphereGeometry />
-                <Outlines thickness={0.05} color={outlineColor }/>
-                <meshBasicMaterial 
-                  color={baseColor} 
+                <circleGeometry />
+                <meshBasicMaterial
+                  toneMapped={false}
+                  map={texture}
+                  color={"white"}
+                  transparent={true}
+                  opacity={1}
+                  depthWrite={true}
+                  depthTest={true}
+                />
+                <Edges 
+                    linewidth={10}
+                    scale={1}
+                    threshold={15} // Display edges only when the angle between two faces exceeds this value (default=15 degrees)
+                    color="black"
                 />
             </mesh>}
             originalRef={meshRef}

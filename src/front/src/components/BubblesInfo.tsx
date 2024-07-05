@@ -113,7 +113,7 @@ export const BubblesInfo = ({bubble, position}: {bubble: BubbleState, position: 
     const pos = position.clone();
     const mass = bubble?.mass;
 
-    const lineHeightVector = new THREE.Vector3(0, -radius / 3, 0);
+    const lineHeightVector = new THREE.Vector3(0, -radius / 3, 10);
     const pos2 = pos
         .clone()
         .add(lineHeightVector.clone().multiplyScalar(1))
