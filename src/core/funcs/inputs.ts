@@ -198,10 +198,25 @@ const handleDeposit = (
 ): boolean => {
     const user = getUser(sender, client);
     user.balance += amount;
-    handleSpawnPortal(
-        { type: InputType.SpawnPortal, timestamp, sender, mass: amount },
-        client,
-    );
+    
+    //Check if user has a portal
+    const userPortal = client
+        ? Array.from(snapshotPortals.values()).filter(
+              (portal) => portal.owner === user.address,
+          )
+        : Array.from(portals.values()).filter(
+              (portal) => portal.owner === user.address,
+          );
+    
+    if(userPortal.length > 0){
+        handleAddEthToPortal(sender, amount, client)
+
+    }else{
+        handleSpawnPortal(
+            { type: InputType.SpawnPortal, timestamp, sender, mass: amount },
+            client,
+        );
+    }   
     return true;
 };
 
@@ -327,6 +342,21 @@ const handleSpawnPortal = (input: SpawnPortal, client: boolean): boolean => {
 
     return true;
 };
+
+const handleAddEthToPortal = (portalId: string, amount: number, client: boolean): boolean => {
+    const portal = client
+        ? snapshotPortals.get(portalId.toLowerCase())
+        : portals.get(portalId.toLowerCase());
+    if (!portal) return false;
+    if (client) {
+        const amountAfterFees = snapshotProtocol.processFee(FeeType.SPAWN, AssetType.ETH, amount);
+        portal.mass += amountAfterFees;
+    } else {
+        const amountAfterFees = protocol.processFee(FeeType.SPAWN, AssetType.ETH, amount);
+        portal.mass += amountAfterFees;
+    }
+    return true;
+}
 
 const handleEmit = (input: Emit, client: boolean): boolean => {
     //console.log("Handling emit with input:", JSON.stringify(input));

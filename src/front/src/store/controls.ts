@@ -8,6 +8,8 @@ interface ControlsState {
     selected: string | null; //selected entity id
     aiming: {id: string, mass: number, type: ResourceType, isPortal:boolean} | null, //list of aiming entities and their mass
     emitting: {[id: string]: {id:string, mass: number, type: ResourceType, x: number, y: number}}; //list of emitting entities and their directions
+    withdraw: boolean; //Widthdraw modal
+    deposit: boolean; //Deposit modal
 }
 
 export const controlsSlice = createSlice({
@@ -16,7 +18,9 @@ export const controlsSlice = createSlice({
         hovered: null,
         selected: null,
         aiming: null,
-        emitting: {}
+        emitting: {},
+        withdraw: false,
+        deposit: false,
      } as ControlsState,
     reducers: {
         setHovered: (state, action: PayloadAction<string | null>) => {
@@ -41,6 +45,12 @@ export const controlsSlice = createSlice({
         clearAllEmitting: (state) => {
             state.emitting = {};
         },
+        setWithdrawControlsActive: (state, action: PayloadAction<boolean>) => {
+            state.withdraw = action.payload;
+        },
+        setDepositControlsActive: (state, action: PayloadAction<boolean>) => {
+            state.deposit = action.payload;
+        },
     },
 });
 
@@ -53,6 +63,8 @@ export const {
     clearAiming,
     clearEmitting,
     clearAllEmitting,
+    setWithdrawControlsActive,
+    setDepositControlsActive,
 } = controlsSlice.actions;
 
 export default controlsSlice.reducer;

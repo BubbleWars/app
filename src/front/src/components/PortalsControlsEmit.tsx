@@ -30,6 +30,7 @@ import { setControlsActive, setIsBubbleSelected } from "../store/interpolation";
 import { useWallets } from "@privy-io/react-auth";
 import { getPortalMass } from "../../../core/funcs/portal";
 import { PLANCK_MASS } from "../../../core/consts";
+import { setDepositControlsActive, setWithdrawControlsActive } from "@/store/controls";
 
 export const PortalsControlsEmit = ({
     portalId,
@@ -56,6 +57,8 @@ export const PortalsControlsEmit = ({
     const [isEmitting, setIsEmitting] = useState<boolean>(false);
     const [mass, setMass] = useState<number>(0.05);
     const [emitEth, setEmitEth] = useState<boolean>(true);
+    const [depositHover, setDepositHover] = useState<boolean>(false);
+    const [withdrawHover, setWithdrawHover] = useState<boolean>(false);
     const [emitEp, setEmitEp] = useState<boolean>(false);
     const [isReady, setIsReady] = useState<boolean>(false);
     const lineRef = useRef<any>();
@@ -271,6 +274,12 @@ export const PortalsControlsEmit = ({
                             setEmitEth(true);
                             setMass(ethMass/10);
                             setEmitEp(false);
+                            setWithdrawHover(false);
+                            setDepositHover(false);
+                        }}
+                        onPointerLeave={() => {
+                            setEmitEth(false);
+
                         }}
                         onPointerDown={() => {
                             setTimeout(() => {
@@ -292,6 +301,76 @@ export const PortalsControlsEmit = ({
                         >
                             Emit ETH
                         </CustomText>
+                        
+                    </group>
+                    <group
+                    position={new THREE.Vector3(
+                        radius + 2,
+                        radius + 2 - 1,
+                        0,
+                    ).add(position)}
+                    onPointerEnter={() => {
+                        setDepositHover(true);
+                        setEmitEth(false);
+                        setWithdrawHover(false);
+                    }}
+                    onPointerLeave={() => {
+                        setDepositHover(false);
+                    }}
+                    onPointerDown={() => {
+                        setTimeout(() => {
+                            dispatch(setDepositControlsActive(true));
+                        }, 250);
+                    }}
+                    >
+                        <CustomText
+                            size={depositHover ? 1.2 : 1.1}
+                            position={new THREE.Vector3(
+                                0,
+                                0,
+                                0,
+                            )}
+                            anchorX="center"
+                            anchorY="center"
+                            color="white"
+                        >
+                            Deposit
+                            </CustomText>
+                        
+                    </group>
+                    <group
+                    position={new THREE.Vector3(
+                        radius + 2,
+                        radius + 2 - 2,
+                        0,
+                    ).add(position)}
+                    onPointerEnter={() => {
+                        setWithdrawHover(true);
+                        setEmitEth(false);
+                        setDepositHover(false);
+                    }}
+                    onPointerLeave={() => {
+                        setWithdrawHover(false);
+                    }}
+                    onPointerDown={() => {
+                        setTimeout(() => {
+                            dispatch(setWithdrawControlsActive(true));
+                        }, 250);
+                    }}
+                    >
+                        <CustomText
+                            size={withdrawHover ? 1.2 : 1.1}
+                            position={new THREE.Vector3(
+                                0,
+                                0,
+                                0,
+                            )}
+                            anchorX="center"
+                            anchorY="center"
+                            color="white"
+                            >
+                                Withdraw
+                            </CustomText>
                     </group>
                     {/* <group
                     position={new THREE.Vector3(

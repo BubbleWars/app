@@ -33,6 +33,9 @@ import { StatsLeaderboard } from "./components/ui/StatsLeaderboard";
 import { StatsEventBox } from "./components/ui/StatsEventBox";
 import { StatsTokenomics } from "./components/ui/StatsTokenomics";
 import { Edge } from "planck-js";
+import { useSelector } from "react-redux";
+import { ScreenDeposit } from "./components/screens/ScreenDeposit";
+import { ScreenWithdraw } from "./components/screens/ScreenWithdraw";
 
 function Background() {
     const defaultUrl = "/bg.png";
@@ -68,6 +71,8 @@ function App() {
     //const { inputs } = useInputs();
 
     const { logout, authenticated } = usePrivy();
+    const withdrawModal = useSelector((state: any) => state.controls.withdraw);
+    const depositModal = useSelector((state: any) => state.controls.deposit);
 
     return (
         <>
@@ -102,6 +107,8 @@ function App() {
             {!authenticated && <ScreenLogin />}
             {authenticated && <ScreenSpawnPortal /> }
             {authenticated && <ScreenTitle />}
+            {withdrawModal && <ScreenWithdraw />}
+            {depositModal && <ScreenDeposit />}
 
             {/* <button onClick={logout}>Log out</button> */}
         </>
