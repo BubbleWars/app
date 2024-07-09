@@ -157,6 +157,7 @@ export class World extends Room<WorldState> {
     unwatchInputs: () => void = () => {};
     unwatchBlock: () => void = () => {};
     autoDispose = false;
+    started = false;
 
     async onCreate(options: any) {
         //this.unwatchBlock();
@@ -166,7 +167,6 @@ export class World extends Room<WorldState> {
        //console.log("World room created!", options);
         this.setState(new WorldState());
 
-        this.setSimulationInterval((deltaTime) => this.update(deltaTime));
 
         onInspect((snapshot) => {
            //console.log("recieved snapshot", snapshot);
@@ -174,6 +174,25 @@ export class World extends Room<WorldState> {
             init(snapshot);
             snapshotInit(snapshot);
             this.recievedStartupInspect = true;
+            if(snapshot.timestamp >= 0){
+                this.started = true;
+                this.setSimulationInterval((deltaTime) => this.update(deltaTime));
+                this.started = true;
+                this.unwatchBlock = onBlock((blockTimestamp) => {
+                    //console.log("recieved block", blockTimestamp);
+                    //if (!this.recievedStartupInspect) return;
+                    this.blockTimestamp = blockTimestamp;
+                    snapshotRun(this.blockTimestamp);
+                    //console.log("block timestamp", this.blockTimestamp, "current snapshot state", snapshotCurrentState.timestamp, "current timestamp", snapshotCurrentState)
+                    
+                    //rollbackToState(snapshotCurrentState);
+                    //max keep 10 snapshots
+                    if (snapshots.size > 15) {
+                        const oldestSnapshot = snapshots.keys().next().value;
+                        snapshots.delete(oldestSnapshot);
+                    }
+                });
+            }
         });
 
         onUser((users) => {
@@ -183,20 +202,7 @@ export class World extends Room<WorldState> {
             });
         });
 
-        this.unwatchBlock = onBlock((blockTimestamp) => {
-            //console.log("recieved block", blockTimestamp);
-            //if (!this.recievedStartupInspect) return;
-            this.blockTimestamp = blockTimestamp;
-            snapshotRun(this.blockTimestamp);
-            //console.log("block timestamp", this.blockTimestamp, "current snapshot state", snapshotCurrentState.timestamp, "current timestamp", snapshotCurrentState)
-            
-            //rollbackToState(snapshotCurrentState);
-            //max keep 10 snapshots
-            if (snapshots.size > 15) {
-                const oldestSnapshot = snapshots.keys().next().value;
-                snapshots.delete(oldestSnapshot);
-            }
-        });
+        
 
         this.unwatchInputs = onInput((input) => {
           //console.log("current timestamp", this.state.timestamp)
@@ -205,7 +211,7 @@ export class World extends Room<WorldState> {
 
             
 
-            
+        
 
 
             //If current block is ahead of input, rollback and append input
@@ -259,7 +265,24 @@ export class World extends Room<WorldState> {
             // }
 
             //console.log("timestamp of world", currentState.timestamp);
-            
+            if (!started && this.recievedStartupInspect) {
+                this.setSimulationInterval((deltaTime) => this.update(deltaTime));
+                this.started = true;
+                this.unwatchBlock = onBlock((blockTimestamp) => {
+                    //console.log("recieved block", blockTimestamp);
+                    //if (!this.recievedStartupInspect) return;
+                    this.blockTimestamp = blockTimestamp;
+                    snapshotRun(this.blockTimestamp);
+                    //console.log("block timestamp", this.blockTimestamp, "current snapshot state", snapshotCurrentState.timestamp, "current timestamp", snapshotCurrentState)
+                    
+                    //rollbackToState(snapshotCurrentState);
+                    //max keep 10 snapshots
+                    if (snapshots.size > 15) {
+                        const oldestSnapshot = snapshots.keys().next().value;
+                        snapshots.delete(oldestSnapshot);
+                    }
+                });
+            }
         });
 
         // this.onMessage("type", (client, message) => {

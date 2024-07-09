@@ -6,12 +6,15 @@ import { Bubble } from "./bubble";
 import { InputWithExecutionTime } from "./inputs";
 import { Obstacle, ObstacleGroup } from "./obstacle";
 import { Portal } from "./portal";
-import { Resource, ResourceNode } from "./resource";
+import { Resource, ResourceNode, ResourceType } from "./resource";
 import { User } from "./user";
 import { ProtocolState } from "./state";
-import { createPortal, generateSpawnPoint } from "../funcs/portal";
+import { createPortal, destroyPortal, generateSpawnPoint, getPortalMass, getPortalResourceMass, setPortalResourceMass } from "../funcs/portal";
 import { massToRadius } from "../funcs/utils";
 import { MIN_PORTAL_DISTANCE, PORTAL_SPAWN_RADIUS, WORLD_RADIUS } from "../consts";
+import { addEvent } from "../funcs/events";
+import { EventsType } from "./events";
+import { withdrawEth } from "../funcs/inputs";
 
 //Protocol revenue split
 const BUYBACK_PERCENTAGE = 0.5;
@@ -34,12 +37,16 @@ export class Protocol {
     MAX_RESOURCES = 10000;
     inflationRate = 1 // Max inflation rate per cycle
     cycle: number = 1; // Should run every 100s
+    rentCycle: number = 24 * 60 * 60; // Rent cycle is 24h
 
     //State
     last: number = 0; // Last time the protocol was run
     balance: Map<AssetType, number> = new Map<AssetType, number>(); // Balance of the protocol
     pendingBalance: Map<AssetType, number> = new Map<AssetType, number>(); // Pending balance of ETH or ENERGY to be used for buyback if ETH or respawn if ENERGY
     pendingSpawn: Map<AssetType, number> = new Map<AssetType, number>(); // Pending spawn of ETH or ENERGY to be used for buyback if ETH or respawn if ENERGY
+    rentCost: number = 1; // The current daily cost in $BBL to keep a portal open
+    rentDueAt: number = 0; // The time the rent is due
+    hasPayedRent: Map<Address, boolean> = new Map<Address, boolean>(); // If the user has payed rent
 
     deposit(type: AssetType, amount: number) { 
        //console.log("Depositing", type, amount);
@@ -60,6 +67,16 @@ export class Protocol {
        //console.log("Processing fee", feeTypeAsString, "for", amount, asset);
         const fee = amount * type / 100;
         this.deposit(asset, fee);
+
+        //Call event
+        addEvent({
+            type: EventsType.ProtocolRevenue,
+            timestamp: 0,
+            amount: fee,
+            from: type,
+            blockNumber: 0,
+        });
+
         return amount - fee;
     }
 
@@ -188,6 +205,126 @@ export class Protocol {
 
        //console.log("Spawned", amountToSpawn, type);
     }
+
+    payRent(
+        timestamp:number,
+        world: World,
+        portalId: Address,
+        portals: Map<Address, Portal>,
+    ){
+        const hasPayed = this.hasPayedRent.get(portalId);
+        if(hasPayed){
+            console.log("Has already payed rent");
+            return false;
+        }
+
+        const portal = portals.get(portalId);
+        if(!portal){
+            console.log("Portal not found");
+            return false;
+        }
+
+        //Remove rent from portal
+        const portalResourceBalance = getPortalResourceMass(portal, ResourceType.ENERGY);
+        const remaining = portalResourceBalance - this.rentCost;
+        if(remaining < 0){
+            console.log("Not enough energy to pay rent");
+            return false;
+        }
+        setPortalResourceMass(portal, ResourceType.ENERGY, remaining);
+
+        //Transfer rent to protocol
+        this.deposit(AssetType.ENERGY, this.rentCost);
+
+        //Set rent payed
+        this.hasPayedRent.set(portalId, true);
+
+        //Call event
+        addEvent({
+            type: EventsType.ProtocolRentPayed,
+            timestamp,
+            amount: this.rentCost,
+            payer: portalId,
+            blockNumber: 0,
+        });
+    }
+
+    kickPortal(
+        timestamp: number,
+        world: World,
+        portalId: Address,
+        portals: Map<Address, Portal>,
+        protocol: Protocol,
+    ){
+        const portal = portals.get(portalId);
+        if(!portal){
+            console.log("Portal not found");
+            return false;
+        }
+
+        //Transfer resources from portal to protocol
+        const portalResourceBalance = getPortalResourceMass(portal, ResourceType.ENERGY);
+        setPortalResourceMass(portal, ResourceType.ENERGY, 0);
+        this.deposit(AssetType.ENERGY, portalResourceBalance);
+
+        //Withdraw ETH from portal
+        const portalEthBalance = getPortalMass(portal);
+        withdrawEth(portalId, portalEthBalance);
+
+        //Destroy portal
+        destroyPortal(portals, portal);
+
+        //Call event
+        addEvent({
+            type: EventsType.ProtocolKickPortal,
+            timestamp,
+            portalId,
+            blockNumber: 0,
+            amountTakenBack: portalResourceBalance,
+        });
+    }
+
+    initRent(
+        timestamp: number,
+        world: World,
+        portals: Map<Address, Portal>,
+        protocol: Protocol,
+    ){
+        //clear has payed rent
+        this.hasPayedRent.clear();
+
+        //Set rent due date
+        this.rentDueAt = timestamp + this.rentCycle;
+    }
+
+    handleRent(
+        timestamp: number,
+        world: World,
+        portals: Map<Address, Portal>,
+        protocol: Protocol,
+    ){
+        //Check if rent cycle has been set
+        if(this.rentDueAt == 0) {
+            this.initRent(timestamp, world, portals, protocol);
+            return;
+        }
+
+        //Check if rent is due
+        const timeToPayUp = timestamp >= this.rentDueAt;
+
+        //Force rent payment
+        if(timeToPayUp){
+            portals.forEach((portal) => {
+                const portalId = portal.owner;
+                const success = this.payRent(timestamp, world, portalId, portals);
+                //if failed, close portal. Force withdrawal of ETH. And return energy to protocol
+                if(!success)
+                    this.kickPortal(timestamp, world, portalId, portals, protocol);
+                
+            });
+            this.rentDueAt = timestamp + this.rentCycle;
+        }
+    }
     
     run(
         timestamp: number,
@@ -256,6 +393,12 @@ export class Protocol {
             nodes, 
             resources, 
             pendingInputs
+        );
+        this.handleRent(
+            timestamp,
+            world,
+            portals,
+            protocol,
         );
 
         this.last = timestamp;

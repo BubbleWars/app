@@ -7,6 +7,7 @@ export enum InputType {
     Withdraw = "withdraw",
     Invalid = "invalid",
     Puncture = "puncture", //puncture bubble
+    PayRent = "payRent",
 }
 
 export interface BaseInput {
@@ -32,6 +33,10 @@ export interface Withdraw extends BaseInput {
     amount: number;
 }
 
+export interface PayRent extends BaseInput {
+    type: InputType.PayRent;
+}
+
 export interface SpawnPortal extends BaseInput {
     type: InputType.SpawnPortal;
     mass: number;
@@ -55,8 +60,8 @@ export interface PunctureInput extends BaseInput {
     executionTime?: number;
 }
 
-export type Input = SpawnPortal | Emit | Deposit | Withdraw | Invalid | PunctureInput;
-export type InputWithExecutionTime = Emit | PunctureInput;
+export type Input = SpawnPortal | Emit | Deposit | Withdraw | Invalid | PunctureInput | PayRent;
+export type InputWithExecutionTime = Emit | PunctureInput | PayRent;
 
 export interface AdvanceData {
     metadata: {

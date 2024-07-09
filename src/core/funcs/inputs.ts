@@ -10,6 +10,7 @@ import {
     Inspect,
     InspectType,
     PunctureInput,
+    PayRent,
 } from "../types/inputs";
 import { ethers } from "ethers";
 import {
@@ -142,6 +143,15 @@ export const parseInput = (data: AdvanceData): Input | false => {
                 epochIndex: epochIndex,
                 amount: payloadJSON.amount,
             };
+        case InputType.PayRent:
+            return {
+                type: InputType.PayRent,
+                timestamp: timestamp,
+                sender: sender,
+                blockNumber: blockNumber,
+                inputIndex: inputIndex,
+                epochIndex: epochIndex,
+            };
     }
 };
 
@@ -183,6 +193,9 @@ export const handleInput = async (
         case InputType.Withdraw:
             await handleWithdraw(input, client);
             break;
+        case InputType.PayRent:
+            await handlePayRent(input, client);
+            break;
     }
     if (!client) {
         //sendNotice(input);
@@ -191,6 +204,14 @@ export const handleInput = async (
 
     return true;
 };
+
+const handlePayRent = async (input: PayRent, client: boolean): Promise<boolean> => {
+    const w = client ? snapshotWorld : world;
+    const p = client ? snapshotProtocol : protocol;
+    const ps = client ? snapshotPortals : portals;
+    const success = p.payRent(input.timestamp, w, input.sender, ps);
+    return success;
+}
 
 const handleDeposit = (
     { sender, amount, timestamp }: Deposit,
@@ -253,6 +274,28 @@ const handleWithdraw = async (
         return true;
     }
 };
+
+export const withdrawEth = async (address: Address, amount: number): Promise<boolean> => {
+    const voucher_request = await fetch(rollup_server + "/voucher", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            destination: address,
+            payload: ETH_WITHDRAW_FUNCTION_SELECTOR + ethers.AbiCoder.defaultAbiCoder().encode(
+                ["address", "uint256"],
+                [address, amount],
+            ),
+        }),
+    });
+
+    if (voucher_request.status != 200) {
+        return false;
+    }
+
+    return true;
+}
 
 const handleSpawnPortal = (input: SpawnPortal, client: boolean): boolean => {
     const user = getUser(input.sender, client);
@@ -484,6 +527,7 @@ export const handleInspect = async (inspect: Inspect): Promise<boolean> => {
                         ),
                     }),
                 });
+                console.log("Request sent. Status:", JSON.stringify(currentState));
                 //console.log("Request sent. Status:", inspect_request.status);
                 //console.log("Request response:");
                 //console.log(inspect_request);

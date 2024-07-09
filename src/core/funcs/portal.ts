@@ -254,6 +254,15 @@ export const generateSpawnPoint = (
 //     return spawnPoint;
 // };
 
+export const destroyPortal = (
+    portals: Map<string, Portal>,
+    portal: Portal,
+): void => {
+    portals.delete(portal.owner as string);
+    portal.body.getWorld().destroyBody(portal.body);
+    portal = null;
+}
+
 
 export const createPortal = (
     portals: Map<string, Portal>,
@@ -388,7 +397,7 @@ export const portalAbsorbBubble = (
     const absorbedEthMass = getBubbleEthMass(absorbedBubble);
     const absorbedTotalMass = getTotalBubbleMass(absorbedBubble);
     const newPortalEthMass = getPortalMass(portal) + absorbedEthMass; 
-    const newTotalMass = portal.mass + absorbedTotalMass;
+    const newTotalMass = portal.mass + absorbedEthMass;
     const totalAbsorbedResourceAmount = getTotalResourceMass(absorbedBubble);
 
     //Transfer resources to portal

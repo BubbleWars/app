@@ -1,3 +1,6 @@
+import { Address } from "./address";
+import { FeeType } from "./protocol";
+
 export enum EventsType {
     CreateWorld,
     CreateBubble,
@@ -14,6 +17,10 @@ export enum EventsType {
     PunctureBubble,
     PunctureEmit,
     SpawnPortal,
+    ProtocolSpawnResource,
+    ProtocolRevenue,
+    ProtocolRentPayed,
+    ProtocolKickPortal,
 }
 
 export interface BaseEvent {    
@@ -131,6 +138,29 @@ export interface EmitBubble extends InputBaseEvent {
     fromPortal: boolean,
 }
 
+export interface ProtocolSpawnResource extends BaseEvent {
+    type: EventsType.ProtocolSpawnResource;
+    position: { x: number; y: number };
+    amount: number;
+}
+
+export interface ProtocolRevenue extends BaseEvent {
+    type: EventsType.ProtocolRevenue;
+    amount: number;
+    from: FeeType,
+}   
+
+export interface ProtocolRentPayed extends BaseEvent {
+    type: EventsType.ProtocolRentPayed;
+    amount: number;
+    payer: Address,
+}
+
+export interface ProtocolKickPortal extends BaseEvent {
+    type: EventsType.ProtocolKickPortal;
+    portalId: string;
+    amountTakenBack: number, //Amount of Tokens taken back from the portal
+}
 
 
 
@@ -149,5 +179,10 @@ export type Event =
     | SellResource
     | PunctureBubble
     | PunctureEmit
-    | SpawnPortal;
+    | SpawnPortal
+    | ProtocolSpawnResource
+    | ProtocolRevenue
+    | ProtocolRentPayed
+    | ProtocolKickPortal;
+
 

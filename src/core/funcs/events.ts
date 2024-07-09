@@ -44,7 +44,7 @@ export const addEvent = (event: Event) => {
 
     global.events.push(event);
     onEvent(event);
-    console.log("New event", EventsType[event.type]);
+    console.log("New event", EventsType[event.type], event);
 };
 
 export const getEvents = (from: number, to: number) => {
