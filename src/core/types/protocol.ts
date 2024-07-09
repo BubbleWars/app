@@ -413,6 +413,12 @@ export class Protocol {
         this.pendingBalance.set(AssetType.ENERGY, state.pendingEnergyBalance);
         this.pendingSpawn.set(AssetType.ENERGY, state.pendingEnergySpawn);
         this.pendingSpawn.set(AssetType.ETH, state.pendingEthBalance);
+        this.rentCost = state.rentCost;
+        this.rentDueAt = state.rentDueAt;
+        this.hasPayedRent = new Map<Address, boolean>();
+        state.hasPayedRent.forEach((address) => {
+            this.hasPayedRent.set(address, true);
+        });
     }
 
     clear() {
@@ -420,5 +426,8 @@ export class Protocol {
         this.balance = new Map<AssetType, number>();
         this.pendingBalance = new Map<AssetType, number>();
         this.pendingSpawn = new Map<AssetType, number>();
+        this.rentCost = 1;
+        this.rentDueAt = 0;
+        this.hasPayedRent = new Map<Address, boolean>();
     }
 }

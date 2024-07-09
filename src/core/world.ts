@@ -68,6 +68,9 @@ export let currentState: Snapshot = {
         pendingEthBalance: 0,
         pendingEnergyBalance: 0,
         pendingEnergySpawn: 0,
+        rentCost: 0,
+        rentDueAt: 0,
+        hasPayedRent: [],
     },
 
 };

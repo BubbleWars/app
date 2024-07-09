@@ -5,6 +5,7 @@ import { InputWithExecutionTime } from "./inputs";
 import { ResourceType } from "./resource";
 import { User } from "./user";
 import { ObstacleGroupDef } from "./obstacle";
+import { Address } from "./address";
 
 export interface BubbleState {
     id: string;
@@ -91,7 +92,10 @@ export interface ProtocolState {
     balance: number
     pendingEthBalance: number,
     pendingEnergyBalance: number,
-    pendingEnergySpawn: number
+    pendingEnergySpawn: number,
+    rentCost: number,
+    rentDueAt: number,
+    hasPayedRent: Address[],
 }
 
 
