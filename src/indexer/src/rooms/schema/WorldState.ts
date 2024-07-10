@@ -105,6 +105,16 @@ export class ResourceStateSchema extends Schema {
     @type("number") mass: number = 0;
 }
 
+export class ProtocolStateSchema extends Schema {
+    @type("number") balance: number = 0;
+    @type("number") pendingEthBalance: number = 0;
+    @type("number") pendingEnergyBalance: number = 0;
+    @type("number") pendingEnergySpawn: number = 0;
+    @type("number") rentCost: number= 0;
+    @type("number") rentDueAt: number = 0;
+    @type(["string"]) hasPayedRent: ArraySchema<string> = new ArraySchema<string>();
+}
+
 export class WorldState extends Schema {
     @type("number") timestamp: number = 0;
     @type([InputWithExecutionTimeSchema]) pendingInputs =
@@ -125,6 +135,8 @@ export class WorldState extends Schema {
         new MapSchema<Vector2Schema>();
     @type({ map: Vector2Schema }) syncResourceStartPositions =
         new MapSchema<Vector2Schema>();
+    @type(ProtocolStateSchema) protocol = new ProtocolStateSchema();
+    
 }
 
 

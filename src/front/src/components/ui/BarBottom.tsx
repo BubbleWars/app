@@ -10,6 +10,9 @@ import { useUserSocial } from "@/hooks/socials";
 import { getPortalStateResourceMass } from "../../../../core/funcs/portal";
 import { PLANCK_MASS } from "../../../../core/consts";
 import { getBubbleStateResourceMass } from "../../../../core/funcs/bubble";
+import { useCreateInput } from "@/hooks/inputs";
+import { Input } from "postcss";
+import { InputType } from "../../../../core/types/inputs";
 
 export const BubbleStateView = ({ bubbles }: { bubbles: BubbleState[] }) => {
     return (
@@ -40,6 +43,21 @@ export const BarBottom = () => {
     const [ position, setPosition ] = useState<{x: number, y: number}>({x: 0, y: 0});
     const [ resourceMass, setResourceMass ] = useState<number>(0);
     const [ bubbles, setBubbles ] = useState<BubbleState[]>([]);
+    const [ needsToPayRent, setNeedsToPayRent ] = useState<boolean>(false);
+    const [ rentDueAt, setRentDueAt ] = useState<number>(0);
+    const [ rentAmount, setRentAmount ] = useState<number>(0);
+    const [ rentDueIn, setRentDueIn ] = useState<number>(0);
+    const [ payRentButtonText, setPayRentButtonText ] = useState<string>("");
+    const [ payRentHeaderText, setPayRentHeaderText ] = useState<string>("");
+    const [ payRentButtonEnabled, setPayRentButtonEnabled ] = useState<boolean>(true);
+
+    const {
+        isError,
+        isLoading,
+        submitTransaction,
+    } = useCreateInput({
+        type: InputType.PayRent,
+    })
 
     useEffect(() => {
         const intervalId = setInterval(() => {
@@ -50,10 +68,40 @@ export const BarBottom = () => {
                 setPosition(portal.position);
                 setResourceMass(getPortalStateResourceMass(portal, ResourceType.ENERGY))
                 setBubbles(currentState.bubbles.filter(bubble => bubble.owner.toLowerCase() == address.toLowerCase() && bubble.mass > PLANCK_MASS));
+                setNeedsToPayRent(currentState.protocol.hasPayedRent.find((val => val == address)) != undefined)
+                setRentDueAt(currentState.protocol.rentDueAt)
+                setRentAmount(currentState.protocol.rentCost)
+                setRentDueIn(rentDueAt - (Date.now()/1000))
+                const portalResourceBalance = getPortalStateResourceMass(portal, ResourceType.ENERGY);
+                const remaining = portalResourceBalance - rentAmount
+                if(!needsToPayRent){
+                    setPayRentButtonEnabled(false);
+                    setPayRentButtonText("Rent Payed")
+                    setPayRentHeaderText("Next rent cycle in: " + rentDueIn)
+                }
+                else if(remaining < 0){
+                    setPayRentButtonEnabled(false);
+                    setPayRentButtonText("Need " + Math.abs(remaining) + "$BBL to pay Rent")
+                    setPayRentHeaderText("Must pay rent in: " + rentDueIn)
+                } else if (isLoading) {
+                    setPayRentButtonEnabled(false);
+                    setPayRentButtonText("Paying...")
+                    setPayRentHeaderText("Must pay rent in: " + rentDueIn)
+                } else {
+                    setPayRentButtonEnabled(true);
+                    setPayRentButtonText("Pay Rent")
+                    setPayRentHeaderText("Must pay rent in: " + rentDueIn)
+                }
+
             }
         }, 1000)
         return () => clearInterval(intervalId);
     }, [address])
+
+    
+
+
+
     return (
         <div className="bg-white flex flex-row h-[10vh] w-full fixed bottom-0 right-0 space-x-6 p-4 items-center">
             <UserView address={address} />
@@ -66,6 +114,19 @@ export const BarBottom = () => {
                 <div className="flex flex-row space-x-2">
                     <p className=""><MassView mass={balance} /></p>
                     <p className="text-xs"><ResourceMassView mass={resourceMass} /></p>
+                    
+                        <div className="flex flex-col items-left">
+                            <p className="text-sm font-semibold"> {payRentHeaderText} </p>
+                            <button
+                            disabled={!payRentButtonEnabled}
+                                onClick={() =>{ 
+                                     submitTransaction?.()
+                                }}
+                            >{payRentButtonText}</button>
+
+                        </div>
+                        
+                    
                 </div>
                 
             </div>

@@ -126,7 +126,7 @@ export const updateState = (
     });
     state.protocol = {
         last: protocol.last,
-        balance: protocol.balance[AssetType.ETH],
+        balance: protocol.balance.get(AssetType.ETH),
         pendingEnergyBalance: protocol.getPendingBalance(AssetType.ENERGY),
         pendingEthBalance: protocol.getPendingBalance(AssetType.ETH),
         pendingEnergySpawn: protocol.getPendingSpawn(AssetType.ENERGY),

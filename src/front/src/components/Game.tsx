@@ -78,7 +78,7 @@ export const events: Event[] = [];
 //Create init function for state.onChange
 const initStateServer = (room) => {
     room.state.onChange(() => {
-        const { timestamp, users, bubbles, portals, nodes, resources, syncBubbleStartPositions, userSocials, obstacles } = room.state as WorldState;
+        const { timestamp, users, bubbles, portals, nodes, resources, syncBubbleStartPositions, userSocials, obstacles, protocol } = room.state as WorldState;
 
         //Timestamp
         currentState.timestamp = timestamp
@@ -264,6 +264,17 @@ const initStateServer = (room) => {
             }
             currentState.obstacles.obstaclesStates.push(tempObstacle)
         })
+
+        //Protocol
+        currentState.protocol.balance = protocol.balance;
+        currentState.protocol.pendingEthBalance = protocol.pendingEthBalance;
+        currentState.protocol.pendingEnergyBalance = protocol.pendingEnergyBalance;
+        currentState.protocol.pendingEnergySpawn = protocol.pendingEnergySpawn;
+        currentState.protocol.rentCost = protocol.rentCost;
+        currentState.protocol.rentDueAt = protocol.rentDueAt;
+        currentState.protocol.hasPayedRent = []
+        protocol.hasPayedRent
+            .forEach((val)=> currentState.protocol.hasPayedRent.push(val))
 
     });
 

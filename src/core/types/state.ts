@@ -89,7 +89,7 @@ export interface ObstaclesState {
 
 export interface ProtocolState {
     last: number,
-    balance: number
+    balance: number //eth balance
     pendingEthBalance: number,
     pendingEnergyBalance: number,
     pendingEnergySpawn: number,
