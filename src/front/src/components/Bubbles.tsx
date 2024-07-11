@@ -157,6 +157,9 @@ import { text } from "stream/consumers";
 import { usePfpTexture, useTextureWithFallback } from "@/hooks/state";
 import { BubbleState } from "../../../core/types/state";
 import ShadowMesh from "./Shadow";
+import { EffectShield } from "./EffectShield";
+import { getBubbleStateResourceMass } from "../../../core/funcs/bubble";
+import { ResourceType } from "../../../core/types/resource";
 
 export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
     const { wallets } = useWallets();
@@ -178,7 +181,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
     );
     const isSelected = isBubbleSelected && selectedBubbleId == bubbleId;
 
-    const bubble = currentState.bubbles.find(
+    const bubble: BubbleState = currentState.bubbles.find(
         (bubble) => bubble.id == bubbleId,
     ) ?? { position: { x: 0, y: 0 }, mass: 0, owner: "", velocity: { x: 0, y: 0 }, from: "" };
 
@@ -199,8 +202,14 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
     const inverseVelocity = { x: -velocity.x, y: -velocity.y };
     const radius = massToRadius(bubble?.mass ?? 0);
 
+    const hasTokens = useMemo(() => {
+        return getBubbleStateResourceMass(bubble, ResourceType.ENERGY) > 0;
+    }, [bubble]);
+
     const [mainBubble, setMainBubble] = useState<BubbleState>(null);
     const [position, setPosition] = useState(new THREE.Vector3(0,0,0));
+    const [lerpedRadius, setLerpedRadius] = useState<number>(radius);
+
 
     useFrame((state, delta) => {
         const elapsedTime = delta;
@@ -276,6 +285,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
         const radius = massToRadius(bubble.mass);
         const newRadius = MathUtils.lerp(meshRef.current.scale.x, radius, 0.1);
         meshRef.current.scale.set(newRadius, newRadius, newRadius);
+        setLerpedRadius(newRadius);
         //console.log("bubble position:", bubble.position)
         const lastX = meshRef.current.position.x;
         const newX = MathUtils.lerp(
@@ -329,6 +339,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
                 position={position}
                 color={baseColor}
             />
+            {hasTokens && <EffectShield position={position} radius={lerpedRadius} />}
             {isSelected && (
                 <BubblesControlsEmit
                     isHovered={isHovered}
