@@ -416,6 +416,7 @@ export class Protocol {
         this.rentCost = state.rentCost;
         this.rentDueAt = state.rentDueAt;
         this.hasPayedRent = new Map<Address, boolean>();
+        if(state.hasPayedRent)
         state.hasPayedRent.forEach((address) => {
             this.hasPayedRent.set(address, true);
         });

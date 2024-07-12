@@ -4,8 +4,8 @@ import * as THREE from 'three';
 import vertSrc from '../shaders/shieldEffectVert.glsl?raw';
 import fragSrc from '../shaders/shieldEffectFrag.glsl?raw';
 
-const SHIELD_THICKNESS = 0.5;
-const SHIELD_MARGIN = 0.1;
+const SHIELD_THICKNESS = 0.08;
+const SHIELD_MARGIN = 0.05;
 
 export const EffectShield = (props: { position: THREE.Vector3, radius: number }) => {
     const { position, radius } = props;

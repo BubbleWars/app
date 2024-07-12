@@ -153,9 +153,10 @@ const updateState = (state: WorldState, snapshot: Snapshot): WorldState => {
     state.protocol.rentCost = snapshot.protocol.rentCost;
     state.protocol.rentDueAt = snapshot.protocol.rentDueAt;
     state.protocol.hasPayedRent = new ArraySchema<string>();
-    snapshot.protocol.hasPayedRent.forEach((val)=>{
+    if(snapshot.protocol.hasPayedRent) snapshot.protocol.hasPayedRent.forEach((val)=>{
         state.protocol.hasPayedRent.push(val)
     })
+ 
 
     return state;
 };

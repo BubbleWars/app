@@ -10,7 +10,7 @@ void main() {
     float alpha = fade * (1.0 - smoothstep(0.9, 1.0, dist)); // Add a slight fade at the outer edge
 
     // Set the shield color to blue with the calculated alpha
-    vec3 color = vec3(0.0, 0.0, 1.0);
+    vec3 color = vec3(58.0, 190.0, 249.0);
 
     gl_FragColor = vec4(color, alpha);
 }
