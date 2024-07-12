@@ -20,8 +20,15 @@ export const fetchUsers = async () => {
         //console.log("fetched users", users.length)
         return users.map((user) => {
             const newUser = new UserSocialSchema();
+            if(!user.wallet || !user.wallet.address) {
+                //return nothing
+                return null;
+            }
+            
             newUser.privyId = user.id;
             newUser.address = user.wallet.address;
+
+            
 
             if (user.farcaster) {
                 newUser.social = user.farcaster.username;
@@ -36,7 +43,7 @@ export const fetchUsers = async () => {
             }
 
             return newUser;
-        });
+        }).filter((user) => user !== null);
     } catch (e) {
         console.log("error fetching users")
         return [];
