@@ -339,7 +339,7 @@ export const Bubble = ({ bubbleId }: { bubbleId: string }) => {
                 position={position}
                 color={baseColor}
             />
-            {hasTokens && <EffectShield position={position} radius={lerpedRadius} />}
+            {/* {hasTokens && <EffectShield position={position} radius={lerpedRadius} />} */}
             {isSelected && (
                 <BubblesControlsEmit
                     isHovered={isHovered}
