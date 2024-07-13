@@ -35,6 +35,8 @@ import { Attractor } from "./types/entity";
 import { Protocol } from "./types/protocol";
 
 
+
+
 export const users = new Map<Address, User>();
 export const bubbles = new Map<string, Bubble>();
 export const portals = new Map<string, Portal>();
@@ -337,7 +339,10 @@ export const run = (
         }
     }
 
-    //console.log("ran world for", current - lastTimestamp, "seconds")
+    console.log("ran world for", current - lastTimestamp, "seconds")
+    for (const [key,value] of Object.entries(process.memoryUsage())){ 
+        console.log(`Memory usage by ${key}, ${value/1000000}MB `) 
+    }
 
     // Update the last timestamp
     lastTimestamp = preciseRound(current, 2);
@@ -359,6 +364,6 @@ export const run = (
 
     //console.log("world state", currentState.timestamp);
 
-    //console.log("world state", currentState)
+    console.log("world state", currentState)
     //console.log("resource state", currentState.resources)
 };

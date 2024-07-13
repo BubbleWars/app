@@ -179,6 +179,7 @@ export const handleInput = async (
     client: boolean = false,
 ): Promise<boolean> => {
     if (!input) return false;
+    console.log("Handling input:", input);
     const type = input.type;
     switch (type) {
         case InputType.Emit:

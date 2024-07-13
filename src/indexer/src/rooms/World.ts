@@ -146,16 +146,16 @@ const updateState = (state: WorldState, snapshot: Snapshot): WorldState => {
     });
 
     //set protocol
-    state.protocol.balance = snapshot.protocol.balance;
-    state.protocol.pendingEthBalance = snapshot.protocol.pendingEthBalance;
-    state.protocol.pendingEnergyBalance = snapshot.protocol.pendingEnergyBalance;
-    state.protocol.pendingEnergySpawn = snapshot.protocol.pendingEnergySpawn;
-    state.protocol.rentCost = snapshot.protocol.rentCost;
-    state.protocol.rentDueAt = snapshot.protocol.rentDueAt;
-    state.protocol.hasPayedRent = new ArraySchema<string>();
-    if(snapshot.protocol.hasPayedRent) snapshot.protocol.hasPayedRent.forEach((val)=>{
-        state.protocol.hasPayedRent.push(val)
-    })
+    // state.protocol.balance = snapshot.protocol.balance;
+    // state.protocol.pendingEthBalance = snapshot.protocol.pendingEthBalance;
+    // state.protocol.pendingEnergyBalance = snapshot.protocol.pendingEnergyBalance;
+    // state.protocol.pendingEnergySpawn = snapshot.protocol.pendingEnergySpawn;
+    // state.protocol.rentCost = snapshot.protocol.rentCost;
+    // state.protocol.rentDueAt = snapshot.protocol.rentDueAt;
+    // state.protocol.hasPayedRent = new ArraySchema<string>();
+    // if(snapshot.protocol.hasPayedRent) snapshot.protocol.hasPayedRent.forEach((val)=>{
+    //     state.protocol.hasPayedRent.push(val)
+    // })
  
 
     return state;
