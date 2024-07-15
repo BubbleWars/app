@@ -12,25 +12,37 @@ console.log("HTTP rollup_server url is " + rollup_server);
 init();
 
 async function handle_advance(data) {
-    //console.log("Received advance request data" + JSON.stringify(data));
-    const input = parseInput(data);
-    //console.log("Parsed input " + JSON.stringify(input));
-    if (!input) return "reject";
-    const handled = await handleInput(input);
-    if (handled) {
-        console.log("Handled input " + JSON.stringify(input));
-        return "accept";
+    try {    
+        console.log("Received advance request data" + data);
+        const input = parseInput(data);
+        //console.log("Parsed input " + JSON.stringify(input));
+        if (!input) return "reject";
+        const handled = await handleInput(input);
+        if (handled) {
+            console.log("Handled input " + JSON.stringify(input));
+            return "accept";
+        }
+        return "reject";
     }
-    return "reject";
+    catch (error) {
+        console.error("Error in handle_advance:", error);
+        return "reject";
+    }
 }
 
 async function handle_inspect(data) {
-    //console.log("Received inspect request data " + JSON.stringify(data));
-    const inspect = parseInspect(data);
-    if (!inspect) return "reject";
-    console.log("Parsed inspect " + JSON.stringify(inspect));
-    await handleInspect(inspect);
-    return "accept";
+    try {
+        console.log("Received inspect request data " + data);
+        const inspect = parseInspect(data);
+        if (!inspect) return "reject";
+        console.log("Parsed inspect " + JSON.stringify(inspect));
+        await handleInspect(inspect);
+        return "accept";
+    }
+    catch (error) {
+        console.error("Error in handle_inspect:", error);
+        return "reject";
+    }
 }
 
 var handlers = {
