@@ -186,8 +186,8 @@ export class World extends Room<WorldState> {
             updateState(this.state, snapshot);
             init(snapshot);
             snapshotInit(snapshot);
-            this.recievedStartupInspect = true;
             if(snapshot.timestamp >= 0){
+                this.recievedStartupInspect = true;
                 this.started = true;
                 this.setSimulationInterval((deltaTime) => this.update(deltaTime));
                 this.started = true;

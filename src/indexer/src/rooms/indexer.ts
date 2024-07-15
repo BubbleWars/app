@@ -69,7 +69,11 @@ export const publicClient = createPublicClient({
 });
 
 export const onInspect = async (callback: (snapshot: Snapshot) => void) => {
-    const snapshot = await inspectState({ type: InspectType.State, value: 0 });
+    let snapshot = await inspectState({ type: InspectType.State, value: 0 });
+    while (!snapshot || snapshot.timestamp <= 0) {
+        snapshot = await inspectState({ type: InspectType.State, value: 0 });
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
    console.log("snapshot", snapshot);
     callback(snapshot);
 };
