@@ -13,8 +13,10 @@ import { erc20ABI } from "wagmi";
 import { defineChain } from "viem";
 import { RPC_URL } from "./consts";
 
+const isProd = process.env.NODE_ENV == "production";
+const blockchainId = isProd ? process.env.CARTESI_BLOCKCHAIN_ID : 31337;
 export const currentChain = defineChain({
-    id: 31337,
+    id: blockchainId,
     name: "bubblewars_anvil",
     network: "bubblewars_anvil",
     nativeCurrency: {

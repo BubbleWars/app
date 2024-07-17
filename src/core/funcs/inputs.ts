@@ -36,6 +36,7 @@ import {
     getPortalResourceMass,
     portalEmitBubble,
     portalEmitResource,
+    portalRemoveEth,
 } from "./portal";
 import { decodePacked, massToRadius } from "./utils";
 import { addPuncturePoint, emitBubble, emitResource, getBubbleEthMass, getBubbleResourceMass, setBubbleResourceMass } from "./bubble";
@@ -73,6 +74,8 @@ const ETH_WITHDRAW_FUNCTION_SELECTOR = ethers
     .keccak256(ethers.toUtf8Bytes("withdrawEther(address,uint256)"))
     .slice(0, 4);
 
+    console.log("ETH WITHDRAW FUNCTION SELECTOR: ", ETH_WITHDRAW_FUNCTION_SELECTOR);
+
 console.log("HTTP rollup_server url is " + rollup_server);
 
 export const parseInput = (data: AdvanceData): Input | false => {
@@ -88,6 +91,7 @@ export const parseInput = (data: AdvanceData): Input | false => {
    //console.log("Recieved payload: ", payload);
 
     if (sender.toLowerCase() == ETH_PORTAL_ADDRESS.toLowerCase()) {
+        console.log("Recieved deposit payload", payload);
         const binary = decodePacked(["address", "uint256"], payload);
         const address = binary[0];
         const amount = Number(binary[1]);
@@ -247,48 +251,39 @@ const handleWithdraw = async (
     client: boolean,
 ): Promise<boolean> => {
     const user = getUser(input.sender, client);
+    const portalList = client ? snapshotPortals : portals;
+    const userPortal = user.address;
+    const portal = portalList.get(userPortal.toLowerCase());
+    if (!portal) {
+        console.log("Portal not found");
+        return false
+    }
+    const portalBalance = getPortalMass(portal);
     const amount = input.amount;
-    if (user.balance < amount) {
+    if (portalBalance < amount) {
+        console.log("Not enough ETH in portal")
         return false;
     } else {
-        user.balance -= amount;
-        const voucher_request = await fetch(rollup_server + "/voucher", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                destination: ETH_PORTAL_ADDRESS,
-                payload:
-                    ETH_WITHDRAW_FUNCTION_SELECTOR +
-                    ethers.AbiCoder.defaultAbiCoder().encode(
-                        ["address", "uint256"],
-                        [input.sender, amount],
-                    ),
-            }),
-        });
-
-        if (voucher_request.status != 200) {
-            return false;
-        }
-
-        return true;
+        portalRemoveEth(portal, amount);
+        if(!client) await withdrawEth(input.sender, amount);
     }
 };
 
 export const withdrawEth = async (address: Address, amount: number): Promise<boolean> => {
+    const body = JSON.stringify({
+        destination: address,
+        payload: ETH_WITHDRAW_FUNCTION_SELECTOR + ethers.AbiCoder.defaultAbiCoder().encode(
+            ["address", "uint256"],
+            [address, amount],
+        ).slice(2),
+    });
+    console.log("WITHDRAW ETH BODY: ", body);
     const voucher_request = await fetch(rollup_server + "/voucher", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-            destination: address,
-            payload: ETH_WITHDRAW_FUNCTION_SELECTOR + ethers.AbiCoder.defaultAbiCoder().encode(
-                ["address", "uint256"],
-                [address, amount],
-            ),
-        }),
+        body,
     });
 
     if (voucher_request.status != 200) {

@@ -254,6 +254,18 @@ export const generateSpawnPoint = (
 //     return spawnPoint;
 // };
 
+export const portalRemoveEth = (
+    portal: Portal,
+    amount: number,
+): void => {
+    if (amount > getPortalMass(portal)){
+        console.log("Cannot remove more than the portal's mass");
+        return;
+    }
+    const newPortalMass = portal.mass - amount;
+    updatePortal(portal, newPortalMass);
+}
+
 export const destroyPortal = (
     portals: Map<string, Portal>,
     portal: Portal,
