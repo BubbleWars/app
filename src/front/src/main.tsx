@@ -12,6 +12,7 @@ import { Provider } from "react-redux";
 import store from "./store/index.ts";
 import { cEvent } from "./types/events.ts";
 import { PrivyProvider } from "@privy-io/react-auth";
+import { GraphQLProvider } from "./hooks/urql.tsx";
 
 //Configure Apollo
 const client = new ApolloClient({
@@ -59,7 +60,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                             },
                         }}
                     >
-                        <App />
+                        <GraphQLProvider>
+                            <App />
+                        </GraphQLProvider>
                     </PrivyProvider>
                 </React.StrictMode>
             </WagmiConfig>

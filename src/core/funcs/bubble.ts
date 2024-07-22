@@ -7,7 +7,7 @@ import { RESOURCE_MASS, Resource, ResourceNode, ResourceType } from "../types/re
 import { clamp, createResource, getEntity, getNearestNodeToPosition, resourceAmountToMass, resourceMassToAmount, resourceMassToRadius, rotateVec2, updateResource } from "./resource";
 import { addEvent } from "./events";
 import { EventsType } from "../types/events";
-import { ZeroAddress } from "ethers";
+const ZeroAddress = "0x0000000000000000000000000000000000000000";
 import { BubbleState } from "../types/state";
 import { pseudoRandom } from "./portal";
 import { bubbles, pendingInputs } from "../world";

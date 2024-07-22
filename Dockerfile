@@ -43,6 +43,7 @@ WORKDIR /opt/cartesi/dapp
 COPY --from=build-stage /opt/cartesi/dapp/dist .
 
 ENV ROLLUP_HTTP_SERVER_URL="http://127.0.0.1:5004"
+ENV ROLLUP_CONTRACT_ADDRESS="0xab7528bb862fb57e8a2bcd567a2e929a0be56a5e"
 
 ENTRYPOINT ["rollup-init"]
 CMD ["node", "index.js"]

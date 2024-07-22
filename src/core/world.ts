@@ -339,9 +339,9 @@ export const run = (
         }
     }
 
-    console.log("ran world for", current - lastTimestamp, "seconds")
+    //console.log("ran world for", current - lastTimestamp, "seconds")
     for (const [key,value] of Object.entries(process.memoryUsage())){ 
-        console.log(`Memory usage by ${key}, ${value/1000000}MB `) 
+        //console.log(`Memory usage by ${key}, ${value/1000000}MB `) 
     }
 
     // Update the last timestamp
@@ -364,6 +364,6 @@ export const run = (
 
     //console.log("world state", currentState.timestamp);
 
-    console.log("world state", currentState)
+    //console.log("world state", currentState)
     //console.log("resource state", currentState.resources)
 };

@@ -6,6 +6,8 @@ import {
 } from "../../../core/types/inputs.js";
 import {
     Chain,
+    Client,
+    createClient,
     createPublicClient,
     defineChain,
     hexToString,
@@ -18,9 +20,10 @@ import { decodePacked } from "../../../core/funcs/utils.js";
 import { ethers } from "ethers";
 import { UserSocialSchema } from "./schema/WorldState.js";
 import { fetchUsers } from "./privyApi.js";
+import { rpc } from "viem/utils";
 
-const ETH_DEPOSIT_FUNCTION_SELECTOR = ethers.keccak256(
-    ethers.toUtf8Bytes("depositEther(address,uint256)"),
+const ETH_DEPOSIT_FUNCTION_SELECTOR = ethers.utils.keccak256(
+    ethers.utils.toUtf8Bytes("depositEther(address,uint256)"),
 );
 
 console.log("ETH_DEPOSIT_FUNCTION_SELECTOR", ETH_DEPOSIT_FUNCTION_SELECTOR);
@@ -68,6 +71,8 @@ export const publicClient = createPublicClient({
     pollingInterval: 1000,
 });
 
+
+    
 export const onInspect = async (callback: (snapshot: Snapshot) => void) => {
     let snapshot = await inspectState({ type: InspectType.State, value: 0 });
     while (!snapshot || snapshot.timestamp <= 0) {
@@ -84,6 +89,21 @@ export const onUser = async (callback: (users: UserSocialSchema[]) => void) => {
         callback(users);
     }, 10000);
 };
+
+// Function to increase the EVM time
+export const increaseEvmTime = async (seconds: number) => {
+    try {
+        const response = await publicClient.request({
+            method: 'evm_increaseTime',
+            params: [seconds],
+          });
+      console.log('Time increased by:', seconds, 'seconds');
+      return response;
+    } catch (error) {
+      console.error('Error increasing EVM time:', error);
+    }
+}
+
 
 export const onInput = (callback: (input: Input) => void) => {
     let pendingTransaction: `0x{string}`[] = [];
@@ -188,10 +208,16 @@ export const onBlock = (callback: (block: number) => void) => {
                     // Remove the oldest block
                     delete blockNumberToTimestamp[oldestKey];
                 }
+                
             }
+
         },
         emitMissed: true,
     });
     return unwatch;
     blockSet = true;
 };
+function createHttpTransport(arg0: string): any {
+    throw new Error("Function not implemented.");
+}
+

@@ -32,6 +32,7 @@ import { Emitting } from "./controls/Emitting";
 import { WorldState } from "../../../indexer/src/rooms/schema/WorldState";
 import { ShapeType } from "planck-js/lib/shape";
 import { Obstacles } from "./Obstacle";
+import { useVouchers } from "@/hooks/vouchers";
 
 const client = new Client(INDEXER_URL);
 let room = await client.joinOrCreate("world");
@@ -329,6 +330,11 @@ export const Game = () => {
     // Get current timestamps
     //const blockTimestamp = useBlockTimestamp();
     //const dispatch = useDispatch();
+
+    const {vouchers, executeVoucher, voucherToExecute, getProof } = useVouchers();
+    const [isExecutingVoucher, setIsExecutingVoucher ] = useState<boolean>(false);
+    console.log("vouchers", vouchers);
+
 
     //Initialize client state
     // const [lastTimestampHandled, setLastTimestampHandled] = useState<number>(

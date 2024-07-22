@@ -110,7 +110,7 @@ export const decodePacked = (types: string[], data: string) => {
                 // uint256 are 32 bytes (64 hex characters)
                 decoded.push(
                     Number(
-                        ethers.formatEther(
+                        ethers.utils.formatEther(
                             BigInt("0x" + data.slice(offset, offset + 64)),
                         ),
                     ),

@@ -1,7 +1,7 @@
 import { Circle, Vec2, World } from "planck-js";
 import { RESOURCE_MASS, Resource, ResourceNode, ResourceType, Token } from "../types/resource";
 import { calculateEmissionVelocity, massToRadius } from "./utils";
-import { ZeroAddress } from "ethers";
+const ZeroAddress = "0x0000000000000000000000000000000000000000";
 import {
     CLASH_VELOCITY,
     DAMPENING,

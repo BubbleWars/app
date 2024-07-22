@@ -13,7 +13,7 @@ function isHex(value: string): value is Hex {
 
 function generatePrivateKey(): Hex {
     const randomBytes = ethers.randomBytes(32);
-    return ethers.hexlify(randomBytes);
+    return ethers.utils.hexlify(randomBytes);
 }
 
 export function privateKeyToAccount(privateKey: Hex): string {

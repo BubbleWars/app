@@ -61,6 +61,8 @@ import { addEvent } from "./events";
 import { EventsType } from "../types/events";
 import { getBodyId } from "./obstacle";
 import { MAX_PORTAL_AMOUNT, MIN_PORTAL_DISTANCE, PORTAL_SPAWN_RADIUS, WORLD_RADIUS } from "../consts";
+import { encodeFunctionData, parseAbi } from "viem";
+import { util } from "chai";
 
 const isNode =
     typeof process !== "undefined" &&
@@ -71,7 +73,7 @@ const rollup_server = isNode
     : "http://localhost:3000";
 const ETH_PORTAL_ADDRESS = "0xFfdbe43d4c855BF7e0f105c400A50857f53AB044";
 const ETH_WITHDRAW_FUNCTION_SELECTOR = ethers
-    .keccak256(ethers.toUtf8Bytes("withdrawEther(address,uint256)"))
+    .utils.keccak256(ethers.utils.toUtf8Bytes("withdrawEther(address,uint256)"))
     .slice(0, 4);
 
     console.log("ETH WITHDRAW FUNCTION SELECTOR: ", ETH_WITHDRAW_FUNCTION_SELECTOR);
@@ -105,7 +107,7 @@ export const parseInput = (data: AdvanceData): Input | false => {
             amount: amount,
         };
     }
-    const payloadString = ethers.toUtf8String(payload);
+    const payloadString = ethers.utils.toUtf8String(payload);
     const payloadJSON = JSON.parse(payloadString);
     const type =
         sender == ETH_PORTAL_ADDRESS ? InputType.Deposit : payloadJSON.type;
@@ -269,13 +271,23 @@ const handleWithdraw = async (
     }
 };
 
+const etherWithdrawalAbi = parseAbi([
+    "function withdrawEther(address recipient, uint256 value)",
+]);
+
 export const withdrawEth = async (address: Address, amount: number): Promise<boolean> => {
+    const dapp_address = process.env.ROLLUP_CONTRACT_ADDRESS;
+    if (!dapp_address) {
+        console.error("No dapp address provided");
+        return false
+    }
     const body = JSON.stringify({
-        destination: address,
-        payload: ETH_WITHDRAW_FUNCTION_SELECTOR + ethers.AbiCoder.defaultAbiCoder().encode(
-            ["address", "uint256"],
-            [address, amount],
-        ).slice(2),
+        destination: dapp_address,
+        payload: encodeFunctionData({
+            abi: etherWithdrawalAbi,
+            functionName: "withdrawEther",
+            args: [address as `0x${string}`, BigInt(amount)],
+        }),
     });
     console.log("WITHDRAW ETH BODY: ", body);
     const voucher_request = await fetch(rollup_server + "/voucher", {
@@ -498,7 +510,7 @@ const handleEmit = (input: Emit, client: boolean): boolean => {
 
 export const parseInspect = (data: InspectData): Inspect | false => {
     const payload = data.payload;
-    const payloadString = ethers.toUtf8String(payload);
+    const payloadString = ethers.utils.toUtf8String(payload);
     return JSON.parse(payloadString) as Inspect;
 };
 
@@ -518,8 +530,8 @@ export const handleInspect = async (inspect: Inspect): Promise<boolean> => {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        payload: ethers.hexlify(
-                            ethers.toUtf8Bytes(JSON.stringify(currentState)),
+                        payload: ethers.utils.hexlify(
+                            ethers.utils.toUtf8Bytes(JSON.stringify(currentState)),
                         ),
                     }),
                 });
@@ -570,7 +582,7 @@ export const sendNotice = async (input: Input): Promise<boolean> => {
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            payload: ethers.hexlify(ethers.toUtf8Bytes(JSON.stringify(input))),
+            payload: ethers.utils.hexlify(ethers.utils.toUtf8Bytes(JSON.stringify(input))),
         }),
     });
 

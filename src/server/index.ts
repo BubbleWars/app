@@ -7,6 +7,8 @@ import {
 import { init } from "../core/world";
 
 const rollup_server = process.env.ROLLUP_HTTP_SERVER_URL;
+const dapp_address = process.env.ROLLUP_CONTRACT_ADDRESS;
+console.log("Dapp address is " + dapp_address);
 console.log("HTTP rollup_server url is " + rollup_server);
 
 init();
