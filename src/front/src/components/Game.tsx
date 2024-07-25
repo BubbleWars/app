@@ -333,7 +333,7 @@ export const Game = () => {
 
     const {vouchers, executeVoucher, voucherToExecute, getProof } = useVouchers();
     const [isExecutingVoucher, setIsExecutingVoucher ] = useState<boolean>(false);
-    console.log("vouchers", vouchers);
+    //console.log("vouchers", vouchers);
 
 
     //Initialize client state

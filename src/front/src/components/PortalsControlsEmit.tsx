@@ -311,7 +311,6 @@ export const PortalsControlsEmit = ({
                     ).add(position)}
                     onPointerEnter={() => {
                         setDepositHover(true);
-                        setEmitEth(false);
                         setWithdrawHover(false);
                     }}
                     onPointerLeave={() => {
@@ -346,7 +345,6 @@ export const PortalsControlsEmit = ({
                     ).add(position)}
                     onPointerEnter={() => {
                         setWithdrawHover(true);
-                        setEmitEth(false);
                         setDepositHover(false);
                     }}
                     onPointerLeave={() => {

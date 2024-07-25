@@ -36,6 +36,7 @@ import { Edge } from "planck-js";
 import { useSelector } from "react-redux";
 import { ScreenDeposit } from "./components/screens/ScreenDeposit";
 import { ScreenWithdraw } from "./components/screens/ScreenWithdraw";
+import { useVouchers } from "./hooks/vouchers";
 
 function Background() {
     const defaultUrl = "/bg.png";
@@ -73,6 +74,10 @@ function App() {
     const { logout, authenticated } = usePrivy();
     const withdrawModal = useSelector((state: any) => state.controls.withdraw);
     const depositModal = useSelector((state: any) => state.controls.deposit);
+    // const {vouchers, executeVoucher, voucherToExecute, getProof } = useVouchers();
+    // const [isExecutingVoucher, setIsExecutingVoucher ] = useState<boolean>(false);
+    // console.log("vouchers", vouchers);
+
 
     return (
         <>

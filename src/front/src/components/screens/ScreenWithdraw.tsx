@@ -16,22 +16,36 @@ import {
 import { useWallets, usePrivy } from "@privy-io/react-auth";
 import { currentChain } from "@/contracts";
 import { setWithdrawControlsActive } from "@/store/controls";
+import { usePendingWithdrawals } from "@/hooks/vouchers";
+import { is } from "@react-three/fiber/dist/declarations/src/core/utils";
+import { useInterval } from "@/hooks/state";
 
 export const ScreenWithdraw = () => {
     const { wallets } = useWallets();
     const { authenticated } = usePrivy();
     const connectedAddress = wallets[0]?.address ? `${wallets[0].address}` : "";
     const address = connectedAddress;
-   //console.log("This is the current address: 420 ", address);
+
+    const { 
+        pendingWithdrawals, 
+        executeWithdrawal, 
+        isExecuting,
+        canExecute,
+        isFinished,
+    } = usePendingWithdrawals();
+
+    console.log("pendingWithdrawals", pendingWithdrawals);
 
     const [buttonText, setButtonText] = React.useState("Withdraw");
+    const [portalBalance, setPortalBalance] = React.useState(0);
     //const [ dripText, setDripText ] = React.useState('Drip')
-    const [amount, setAmount] = useState(10);
+    const [amount, setAmount] = useState(0);
     const dispatch = useDispatch();
 
     const { data } = useBalance({
         address: connectedAddress,
         chainId: currentChain.id,
+        watch: true,
     });
 
     const balance = useMemo(() => {
@@ -44,15 +58,18 @@ export const ScreenWithdraw = () => {
         );
     }, [currentState.portals, address]);
 
-    const portalBalance = useMemo(() => {
-        return portal.mass;
-    }, [portal]);
+    useInterval(() => {
+        const portal = currentState.portals.find(
+            (portal) => portal.owner.toLowerCase() === address?.toLowerCase(),
+        );
+        setPortalBalance(portal?.mass ?? 0);
+    }, 1000);
 
     const {
         //write,
         isError,
         isLoading,
-        //isSuccess,
+        isSuccess,
         submitTransaction,
     } = useCreateInput({
         type: InputType.Withdraw,
@@ -95,13 +112,13 @@ export const ScreenWithdraw = () => {
                             <p>ETH</p>
                         </div>
                         <button
-                            disabled={isError || isLoading}
+                            disabled={isError || isLoading || isSuccess || amount <= 0 || amount > portalBalance}
                             onClick={() => {
                                 submitTransaction?.();
                                 setButtonText("Withdrawing...");
                             }}
                         >
-                            {buttonText}
+                            {isSuccess ? "Success!" : buttonText}
                         </button>
                         <button
                             onClick={() => {
@@ -124,6 +141,24 @@ export const ScreenWithdraw = () => {
 
             <p>{dripText}</p>
         </button> */}
+                    </div>
+                    <div>
+                        {
+                            pendingWithdrawals.map((withdrawal, index) => {
+                                return (
+                                    <div key={index} className="withdrawal">
+                                        <p>{withdrawal.amount} ETH</p>
+                                        <button
+                                            onClick={() => {
+                                                executeWithdrawal(index);
+                                            }}
+                                        >
+                                            {!canExecute(index) ? "Pending" : isExecuting(index) ? "Withdrawing..." : isFinished(index) ? "Finished" : "Withdraw"}
+                                        </button>
+                                    </div>
+                                );
+                            })
+                        }
                     </div>
                 </CardContent>
             </Card>

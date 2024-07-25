@@ -39,15 +39,21 @@ let blockSet = false;
 export const inspectState = async (
     inspect: Inspect,
 ): Promise<Snapshot | undefined> => {
-    const param = JSON.stringify(inspect);
-    const url = `${process.env.INSPECTOR_URL}/${param}`;
-    console.log("inspect url", url);
-    const response = await fetch(url);
-    const json = await response.json();
-    if (!json) return undefined;
-    const payloadString = json?.reports[0]?.payload;
-    if (!payloadString) return undefined;
-    return JSON.parse(hexToString(payloadString)) as Snapshot;
+    try {
+        const param = JSON.stringify(inspect);
+        const url = `${process.env.INSPECTOR_URL}/${param}`;
+        console.log("inspect url", url);
+        const response = await fetch(url);
+        const json = await response.json();
+        if (!json) return undefined;
+        const payloadString = json?.reports[0]?.payload;
+        if (!payloadString) return undefined;
+        return JSON.parse(hexToString(payloadString)) as Snapshot;
+    }
+    catch (e) {
+        console.log("error inspecting state", e);
+        return { timestamp: 0} as any
+    }
 };
 
 export const currentChain = defineChain({
@@ -77,7 +83,7 @@ export const onInspect = async (callback: (snapshot: Snapshot) => void) => {
     let snapshot = await inspectState({ type: InspectType.State, value: 0 });
     while (!snapshot || snapshot.timestamp <= 0) {
         snapshot = await inspectState({ type: InspectType.State, value: 0 });
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 10000));
     }
    console.log("snapshot", snapshot);
     callback(snapshot);

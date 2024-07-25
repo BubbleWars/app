@@ -286,7 +286,7 @@ export const withdrawEth = async (address: Address, amount: number): Promise<boo
         payload: encodeFunctionData({
             abi: etherWithdrawalAbi,
             functionName: "withdrawEther",
-            args: [address as `0x${string}`, BigInt(amount)],
+            args: [address as `0x${string}`, BigInt(amount * 10**18)],
         }),
     });
     console.log("WITHDRAW ETH BODY: ", body);
