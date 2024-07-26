@@ -59,8 +59,14 @@ export class Protocol {
         }
     }
     withdraw(type: AssetType, amount: number) { 
-       //console.log("Withdrawing", type, amount);
+        //console.log("Withdrawing", type, amount);
+        const balance = this.getBalance(type);
+        if(balance < amount) {
+            console.log("Not enough balance to withdraw", type, amount);
+            return false;
+        }
         this.addBalance(type, -amount);
+        return true;
     }
     processFee(type: FeeType, asset: AssetType, amount: number) {
         const feeTypeAsString = FeeType[type];

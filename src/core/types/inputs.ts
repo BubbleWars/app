@@ -8,6 +8,9 @@ export enum InputType {
     Invalid = "invalid",
     Puncture = "puncture", //puncture bubble
     PayRent = "payRent",
+    ProtocolWithdraw = "protocolWithdraw",
+    ProtocolSend = "protocolSend",
+    ProtocolDeposit = "protocolDeposit",
 }
 
 export interface BaseInput {
@@ -37,6 +40,22 @@ export interface PayRent extends BaseInput {
     type: InputType.PayRent;
 }
 
+export interface ProtocolWithdraw extends BaseInput {
+    type: InputType.ProtocolWithdraw;
+    amount: number;
+}
+
+export interface ProtocolSend extends BaseInput {
+    type: InputType.ProtocolSend;
+    amount: number;
+    recipient: string;
+}
+
+export interface ProtocolDeposit extends BaseInput {
+    type: InputType.ProtocolDeposit;
+    amount: number;
+}
+
 export interface SpawnPortal extends BaseInput {
     type: InputType.SpawnPortal;
     mass: number;
@@ -60,7 +79,7 @@ export interface PunctureInput extends BaseInput {
     executionTime?: number;
 }
 
-export type Input = SpawnPortal | Emit | Deposit | Withdraw | Invalid | PunctureInput | PayRent;
+export type Input = SpawnPortal | Emit | Deposit | Withdraw | Invalid | PunctureInput | PayRent | ProtocolWithdraw | ProtocolSend | ProtocolDeposit;
 export type InputWithExecutionTime = Emit | PunctureInput | PayRent;
 
 export interface AdvanceData {

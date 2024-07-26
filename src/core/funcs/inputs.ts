@@ -11,6 +11,9 @@ import {
     InspectType,
     PunctureInput,
     PayRent,
+    ProtocolWithdraw,
+    ProtocolDeposit,
+    ProtocolSend,
 } from "../types/inputs";
 import { ethers } from "ethers";
 import {
@@ -76,6 +79,8 @@ const ETH_WITHDRAW_FUNCTION_SELECTOR = ethers
     .utils.keccak256(ethers.utils.toUtf8Bytes("withdrawEther(address,uint256)"))
     .slice(0, 4);
 
+const owner_address = process.env.ROLLUP_OWNER_ADDRESS;
+
     console.log("ETH WITHDRAW FUNCTION SELECTOR: ", ETH_WITHDRAW_FUNCTION_SELECTOR);
 
 console.log("HTTP rollup_server url is " + rollup_server);
@@ -97,6 +102,18 @@ export const parseInput = (data: AdvanceData): Input | false => {
         const binary = decodePacked(["address", "uint256"], payload);
         const address = binary[0];
         const amount = Number(binary[1]);
+        const isFromOwner = address.toLowerCase() === owner_address?.toLowerCase();
+        if(isFromOwner){
+            return {
+                type: InputType.ProtocolDeposit,
+                timestamp: timestamp,
+                sender: address,
+                blockNumber: blockNumber,
+                inputIndex: inputIndex,
+                epochIndex: epochIndex,
+                amount: amount,
+            };
+        }
         return {
             type: InputType.Deposit,
             timestamp: timestamp,
@@ -158,6 +175,27 @@ export const parseInput = (data: AdvanceData): Input | false => {
                 inputIndex: inputIndex,
                 epochIndex: epochIndex,
             };
+        case InputType.ProtocolWithdraw:
+            return {
+                type: InputType.ProtocolWithdraw,
+                timestamp: timestamp,
+                sender: sender,
+                blockNumber: blockNumber,
+                inputIndex: inputIndex,
+                epochIndex: epochIndex,
+                amount: payloadJSON.amount,
+            };
+        case InputType.ProtocolSend:
+            return {
+                type: InputType.ProtocolSend,
+                timestamp: timestamp,
+                sender: sender,
+                blockNumber: blockNumber,
+                inputIndex: inputIndex,
+                epochIndex: epochIndex,
+                amount: payloadJSON.amount,
+                recipient: payloadJSON.recipient,
+            };
     }
 };
 
@@ -203,6 +241,15 @@ export const handleInput = async (
         case InputType.PayRent:
             await handlePayRent(input, client);
             break;
+        case InputType.ProtocolSend:
+            handleProtocolSend(input, client);
+            break;
+        case InputType.ProtocolDeposit:
+            handleProtocolDeposit(input, client);
+            break;
+        case InputType.ProtocolWithdraw:
+            handleProtocolWithdraw(input, client);
+            break;
     }
     if (!client) {
         //sendNotice(input);
@@ -211,6 +258,60 @@ export const handleInput = async (
 
     return true;
 };
+
+const handleProtocolWithdraw = (
+    { sender, amount, timestamp }: ProtocolWithdraw,
+    client: boolean,
+): boolean => {
+    const protocolMain = client ? snapshotProtocol : protocol;
+    const isOwner = sender.toLowerCase() === owner_address?.toLowerCase();
+    if (!isOwner) {
+        console.log("Sender is not owner");
+        return false;
+    }
+    const success = protocolMain.withdraw(AssetType.ETH, amount);
+    if(success){
+        if(!client) withdrawEth(sender, amount);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+const handleProtocolDeposit = (
+    { sender, amount, timestamp }: ProtocolDeposit,
+    client: boolean,
+): boolean => {
+    const protocolMain = client ? snapshotProtocol : protocol;
+    protocolMain.deposit(AssetType.ETH, amount);
+    return true;
+}
+
+//Protocol send funds to a portal
+const handleProtocolSend = (
+    { sender, amount, recipient, timestamp }: ProtocolSend,
+    client: boolean,
+): boolean => {
+    const protocolMain = client ? snapshotProtocol : protocol;
+    const isOwner = sender.toLowerCase() === owner_address?.toLowerCase();
+    if (!isOwner) {
+        console.log("Sender is not owner");
+        return false;
+    }
+    const portal = client ? snapshotPortals.get(recipient.toLowerCase()) : portals.get(recipient.toLowerCase());
+    if(!portal){
+        console.log("Portal not found");
+        return false;
+    }
+    const success = protocolMain.withdraw(AssetType.ETH, amount);
+    if(success){
+        portal.mass += amount;
+        return true;
+    } else {
+        return false;
+    }
+}
+
 
 const handlePayRent = async (input: PayRent, client: boolean): Promise<boolean> => {
     const w = client ? snapshotWorld : world;

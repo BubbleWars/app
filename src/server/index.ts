@@ -8,7 +8,9 @@ import { init } from "../core/world";
 
 const rollup_server = process.env.ROLLUP_HTTP_SERVER_URL;
 const dapp_address = process.env.ROLLUP_CONTRACT_ADDRESS;
+const owner_address = process.env.ROLLUP_OWNER_ADDRESS;
 console.log("Dapp address is " + dapp_address);
+console.log("Owner address is " + owner_address);
 console.log("HTTP rollup_server url is " + rollup_server);
 
 init();
