@@ -101,7 +101,7 @@ export const snapshotInit = (initialState?: Snapshot) => {
         snapshotBubbles.clear();
         snapshotPortals.clear();
         snapshotObstacles.length = 0;
-        snapshotNodes.clear();
+        //snapshotNodes.clear();
         snapshotResources.clear();
         snapshotAttractors.length = 0;
         snapshotPendingInputs.length = 0;
@@ -109,9 +109,8 @@ export const snapshotInit = (initialState?: Snapshot) => {
         snapshotProtocol.init(initialState.protocol);
 
 
-        if (!initialState?.nodes || initialState.nodes.length == 0) {
+        if (initialState.timestamp == 0) {
            //console.log("generating snapshot nodes");
-            generateNodes(snapshotWorld, snapshotNodes, 1);
             generateObstacles(snapshotWorld, snapshotObstacles, 3);
             // for (let index = 0; index < 100; index++) {
             //     const { x, y } = generateSpawnPoint(
@@ -177,6 +176,7 @@ export const snapshotInit = (initialState?: Snapshot) => {
             snapshotUsers.set(user.address, {
                 address: user.address,
                 balance: user.balance,
+                points: user.points,
             });
         });
         snapshotCurrentState.resources.forEach((resource) => {
@@ -196,20 +196,7 @@ export const snapshotInit = (initialState?: Snapshot) => {
                 Vec2(resource.velocity.x, resource.velocity.y),
             );
         });
-        snapshotCurrentState.nodes.forEach((node) => {
-            createNode(
-                snapshotWorld,
-                snapshotNodes,
-                node.type,
-                node.position.x,
-                node.position.y,
-                node.mass,
-                node.id,
-                node.emissionDirection,
-                node.lastEmission,
-                node,
-            );
-        });
+        
         snapshotCurrentState.pendingInputs.forEach((input) => {
             snapshotPendingInputs.push(input);
         });
@@ -307,24 +294,6 @@ export const snapshotRun = (
 
         // Handle entity updates
         handleBubbleUpdates(current, snapshotBubbles, stepDelta, true);
-        handleNodeUpdates(
-            current,
-            snapshotWorld,
-            snapshotNodes,
-            snapshotBubbles,
-            snapshotResources,
-            snapshotPortals,
-            snapshotAttractors,
-            stepDelta,
-        );
-        handleAttractors(
-            snapshotNodes,
-            snapshotResources,
-            snapshotBubbles,
-            snapshotPortals,
-            snapshotAttractors,
-            current,
-        );
         snapshotProtocol.run(current, snapshotWorld, snapshotUsers, snapshotBubbles, snapshotPortals, snapshotObstacles, snapshotNodes, snapshotResources, snapshotProtocol, snapshotPendingInputs);
 
         // Step the snapshotWorld

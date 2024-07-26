@@ -118,7 +118,7 @@ export const init = (initialState?: Snapshot) => {
         bubbles.clear();
         portals.clear();
         obstacles.length = 0;
-        nodes.clear();
+        //nodes.clear();
         resources.clear();
         attractors.length = 0;
         pendingInputs.length = 0;
@@ -126,9 +126,8 @@ export const init = (initialState?: Snapshot) => {
         protocol.init(initialState.protocol)
 
 
-        if (!initialState?.nodes || initialState.nodes.length == 0) {
+        if (initialState.timestamp == 0) {
            //console.log("generating nodes");
-            generateNodes(world, nodes, 1);
             generateObstacles(world, obstacles, 3);
             // for (let index = 0; index < 100; index++) {
             //     const { x, y } = generateSpawnPoint(
@@ -193,6 +192,7 @@ export const init = (initialState?: Snapshot) => {
             users.set(user.address, {
                 address: user.address,
                 balance: user.balance,
+                points: user.points,
             });
         });
         currentState.resources.forEach((resource) => {
@@ -212,20 +212,7 @@ export const init = (initialState?: Snapshot) => {
                 Vec2(resource.velocity.x, resource.velocity.y),
             );
         });
-        currentState.nodes.forEach((node) => {
-            createNode(
-                world,
-                nodes,
-                node.type,
-                node.position.x,
-                node.position.y,
-                node.mass,
-                node.id,
-                node.emissionDirection,
-                node.lastEmission,
-                node
-            );
-        });
+        
         currentState.pendingInputs.forEach((input) => {
             pendingInputs.push(input);
         });
@@ -314,8 +301,6 @@ export const run = (
 
         // Handle entity updates
         handleBubbleUpdates(current, bubbles, stepDelta);
-        handleNodeUpdates(current, world, nodes, bubbles, resources, portals, attractors, stepDelta);
-        handleAttractors(nodes, resources, bubbles, portals, attractors,  current);
         protocol.run(current, world, users, bubbles, portals, obstacles, nodes, resources, protocol, pendingInputs);
 
         // Step the world
