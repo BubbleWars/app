@@ -550,6 +550,7 @@ const handleEmit = (input: Emit, client: boolean): boolean => {
        //console.log("Input mass is less than or equal to 0");
         return false;
     }
+    input.emissionType = "bubble";
     const user = getUser(input.sender, client);
 
     if (isPortal) {
@@ -730,16 +731,7 @@ export const handlePendingEmit = (input: Emit): void => {
                 Vec2(input.direction.x, input.direction.y),
             );
         else
-            portalEmitResource(
-                timestamp,
-                portals,
-                world,
-                resources,
-                portal,
-                emissionType,
-                input.mass,
-                Vec2(input.direction.x, input.direction.y),
-            );
+            console.log("Emit resource not implemented");
     } else if (isBubble) {
         const bubble = bubbles.get(input.from.toLowerCase());
         if (!bubble) return;
@@ -752,16 +744,7 @@ export const handlePendingEmit = (input: Emit): void => {
                 Vec2(input.direction.x, input.direction.y),
             );
         else
-            emitResource(
-                timestamp,
-                world,
-                bubbles,
-                resources,
-                bubble,
-                emissionType,
-                input.mass,
-                Vec2(input.direction.x, input.direction.y),
-            );
+            console.log("Emit resource not implemented");
     }
 };
 
@@ -784,16 +767,7 @@ export const handlePendingClientEmit = (input: Emit): void => {
                 Vec2(input.direction.x, input.direction.y),
             );
         else
-            portalEmitResource(
-                timestamp,
-                snapshotPortals,
-                snapshotWorld,
-                snapshotResources,
-                portal,
-                emissionType,
-                input.mass,
-                Vec2(input.direction.x, input.direction.y),
-            );
+            console.log("Emit resource not implemented");
     } else if (isBubble) {
         const bubble = snapshotBubbles.get(input.from.toLowerCase());
         if (!bubble) return;
@@ -806,16 +780,7 @@ export const handlePendingClientEmit = (input: Emit): void => {
                 Vec2(input.direction.x, input.direction.y),
             );
         else
-            emitResource(
-                timestamp,
-                snapshotWorld,
-                snapshotBubbles,
-                snapshotResources,
-                bubble,
-                emissionType,
-                input.mass,
-                Vec2(input.direction.x, input.direction.y),
-            );
+            console.log("Emit resource not implemented");
     }
 };
 
