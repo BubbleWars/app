@@ -16,6 +16,7 @@ import {
     tempTimestamp,
     attractors,
     protocol,
+    users,
 } from "../world";
 import { portalAbsorbBubble, portalAbsorbResource } from "./portal";
 import { absorbBubble, absorbResource, bubbleRemoveEth, getBubbleEthMass, setBubbleEthMass } from "./bubble";
@@ -27,6 +28,7 @@ import {
     snapshotResources,
     snapshotTempTimestamp,
     snapshotProtocol,
+    snapshotUsers,
 } from "../snapshots";
 import { Resource, ResourceNode } from "../types/resource";
 import { nodeAbsorbBubble, nodeAbsorbResource } from "./resource";
@@ -118,21 +120,10 @@ export const updateState = (
 
     state.attractors = [...attractors]
 
-    const hasPayedRentArray: Address[] = []
-    protocol.hasPayedRent.forEach((value, key) => {
-        if(value){
-            hasPayedRentArray.push(key)
-        }
-    });
+    
     state.protocol = {
         last: protocol.last,
         balance: protocol.balance.get(AssetType.ETH),
-        pendingEnergyBalance: protocol.getPendingBalance(AssetType.ENERGY),
-        pendingEthBalance: protocol.getPendingBalance(AssetType.ETH),
-        pendingEnergySpawn: protocol.getPendingSpawn(AssetType.ENERGY),
-        rentCost: protocol.rentCost,
-        rentDueAt: protocol.rentDueAt,
-        hasPayedRent: hasPayedRentArray,
     }
 
 
@@ -245,22 +236,22 @@ export const handleContact = (contact: Contact) => {
     //Bubble-Resource collision
     else if (b1 && r2) {
         deferredUpdates.push(() => {
-            absorbResource(bubbles, resources, nodes, protocol, b1, r2, STEP_DELTA, tempTimestamp);
+            absorbResource(users, bubbles, resources, nodes, protocol, b1, r2, STEP_DELTA, tempTimestamp);
         });
     } else if (b2 && r1) {
         deferredUpdates.push(() => {
-            absorbResource(bubbles, resources, nodes, protocol, b2, r1, STEP_DELTA, tempTimestamp);
+            absorbResource(users, bubbles, resources, nodes, protocol, b2, r1, STEP_DELTA, tempTimestamp);
         });
     }
 
     //Portal-Resource collision
     else if (p1 && r2) {
         deferredUpdates.push(() => {
-            portalAbsorbResource(portals, resources, p1, r2, STEP_DELTA);
+            portalAbsorbResource(users, portals, resources, p1, r2, STEP_DELTA);
         });
     } else if (p2 && r1) {
         deferredUpdates.push(() => {
-            portalAbsorbResource(portals, resources, p2, r1, STEP_DELTA);
+            portalAbsorbResource(users, portals, resources, p2, r1, STEP_DELTA);
         });
     }
 
@@ -380,6 +371,7 @@ export const handleSnapshotContact = (contact: Contact) => {
     else if (b1 && r2) {
         snapshotDeferredUpdates.push(() => {
             absorbResource(
+                snapshotUsers,
                 snapshotBubbles,
                 snapshotResources,
                 snapshotNodes,
@@ -394,6 +386,7 @@ export const handleSnapshotContact = (contact: Contact) => {
     } else if (b2 && r1) {
         snapshotDeferredUpdates.push(() => {
             absorbResource(
+                snapshotUsers,
                 snapshotBubbles,
                 snapshotResources,
                 snapshotNodes,
@@ -411,6 +404,7 @@ export const handleSnapshotContact = (contact: Contact) => {
     else if (p1 && r2) {
         snapshotDeferredUpdates.push(() => {
             portalAbsorbResource(
+                snapshotUsers,
                 snapshotPortals,
                 snapshotResources,
                 p1,
@@ -421,6 +415,7 @@ export const handleSnapshotContact = (contact: Contact) => {
     } else if (p2 && r1) {
         snapshotDeferredUpdates.push(() => {
             portalAbsorbResource(
+                snapshotUsers,
                 snapshotPortals,
                 snapshotResources,
                 p2,

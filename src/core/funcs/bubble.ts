@@ -10,7 +10,7 @@ import { EventsType } from "../types/events";
 const ZeroAddress = "0x0000000000000000000000000000000000000000";
 import { BubbleState } from "../types/state";
 import { pseudoRandom } from "./portal";
-import { bubbles, pendingInputs } from "../world";
+import { bubbles, pendingInputs, users } from "../world";
 import { get } from "http";
 import { snapshotPendingInputs } from "../snapshots";
 import { InputType } from "../types/inputs";
@@ -18,6 +18,8 @@ import { timeStamp } from "console";
 import { AssetType, Protocol } from "../types/protocol";
 import { getTotalInventoryMass } from "./entity";
 import { getBodyId } from "./obstacle";
+import { getUser } from "./inputs";
+import { User } from "../types/user";
 
 //const PUNCTURE_EMIT_PER_SECOND = 100;
 
@@ -505,9 +507,20 @@ export const isResourceActivated = (vx: number, vy: number) => {
 
 }
 
+export const addUserPoints = (
+    users: Map<string, User>,
+    address: Address,
+    points: number,
+) => {
+    const user = users.get(address);
+    if (!user) return;
+    user.points += points;
+    users.set(address, user);
+}
 
 
 export const absorbResource = (
+    users: Map<string, User>,
     bubbles: Map<string, Bubble>,
     resources: Map<string, Resource>,
     nodes: Map<string, ResourceNode>,
@@ -518,39 +531,43 @@ export const absorbResource = (
     timestamp: number,
     isSnapshot: boolean = false,
 ): void => {
-    //Transfer resource to bubble
-    const resourceType = absorbedResource.resource;
-    switch (resourceType) {    
-        case ResourceType.ENERGY:
-            //Check kinetic energy for PUNCTURE
-            const { x, y } = absorbedResource.body.getLinearVelocity();
-            if(isResourceActivated(x, y)){
-                //console.log("resource is activated", absorbedResource.body.getLinearVelocity().length());
-                punctureBubble(bubbles, resources, nodes, protocol, bubble, absorbedResource, timestamp, isSnapshot);
-                break;
-            }
-            //Transfer RED to bubble
-            transferResourceToBubble(bubbles, resources, bubble, absorbedResource, timestamp);
-            break;
-    }
+    const amount = resourceMassToAmount(absorbedResource.resource, absorbedResource.body.getMass());
+    const owner = bubble.owner;
+    addUserPoints(users, owner, amount);
 
-    //Transfer momentum to bubble
-    if (bubble.body.isDynamic()){
-        const resourceMomentum = absorbedResource.body.getLinearVelocity().clone().mul(absorbedResource.body.getMass());
-        const totalMomentum = bubble.body.getLinearVelocity().clone().mul(bubble.body.getMass());
-        const newBubbleMomentum = totalMomentum.add(resourceMomentum);
-        bubble.body.setLinearVelocity(newBubbleMomentum.mul(1 / bubble.body.getMass()));
-    } 
+    // //Transfer resource to bubble
+    // const resourceType = absorbedResource.resource;
+    // switch (resourceType) {    
+    //     case ResourceType.ENERGY:
+    //         //Check kinetic energy for PUNCTURE
+    //         const { x, y } = absorbedResource.body.getLinearVelocity();
+    //         if(isResourceActivated(x, y)){
+    //             //console.log("resource is activated", absorbedResource.body.getLinearVelocity().length());
+    //             punctureBubble(bubbles, resources, nodes, protocol, bubble, absorbedResource, timestamp, isSnapshot);
+    //             break;
+    //         }
+    //         //Transfer RED to bubble
+    //         transferResourceToBubble(bubbles, resources, bubble, absorbedResource, timestamp);
+    //         break;
+    // }
+
+    // //Transfer momentum to bubble
+    // if (bubble.body.isDynamic()){
+    //     const resourceMomentum = absorbedResource.body.getLinearVelocity().clone().mul(absorbedResource.body.getMass());
+    //     const totalMomentum = bubble.body.getLinearVelocity().clone().mul(bubble.body.getMass());
+    //     const newBubbleMomentum = totalMomentum.add(resourceMomentum);
+    //     bubble.body.setLinearVelocity(newBubbleMomentum.mul(1 / bubble.body.getMass()));
+    // } 
     
     //Emit event
-    addEvent({
-        type: EventsType.AbsorbResource,
-        absorber: bubble.owner,
-        absorberEntityId: getBodyId(bubble.body),
-        amount: resourceMassToAmount(absorbedResource.resource, absorbedResource.body.getMass()),
-        timestamp,
-        blockNumber: 0,
-    });
+    // addEvent({
+    //     type: EventsType.AbsorbResource,
+    //     absorber: bubble.owner,
+    //     absorberEntityId: getBodyId(bubble.body),
+    //     amount: resourceMassToAmount(absorbedResource.resource, absorbedResource.body.getMass()),
+    //     timestamp,
+    //     blockNumber: 0,
+    // });
 
 };
 

@@ -10,7 +10,7 @@ import {
     WORLD_WIDTH,
 } from "../consts";
 import { Bubble } from "../types/bubble";
-import { createBubble, destroyBubble, getBubbleEthMass, getTotalBubbleMass, getTotalResourceMass, setBubbleEthMass, setBubbleResourceMass, updateBubble } from "./bubble";
+import { addUserPoints, createBubble, destroyBubble, getBubbleEthMass, getTotalBubbleMass, getTotalResourceMass, setBubbleEthMass, setBubbleResourceMass, updateBubble } from "./bubble";
 import { Obstacle } from "../types/obstacle";
 import { Resource, ResourceNode, ResourceType } from "../types/resource";
 import { createResource, resourceMassToAmount, resourceMassToRadius, updateResource } from "./resource";
@@ -20,6 +20,7 @@ import { addEvent } from "./events";
 import { EventsType } from "../types/events";
 import { getBodyId } from "./obstacle";
 import { WorldState } from "../world";
+import { User } from "../types/user";
 
 function deterministicHash(x: number, y: number): number {
     let hash = (Math.floor(x) * 0x1f1f1f1f) ^ Math.floor(y);
@@ -517,28 +518,32 @@ export const portalEmitBubble = (
 };
 
 export const portalAbsorbResource = (
+    users: Map<string, User>,
     portals: Map<string, Portal>,
     resources: Map<string, Resource>,
     portal: Portal,
     absorbedResource: Resource,
     timeElapsed: number,
 ): void => {
-    if (!portal || !absorbedResource) return;
-    const trueResourceMass = absorbedResource.body.getMass();
-    const amountAbsorbed = resourceMassToAmount(absorbedResource.resource, trueResourceMass);
-    const newPortalMass = portal.mass;
-    //console.log("portalAbsorbBubble", amountAbsorbed, newPortalMass);
-    updatePortal(portal, newPortalMass);
+    const amount = resourceMassToAmount(absorbedResource.resource, absorbedResource.body.getMass());
+    const owner = portal.owner;
+    addUserPoints(users, owner, amount);
+    // if (!portal || !absorbedResource) return;
+    // const trueResourceMass = absorbedResource.body.getMass();
+    // const amountAbsorbed = resourceMassToAmount(absorbedResource.resource, trueResourceMass);
+    // const newPortalMass = portal.mass;
+    // //console.log("portalAbsorbBubble", amountAbsorbed, newPortalMass);
+    // updatePortal(portal, newPortalMass);
 
-    //Add resource to portal
-    setPortalResourceMass(
-        portal,
-        absorbedResource.resource,
-        getPortalResourceMass(portal, absorbedResource.resource) +
-            amountAbsorbed,
-    );
+    // //Add resource to portal
+    // setPortalResourceMass(
+    //     portal,
+    //     absorbedResource.resource,
+    //     getPortalResourceMass(portal, absorbedResource.resource) +
+    //         amountAbsorbed,
+    // );
 
-    updateResource(resources, absorbedResource, 0);
+    // updateResource(resources, absorbedResource, 0);
 
     //Emit event
     addEvent({
