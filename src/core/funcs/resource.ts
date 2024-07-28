@@ -79,9 +79,9 @@ export const generateResources = (
     portals: Map<string, Portal>,
     bubbles: Map<string, Bubble>,
     amount: number,
-): void => {
+): number => {
     let count = 0;
-
+    let amountSpawned = 0;
 
     for(let i = 0; i < amount; i++){
         let attempt = 0;
@@ -92,8 +92,9 @@ export const generateResources = (
         const point = generateSpawnPoint(world, entityRadius, minimumSafeDistance, WORLD_RADIUS*0.1, PORTAL_SPAWN_RADIUS);
         if(!point) return;
         createResource(0, world, resources, ResourceType.ENERGY, point.x, point.y, 1);
+        amountSpawned++;
     }
-
+    return amountSpawned;
     //console.log("spawned resources", count);
 };
 
