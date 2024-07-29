@@ -33,6 +33,45 @@ jobs:
             - name: Checkout Repository
               uses: actions/checkout@v3
 
+            - name: Confirm Environment Variables
+              run: |
+                required_vars=(
+                  CARTESI_BLOCKCHAIN_FINALITY_OFFSET
+                  CARTESI_BLOCKCHAIN_ID
+                  CARTESI_CONTRACTS_APPLICATION_ADDRESS
+                  CARTESI_CONTRACTS_APPLICATION_DEPLOYMENT_BLOCK_NUMBER
+                  CARTESI_CONTRACTS_AUTHORITY_ADDRESS
+                  CARTESI_CONTRACTS_HISTORY_ADDRESS
+                  CARTESI_CONTRACTS_INPUT_BOX_ADDRESS
+                  CARTESI_CONTRACTS_INPUT_BOX_DEPLOYMENT_BLOCK_NUMBER
+                  CARTESI_EPOCH_DURATION
+                  CARTESI_EPOCH_LENGTH
+                  CARTESI_AUTH_MNEMONIC
+                  CARTESI_BLOCKCHAIN_HTTP_ENDPOINT
+                  CARTESI_BLOCKCHAIN_WS_ENDPOINT
+                  RPC_HTTP_ENDPOINT
+                  RPC_WS_ENDPOINT
+                  INSPECTOR_URL
+                  PRIVY_APP_ID
+                  PRIVY_APP_SECRET
+                  ROLLUP_OWNER_ADDRESS
+                )
+
+                missing_vars=false
+                for var in "${required_vars[@]}"; do
+                  if [ -z "${!var}" ]; then
+                    echo "Error: Environment variable $var is not set."
+                    missing_vars=true
+                  fi
+                done
+
+                if [ "$missing_vars" = true ]; then
+                  echo "One or more required environment variables are not set."
+                  exit 1
+                else
+                  echo "All required environment variables are set."
+                fi
+
             - name: Install Node.js
               uses: actions/setup-node@v3
               with:
