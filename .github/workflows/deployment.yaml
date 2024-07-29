@@ -21,6 +21,7 @@ jobs:
           CARTESI_AUTH_MNEMONIC: ${{ secrets.CARTESI_AUTH_MNEMONIC }}
           CARTESI_BLOCKCHAIN_HTTP_ENDPOINT: ${{ secrets.CARTESI_BLOCKCHAIN_HTTP_ENDPOINT }}
           CARTESI_BLOCKCHAIN_WS_ENDPOINT: ${{ secrets.CARTESI_BLOCKCHAIN_WS_ENDPOINT }}
+          CARTESI_POSTGRES_ENDPOINT: ${{ secrets.CARTESI_POSTGRES_ENDPOINT }}
           RPC_HTTP_ENDPOINT: ${{ secrets.CARTESI_BLOCKCHAIN_HTTP_ENDPOINT }}
           RPC_WS_ENDPOINT: ${{ secrets.CARTESI_BLOCKCHAIN_WS_ENDPOINT }}
           INSPECTOR_URL: ${{ secrets.INSPECTOR_URL }}
@@ -47,6 +48,7 @@ jobs:
                   CARTESI_AUTH_MNEMONIC
                   CARTESI_BLOCKCHAIN_HTTP_ENDPOINT
                   CARTESI_BLOCKCHAIN_WS_ENDPOINT
+                  CARTESI_POSTGRES_ENDPOINT
                   RPC_HTTP_ENDPOINT
                   RPC_WS_ENDPOINT
                   INSPECTOR_URL
@@ -168,6 +170,7 @@ jobs:
                   --env CARTESI_AUTH_MNEMONIC=${{ secrets.CARTESI_AUTH_MNEMONIC }} \
                   --env CARTESI_BLOCKCHAIN_HTTP_ENDPOINT=${{ secrets.CARTESI_BLOCKCHAIN_HTTP_ENDPOINT }} \
                   --env CARTESI_BLOCKCHAIN_WS_ENDPOINT=${{ secrets.CARTESI_BLOCKCHAIN_WS_ENDPOINT }} \
+                  --env CARTESI_POSTGRES_ENDPOINT=${{ secrets.CARTESI_POSTGRES_ENDPOINT }} \
                   ultimateurinater/bubblewars-sepolia:latest"
             # - name: Wait for Blockchain Setup
             #   run: sleep 30 # Adjust the sleep duration as needed
