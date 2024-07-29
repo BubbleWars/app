@@ -131,12 +131,6 @@ jobs:
                   --env CARTESI_AUTH_MNEMONIC=${{ secrets.CARTESI_AUTH_MNEMONIC }} \
                   --env CARTESI_BLOCKCHAIN_HTTP_ENDPOINT=${{ secrets.CARTESI_BLOCKCHAIN_HTTP_ENDPOINT }} \
                   --env CARTESI_BLOCKCHAIN_WS_ENDPOINT=${{ secrets.CARTESI_BLOCKCHAIN_WS_ENDPOINT }} \
-                  --env RPC_HTTP_ENDPOINT=${{ secrets.CARTESI_BLOCKCHAIN_HTTP_ENDPOINT }} \
-                  --env RPC_WS_ENDPOINT=${{ secrets.CARTESI_BLOCKCHAIN_WS_ENDPOINT }} \
-                  --env INSPECTOR_URL=${{ secrets.INSPECTOR_URL }} \
-                  --env PRIVY_APP_ID=${{ secrets.PRIVY_APP_ID }} \
-                  --env PRIVY_APP_SECRET=${{ secrets.PRIVY_APP_SECRET }} \
-                  --env ROLLUP_OWNER_ADDRESS=${{ secrets.ROLLUP_OWNER_ADDRESS }} \
                   ultimateurinater/bubblewars-sepolia:latest"
 
             # - name: Wait for Blockchain Setup
