@@ -21,6 +21,7 @@ set_secrets_from_env_file() {
       local secret_value=$(echo "$line" | cut -d '=' -f 2-)
       gh secret set "$secret_name" --body "$secret_value" --repo "$repo"
       echo "Set secret: $secret_name"
+      echo "Value: $secret_value"
     fi
   done < "$env_file"
 }
