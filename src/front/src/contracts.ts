@@ -14,7 +14,7 @@ import { defineChain } from "viem";
 import { RPC_URL } from "./consts";
 
 const isProd = process.env.NODE_ENV == "production";
-const blockchainId = isProd ? import.meta.env.CARTESI_BLOCKCHAIN_ID : 31337;
+const blockchainId = isProd ? import.meta.env.VITE_CARTESI_BLOCKCHAIN_ID : 31337;
 export const currentChain = defineChain({
     id: blockchainId,
     name: "bubblewars_anvil",
