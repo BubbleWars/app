@@ -12,10 +12,13 @@ import {
 import { erc20ABI } from "wagmi";
 import { defineChain } from "viem";
 import { RPC_URL } from "./consts";
+import { baseSepolia } from "viem/chains";
 
 const isProd = process.env.NODE_ENV == "production";
 const blockchainId = isProd ? import.meta.env.VITE_CARTESI_BLOCKCHAIN_ID : 84532;
-export const currentChain = defineChain({
+export const currentChain = isProd ?
+    baseSepolia:
+ defineChain({
     id: blockchainId,
     name: "bubblewars_anvil",
     network: "bubblewars_anvil",

@@ -131,6 +131,7 @@ jobs:
             
             - name: Clear Existing Docker Containers
               run: |
+                sudo lsof -t -i:10000 | xargs -r sudo kill -9 || true
                   docker stop $(docker ps -aq) || true
                   docker rm -v $(docker ps -aq) || true
                   docker volume prune -f || true
