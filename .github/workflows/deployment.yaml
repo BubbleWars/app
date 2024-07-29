@@ -108,34 +108,39 @@ jobs:
                       }
                   }' | sudo tee /etc/docker/daemon.json
                   sudo systemctl restart docker
-            
+
             - name: Log in to Docker Hub
               run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
             
             - name: Wait for Blockchain Setup
               run: sleep 10 # Adjust the sleep duration as needed
 
-            - name: Set up local Node
-              run: pm2 start --name blockchain "docker run -p 10000:10000 \
-                --env CARTESI_BLOCKCHAIN_FINALITY_OFFSET=${{ secrets.CARTESI_BLOCKCHAIN_FINALITY_OFFSET }} \
-                --env CARTESI_BLOCKCHAIN_ID=${{ secrets.CARTESI_BLOCKCHAIN_ID }} \
-                --env CARTESI_CONTRACTS_APPLICATION_ADDRESS=${{ secrets.CARTESI_CONTRACTS_APPLICATION_ADDRESS }} \
-                --env CARTESI_CONTRACTS_APPLICATION_DEPLOYMENT_BLOCK_NUMBER=${{ secrets.CARTESI_CONTRACTS_APPLICATION_DEPLOYMENT_BLOCK_NUMBER }} \
-                --env CARTESI_CONTRACTS_AUTHORITY_ADDRESS=${{ secrets.CARTESI_CONTRACTS_AUTHORITY_ADDRESS }} \
-                --env CARTESI_CONTRACTS_HISTORY_ADDRESS=${{ secrets.CARTESI_CONTRACTS_HISTORY_ADDRESS }} \
-                --env CARTESI_CONTRACTS_INPUT_BOX_ADDRESS=${{ secrets.CARTESI_CONTRACTS_INPUT_BOX_ADDRESS }} \
-                --env CARTESI_CONTRACTS_INPUT_BOX_DEPLOYMENT_BLOCK_NUMBER=${{ secrets.CARTESI_CONTRACTS_INPUT_BOX_DEPLOYMENT_BLOCK_NUMBER }} \
-                --env CARTESI_EPOCH_DURATION=${{ secrets.CARTESI_EPOCH_DURATION }} \
-                --env CARTESI_AUTH_MNEMONIC=${{ secrets.CARTESI_AUTH_MNEMONIC }} \
-                --env CARTESI_BLOCKCHAIN_HTTP_ENDPOINT=${{ secrets.CARTESI_BLOCKCHAIN_HTTP_ENDPOINT }} \
-                --env CARTESI_BLOCKCHAIN_WS_ENDPOINT=${{ secrets.CARTESI_BLOCKCHAIN_WS_ENDPOINT }} \
-                --env RPC_HTTP_ENDPOINT=${{ secrets.CARTESI_BLOCKCHAIN_HTTP_ENDPOINT }} \
-                --env RPC_WS_ENDPOINT=${{ secrets.CARTESI_BLOCKCHAIN_WS_ENDPOINT }} \
-                --env INSPECTOR_URL=${{ secrets.INSPECTOR_URL }} \
-                --env ROLLUP_OWNER_ADDRESS=${{ secrets.ROLLUP_OWNER_ADDRESS }} \
-                ultimateurinater/bubblewars-sepolia:latest"
-
             
+            - name: Set up local Node
+              run: |
+                pm2 start --name blockchain "docker run -p 10000:10000 \
+                  --env CARTESI_BLOCKCHAIN_FINALITY_OFFSET=${{ secrets.CARTESI_BLOCKCHAIN_FINALITY_OFFSET }} \
+                  --env CARTESI_BLOCKCHAIN_ID=${{ secrets.CARTESI_BLOCKCHAIN_ID }} \
+                  --env CARTESI_CONTRACTS_APPLICATION_ADDRESS=${{ secrets.CARTESI_CONTRACTS_APPLICATION_ADDRESS }} \
+                  --env CARTESI_CONTRACTS_APPLICATION_DEPLOYMENT_BLOCK_NUMBER=${{ secrets.CARTESI_CONTRACTS_APPLICATION_DEPLOYMENT_BLOCK_NUMBER }} \
+                  --env CARTESI_CONTRACTS_AUTHORITY_ADDRESS=${{ secrets.CARTESI_CONTRACTS_AUTHORITY_ADDRESS }} \
+                  --env CARTESI_CONTRACTS_HISTORY_ADDRESS=${{ secrets.CARTESI_CONTRACTS_HISTORY_ADDRESS }} \
+                  --env CARTESI_CONTRACTS_INPUT_BOX_ADDRESS=${{ secrets.CARTESI_CONTRACTS_INPUT_BOX_ADDRESS }} \
+                  --env CARTESI_CONTRACTS_INPUT_BOX_DEPLOYMENT_BLOCK_NUMBER=${{ secrets.CARTESI_CONTRACTS_INPUT_BOX_DEPLOYMENT_BLOCK_NUMBER }} \
+                  --env CARTESI_EPOCH_DURATION=${{ secrets.CARTESI_EPOCH_DURATION }} \
+                  --env CARTESI_AUTH_MNEMONIC=${{ secrets.CARTESI_AUTH_MNEMONIC }} \
+                  --env CARTESI_BLOCKCHAIN_HTTP_ENDPOINT=${{ secrets.CARTESI_BLOCKCHAIN_HTTP_ENDPOINT }} \
+                  --env CARTESI_BLOCKCHAIN_WS_ENDPOINT=${{ secrets.CARTESI_BLOCKCHAIN_WS_ENDPOINT }} \
+                  --env RPC_HTTP_ENDPOINT=${{ secrets.CARTESI_BLOCKCHAIN_HTTP_ENDPOINT }} \
+                  --env RPC_WS_ENDPOINT=${{ secrets.CARTESI_BLOCKCHAIN_WS_ENDPOINT }} \
+                  --env INSPECTOR_URL=${{ secrets.INSPECTOR_URL }} \
+                  --env PRIVY_APP_ID=${{ secrets.PRIVY_APP_ID }} \
+                  --env PRIVY_APP_SECRET=${{ secrets.PRIVY_APP_SECRET }} \
+                  --env ROLLUP_OWNER_ADDRESS=${{ secrets.ROLLUP_OWNER_ADDRESS }} \
+                  ultimateurinater/bubblewars-sepolia:latest"
+
+            # - name: Wait for Blockchain Setup
+            #   run: sleep 30 # Adjust the sleep duration as needed
 
             # - name: Start Node Backend
             #   run: |
