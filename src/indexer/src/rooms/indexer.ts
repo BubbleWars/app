@@ -65,7 +65,7 @@ export const inspectState = async (
     }
 };
 
-const rpcUrl = process.env.RPC_URL ?? "http://localhost:8545";
+const rpcUrl = process.env.RPC_HTTP_ENDPOINT ?? "http://localhost:8545";
 const chainId = process.env.CARTESI_BLOCKCHAIN_ID ?? 1_337;
 
 export const currentChain = defineChain({
