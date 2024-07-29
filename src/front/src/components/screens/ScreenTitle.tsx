@@ -27,7 +27,7 @@ const faucetClient = createFaucetClient({
     url: FAUCET_URL,
 });
 
-const contract_owner = process?.env?.ROLLUP_OWNER_ADDRESS;
+const contract_owner = import.meta.env.VITE_ROLLUP_OWNER_ADDRESS;
 
 export const ScreenTitle = () => {
     const { authenticated, ready, logout } = usePrivy();
