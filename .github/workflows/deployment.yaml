@@ -195,6 +195,25 @@ jobs:
               run: |
                   cd src/front
                   npm i
+                  VITE_CARTESI_BLOCKCHAIN_FINALITY_OFFSET=${{ secrets.CARTESI_BLOCKCHAIN_FINALITY_OFFSET }} \
+                  VITE_CARTESI_BLOCKCHAIN_ID=${{ secrets.CARTESI_BLOCKCHAIN_ID }} \
+                  VITE_CARTESI_CONTRACTS_APPLICATION_ADDRESS=${{ secrets.CARTESI_CONTRACTS_APPLICATION_ADDRESS }} \
+                  VITE_CARTESI_CONTRACTS_AUTHORITY_ADDRESS=${{ secrets.CARTESI_CONTRACTS_AUTHORITY_ADDRESS }} \
+                  VITE_CARTESI_CONTRACTS_HISTORY_ADDRESS=${{ secrets.CARTESI_CONTRACTS_HISTORY_ADDRESS }} \
+                  VITE_CARTESI_CONTRACTS_INPUT_BOX_ADDRESS=${{ secrets.CARTESI_CONTRACTS_INPUT_BOX_ADDRESS }} \
+                  VITE_CARTESI_CONTRACTS_INPUT_BOX_DEPLOYMENT_BLOCK_NUMBER=${{ secrets.CARTESI_CONTRACTS_INPUT_BOX_DEPLOYMENT_BLOCK_NUMBER }} \
+                  VITE_CARTESI_CONTRACTS_APPLICATION_DEPLOYMENT_BLOCK_NUMBER=${{ secrets.CARTESI_CONTRACTS_INPUT_BOX_DEPLOYMENT_BLOCK_NUMBER }} \
+                  VITE_CARTESI_EPOCH_DURATION=${{ secrets.CARTESI_EPOCH_DURATION }} \
+                  VITE_CARTESI_EPOCH_LENGTH=${{ secrets.CARTESI_EPOCH_LENGTH }} \
+                  VITE_CARTESI_BLOCKCHAIN_HTTP_ENDPOINT=${{ secrets.CARTESI_BLOCKCHAIN_HTTP_ENDPOINT }} \
+                  VITE_CARTESI_BLOCKCHAIN_WS_ENDPOINT=${{ secrets.CARTESI_BLOCKCHAIN_WS_ENDPOINT }} \
+                  VITE_CARTESI_POSTGRES_ENDPOINT=${{ secrets.CARTESI_POSTGRES_ENDPOINT }} \
+                  VITE_RPC_HTTP_ENDPOINT=${{ secrets.CARTESI_BLOCKCHAIN_HTTP_ENDPOINT }} \
+                  VITE_RPC_WS_ENDPOINT=${{ secrets.CARTESI_BLOCKCHAIN_WS_ENDPOINT }} \
+                  VITE_INSPECTOR_URL=${{ secrets.INSPECTOR_URL }} \
+                  VITE_PRIVY_APP_ID=${{ secrets.PRIVY_APP_ID }} \
+                  VITE_PRIVY_APP_SECRET=${{ secrets.PRIVY_APP_SECRET }} \
+                  VITE_ROLLUP_OWNER_ADDRESS=${{ secrets.ROLLUP_OWNER_ADDRESS }} \
                   npm run build
                   cd dist
                   pm2 start --name front-end "npx serve -l 80 -d "
