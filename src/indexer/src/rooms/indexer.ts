@@ -27,9 +27,9 @@ const ETH_DEPOSIT_FUNCTION_SELECTOR = ethers.utils.keccak256(
 );
 
 console.log("ETH_DEPOSIT_FUNCTION_SELECTOR", ETH_DEPOSIT_FUNCTION_SELECTOR);
-const ETH_PORTAL_ADDRESS = import.meta.env.CARTESI_CONTRACTS_APPLICATION_ADDRESS ??
+const ETH_PORTAL_ADDRESS = process.env.CARTESI_CONTRACTS_APPLICATION_ADDRESS ??
     "0xFfdbe43d4c855BF7e0f105c400A50857f53AB044";
-const INPUT_BOX_ADDRESS =  import.meta.env.CARTESI_CONTRACTS_INPUT_BOX_ADDRESS ??
+const INPUT_BOX_ADDRESS =  process.env.CARTESI_CONTRACTS_INPUT_BOX_ADDRESS ??
     "0x59b22D57D4f067708AB0c00552767405926dc768";
 
 const blockNumberToTimestamp: { [key: number]: number } = {};
@@ -38,7 +38,7 @@ let inputSet = false;
 let inspectSet = false;
 let blockSet = false;
 
-const inspector_url = import.meta.env.INSPECTOR_URL ?? "http://localhost:8080/inspect"
+const inspector_url = process.env.INSPECTOR_URL ?? "http://localhost:8080/inspect"
 
 console.log("portal address", ETH_PORTAL_ADDRESS);
 console.log("input box address", INPUT_BOX_ADDRESS);
@@ -65,8 +65,8 @@ export const inspectState = async (
     }
 };
 
-const rpcUrl = import.meta.env.RPC_URL ?? "http://localhost:8545";
-const chainId = import.meta.env.CARTESI_BLOCKCHAIN_ID ?? 1_337;
+const rpcUrl = process.env.RPC_URL ?? "http://localhost:8545";
+const chainId = process.env.CARTESI_BLOCKCHAIN_ID ?? 1_337;
 
 export const currentChain = defineChain({
     id: chainId as number,
@@ -122,7 +122,7 @@ export const increaseEvmTime = async (seconds: number) => {
     }
 }
 
-const contract_address = import.meta.env.CARTESI_CONTRACTS_INPUT_BOX_ADDRESS ?? "0x59b22D57D4f067708AB0c00552767405926dc768";
+const contract_address = process.env.CARTESI_CONTRACTS_INPUT_BOX_ADDRESS ?? "0x59b22D57D4f067708AB0c00552767405926dc768";
 export const onInput = (callback: (input: Input) => void) => {
     let pendingTransaction: `0x{string}`[] = [];
     const unwatch = publicClient.watchPendingTransactions({

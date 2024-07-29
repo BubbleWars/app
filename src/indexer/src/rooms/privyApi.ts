@@ -2,8 +2,8 @@
 import { PrivyClient } from "@privy-io/server-auth";
 import { UserSocialSchema } from "./schema/WorldState";
 
-const PRIVY_APP_ID = import.meta.env.PRIVY_APP_ID;
-const PRIVY_APP_SECRET = import.meta.env.PRIVY_APP_SECRET;
+const PRIVY_APP_ID = process.env.PRIVY_APP_ID;
+const PRIVY_APP_SECRET = process.env.PRIVY_APP_SECRET;
 const privy = new PrivyClient(PRIVY_APP_ID, PRIVY_APP_SECRET);
 
 // @type("string") address: string = "";
