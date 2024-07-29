@@ -112,6 +112,9 @@ jobs:
             - name: Log in to Docker Hub
               run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
             
+            - name: Wait for Blockchain Setup
+              run: sleep 10 # Adjust the sleep duration as needed
+
             - name: Set up local Node
               run: |
                 pm2 start --name blockchain "docker run -p 10000:10000 \
@@ -135,8 +138,7 @@ jobs:
                   --env ROLLUP_OWNER_ADDRESS=${{ secrets.ROLLUP_OWNER_ADDRESS }} \
                   ultimateurinater/bubblewars-sepolia:latest"
 
-            # - name: Wait for Blockchain Setup
-            #   run: sleep 30 # Adjust the sleep duration as needed
+            
 
             # - name: Start Node Backend
             #   run: |
