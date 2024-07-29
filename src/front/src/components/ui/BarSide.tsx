@@ -79,7 +79,7 @@ export const MassView = ({ mass }: { mass: number }) => {
 }
 
 export const ResourceMassView = ({ mass }: { mass: number }) => {
-    return <p className="text-xs bold text-blue-500">{mass.toFixed(2)} $BBL</p>
+    return <p className="text-xs bold text-blue-500">{mass.toFixed(2)} POINTS</p>
 }
 
 export const CameraLock = ({ id }: { id: string }) => {};
@@ -202,14 +202,9 @@ export const VelocityIcon = ({
 export const ListPlayersLeaderboard = ({ players }: { players: User[] }) => {
     const [fullPlayers, setFullPlayers] = useState<{ address: string; resourcesCollected: number }[]>(
         players.map((player) => {
-            const portal = currentState.portals.find((portal) => portal.owner === player.address);
-            const bubbles = currentState.bubbles.filter((bubble) => bubble.owner === player.address);
-            const portalResourceMass = getPortalStateResourceMass(portal, ResourceType.ENERGY);
-            const bubblesResourceMass = bubbles.reduce((acc, bubble) => acc + getBubbleStateResourceMass(bubble, ResourceType.ENERGY) ?? 0, 0);
-            const totalResourceMass = portalResourceMass + bubblesResourceMass;
             return {
                 address: player.address,
-                resourcesCollected: totalResourceMass,
+                resourcesCollected: player.points ?? 0,
             };
         }).sort((a, b) => b.resourcesCollected - a.resourcesCollected)
     );
@@ -219,14 +214,9 @@ export const ListPlayersLeaderboard = ({ players }: { players: User[] }) => {
     useInterval(() => {
         setFullPlayers(
             players.map((player) => {
-                const portal = currentState.portals.find((portal) => portal.owner === player.address);
-                const bubbles = currentState.bubbles.filter((bubble) => bubble.owner === player.address);
-                const portalResourceMass = getPortalStateResourceMass(portal, ResourceType.ENERGY);
-                const bubblesResourceMass = bubbles.reduce((acc, bubble) => acc + getBubbleStateResourceMass(bubble, ResourceType.ENERGY) ?? 0, 0);
-                const totalResourceMass = portalResourceMass + bubblesResourceMass;
                 return {
                     address: player.address,
-                    resourcesCollected: totalResourceMass,
+                    resourcesCollected: player.points ?? 0,
                 };
             }).sort((a, b) => b.resourcesCollected - a.resourcesCollected)
         );
@@ -249,7 +239,7 @@ export const ListPlayersLeaderboard = ({ players }: { players: User[] }) => {
                             <TableRow>
                                 <TableCell>#{index + 1}</TableCell>
                                 <TableCell><UserView address={player.address}/></TableCell>
-                                <TableCell><div className="text-sm text-bold text-blue-400">{player.resourcesCollected.toFixed(2)} $BBL</div></TableCell>
+                                <TableCell><div className="text-sm text-bold text-blue-400">{player.resourcesCollected.toFixed(2)} POINTS</div></TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

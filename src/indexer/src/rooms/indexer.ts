@@ -27,7 +27,10 @@ const ETH_DEPOSIT_FUNCTION_SELECTOR = ethers.utils.keccak256(
 );
 
 console.log("ETH_DEPOSIT_FUNCTION_SELECTOR", ETH_DEPOSIT_FUNCTION_SELECTOR);
-const ETH_PORTAL_ADDRESS = "0xFfdbe43d4c855BF7e0f105c400A50857f53AB044";
+const ETH_PORTAL_ADDRESS = process.env.CARTESI_CONTRACTS_APPLICATION_ADDRESS ??
+    "0xFfdbe43d4c855BF7e0f105c400A50857f53AB044";
+const INPUT_BOX_ADDRESS =  process.env.CARTESI_CONTRACTS_INPUT_BOX_ADDRESS ??
+    "0x59b22D57D4f067708AB0c00552767405926dc768";
 
 const blockNumberToTimestamp: { [key: number]: number } = {};
 
@@ -35,13 +38,15 @@ let inputSet = false;
 let inspectSet = false;
 let blockSet = false;
 
+const inspector_url = process.env.INSPECTOR_URL ?? "http://localhost:8080/inspect"
+
 //Inspect the state of the Cartesi Machine
 export const inspectState = async (
     inspect: Inspect,
 ): Promise<Snapshot | undefined> => {
     try {
         const param = JSON.stringify(inspect);
-        const url = `${process.env.INSPECTOR_URL}/${param}`;
+        const url = `${inspector_url}/${param}`;
         console.log("inspect url", url);
         const response = await fetch(url);
         const json = await response.json();
@@ -56,8 +61,11 @@ export const inspectState = async (
     }
 };
 
+const rpcUrl = process.env.RPC_URL ?? "http://localhost:8545";
+const chainId = process.env.CARTESI_BLOCKCHAIN_ID ?? 1_337;
+
 export const currentChain = defineChain({
-    id: 1_337,
+    id: chainId as number,
     name: "bubblewars_anvil",
     network: "bubblewars_anvil",
     nativeCurrency: {
@@ -66,8 +74,8 @@ export const currentChain = defineChain({
         symbol: "ETH",
     },
     rpcUrls: {
-        default: { http: [process.env.RPC_URL] },
-        public: { http: [process.env.RPC_URL] },
+        default: { http: [rpcUrl] },
+        public: { http: [rpcUrl] },
     },
 });
 
@@ -110,7 +118,7 @@ export const increaseEvmTime = async (seconds: number) => {
     }
 }
 
-
+const contract_address = process.env.CARTESI_CONTRACTS_INPUT_BOX_ADDRESS ?? "0x59b22D57D4f067708AB0c00552767405926dc768";
 export const onInput = (callback: (input: Input) => void) => {
     let pendingTransaction: `0x{string}`[] = [];
     const unwatch = publicClient.watchPendingTransactions({
@@ -163,7 +171,7 @@ export const onInput = (callback: (input: Input) => void) => {
                         sender: address,
                         amount,
                     });
-                } else {
+                } else if (transaction?.to?.toLowerCase() == INPUT_BOX_ADDRESS.toLowerCase()) {
                     try {
                         const data = logs[0].data;
                         //from hex to string

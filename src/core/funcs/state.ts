@@ -55,6 +55,7 @@ export const updateState = (
     state.users = Array.from(users.values()).map((user) => ({
         address: user.address,
         balance: user.balance,
+        points: user.points,
     }));
     state.bubbles = Array.from(bubbles.values()).map((bubble) => {
         const puncturesMap = bubble.punctures ?? new Map();

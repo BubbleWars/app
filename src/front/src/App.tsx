@@ -103,9 +103,7 @@ function App() {
 
             </Canvas>
             <StatsLeaderboard />
-            <StatsEventBox />
             <BarBottom />
-            <StatsTokenomics />
             
 
 

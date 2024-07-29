@@ -19,11 +19,11 @@ export const EventText = ({ event }: { event: Event }) => {
                     </div>
         case EventsType.BuyResource:
             return <div className="flex flex-row text-xs items-center">
-                        <SmallUserView address={event.buyer} />  bought {event.amount}$BBL for {event.cost}ETH
+                        <SmallUserView address={event.buyer} />  bought {event.amount}POINTS for {event.cost}ETH
                     </div>
         case EventsType.SellResource:
             return <div className="flex flex-row text-xs items-center">
-                        <SmallUserView address={event.seller} />  sold {event.amount}$BBL for {event.cost}ETH
+                        <SmallUserView address={event.seller} />  sold {event.amount}POINTS for {event.cost}ETH
                     </div>
         case EventsType.PunctureBubble:
             return <div className="flex flex-row text-xs items-center">
@@ -39,7 +39,7 @@ export const EventText = ({ event }: { event: Event }) => {
                     </div>
         case EventsType.EmitResource:
             return <div className="flex flex-row text-xs items-center">
-                        <SmallUserView address={event.userAddress} />  {event.fromPortal ? "'s portal " : ""} emitted {event.amount}$BBL
+                        <SmallUserView address={event.userAddress} />  {event.fromPortal ? "'s portal " : ""} emitted {event.amount}POINTS
                     </div>
         case EventsType.EmitBubble:
             return <div className="flex flex-row text-xs items-center">

@@ -9,6 +9,7 @@ export class Vector2Schema extends Schema {
 export class UserSchema extends Schema {
     @type("string") address: string = "";
     @type("number") balance: number = 0;
+    @type("number") points: number = 0;
 }
 
 export class UserSocialSchema extends Schema {

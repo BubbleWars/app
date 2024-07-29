@@ -543,14 +543,14 @@ export const portalAbsorbResource = (
     //         amountAbsorbed,
     // );
 
-    // updateResource(resources, absorbedResource, 0);
+    updateResource(resources, absorbedResource, 0);
 
     //Emit event
     addEvent({
         type: EventsType.AbsorbResource,
         absorber: portal.owner,
         absorberEntityId: getBodyId(portal.body),
-        amount: amountAbsorbed,
+        amount: 0,
         isPortal: true,
         blockNumber: 0,
         timestamp: 0,

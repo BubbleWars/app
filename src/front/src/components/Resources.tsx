@@ -137,7 +137,7 @@ export const Resource = ({ resourceId }: { resourceId: string }) => {
                 outlineColor={baseColor}
                 
             >
-                {amount.toFixed(2)} $BBL
+                {amount.toFixed(2)} POINT
             </CustomText>
             {isResourceActivated(velocity.x, velocity.y) && resource.type == ResourceType.ENERGY && (
                 <CustomText

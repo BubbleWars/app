@@ -79,7 +79,7 @@ const ETH_WITHDRAW_FUNCTION_SELECTOR = ethers
     .utils.keccak256(ethers.utils.toUtf8Bytes("withdrawEther(address,uint256)"))
     .slice(0, 4);
 
-const owner_address = process.env.ROLLUP_OWNER_ADDRESS;
+const owner_address = isNode ? process.env.ROLLUP_OWNER_ADDRESS ?? "" : "";
 
     console.log("ETH WITHDRAW FUNCTION SELECTOR: ", ETH_WITHDRAW_FUNCTION_SELECTOR);
 
@@ -210,6 +210,7 @@ export const getUser = (address: Address, client: boolean): User => {
         const newUser: User = {
             address: address,
             balance: 0,
+            points: 0,
         };
         client
             ? snapshotUsers.set(address, newUser)
@@ -260,11 +261,12 @@ export const handleInput = async (
 };
 
 const handleProtocolWithdraw = (
-    { sender, amount, timestamp }: ProtocolWithdraw,
+    { sender, timestamp }: ProtocolWithdraw,
     client: boolean,
 ): boolean => {
     const protocolMain = client ? snapshotProtocol : protocol;
     const isOwner = sender.toLowerCase() === owner_address?.toLowerCase();
+    const amount = protocolMain.getBalance(AssetType.ETH);
     if (!isOwner) {
         console.log("Sender is not owner");
         return false;

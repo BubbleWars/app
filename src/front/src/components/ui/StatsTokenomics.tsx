@@ -23,16 +23,16 @@ export const StatsTokenomics = () => {
     return (
         <div className="flex flex-row h-[10vh] w-full fixed top-0 right-0 space-x-6 p-4 items-center align-center">
             <div className="bg-white border border-rounded p-4 flex flex-col items-left">
-                <p className="text-sm font-semibold">Price $BBL</p>
+                <p className="text-sm font-semibold">Price POINTS</p>
                 <p className="">{price.toFixed(7)} ETH</p>
             </div>
             <div className="bg-white border border-rounded p-4 flex flex-col items-left">
-                <p className="text-sm font-semibold">Market Cap $BBL</p>
+                <p className="text-sm font-semibold">Market Cap POINTS</p>
                 <p className="">{marketcap.toFixed(8)} ETH</p>
             </div>
             <div className="bg-white border border-rounded p-4 flex flex-col items-left">
-                <p className="text-sm font-semibold">Supply $BBL</p>
-                <p className="">{supply.toFixed(2)} $BBL</p>
+                <p className="text-sm font-semibold">Supply POINTS</p>
+                <p className="">{supply.toFixed(2)} POINTS</p>
             </div>
         </div>
     );

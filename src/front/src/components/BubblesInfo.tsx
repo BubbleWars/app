@@ -58,7 +58,7 @@ export const ResourceButton = ({
                 color={"white"}
                 outlineColor={colorName}
             >
-                {text} $BBL
+                {text} POINTS
             </CustomText>
         </group>
         
@@ -134,14 +134,6 @@ export const BubblesInfo = ({bubble, position}: {bubble: BubbleState, position: 
             >
                 {(mass).toFixed(2)} ETH
             </CustomText>
-
-            <Inventory 
-                key={bubble.id}
-                id={bubble.id} 
-                radius={radius} 
-                position={pos} 
-                resources={bubble?.resources} 
-            />
 
         </>
     );

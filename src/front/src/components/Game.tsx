@@ -116,20 +116,14 @@ const initStateServer = (room) => {
         users.forEach((user) => {
             const tempUser: User = {
                 address: user.address,
-                balance: user.balance
+                balance: user.balance,
+                points: user.points,
             }
             currentState.users.push(tempUser)
         })
 
         //Bubbles
         currentState.bubbles.length = 0;
-        users.forEach((user) => {
-            const tempUser: User = {
-                address: user.address,
-                balance: user.balance
-            }
-            currentState.users.push(tempUser)
-        })
 
         bubbles.forEach((bubble) => {
             const resources: {

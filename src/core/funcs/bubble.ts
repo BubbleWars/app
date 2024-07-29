@@ -558,6 +558,9 @@ export const absorbResource = (
     //     const newBubbleMomentum = totalMomentum.add(resourceMomentum);
     //     bubble.body.setLinearVelocity(newBubbleMomentum.mul(1 / bubble.body.getMass()));
     // } 
+
+    // //Destroy the absorbed resource
+    updateResource(resources, absorbedResource, 0, timestamp);
     
     //Emit event
     // addEvent({

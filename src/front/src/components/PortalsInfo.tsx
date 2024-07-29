@@ -88,15 +88,6 @@ export const PortalsInfo = ({ portalId }: { portalId: string }) => {
                     {energyAmount.toFixed(2)} EP
                 </CustomText> */}
             </group>
-
-            <Inventory
-                key={portal.id}
-                id={portal.id}
-                isPortal={true}
-                radius={radius}
-                position={textPosition}
-                resources={portal.resources}
-            />
         </>
     );
 };

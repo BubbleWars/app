@@ -48,6 +48,7 @@ const updateState = (state: WorldState, snapshot: Snapshot): WorldState => {
         const newUser = new UserSchema();
         newUser.address = user.address;
         newUser.balance = user.balance;
+        newUser.points = user.points;
         state.users.push(newUser);
     });
 

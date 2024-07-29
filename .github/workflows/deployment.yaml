@@ -8,6 +8,26 @@ on:
 jobs:
     build-and-deploy:
         runs-on: self-hosted
+        env:
+          CARTESI_BLOCKCHAIN_FINALITY_OFFSET: {{ secrets.CARTESI_BLOCKCHAIN_FINALITY_OFFSET }}
+          CARTESI_BLOCKCHAIN_ID: {{ secrets.CARTESI_BLOCKCHAIN_ID }}
+          CARTESI_CONTRACTS_APPLICATION_ADDRESS: {{ secrets.CARTESI_CONTRACTS_APPLICATION_ADDRESS }}
+          CARTESI_CONTRACTS_APPLICATION_DEPLOYMENT_BLOCK_NUMBER: {{ secrets.CARTESI_CONTRACTS_APPLICATION_DEPLOYMENT_BLOCK_NUMBER }}
+          CARTESI_CONTRACTS_AUTHORITY_ADDRESS: {{ secrets.CARTESI_CONTRACTS_AUTHORITY_ADDRESS }}
+          CARTESI_CONTRACTS_HISTORY_ADDRESS: {{ secrets.CARTESI_CONTRACTS_HISTORY_ADDRESS }}
+          CARTESI_CONTRACTS_INPUT_BOX_ADDRESS: {{ secrets.CARTESI_CONTRACTS_INPUT_BOX_ADDRESS }}
+          CARTESI_CONTRACTS_INPUT_BOX_DEPLOYMENT_BLOCK_NUMBER: {{ secrets.CARTESI_CONTRACTS_INPUT_BOX_DEPLOYMENT_BLOCK_NUMBER }}
+          CARTESI_EPOCH_DURATION: {{ secrets.CARTESI_EPOCH_DURATION }}
+          CARTESI_AUTH_MNEMONIC: {{ secrets.CARTESI_AUTH_MNEMONIC }}
+          CARTESI_BLOCKCHAIN_HTTP_ENDPOINT: {{ secrets.CARTESI_BLOCKCHAIN_HTTP_ENDPOINT }}
+          CARTESI_BLOCKCHAIN_WS_ENDPOINT: {{ secrets.CARTESI_BLOCKCHAIN_WS_ENDPOINT }}
+          RPC_HTTP_ENDPOINT: {{ secrets.CARTESI_BLOCKCHAIN_HTTP_ENDPOINT }}
+          RPC_WS_ENDPOINT: {{ secrets.CARTESI_BLOCKCHAIN_WS_ENDPOINT }}
+          INSPECTOR_URL: {{ secrets.INSPECTOR_URL }}
+          PRIVY_APP_ID: {{ secrets.PRIVY_APP_ID }}
+          PRIVY_APP_SECRET: {{ secrets.PRIVY_APP_SECRET }}
+          ROLLUP_OWNER_ADDRESS: {{ secrets.ROLLUP_OWNER_ADDRESS }}
+
         steps:
             - name: Checkout Repository
               uses: actions/checkout@v3
@@ -88,16 +108,17 @@ jobs:
                   }' | sudo tee /etc/docker/daemon.json
                   sudo systemctl restart docker
 
-            - name: Set up Local Blockchain and Smart Contracts
-              run: pm2 start --name blockchain "sunodo run --no-backend --block-time 1"
+            - name: Set up local Node
+              run: pm2 start --name blockchain "docker run -p 10000:10000 ultimateurinater/bubblewars-sepolia:latest
+"
 
             # - name: Wait for Blockchain Setup
             #   run: sleep 30 # Adjust the sleep duration as needed
 
-            - name: Start Node Backend
-              run: |
-                  npm i
-                  pm2 start --name node-backend "npm run host"
+            # - name: Start Node Backend
+            #   run: |
+            #       npm i
+            #       pm2 start --name node-backend "npm run host"
             
             - name: Start State Indexing Server
               run: |
@@ -126,11 +147,11 @@ jobs:
                     kill -9 $(lsof -t -i:2001)
                   fi
 
-            - name: Deploy Faucet Server
-              run: |
-                  cd src/front
-                  pnpm install @latticexyz/faucet
-                  pm2 start --name faucet-server "RPC_HTTP_URL=http://localhost:8545 FAUCET_PRIVATE_KEY="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80" DRIP_AMOUNT_ETHER=200 PORT=2001 pnpm faucet-server"
+            # - name: Deploy Faucet Server
+            #   run: |
+            #       cd src/front
+            #       pnpm install @latticexyz/faucet
+            #       pm2 start --name faucet-server "RPC_HTTP_URL=http://localhost:8545 FAUCET_PRIVATE_KEY="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80" DRIP_AMOUNT_ETHER=200 PORT=2001 pnpm faucet-server"
 
             - name: Save PM2 Process List
               run: pm2 save

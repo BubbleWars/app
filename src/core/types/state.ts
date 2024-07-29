@@ -90,12 +90,6 @@ export interface ObstaclesState {
 export interface ProtocolState {
     last: number,
     balance: number //eth balance
-    pendingEthBalance: number,
-    pendingEnergyBalance: number,
-    pendingEnergySpawn: number,
-    rentCost: number,
-    rentDueAt: number,
-    hasPayedRent: Address[],
 }
 
 

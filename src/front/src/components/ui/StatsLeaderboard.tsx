@@ -8,6 +8,7 @@ export const StatsLeaderboard = () => {
     const [ players, setPlayers ] = useState<User[]>(Object.values(currentState.users.reduce((acc, user) => (acc[user.address] = user, acc), {})));
     useInterval(() => {
         setPlayers(Object.values(currentState.users.reduce((acc, user) => (acc[user.address] = user, acc), {})));
+        console.log("players", currentState.users);
     },1000)
     return (
         <ListPlayersLeaderboard players={players} />

@@ -13,6 +13,8 @@ import { getBubbleStateResourceMass } from "../../../../core/funcs/bubble";
 import { useCreateInput } from "@/hooks/inputs";
 import { Input } from "postcss";
 import { InputType } from "../../../../core/types/inputs";
+import { useBalance } from "wagmi";
+import { currentChain } from "@/contracts";
 
 export const BubbleStateView = ({ bubbles }: { bubbles: BubbleState[] }) => {
     return (
@@ -22,7 +24,6 @@ export const BubbleStateView = ({ bubbles }: { bubbles: BubbleState[] }) => {
                     <p className="text-xs">Bubble #{index}</p>
                     <div className="flex flex-row space-x-2">
                         <MassView mass={bubble.mass} />
-                        <ResourceMassView mass={getBubbleStateResourceMass(bubble, ResourceType.ENERGY)} />
                     </div>
                 </div>
             ))}
@@ -35,6 +36,16 @@ export const BarBottom = () => {
 
     const connectedAddress = wallets[0]?.address ? `${wallets[0].address}` : "";
     const address = connectedAddress;
+
+    const { data } = useBalance({
+        address: connectedAddress,
+        chainId: currentChain.id,
+        watch: true,
+    });
+
+    const balanceBase = useMemo(() => {
+        return parseFloat(data?.formatted ?? "0");
+    }, [data]);
 
 
 
@@ -64,9 +75,10 @@ export const BarBottom = () => {
             const portal = currentState.portals.find(portal => portal.owner.toLowerCase() == address.toLowerCase());
            //console.log("These are the current portals 69:  ", currentState.portals);
             if(portal) {
+                const user = currentState.users.find(user => user.address.toLowerCase() == address.toLowerCase());
                 setBalance(portal.mass);
                 setPosition(portal.position);
-                setResourceMass(getPortalStateResourceMass(portal, ResourceType.ENERGY))
+                setResourceMass(user.points ?? 0);
                 setBubbles(currentState.bubbles.filter(bubble => bubble.owner.toLowerCase() == address.toLowerCase() && bubble.mass > PLANCK_MASS));
                 setNeedsToPayRent(currentState.protocol.hasPayedRent.find((val => val == address)) != undefined)
                 setRentDueAt(currentState.protocol.rentDueAt)
@@ -81,7 +93,7 @@ export const BarBottom = () => {
                 }
                 else if(remaining < 0){
                     setPayRentButtonEnabled(false);
-                    setPayRentButtonText("Need " + Math.abs(remaining) + "$BBL to pay Rent")
+                    setPayRentButtonText("Need " + Math.abs(remaining) + "POINTS to pay Rent")
                     setPayRentHeaderText("Must pay rent in: " + rentDueIn)
                 } else if (isLoading) {
                     setPayRentButtonEnabled(false);
@@ -110,21 +122,23 @@ export const BarBottom = () => {
                 <PositionIcon position={position} />
             </div>
             <div className="flex flex-col items-left">
+                <p className="text-sm font-semibold">Your Balance</p>
+                <div className="flex flex-row space-x-2">
+                    <p className=""><MassView mass={balanceBase} /></p>
+                    
+                        
+                        
+                    
+                </div>
+                
+            </div>
+            <div className="flex flex-col items-left">
                 <p className="text-sm font-semibold">Your Portal</p>
                 <div className="flex flex-row space-x-2">
                     <p className=""><MassView mass={balance} /></p>
                     <p className="text-xs"><ResourceMassView mass={resourceMass} /></p>
                     
-                        <div className="flex flex-col items-left">
-                            <p className="text-sm font-semibold"> {payRentHeaderText} </p>
-                            <button
-                            disabled={!payRentButtonEnabled}
-                                onClick={() =>{ 
-                                     submitTransaction?.()
-                                }}
-                            >{payRentButtonText}</button>
-
-                        </div>
+                        
                         
                     
                 </div>

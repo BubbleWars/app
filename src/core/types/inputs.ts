@@ -42,7 +42,6 @@ export interface PayRent extends BaseInput {
 
 export interface ProtocolWithdraw extends BaseInput {
     type: InputType.ProtocolWithdraw;
-    amount: number;
 }
 
 export interface ProtocolSend extends BaseInput {

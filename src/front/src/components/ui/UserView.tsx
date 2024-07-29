@@ -2,6 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { truncateAddress } from "../../../../core/funcs/utils"
 import { TwitterLogoIcon } from "@radix-ui/react-icons"
 import { useUserSocial } from "@/hooks/socials";
+import { CopyIcon } from "lucide-react";
 
 export const UserView = ({ address }: { address: string }) => {
     const user = useUserSocial({ address });
@@ -12,9 +13,9 @@ export const UserView = ({ address }: { address: string }) => {
             <AvatarImage src={user?.pfpUrl ?? "https://pbs.twimg.com/profile_images/1775519317024542720/d3H28anA_400x400.jpg"} alt="@shadcn" />
                 <AvatarFallback>CN</AvatarFallback>
             </Avatar>
-            <div className="flex flex-col ml-2">
+            <div className="flex flex-col ml-2" onClick={() => {navigator.clipboard.writeText(address); alert("Address copied to clipboard")}}>
                 <div className="text-sm flex items-center space-x-2"><span className="font-semibold underline">@{user?.social ?? "not signed in"}</span> <TwitterLogoIcon className="h-3 w-3" /> </div>
-                <span className="text-xs text-gray-500">{truncateAddress(address)}</span>
+                <div className="text-sm flex items-center space-x-2"><span className="text-xs text-gray-500">{truncateAddress(address)} </span> <CopyIcon className="h-3 w-3" /> </div>
             </div>
         </div>
     )

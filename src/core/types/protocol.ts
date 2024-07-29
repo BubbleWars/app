@@ -11,10 +11,11 @@ import { User } from "./user";
 import { ProtocolState } from "./state";
 import { createPortal, destroyPortal, generateSpawnPoint, getPortalMass, getPortalResourceMass, setPortalResourceMass } from "../funcs/portal";
 import { massToRadius } from "../funcs/utils";
-import { MIN_PORTAL_DISTANCE, PORTAL_SPAWN_RADIUS, WORLD_RADIUS } from "../consts";
+import { MIN_PORTAL_DISTANCE, PLANCK_MASS, PORTAL_SPAWN_RADIUS, WORLD_RADIUS } from "../consts";
 import { addEvent } from "../funcs/events";
 import { EventsType } from "./events";
 import { withdrawEth } from "../funcs/inputs";
+import { destroyBubble, getBubbleEthMass } from "../funcs/bubble";
 
 //Protocol revenue split
 const BUYBACK_PERCENTAGE = 0.5;
@@ -35,7 +36,7 @@ export class Protocol {
     //Constants
     maxPoints: number = 100; // Max amount of Points the protocol can have at any time
     spawnAmount: number = 10; // Max amount of Points to spawn per cycle
-    cycle: number = 1; // Should run every 100s
+    cycle: number = 60; // Should run every 100s
 
     //State
     last: number = 0; // Last time the protocol was run
@@ -143,14 +144,34 @@ export class Protocol {
 
         console.log("Spawned", amountSpawned, "points");
 
-        //Call event
-        addEvent({
-            type: EventsType.ProtocolSpawnResource,
-            timestamp,
-            blockNumber: 0,
-            amount: amountSpawned,
-            position: { x: 0, y: 0 },
+    }
+
+    //Find bubbles around that world that are no longer moving that are less than PLANCK_MASS * 10 and remove them and deposit their mass into the protocol
+    handleStrayBubbles(
+        timestamp: number,
+        world: World,
+        portals: Map<Address, Portal>,
+        protocol: Protocol,
+        resources: Map<Address, Resource>,
+        nodes: Map<Address, ResourceNode>,
+        bubbles: Map<Address, Bubble>,
+    ){
+        bubbles.forEach((bubble, address) => {
+            const mass = getBubbleEthMass(bubble);
+            const speed = bubble.body.getLinearVelocity().length();
+            const minMass = PLANCK_MASS * 10;
+            const minSpeed = 0.01;
+
+            if(mass < minMass && speed < minSpeed){
+                //Deposit mass into protocol
+                protocol.deposit(AssetType.ETH, mass);
+
+                //Remove bubble
+                destroyBubble(bubbles, bubble);
+            }
         });
+
+        
     }
     
     run(
@@ -169,6 +190,7 @@ export class Protocol {
         if(timePassed < this.cycle) return;
 
         this.handleSpawnPoints(timestamp, world, portals, protocol, resources, nodes, bubbles);
+        this.handleStrayBubbles(timestamp, world, portals, protocol, resources, nodes, bubbles);
         this.last = timestamp;
     }
 
