@@ -116,7 +116,7 @@ jobs:
               run: sleep 10 # Adjust the sleep duration as needed
 
             - name: Set up local Node
-              run: pm2 start --name blockchain --interpreter bash -- "docker run -p 10000:10000 \
+              run: pm2 start --name blockchain "docker run -p 10000:10000 \
                 --env CARTESI_BLOCKCHAIN_FINALITY_OFFSET=${{ secrets.CARTESI_BLOCKCHAIN_FINALITY_OFFSET }} \
                 --env CARTESI_BLOCKCHAIN_ID=${{ secrets.CARTESI_BLOCKCHAIN_ID }} \
                 --env CARTESI_CONTRACTS_APPLICATION_ADDRESS=${{ secrets.CARTESI_CONTRACTS_APPLICATION_ADDRESS }} \
@@ -132,8 +132,6 @@ jobs:
                 --env RPC_HTTP_ENDPOINT=${{ secrets.CARTESI_BLOCKCHAIN_HTTP_ENDPOINT }} \
                 --env RPC_WS_ENDPOINT=${{ secrets.CARTESI_BLOCKCHAIN_WS_ENDPOINT }} \
                 --env INSPECTOR_URL=${{ secrets.INSPECTOR_URL }} \
-                --env PRIVY_APP_ID=${{ secrets.PRIVY_APP_ID }} \
-                --env PRIVY_APP_SECRET=${{ secrets.PRIVY_APP_SECRET }} \
                 --env ROLLUP_OWNER_ADDRESS=${{ secrets.ROLLUP_OWNER_ADDRESS }} \
                 ultimateurinater/bubblewars-sepolia:latest"
 
