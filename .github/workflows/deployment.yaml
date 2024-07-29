@@ -159,6 +159,7 @@ jobs:
               run: |
                 pm2 start --name blockchain "docker run -p 10000:10000 \
                   --env CARTESI_BLOCKCHAIN_FINALITY_OFFSET=${{ secrets.CARTESI_BLOCKCHAIN_FINALITY_OFFSET }} \
+                  --env CARTESI_BLOCKCHAIN_ID=${{ secrets.CARTESI_BLOCKCHAIN_ID }} \
                   ultimateurinater/bubblewars-sepolia:latest"
             # - name: Wait for Blockchain Setup
             #   run: sleep 30 # Adjust the sleep duration as needed
