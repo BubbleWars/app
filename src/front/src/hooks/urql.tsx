@@ -13,15 +13,17 @@
 import React, { useMemo } from "react";
 import { Client, createClient, Provider } from "urql";
 
-import configFile from "../config.json";
 import { currentChain } from "@/contracts";
 import { useWallets } from "@privy-io/react-auth";
+import { URL_QUERY_GRAPHQL } from "@/consts";
 
-const config: any = configFile;
+const config: any = {
+    graphqlAPIURL: URL_QUERY_GRAPHQL,
+}
 
 const useGraphQL = () => {
     const { wallets, ready } = useWallets();
-    const connectedChain = useMemo(()=>{
+    const connectedChain = useMemo(() => {
         const id = wallets[0]?.chainId ? wallets[0].chainId.split(':')[1] : currentChain.id;
         return id;
     }, [wallets, ready]);
@@ -29,14 +31,9 @@ const useGraphQL = () => {
         if (!connectedChain) {
             return null;
         }
-        let url = "";
+        let url = URL_QUERY_GRAPHQL;
 
-        if(config[connectedChain]?.graphqlAPIURL) {
-            url = `${config[connectedChain].graphqlAPIURL}/graphql`;
-        } else {
-            console.error(`No GraphQL interface defined for chain ${connectedChain}`);
-            return null;
-        }
+    
 
         if (!url) {
             return null;

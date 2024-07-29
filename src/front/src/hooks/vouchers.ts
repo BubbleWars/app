@@ -47,7 +47,7 @@ export const useVouchers = () => {
     const { data, fetching, error } = result;
     const rollups = useRollups(CartesiDAppAddress);
     const { wallets, ready } = useWallets();
-    const currentAddress = useMemo(()=> {
+    const currentAddress = useMemo(() => {
         return wallets[0]?.address;
     },[wallets, ready]);
 
