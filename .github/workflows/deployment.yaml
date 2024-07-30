@@ -172,7 +172,7 @@ jobs:
                   --env CARTESI_CONTRACTS_INPUT_BOX_DEPLOYMENT_BLOCK_NUMBER=${{ secrets.CARTESI_CONTRACTS_INPUT_BOX_DEPLOYMENT_BLOCK_NUMBER }} \
                   --env CARTESI_AUTH_MNEMONIC='${{ secrets.CARTESI_AUTH_MNEMONIC }}' \
                   --env CARTESI_POSTGRES_ENDPOINT=${{ secrets.CARTESI_POSTGRES_ENDPOINT }} \
-                  ultimateurinater/bubblewars-sepolia:latest &
+                  ultimateurinater/bubblewars-sepolia:latest > ~/blockchain_nohup.out 2>&1 &
             # - name: Wait for Blockchain Setup
             #   run: sleep 30 # Adjust the sleep duration as needed
 
