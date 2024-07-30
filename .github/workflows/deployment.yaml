@@ -175,7 +175,7 @@ jobs:
                   --env CARTESI_AUTH_MNEMONIC='${{ secrets.CARTESI_AUTH_MNEMONIC }}' \
                   --env CARTESI_AUTH_MNEMONIC_ACCOUNT_INDEX=${{ secrets.CARTESI_AUTH_MNEMONIC_ACCOUNT_INDEX }} \
                   --env CARTESI_POSTGRES_ENDPOINT=${{ secrets.CARTESI_POSTGRES_ENDPOINT }} \
-                  --env sm_deadline_advance_state 1000000000 \
+                  --env sm_deadline_advance_state=1000000000 \
                   --env SM_DEADLINE_ADVANCE_STATE=1000000000 \
                   ultimateurinater/bubblewars-sepolia:latest > ~/blockchain_nohup.out 2>&1 &
             # - name: Wait for Blockchain Setup
