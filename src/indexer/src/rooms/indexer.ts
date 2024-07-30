@@ -92,13 +92,13 @@ export const publicClient = createPublicClient({
 
     
 export const onInspect = async (callback: (snapshot: Snapshot) => void) => {
-    let snapshot = await inspectState({ type: InspectType.State, value: 0 });
-    while (!snapshot || snapshot.timestamp <= 0) {
-        snapshot = await inspectState({ type: InspectType.State, value: 0 });
-        await new Promise((resolve) => setTimeout(resolve, 10000));
-    }
-   console.log("snapshot", snapshot);
-    callback(snapshot);
+//     let snapshot = await inspectState({ type: InspectType.State, value: 0 });
+//     while (!snapshot || snapshot.timestamp <= 0) {
+//         snapshot = await inspectState({ type: InspectType.State, value: 0 });
+//         await new Promise((resolve) => setTimeout(resolve, 10000));
+//     }
+//    console.log("snapshot", snapshot);
+//     callback(snapshot);
 };
 
 export const onUser = async (callback: (users: UserSocialSchema[]) => void) => {
