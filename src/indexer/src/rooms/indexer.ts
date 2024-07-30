@@ -38,7 +38,7 @@ let inputSet = false;
 let inspectSet = false;
 let blockSet = false;
 
-const inspector_url = process.env.INSPECTOR_URL ?? "http://localhost:8080/inspect"
+const inspector_url = process.env.INSPECTOR_URL ? "127.0.0.1:10000/inspect" : "http://localhost:8080/inspect"
 
 console.log("portal address", ETH_PORTAL_ADDRESS);
 console.log("input box address", INPUT_BOX_ADDRESS);
