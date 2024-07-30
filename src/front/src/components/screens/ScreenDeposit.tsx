@@ -72,7 +72,7 @@ export const ScreenDeposit = () => {
                                 value={amount}
                                 onChange={(e) =>
                                     setAmount(
-                                        parseInt(
+                                        parseFloat(
                                             e.target.value
                                                 ? e.target.value
                                                 : "0",
