@@ -51,7 +51,8 @@ export const inspectState = async (
     try {
         console.log("inspector url", inspector_url);
         const param = JSON.stringify(inspect);
-        const url = `${inspector_url}/${param}`;
+        const encodedParam = encodeURIComponent(param);
+        const url = `${inspector_url}/${encodedParam}`;
         console.log("inspect url", url);
         const response = await fetch(url);
         const json = await response.json();
