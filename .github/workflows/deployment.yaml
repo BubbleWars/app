@@ -131,14 +131,13 @@ jobs:
             
             - name: Clear Existing Docker Containers
               run: |
-                  sudo lsof -t -i:10000 | xargs -r sudo kill -9 || true
-                  docker stop $(docker ps -aq) || true
-                  docker rm -v $(docker ps -aq) || true
-                  docker volume prune -f || true
-                  docker rmi $(docker images -q) || true
-                  docker volume prune -f || true
-                  sudo systemctl stop docker || true
-                  sudo systemctl start docker || true
+                sudo lsof -t -i:10000 | xargs -r sudo kill -9 || true
+                docker ps -q | xargs -r docker stop || true
+                docker ps -a -q | xargs -r docker rm -v || true
+                docker network prune -f || true
+                docker volume prune -f || true
+                docker image prune -a -f || true
+                sudo systemctl restart docker
 
             - name: Configure Docker Logging
               run: |

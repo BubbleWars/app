@@ -35,8 +35,6 @@ import { Attractor } from "./types/entity";
 import { Protocol } from "./types/protocol";
 
 
-
-
 export const users = new Map<Address, User>();
 export const bubbles = new Map<string, Bubble>();
 export const portals = new Map<string, Portal>();
