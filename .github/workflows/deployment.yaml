@@ -159,7 +159,7 @@ jobs:
             
             - name: Set up local Node
               run: |
-                pm2 start --name blockchain --no-autorestart "docker run -p 10000:10000 \
+                  nohup docker run -p 10000:10000 \
                   --env CARTESI_BLOCKCHAIN_FINALITY_OFFSET=${{ secrets.CARTESI_BLOCKCHAIN_FINALITY_OFFSET }} \
                   --env CARTESI_BLOCKCHAIN_ID=${{ secrets.CARTESI_BLOCKCHAIN_ID }} \
                   --env CARTESI_BLOCKCHAIN_HTTP_ENDPOINT=${{ secrets.CARTESI_BLOCKCHAIN_HTTP_ENDPOINT }} \
