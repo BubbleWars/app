@@ -123,18 +123,53 @@ export const increaseEvmTime = async (seconds: number) => {
     }
 }
 
-const contract_address = process.env.CARTESI_CONTRACTS_INPUT_BOX_ADDRESS ?? "0x59b22D57D4f067708AB0c00552767405926dc768";
 export const onInput = (callback: (input: Input) => void) => {
     let pendingTransaction: `0x{string}`[] = [];
+    publicClient.watchContractEvent({
+        address: ETH_PORTAL_ADDRESS,
+        abi: [],
+        onLogs: function (logs: { address: `0x${string}`; blockHash: `0x${string}`; blockNumber: bigint; data: `0x${string}`; logIndex: number; transactionHash: `0x${string}`; transactionIndex: number; removed: boolean; }[] | { address: `0x${string}`; blockHash: `0x${string}`; blockNumber: bigint; data: `0x${string}`; logIndex: number; transactionHash: `0x${string}`; transactionIndex: number; removed: boolean; }[]): void {
+            //log all transaction hashes
+            console.log("portal logs", logs);
+            logs.forEach((log) => {
+                console.log("portal new transaction", log.transactionHash);
+            });
+        }
+    })
+    publicClient.watchContractEvent({
+        address: INPUT_BOX_ADDRESS,
+        abi: [],
+        onLogs: function (logs: { address: `0x${string}`; blockHash: `0x${string}`; blockNumber: bigint; data: `0x${string}`; logIndex: number; transactionHash: `0x${string}`; transactionIndex: number; removed: boolean; }[] | { address: `0x${string}`; blockHash: `0x${string}`; blockNumber: bigint; data: `0x${string}`; logIndex: number; transactionHash: `0x${string}`; transactionIndex: number; removed: boolean; }[]): void {
+            //log all transaction hashes
+            console.log("logs", logs);
+            logs.forEach((log) => {
+                console.log("new transaction", log.transactionHash);
+            });
+        }
+    })
+    publicClient.watchContractEvent({
+        address: CartesiDAppAddress,
+        abi: [],
+        onLogs: function (logs: { address: `0x${string}`; blockHash: `0x${string}`; blockNumber: bigint; data: `0x${string}`; logIndex: number; transactionHash: `0x${string}`; transactionIndex: number; removed: boolean; }[] | { address: `0x${string}`; blockHash: `0x${string}`; blockNumber: bigint; data: `0x${string}`; logIndex: number; transactionHash: `0x${string}`; transactionIndex: number; removed: boolean; }[]): void {
+            //log all transaction hashes
+            console.log("dapp logs", logs);
+            logs.forEach((log) => {
+                console.log("dapp new transaction", log.transactionHash);
+            });
+        }
+    })
+
     const unwatch = publicClient.watchPendingTransactions({
         onTransactions: (hashes: `0x{string}`[]) => {
-            //console.log("pending transactions", hashes)
+            console.log("pending transactions", hashes)
             hashes.forEach(async (hash) => {
                 const transaction =
                     await publicClient.waitForTransactionReceipt({
                         confirmations: 1,
                         hash,
                     });
+                    
+                console.log("new transaction2", hash);
 
                 const logs = transaction.logs;
 

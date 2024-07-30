@@ -15,7 +15,7 @@ import { RPC_URL } from "./consts";
 import { baseSepolia } from "viem/chains";
 
 const isProd = process.env.NODE_ENV == "production";
-const blockchainId = isProd ? import.meta.env.VITE_CARTESI_BLOCKCHAIN_ID : 84532;
+const blockchainId = isProd ? import.meta.env.VITE_CARTESI_BLOCKCHAIN_ID : 31337;
 export const currentChain = isProd ?
     baseSepolia:
  defineChain({
