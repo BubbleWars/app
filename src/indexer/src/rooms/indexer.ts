@@ -49,6 +49,7 @@ export const inspectState = async (
     inspect: Inspect,
 ): Promise<Snapshot | undefined> => {
     try {
+        console.log("inspector url", inspector_url);
         const param = JSON.stringify(inspect);
         const url = `${inspector_url}/${param}`;
         console.log("inspect url", url);
@@ -92,13 +93,13 @@ export const publicClient = createPublicClient({
 
     
 export const onInspect = async (callback: (snapshot: Snapshot) => void) => {
-//     let snapshot = await inspectState({ type: InspectType.State, value: 0 });
-//     while (!snapshot || snapshot.timestamp <= 0) {
-//         snapshot = await inspectState({ type: InspectType.State, value: 0 });
-//         await new Promise((resolve) => setTimeout(resolve, 10000));
-//     }
-//    console.log("snapshot", snapshot);
-//     callback(snapshot);
+    let snapshot = await inspectState({ type: InspectType.State, value: 0 });
+    while (!snapshot || snapshot.timestamp <= 0) {
+        snapshot = await inspectState({ type: InspectType.State, value: 0 });
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+    }
+   console.log("snapshot", snapshot);
+    callback(snapshot);
 };
 
 export const onUser = async (callback: (users: UserSocialSchema[]) => void) => {
