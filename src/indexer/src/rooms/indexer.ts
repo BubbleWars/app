@@ -39,20 +39,20 @@ let blockSet = false;
 
 const inspector_url = process.env.INSPECTOR_URL ? "http://127.0.0.1:10000/inspect" : "http://localhost:8080/inspect"
 
-console.log("portal address", ETH_PORTAL_ADDRESS);
-console.log("input box address", INPUT_BOX_ADDRESS);
-console.log("inspector url", inspector_url);
 
 //Inspect the state of the Cartesi Machine
 export const inspectState = async (
     inspect: Inspect,
 ): Promise<Snapshot | undefined> => {
+    console.log("portal address", ETH_PORTAL_ADDRESS);
+    console.log("input box address", INPUT_BOX_ADDRESS);
+    console.log("inspector url", inspector_url);
     try {
         console.log("inspector url", inspector_url);
         const param = JSON.stringify(inspect);
         const encodedParam = encodeURIComponent(param);
         const url = `${inspector_url}/${encodedParam}`;
-        console.log("inspect url", url);
+        console.log("inspecting at url", url);
         const response = await fetch(url);
         const json = await response.json();
         if (!json) return undefined;
@@ -99,6 +99,11 @@ export const publicClient = createPublicClient({
 export const onInspect = async (callback: (snapshot: Snapshot) => void) => {
     let snapshot = await inspectState({ type: InspectType.State, value: 0 });
     while (!snapshot || snapshot.timestamp <= 0) {
+        console.log("portal address", ETH_PORTAL_ADDRESS);
+        console.log("input box address", INPUT_BOX_ADDRESS);
+        console.log("inspector url", inspector_url);
+        console.log("current chain", currentChain);
+        console.log("process env", process.env)
         snapshot = await inspectState({ type: InspectType.State, value: 0 });
         await new Promise((resolve) => setTimeout(resolve, 10000));
     }
