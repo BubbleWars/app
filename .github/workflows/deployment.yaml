@@ -188,30 +188,28 @@ jobs:
             
             - name: Start State Indexing Server
               run: |
-                  cd src/indexer
-                  npm i
-                  pm2 start --name state-indexer "CARTESI_BLOCKCHAIN_FINALITY_OFFSET=${{ secrets.CARTESI_BLOCKCHAIN_FINALITY_OFFSET }} \
-                  CARTESI_BLOCKCHAIN_ID=${{ secrets.CARTESI_BLOCKCHAIN_ID }} \
-                  CARTESI_CONTRACTS_APPLICATION_ADDRESS=${{ secrets.CARTESI_CONTRACTS_APPLICATION_ADDRESS }} \
-                  CARTESI_CONTRACTS_AUTHORITY_ADDRESS=${{ secrets.CARTESI_CONTRACTS_AUTHORITY_ADDRESS }} \
-                  CARTESI_CONTRACTS_HISTORY_ADDRESS=${{ secrets.CARTESI_CONTRACTS_HISTORY_ADDRESS }} \
-                  CARTESI_CONTRACTS_INPUT_BOX_ADDRESS=${{ secrets.CARTESI_CONTRACTS_INPUT_BOX_ADDRESS }} \
-                  CARTESI_CONTRACTS_INPUT_BOX_DEPLOYMENT_BLOCK_NUMBER=${{ secrets.CARTESI_CONTRACTS_INPUT_BOX_DEPLOYMENT_BLOCK_NUMBER }} \
-                  CARTESI_CONTRACTS_APPLICATION_DEPLOYMENT_BLOCK_NUMBER=${{ secrets.CARTESI_CONTRACTS_INPUT_BOX_DEPLOYMENT_BLOCK_NUMBER }} \
-                  CARTESI_EPOCH_DURATION=${{ secrets.CARTESI_EPOCH_DURATION }} \
-                  CARTESI_EPOCH_LENGTH=${{ secrets.CARTESI_EPOCH_LENGTH }} \
-                  CARTESI_AUTH_MNEMONIC=${{ secrets.CARTESI_AUTH_MNEMONIC }} \
-                  CARTESI_AUTH_MNEMONIC_ACCOUNT_INDEX=${{ secrets.CARTESI_AUTH_MNEMONIC_ACCOUNT_INDEX }} \
-                  CARTESI_BLOCKCHAIN_HTTP_ENDPOINT=${{ secrets.CARTESI_BLOCKCHAIN_HTTP_ENDPOINT }} \
-                  CARTESI_BLOCKCHAIN_WS_ENDPOINT=${{ secrets.CARTESI_BLOCKCHAIN_WS_ENDPOINT }} \
-                  CARTESI_POSTGRES_ENDPOINT=${{ secrets.CARTESI_POSTGRES_ENDPOINT }} \
-                  RPC_HTTP_ENDPOINT=${{ secrets.CARTESI_BLOCKCHAIN_HTTP_ENDPOINT }} \
-                  RPC_WS_ENDPOINT=${{ secrets.CARTESI_BLOCKCHAIN_WS_ENDPOINT }} \
-                  INSPECTOR_URL=${{ secrets.INSPECTOR_URL }} \
-                  PRIVY_APP_ID=${{ secrets.PRIVY_APP_ID }} \
-                  PRIVY_APP_SECRET=${{ secrets.PRIVY_APP_SECRET }} \
-                  ROLLUP_OWNER_ADDRESS=${{ secrets.ROLLUP_OWNER_ADDRESS }} \
-                  npm run host"
+                cd src/indexer
+                npm i
+                pm2 start npm --name state-indexer -- run host --update-env
+                pm2 set state-indexer:CARTESI_BLOCKCHAIN_FINALITY_OFFSET ${{ secrets.CARTESI_BLOCKCHAIN_FINALITY_OFFSET }}
+                pm2 set state-indexer:CARTESI_BLOCKCHAIN_ID ${{ secrets.CARTESI_BLOCKCHAIN_ID }}
+                pm2 set state-indexer:CARTESI_CONTRACTS_APPLICATION_ADDRESS ${{ secrets.CARTESI_CONTRACTS_APPLICATION_ADDRESS }}
+                pm2 set state-indexer:CARTESI_CONTRACTS_AUTHORITY_ADDRESS ${{ secrets.CARTESI_CONTRACTS_AUTHORITY_ADDRESS }}
+                pm2 set state-indexer:CARTESI_CONTRACTS_HISTORY_ADDRESS ${{ secrets.CARTESI_CONTRACTS_HISTORY_ADDRESS }}
+                pm2 set state-indexer:CARTESI_CONTRACTS_INPUT_BOX_ADDRESS ${{ secrets.CARTESI_CONTRACTS_INPUT_BOX_ADDRESS }}
+                pm2 set state-indexer:CARTESI_CONTRACTS_INPUT_BOX_DEPLOYMENT_BLOCK_NUMBER ${{ secrets.CARTESI_CONTRACTS_INPUT_BOX_DEPLOYMENT_BLOCK_NUMBER }}
+                pm2 set state-indexer:CARTESI_CONTRACTS_APPLICATION_DEPLOYMENT_BLOCK_NUMBER ${{ secrets.CARTESI_CONTRACTS_INPUT_BOX_DEPLOYMENT_BLOCK_NUMBER }}
+                pm2 set state-indexer:CARTESI_EPOCH_DURATION ${{ secrets.CARTESI_EPOCH_DURATION }}
+                pm2 set state-indexer:CARTESI_EPOCH_LENGTH ${{ secrets.CARTESI_EPOCH_LENGTH }}
+                pm2 set state-indexer:CARTESI_BLOCKCHAIN_HTTP_ENDPOINT ${{ secrets.CARTESI_BLOCKCHAIN_HTTP_ENDPOINT }}
+                pm2 set state-indexer:CARTESI_BLOCKCHAIN_WS_ENDPOINT ${{ secrets.CARTESI_BLOCKCHAIN_WS_ENDPOINT }}
+                pm2 set state-indexer:CARTESI_POSTGRES_ENDPOINT ${{ secrets.CARTESI_POSTGRES_ENDPOINT }}
+                pm2 set state-indexer:RPC_HTTP_ENDPOINT ${{ secrets.CARTESI_BLOCKCHAIN_HTTP_ENDPOINT }}
+                pm2 set state-indexer:RPC_WS_ENDPOINT ${{ secrets.CARTESI_BLOCKCHAIN_WS_ENDPOINT }}
+                pm2 set state-indexer:INSPECTOR_URL ${{ secrets.INSPECTOR_URL }}
+                pm2 set state-indexer:PRIVY_APP_ID ${{ secrets.PRIVY_APP_ID }}
+                pm2 set state-indexer:PRIVY_APP_SECRET ${{ secrets.PRIVY_APP_SECRET }}
+                pm2 set state-indexer:ROLLUP_OWNER_ADDRESS ${{ secrets.ROLLUP_OWNER_ADDRESS }}
 
 
             # - name: Wait for Backend Setup
