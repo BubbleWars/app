@@ -13,7 +13,7 @@ import {
     hexToString,
     http,
 } from "viem";
-import { CartesiDAppAddress } from "./contracts.js";
+import { CartesiDAppAddress, EtherPortal, InputBox } from "./contracts.js";
 import { mainnet, localhost, baseSepolia } from "viem/chains";
 import { Snapshot } from "../../../core/types/state.js";
 import { decodePacked } from "../../../core/funcs/utils.js";
@@ -139,58 +139,91 @@ export const increaseEvmTime = async (seconds: number) => {
 
 export const onInput = (callback: (input: Input) => void) => {
     let pendingTransaction: `0x{string}`[] = [];
-    publicClient.watchContractEvent({
-        address: ETH_PORTAL_ADDRESS,
-        abi: [],
-        onLogs: function (logs: { address: `0x${string}`; blockHash: `0x${string}`; blockNumber: bigint; data: `0x${string}`; logIndex: number; transactionHash: `0x${string}`; transactionIndex: number; removed: boolean; }[] | { address: `0x${string}`; blockHash: `0x${string}`; blockNumber: bigint; data: `0x${string}`; logIndex: number; transactionHash: `0x${string}`; transactionIndex: number; removed: boolean; }[]): void {
-            //log all transaction hashes
-            console.log("portal logs", logs);
-            logs.forEach((log) => {
-                console.log("portal new transaction", log.transactionHash);
-            });
-        }
-    })
-    publicClient.watchContractEvent({
-        address: INPUT_BOX_ADDRESS,
-        abi: [],
-        onLogs: function (logs: { address: `0x${string}`; blockHash: `0x${string}`; blockNumber: bigint; data: `0x${string}`; logIndex: number; transactionHash: `0x${string}`; transactionIndex: number; removed: boolean; }[] | { address: `0x${string}`; blockHash: `0x${string}`; blockNumber: bigint; data: `0x${string}`; logIndex: number; transactionHash: `0x${string}`; transactionIndex: number; removed: boolean; }[]): void {
-            //log all transaction hashes
-            console.log("logs", logs);
-            logs.forEach((log) => {
-                console.log("new transaction", log.transactionHash);
-            });
-        }
-    })
-    publicClient.watchContractEvent({
-        address: CartesiDAppAddress,
-        abi: [],
-        onLogs: function (logs: { address: `0x${string}`; blockHash: `0x${string}`; blockNumber: bigint; data: `0x${string}`; logIndex: number; transactionHash: `0x${string}`; transactionIndex: number; removed: boolean; }[] | { address: `0x${string}`; blockHash: `0x${string}`; blockNumber: bigint; data: `0x${string}`; logIndex: number; transactionHash: `0x${string}`; transactionIndex: number; removed: boolean; }[]): void {
-            //log all transaction hashes
-            console.log("dapp logs", logs);
-            logs.forEach((log) => {
-                console.log("dapp new transaction", log.transactionHash);
-            });
-        }
-    })
+    // const unwatchPortal = publicClient.watchContractEvent({
+    //     address: ETH_PORTAL_ADDRESS,
+    //     abi: EtherPortal.abi,
+    //     onLogs: (logs) => {
+    //         logs.forEach(async (log: any) => {
+    //             console.log("from watch contract event");
+    //             //log all transaction hashes
+    //             const hash = log.transactionHash;
+    //             const transaction =
+    //                 await publicClient.waitForTransactionReceipt({
+    //                     confirmations: 1,
+    //                     hash,
+    //                 });
+                    
+    //             console.log("portal new transaction2", transaction);
 
-    const unwatch = publicClient.watchPendingTransactions({
-        onTransactions: (hashes: `0x{string}`[]) => {
-            console.log("pending transactions", hashes)
-            hashes.forEach(async (hash) => {
+    //             const logs = transaction.logs;
+
+    //             if (logs.length == 0) return;
+
+    //             //console.log("transaction", transaction);
+    //             //console.log("topics", logs[0]?.topics);
+    //             const blockNumber = Number(transaction.blockNumber);
+    //             let timestamp;
+    //             if (blockNumberToTimestamp[blockNumber]) {
+    //                 timestamp = blockNumberToTimestamp[blockNumber];
+    //             //console.log("timestamp from cache", timestamp);
+    //             } else
+    //                 timestamp = Number(
+    //                     (
+    //                         await publicClient.getBlock({
+    //                             blockNumber: transaction.blockNumber,
+    //                         })
+    //                     ).timestamp,
+    //                 );
+
+                
+    //             //Check if the transaction is a deposit
+    //             const data =
+    //                 "0x" + logs[0].data.substring(194, logs[0].data.length);
+    //             //console.log("data", data);
+
+    //             const binary = decodePacked(["address", "uint256"], data);
+    //             //console.log("binary", binary);
+    //             const address = binary[0];
+    //             const amount = binary[1];
+    //             //console.log("Recieved transaction indexer.ts:", address, timestamp);
+    //             callback({
+    //                 type: InputType.Deposit,
+    //                 timestamp,
+    //                 sender: address,
+    //                 amount,
+    //             });
+    //         });            
+    //     }
+    // })
+    const unwatchInputBox = publicClient.watchContractEvent({
+        address: INPUT_BOX_ADDRESS as `0x${string}`,
+        abi: InputBox.abi,
+        onLogs: (logs) => {
+            logs.forEach(async (log) => {
+                console.log("from watch contract event");
+                const hash = log.transactionHash;
                 const transaction =
                     await publicClient.waitForTransactionReceipt({
                         confirmations: 1,
                         hash,
                     });
+                
+                const t =
+                    await publicClient.getTransaction({
+                        hash,
+                    })
+                const value = t.value;
+
+                
                     
-                console.log("new transaction2", hash);
+                console.log("input new transaction2", transaction);
 
                 const logs = transaction.logs;
 
                 if (logs.length == 0) return;
 
                 //console.log("transaction", transaction);
-                //console.log("topics", logs[0]?.topics);
+                console.log("topics", log.topics);
                 const blockNumber = Number(transaction.blockNumber);
                 let timestamp;
                 if (blockNumberToTimestamp[blockNumber]) {
@@ -204,54 +237,83 @@ export const onInput = (callback: (input: Input) => void) => {
                             })
                         ).timestamp,
                     );
-
-                if (
-                    transaction?.to?.toLowerCase() ==
-                    ETH_PORTAL_ADDRESS.toLowerCase()
-                ) {
-                    //Check if the transaction is a deposit
-                    const data =
-                        "0x" + logs[0].data.substring(194, logs[0].data.length);
-                    //console.log("data", data);
-
-                    const binary = decodePacked(["address", "uint256"], data);
-                    //console.log("binary", binary);
-                    const address = binary[0];
-                    const amount = binary[1];
-                   //console.log("Recieved transaction indexer.ts:", address, timestamp);
-                    callback({
-                        type: InputType.Deposit,
-                        timestamp,
-                        sender: address,
-                        amount,
-                    });
-                } else if (transaction?.to?.toLowerCase() == INPUT_BOX_ADDRESS.toLowerCase()) {
-                    try {
-                        const data = logs[0].data;
-                        //from hex to string
-                        const json = hexToString(data);
-                       //console.log("json", json);
-                        const input: Input = JSON.parse(
-                            json.substring(
-                                json.indexOf('{"'),
-                                json.lastIndexOf("}") + 1,
-                            ),
-                        );
-                       //console.log("Recieved transaction indexer.ts:", transaction.from, timestamp);
+                
+                    if (
+                        transaction?.to?.toLowerCase() ==
+                        INPUT_BOX_ADDRESS.toLowerCase()
+                    ) {
+                        console.log("INPUT EVENT");
+                        try {
+                            const data = logs[0].data;
+                            //from hex to string
+                            const json = hexToString(data);
+                            //console.log("json", json);
+                            const input: Input = JSON.parse(
+                                json.substring(
+                                    json.indexOf('{"'),
+                                    json.lastIndexOf("}") + 1,
+                                ),
+                            );
+                            //console.log("Recieved transaction indexer.ts:", transaction.from, timestamp);
+                            callback({
+                                ...input,
+                                timestamp,
+                                sender: transaction.from,
+                            });
+                        } catch (e) {
+                            console.log("error", e);
+                        }
+                    }else if (
+                        transaction?.to?.toLowerCase() ==
+                        ETH_PORTAL_ADDRESS.toLowerCase()
+                    ) {
+                        console.log("PORTAL EVENT");
+                        
+                        const address = transaction.from;
+                        const amount = Number(value) / 1e18;
+                        console.log("Recieved ", amount, "from", address, "at", timestamp);
+                        //console.log("Recieved transaction indexer.ts:", address, timestamp);
                         callback({
-                            ...input,
+                            type: InputType.Deposit,
                             timestamp,
-                            sender: transaction.from,
+                            sender: address,
+                            amount,
                         });
-                    } catch (e) {
-                       //console.log("error", e);
                     }
-                }
 
-                //Remove characters before the first '{' and after the last '}'
             });
-        },
-    });
+        }
+    })
+    const unwatch = () => {
+        unwatchInputBox();
+        //unwatchPortal();
+
+    }
+
+    // const unwatch2 = publicClient.watchPendingTransactions({
+    //     onTransactions: (hashes: `0x{string}`[]) => {
+    //         console.log("pending transactions", hashes)
+    //         hashes.forEach(async (hash) => {
+    //             //get transaction
+    //             const transactionReciept =
+    //                 await publicClient.waitForTransactionReceipt({
+    //                     confirmations: 1,
+    //                     hash,
+    //                 });
+    //             const transaction = 
+    //                 await publicClient.getTransaction({
+    //                     hash,
+    //                 });
+                    
+    //             console.log("pending transaction", transaction);
+    //             console.log("pending transaction logs", transactionReciept.logs);
+    //             console.log("tranaction value", transaction.value);
+    //             const decoded = decodePacked(["address", "uint256"], transactionReciept.logs[0].data);
+    //             console.log("decoded", decoded);
+    //             //Remove characters before the first '{' and after the last '}'
+    //         });
+    //     },
+    // });
     console.log("unwatch", unwatch);
     return unwatch;
     inspectSet = true;
