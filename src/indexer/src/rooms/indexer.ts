@@ -14,7 +14,7 @@ import {
     http,
 } from "viem";
 import { CartesiDAppAddress } from "./contracts.js";
-import { mainnet, localhost } from "viem/chains";
+import { mainnet, localhost, baseSepolia } from "viem/chains";
 import { Snapshot } from "../../../core/types/state.js";
 import { decodePacked } from "../../../core/funcs/utils.js";
 import { ethers } from "ethers";
@@ -69,20 +69,24 @@ export const inspectState = async (
 const rpcUrl = process.env.RPC_HTTP_ENDPOINT ?? "http://localhost:8545";
 const chainId = process.env.CARTESI_BLOCKCHAIN_ID ?? 1_337;
 
-export const currentChain = defineChain({
-    id: chainId as number,
-    name: "bubblewars_anvil",
-    network: "bubblewars_anvil",
-    nativeCurrency: {
-        decimals: 18,
-        name: "Ether",
-        symbol: "ETH",
-    },
-    rpcUrls: {
-        default: { http: [rpcUrl] },
-        public: { http: [rpcUrl] },
-    },
-});
+export const currentChain = process.env.CARTESI_BLOCKCHAIN_ID  ?
+    baseSepolia:
+    defineChain({
+        id: chainId as number,
+        name: "bubblewars_anvil",
+        network: "bubblewars_anvil",
+        nativeCurrency: {
+            decimals: 18,
+            name: "Ether",
+            symbol: "ETH",
+        },
+        rpcUrls: {
+            default: { http: [rpcUrl] },
+            public: { http: [rpcUrl] },
+        },
+    });
+
+console.log("current chain", currentChain);
 
 export const publicClient = createPublicClient({
     chain: currentChain,
@@ -238,6 +242,7 @@ export const onInput = (callback: (input: Input) => void) => {
             });
         },
     });
+    console.log("unwatch", unwatch);
     return unwatch;
     inspectSet = true;
 };
