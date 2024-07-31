@@ -35,8 +35,8 @@ export enum FeeType {
 export class Protocol {
     //Constants
     maxPoints: number = 100; // Max amount of Points the protocol can have at any time
-    spawnAmount: number = 10; // Max amount of Points to spawn per cycle
-    cycle: number = 60; // Should run every 100s
+    spawnAmount: number = 5; // Max amount of Points to spawn per cycle
+    cycle: number = 600; // Should run every 100s
 
     //State
     last: number = 0; // Last time the protocol was run
@@ -132,6 +132,8 @@ export class Protocol {
             maxPointsOnMap - pointsCount,
             this.spawnAmount,
         );
+
+        if(pointsToSpawn <= 0) return;
         
         const amountSpawned = generateResources(
             world,
