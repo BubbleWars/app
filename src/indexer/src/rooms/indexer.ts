@@ -90,7 +90,7 @@ console.log("current chain", currentChain);
 
 export const publicClient = createPublicClient({
     chain: currentChain,
-    transport: http(),
+    transport: createHttpTransport(rpcUrl),
     pollingInterval: 1000,
 });
 
@@ -99,11 +99,13 @@ export const publicClient = createPublicClient({
 export const onInspect = async (callback: (snapshot: Snapshot) => void) => {
     let snapshot = await inspectState({ type: InspectType.State, value: 0 });
     while (!snapshot || snapshot.timestamp <= 0) {
-        console.log("portal address", ETH_PORTAL_ADDRESS);
-        console.log("input box address", INPUT_BOX_ADDRESS);
-        console.log("inspector url", inspector_url);
-        console.log("current chain", currentChain);
-        console.log("process env", process.env)
+        console.log("rpc url"+ rpcUrl);
+        console.log("chain id" + chainId);
+        console.log("portal address" + ETH_PORTAL_ADDRESS);
+        console.log("input box address" + INPUT_BOX_ADDRESS);
+        console.log("inspector url" + inspector_url);
+        console.log("current chain" + currentChain);
+        console.log("process env"+ process.env)
         snapshot = await inspectState({ type: InspectType.State, value: 0 });
         await new Promise((resolve) => setTimeout(resolve, 10000));
     }
