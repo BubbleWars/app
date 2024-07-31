@@ -190,7 +190,7 @@ jobs:
               run: |
                   cd src/indexer
                   npm i
-                  pm2 start --name state-indexer "env CARTESI_BLOCKCHAIN_FINALITY_OFFSET=${{ secrets.CARTESI_BLOCKCHAIN_FINALITY_OFFSET }} \
+                  pm2 start --name state-indexer "CARTESI_BLOCKCHAIN_FINALITY_OFFSET=${{ secrets.CARTESI_BLOCKCHAIN_FINALITY_OFFSET }} \
                   CARTESI_BLOCKCHAIN_ID=${{ secrets.CARTESI_BLOCKCHAIN_ID }} \
                   CARTESI_CONTRACTS_APPLICATION_ADDRESS=${{ secrets.CARTESI_CONTRACTS_APPLICATION_ADDRESS }} \
                   CARTESI_CONTRACTS_AUTHORITY_ADDRESS=${{ secrets.CARTESI_CONTRACTS_AUTHORITY_ADDRESS }} \
