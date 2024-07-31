@@ -90,7 +90,7 @@ console.log("current chain", currentChain);
 
 export const publicClient = createPublicClient({
     chain: currentChain,
-    transport: createHttpTransport(rpcUrl),
+    transport: http(rpcUrl),
     pollingInterval: 1000,
 });
 
@@ -103,9 +103,12 @@ export const onInspect = async (callback: (snapshot: Snapshot) => void) => {
         console.log("chain id" + chainId);
         console.log("portal address" + ETH_PORTAL_ADDRESS);
         console.log("input box address" + INPUT_BOX_ADDRESS);
-        console.log("inspector url" + inspector_url);
-        console.log("current chain" + currentChain);
-        console.log("process env"+ process.env)
+        console.log("inspector url");
+        console.log(inspector_url);
+        console.log("current chain");
+        console.log(currentChain);
+        console.log("process env");
+        console.log(process.env);
         snapshot = await inspectState({ type: InspectType.State, value: 0 });
         await new Promise((resolve) => setTimeout(resolve, 10000));
     }
