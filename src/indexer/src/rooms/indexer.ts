@@ -12,6 +12,7 @@ import {
     defineChain,
     hexToString,
     http,
+    webSocket,
 } from "viem";
 import { CartesiDAppAddress, EtherPortal, InputBox } from "./contracts.js";
 import { mainnet, localhost, baseSepolia } from "viem/chains";
@@ -90,10 +91,13 @@ console.log("current chain", currentChain);
 
 export const publicClient = createPublicClient({
     chain: currentChain,
-    transport: http(rpcUrl),
-    pollingInterval: 1000,
+    transport: webSocket(process.env.RPC_WS_ENDPOINT, {
+        reconnect: true,
+        retryDelay: 500,
+        retryCount: 1000,
+    }),
+    pollingInterval: 100,
 });
-
 
     
 export const onInspect = async (callback: (snapshot: Snapshot) => void) => {
